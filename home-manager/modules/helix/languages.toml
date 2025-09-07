@@ -1,0 +1,293 @@
+[[grammars]]
+name = "python"
+
+[grammars.source]
+git = "https://github.com/tree-sitter/tree-sitter-python"
+rev = "4bfdd9033a2225cc95032ce77066b7aeca9e2efc"
+
+[[grammars]]
+name = "json"
+
+[grammars.source]
+git = "https://github.com/tree-sitter/tree-sitter-json"
+rev = "73076754005a460947cafe8e03a8cf5fa4fa2938"
+
+[[grammars]]
+name = "yaml"
+
+[grammars.source]
+git = "https://github.com/tree-sitter/tree-sitter-yaml"
+rev = "0e36bed171768908f331ff7dff9d956bae016efb"
+
+[[grammars]]
+name = "bash"
+
+[grammars.source]
+git = "https://github.com/tree-sitter/tree-sitter-bash"
+rev = "275effdfc0edce774acf7d481f9ea195c6c403cd"
+
+[[language]]
+auto-format = true
+file-types = ["json"]
+injection-regex = "json"
+language-servers = ["vscode-json-language-server"]
+name = "json"
+scope = "source.json"
+
+[language.formatter]
+args = ["--parser", "json"]
+command = "/nix/store/984yj87q198g3af56n31g8pgbag9h0ns-prettier-3.5.3/bin/prettier"
+
+[[language]]
+auto-format = true
+file-types = ["jsonc"]
+injection-regex = "jsonc"
+language-servers = ["vscode-json-language-server"]
+name = "jsonc"
+scope = "source.json"
+
+[language.formatter]
+args = ["--parser", "json"]
+command = "/nix/store/984yj87q198g3af56n31g8pgbag9h0ns-prettier-3.5.3/bin/prettier"
+
+[[language]]
+auto-format = true
+file-types = ["py", "pyi"]
+injection-regex = "python"
+language-servers = ["ruff", "pyright"]
+name = "python"
+roots = [
+  "pyproject.toml",
+  "setup.py",
+  "setup.cfg",
+  "Poetry.lock",
+  "requirements.txt",
+  "Pipfile",
+  ".python-version",
+]
+scope = "source.python"
+shebangs = ["python", "python3"]
+
+[language.formatter]
+args = ["format", "--stdin-filename", "file.py", "-"]
+command = "/nix/store/vigk31l3z6isdrys0hp331dd857fv8n5-ruff-0.11.13/bin/ruff"
+
+[[language]]
+auto-format = true
+file-types = ["rs"]
+language-servers = ["rust-analyzer"]
+name = "rust"
+roots = ["Cargo.toml", "Cargo.lock"]
+scope = "source.rust"
+
+[language.formatter]
+args = ["--edition", "2021"]
+command = "/nix/store/5j8840f8adilfqf7m2180xli4iw7yqkf-rustfmt-1.86.0/bin/rustfmt"
+
+[[language]]
+auto-format = true
+file-types = ["nix"]
+language-servers = ["nixd", "nil"]
+name = "nix"
+roots = ["flake.nix", "shell.nix", "default.nix"]
+scope = "source.nix"
+
+[language.formatter]
+args = ["--quiet"]
+command = "/nix/store/40mc2hv8q7v4ypfffcnjjfn2mhkirvsh-alejandra-4.0.0/bin/alejandra"
+
+[[language]]
+auto-format = true
+file-types = ["toml"]
+language-servers = ["taplo"]
+name = "toml"
+scope = "source.toml"
+
+[language.formatter]
+args = ["format", "-"]
+command = "/nix/store/10lws4fm3vhhaljyv930vwh86rjjq97f-taplo-0.9.3/bin/taplo"
+
+[[language]]
+auto-format = true
+file-types = ["md", "markdown"]
+language-servers = ["marksman"]
+name = "markdown"
+scope = "text.markdown"
+
+[language.formatter]
+args = ["--parser", "markdown"]
+command = "/nix/store/984yj87q198g3af56n31g8pgbag9h0ns-prettier-3.5.3/bin/prettier"
+
+[[language]]
+auto-format = true
+file-types = ["typ"]
+language-servers = ["tinymist"]
+name = "typst"
+scope = "source.typst"
+
+[language.formatter]
+args = ["-l", "50", "-t", "4"]
+command = "/nix/store/cmk8zmckb9kp0qwlx7p9lfpw7c2d7fdy-typstyle-0.13.7/bin/typstyle"
+
+[[language]]
+auto-format = true
+file-types = ["yml", "yaml"]
+language-servers = ["yaml-language-server"]
+name = "yaml"
+scope = "source.yaml"
+
+[language.formatter]
+args = ["--parser", "yaml"]
+command = "/nix/store/984yj87q198g3af56n31g8pgbag9h0ns-prettier-3.5.3/bin/prettier"
+
+[[language]]
+auto-format = true
+file-types = ["sh", "bash"]
+language-servers = ["bash-language-server"]
+name = "bash"
+scope = "source.bash"
+shebangs = ["sh", "bash"]
+
+[language.formatter]
+args = ["-i", "2", "-ci"]
+command = "/nix/store/4x1lsvm65jz8vg48xxhgxv3l1ss1xnr8-shfmt-3.11.0/bin/shfmt"
+
+[language-server.bash-language-server]
+args = ["start"]
+command = "/nix/store/fxfqwh5md0l818qb7s2x0cs9gd9qir9y-bash-language-server-5.4.0/bin/bash-language-server"
+
+[language-server.marksman]
+args = ["server"]
+command = "/nix/store/78lhjaqjz9zb2jw377b8vjkpysr2s8sq-marksman-2024-12-18/bin/marksman"
+
+[language-server.nil]
+command = "/nix/store/d3762chpr387v9bfckagqa9mlgyg9bmh-nil-2024-08-06/bin/nil"
+
+[language-server.nil.config.formatting]
+command = [
+  "/nix/store/40mc2hv8q7v4ypfffcnjjfn2mhkirvsh-alejandra-4.0.0/bin/alejandra",
+]
+
+[language-server.nixd]
+command = "/nix/store/b9w9dk1z95y4i4mj6asqrh7amjqxajsf-nixd-2.6.4/bin/nixd"
+
+[language-server.nixd.config.nixpkgs]
+expr = "import <nixpkgs> { }"
+
+[language-server.nixd.config.options.home_manager]
+expr = "import <home-manager/modules> { }"
+
+[language-server.nixd.config.options.nixos]
+expr = "import <nixpkgs/nixos> { }"
+
+[language-server.pyright]
+args = ["--stdio"]
+command = "/nix/store/nqafdbbmnvfpw3ihd5xjr9v836s12ml0-pyright-1.1.399/bin/pyright-langserver"
+
+[language-server.pyright.config.python.analysis]
+autoSearchPaths = true
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+
+[language-server.ruff]
+args = ["server"]
+command = "/nix/store/vigk31l3z6isdrys0hp331dd857fv8n5-ruff-0.11.13/bin/ruff"
+
+[language-server.ruff.config.settings]
+lineLength = 88
+[language-server.ruff.config.settings.format]
+preview = true
+
+[language-server.ruff.config.settings.lint]
+ignore = ["E501"]
+select = ["E4", "E7", "F", "W", "I", "N"]
+
+[language-server.rust-analyzer]
+command = "/nix/store/pq6qr0rr3lrn6x83mwr7p33zcl6fzlwi-rust-analyzer-2025-05-12/bin/rust-analyzer"
+
+[language-server.rust-analyzer.config.check]
+command = "clippy"
+
+[language-server.rust-analyzer.config.inlayHints]
+maxLength = 25
+renderColons = true
+[language-server.rust-analyzer.config.inlayHints.bindingModeHints]
+enable = false
+
+[language-server.rust-analyzer.config.inlayHints.chainingHints]
+enable = true
+
+[language-server.rust-analyzer.config.inlayHints.closingBraceHints]
+enable = true
+minLines = 25
+
+[language-server.rust-analyzer.config.inlayHints.closureReturnTypeHints]
+enable = "never"
+
+[language-server.rust-analyzer.config.inlayHints.lifetimeElisionHints]
+enable = "never"
+useParameterNames = false
+
+[language-server.rust-analyzer.config.inlayHints.parameterHints]
+enable = true
+
+[language-server.rust-analyzer.config.inlayHints.reborrowHints]
+enable = "never"
+
+[language-server.rust-analyzer.config.inlayHints.typeHints]
+enable = true
+hideClosureInitialization = false
+hideNamedConstructor = false
+
+[language-server.taplo]
+args = ["lsp", "stdio"]
+command = "/nix/store/10lws4fm3vhhaljyv930vwh86rjjq97f-taplo-0.9.3/bin/taplo"
+
+[language-server.tinymist]
+command = "/nix/store/vsr4pqvylaj83mwc3p97p3mvs94f2r91-tinymist-0.13.12/bin/tinymist"
+
+[language-server.vscode-json-language-server]
+args = ["--stdio"]
+command = "/nix/store/g51h5f4fbi1nys6z1xm7hq9aa5ispc9g-vscode-langservers-extracted-4.10.0/bin/vscode-json-language-server"
+
+[language-server.vscode-json-language-server.config]
+provideFormatter = false
+[language-server.vscode-json-language-server.config.json.format]
+enable = true
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["package.json"]
+url = "https://json.schemastore.org/package.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["tsconfig.json", "tsconfig.*.json"]
+url = "https://json.schemastore.org/tsconfig.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = [".prettierrc", ".prettierrc.json"]
+url = "https://json.schemastore.org/prettierrc.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = [".eslintrc", ".eslintrc.json"]
+url = "https://json.schemastore.org/eslintrc.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["composer.json"]
+url = "https://json.schemastore.org/composer.json"
+
+[language-server.vscode-json-language-server.config.json.validate]
+enable = true
+
+[language-server.yaml-language-server]
+args = ["--stdio"]
+command = "/nix/store/zxb3zpxxqywxllwj17x47yf7gx0arwmn-yaml-language-server-1.17.0/bin/yaml-language-server"
+
+[language-server.yaml-language-server.config.yaml]
+keyOrdering = false
+validate = true
+[language-server.yaml-language-server.config.yaml.format]
+enable = true
+
+[language-server.yaml-language-server.config.yaml.schemaStore]
+enable = true
+url = "https://www.schemastore.org/api/json/catalog.json"

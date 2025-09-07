@@ -1,0 +1,10 @@
+result
+.direnv/
+
+.envrc.private
+
+.terraform/
+terraform.tfstate
+.terraform.lock.hcl
+*.tfstate.backup
+terraform.tf
