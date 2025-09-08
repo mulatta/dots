@@ -78,7 +78,7 @@ let
     # ===== Palette =====
     palette = [ "0=#1b1b1b" ];
   }
-  // lib.optionals (pkgs.stdenv.isDarwin) {
+  // lib.optionalAttrs (pkgs.stdenv.isDarwin) {
     macos-option-as-alt = true;
     macos-titlebar-style = "hidden";
     macos-non-native-fullscreen = "visible-menu";
