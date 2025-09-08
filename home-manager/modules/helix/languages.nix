@@ -215,7 +215,7 @@
           "json"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # JSON with Comments support
@@ -232,7 +232,7 @@
           "json"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Python with dual LSP support (ruff + pyright)
@@ -270,7 +270,7 @@
           "-"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Rust with clippy integration
@@ -290,7 +290,7 @@
           "2021"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Nix with dual LSP support
@@ -311,7 +311,7 @@
         command = "${pkgs.alejandra}/bin/alejandra";
         args = [ "--quiet" ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # TOML configuration files
@@ -327,7 +327,7 @@
           "-"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Markdown documentation
@@ -346,7 +346,7 @@
           "markdown"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Typst document preparation
@@ -364,7 +364,7 @@
           "4"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # YAML configuration files with schema support
@@ -383,7 +383,7 @@
           "yaml"
         ];
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
 
     # Shell scripts with formatting support
@@ -407,7 +407,7 @@
           "-ci"
         ]; # 2 spaces indent, case indent
       };
-      auto-format = formatOnSave;
+      auto-format = true;
     }
   ];
 
