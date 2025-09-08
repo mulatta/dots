@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   imports = [
     ./atuin
     ./direnv.nix
@@ -17,10 +18,7 @@
   home = {
     username = "seungwon";
     stateVersion = "25.05";
-    homeDirectory =
-      if pkgs.stdenv.isDarwin
-      then "/Users/seungwon"
-      else "/home/seungwon";
+    homeDirectory = if pkgs.stdenv.isDarwin then "/Users/seungwon" else "/home/seungwon";
   };
 
   programs.home-manager.enable = true;

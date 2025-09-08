@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
