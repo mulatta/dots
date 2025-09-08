@@ -33,6 +33,9 @@ in
         backend = "ssh";
         behaviour = "own";
         key = gitCfg.signing.key;
+        backends.ssh = {
+          program = gitCfg.signing.signer;
+        };
       };
 
       template-aliases = {
