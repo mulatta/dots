@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -30,11 +29,10 @@
         set -g fish_vi_force_cursor 1
       end
 
-      # function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
-      #   _zellij_update_tabname
-      # end
-
-      # eval (zellij setup --generate-auto-start fish | string collect)
+      # jujutsu completion
+      if command -v jj >/dev/null 2>&1
+        jj util completion fish | source
+      end
     '';
 
     shellAliases = {
@@ -80,7 +78,7 @@
       nfs = "nix flake show";
 
       # devenvs
-      and = "nix develop";
+      nd = "nix develop";
       dra = "direnv allow";
       drb = "direnv block";
       drr = "direnv reload";

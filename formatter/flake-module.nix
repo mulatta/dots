@@ -1,9 +1,4 @@
 { inputs, ... }:
-let
-  excludes = [
-    ""
-  ];
-in
 {
   imports = [ inputs.treefmt-nix.flakeModule ];
 
@@ -29,6 +24,7 @@ in
         typos.excludes = [
           "home-manager/modules/helix/languages.nix"
           "home-manager/modules/helix/languages.toml"
+          "home-manager/modules/fish.nix"
         ];
       };
     };
