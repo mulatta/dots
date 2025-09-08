@@ -1,8 +1,14 @@
 {
-  programs.hyprland = {
+  wayland.windowManager.hyprland = {
     enable = true;
+
+    systemd.enable = true;
+    systemd.enableXdgAutostart = true;
+    xwayland.enable = true;
+
     settings = {
-      monitor = "eDP-1, 2880x1800@";
+      "$mod" = "SUPER";
+      monitor = "eDP-1,3456x2234@120,0x0,2";
     };
   };
 }

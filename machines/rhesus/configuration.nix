@@ -10,6 +10,7 @@
 
   networking.hostName = "rhesus";
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfree = true;
 
   imports = [
     self.inputs.srvos.darwinModules.common
@@ -17,6 +18,7 @@
     self.inputs.srvos.darwinModules.mixins-nix-experimental
     self.inputs.sops-nix.darwinModules.sops
     ../../modules/darwin/app-store
+    ../../modules/darwin/docker.nix
     ../../modules/darwin/homebrew.nix
     ../../modules/darwin/nix-daemon.nix
     ../../modules/darwin/nix-index.nix
@@ -38,14 +40,14 @@
 
   environment.systemPackages = [
     self.packages.${pkgs.system}.systemctl-macos
-    pkgs.python3
     pkgs.nixos-rebuild
-    pkgs.docker
+    pkgs.python3
+    pkgs.uv
     pkgs.podman
-    pkgs.colima
     pkgs.tree
     pkgs.curl
     pkgs.wget
+    pkgs.nodejs_24
   ];
 
   system.stateVersion = 6;
