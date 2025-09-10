@@ -56,14 +56,6 @@
       tree = "eza --tree";
       sudo = "sudo -E -s";
 
-      # Kubernetes
-      k = "kubectl";
-      kgp = "kubectl get pods";
-
-      # Tailscale
-      tsu = "tailscale up";
-      tsd = "tailscale down";
-
       # Nix commands
       nhd = "nh darwin switch";
       nhh = "nh home switch";
@@ -92,13 +84,7 @@
       mt = "neomutt";
       nv = "nvim";
 
-      # Custom commands
-      weather = "curl wttr.in/incheon?0pq";
-      pfile = "fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'";
-      gdub = "git fetch -p && git branch -vv | grep ': gone]' | awk '{print }' | xargs git branch -D $argv;";
-      tldrf = ''${pkgs.tldr}/bin/tldr --list | fzf --preview "${pkgs.tldr}/bin/tldr {1} --color" --preview-window=right,70% | xargs tldr'';
-      docker-compose = "podman-compose";
-
+      # Jujutsu
       jjs = "jj status";
     };
 
