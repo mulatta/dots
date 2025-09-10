@@ -27,6 +27,11 @@
           "home-manager/modules/fish.nix"
         ];
       };
+
+      settings.global.excludes = [
+        "**/secrets.yaml"
+        "**/secrets.yml"
+      ];
     };
   };
 }
