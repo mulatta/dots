@@ -2,50 +2,35 @@
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
-      # disable fish greeting
-      set fish_greeting
       fish_config theme choose "Catppuccin Mocha"
 
       ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
-      set -a fish_complete_path ~/.nix-profile/share/fish/completions/ ~/.nix-profile/share/fish/vendor_completions.d/
-
-      set hydro_color_pwd brcyan
-      set hydro_color_git brmagenta
-      set hydro_color_error brred
-      set hydro_color_prompt brgreen
-      set hydro_color_duration bryellow
-      set hydro_multiline true
-
       set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
 
+      # fifc setup
+      set -Ux fifc_editor nvim
+      set -U fifc_keybinding \cx
+      bind \cx _fifc
+      bind -M insert \cx _fifc
+
       fzf_configure_bindings
-
-      fish_vi_key_bindings
-      set fish_cursor_default     block      blink
-      set fish_cursor_insert      line       blink
-      set fish_cursor_replace_one underscore blink
-      set fish_cursor_visual      block
-
-      # Correct cursor for ghostty when in VI mode.
-      if string match -q -- '*ghostty*' $TERM
-        set -g fish_vi_force_cursor 1
-      end
 
       # jujutsu completion
       if command -v jj >/dev/null 2>&1
         jj util completion fish | source
       end
+
+      function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
+        _zellij_update_tabname
+      end
+
+      # eval (zellij setup --generate-auto-start fish | string collect)
     '';
 
     shellAliases = {
       # Navigation
       "..." = "cd ../..";
-
-      # Git commands
-      g = "git";
-      gs = "git status";
-      gco = "git checkout";
 
       # Command replacements
       c = "clear";
@@ -84,15 +69,43 @@
 
       # neomutt
       mt = "neomutt";
-      nv = "nvim";
 
       # Jujutsu
-      jjs = "jj status";
+      j = "jj";
     };
 
     shellAbbrs = shellAliases;
 
     functions = {
+      _zellij_update_tabname = ''
+        if set -q ZELLIJ
+          set current_dir $PWD
+          if test $current_dir = $HOME
+              set tab_name "~"
+          else
+              set tab_name (basename $current_dir)
+          end
+
+          if fish_git_prompt >/dev/null
+              # we are in a git repo
+
+              # if we are in a git superproject, use the superproject name
+              # otherwise, use the toplevel repo name
+              set git_root (git rev-parse --show-superproject-working-tree)
+              if test -z $git_root
+                  set git_root (git rev-parse --show-toplevel)
+              end
+
+              #  if we are in a subdirectory of the git root, use the relative path
+              if test (string lower "$git_root") != (string lower "$current_dir")
+                  set tab_name (basename $git_root)/(basename $current_dir)
+              end
+          end
+
+          nohup zellij action rename-tab $tab_name >/dev/null 2>&1
+        end
+      '';
+
       mk = ''
         if test (count $argv) -eq 0
           echo "Usage: mk <directory_name>"
@@ -128,10 +141,6 @@
     };
     plugins = [
       {
-        name = "bass";
-        inherit (pkgs.fishPlugins.bass) src;
-      }
-      {
         name = "fzf-fish";
         inherit (pkgs.fishPlugins.fzf-fish) src;
       }
@@ -143,21 +152,40 @@
         name = "gruvbox";
         inherit (pkgs.fishPlugins.gruvbox) src;
       }
-      # {
-      #   name = "kubectl-abbr";
-      #   src = pkgs.fetchFromGitHub {
-      #     owner = "lewisacidic";
-      #     repo = "fish-kubectl-abbr";
-      #     rev = "161450ab83da756c400459f4ba8e8861770d930c";
-      #     sha256 = "sha256-iKNaD0E7IwiQZ+7pTrbPtrUcCJiTcVpb9ksVid1J6A0=";
-      #   };
-      # }
       {
         name = "git-abbr";
         inherit (pkgs.fishPlugins.git-abbr) src;
       }
+      {
+        name = "helix-bindings";
+        src = pkgs.fetchFromGitHub {
+          owner = "tammoippen";
+          repo = "fish-helix";
+          rev = "8addfe9eae578e6e8efd8c7002c833574824c216";
+          hash = "sha256-xTZ9Y/8yrQ7yM/R8614nezmbn05aVve5vMtCyjRMSOw=";
+        };
+      }
+      {
+        name = "jj-abbr";
+        src = pkgs.fetchFromGitHub {
+          owner = "kapsmudit";
+          repo = "plugin-jj";
+          rev = "593e00baaabac6a306b367103b5bea73316cc241";
+          hash = "sha256-XMk5UquaBFOLwHnC4yFSjykU8LZymk0a0gbBQX5Ga80=";
+        };
+      }
+      {
+        name = "completion-sync";
+        src = pkgs.fetchFromGitHub {
+          owner = "iynaix";
+          repo = "fish-completion-sync";
+          rev = "4f058ad2986727a5f510e757bc82cbbfca4596f0";
+          sha256 = "sha256-kHpdCQdYcpvi9EFM/uZXv93mZqlk1zCi2DRhWaDyK5g=";
+        };
+      }
     ];
   };
 
+  programs.carapace.enable = true;
   catppuccin.fish.enable = true;
 }
