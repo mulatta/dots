@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -7,6 +6,7 @@
 
       ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
+      set -gx SHELL ${pkgs.fish}/bin/fish
       set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
 
       # fifc setup
@@ -14,6 +14,11 @@
       set -U fifc_keybinding \cx
       bind \cx _fifc
       bind -M insert \cx _fifc
+
+      set -U fifc_bat_opts --style=numbers --color=always
+      set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
+      set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
+
 
       fzf_configure_bindings
 
@@ -186,6 +191,5 @@
     ];
   };
 
-  programs.carapace.enable = true;
   catppuccin.fish.enable = true;
 }
