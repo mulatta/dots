@@ -1,13 +1,15 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
       # disable fish greeting
       set fish_greeting
       fish_config theme choose "Catppuccin Mocha"
-      fish_add_path -p ~/.nix-profile/bin /nix/var/nix/profiles/default/bin
+
+      ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
+
       set -a fish_complete_path ~/.nix-profile/share/fish/completions/ ~/.nix-profile/share/fish/vendor_completions.d/
+
       set hydro_color_pwd brcyan
       set hydro_color_git brmagenta
       set hydro_color_error brred
