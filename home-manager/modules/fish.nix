@@ -20,9 +20,6 @@
       set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
       set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
 
-
-      fzf_configure_bindings
-
       # jujutsu completion
       if command -v jj >/dev/null 2>&1
         jj util completion fish | source
@@ -146,10 +143,6 @@
       '';
     };
     plugins = [
-      {
-        name = "fzf-fish";
-        inherit (pkgs.fishPlugins.fzf-fish) src;
-      }
       {
         name = "fifc";
         inherit (pkgs.fishPlugins.fifc) src;
