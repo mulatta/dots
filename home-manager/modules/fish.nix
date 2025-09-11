@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -20,6 +19,8 @@
       set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
       set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
 
+      _fifc_ripgrep_rule
+
       # jujutsu completion
       if command -v jj >/dev/null 2>&1
         jj util completion fish | source
@@ -28,7 +29,6 @@
       function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
         _zellij_update_tabname
       end
-
     '';
 
     shellAliases = {
@@ -140,6 +140,14 @@
         else
           __fish_default_command_not_found_handler $argv
         end
+      '';
+      _fifc_ripgrep_rule = ''
+        fifc -r '.*\*{2}.*' \
+           -s 'rg --hidden -l --no-messages (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline")' \
+           -p 'batgrep --color --paging=never (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate"' \
+           -f "--query '''" \
+           -o 'batgrep --color (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate" | less -R' \
+           -O 1
       '';
     };
     plugins = [
