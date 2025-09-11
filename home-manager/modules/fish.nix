@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -9,7 +10,7 @@
       set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
 
       # fifc setup
-      set -Ux fifc_editor nvim
+      set -Ux fifc_editor hx
       set -U fifc_keybinding \cx
       bind \cx _fifc
       bind -M insert \cx _fifc
@@ -25,7 +26,6 @@
         _zellij_update_tabname
       end
 
-      # eval (zellij setup --generate-auto-start fish | string collect)
     '';
 
     shellAliases = {
@@ -77,6 +77,21 @@
     shellAbbrs = shellAliases;
 
     functions = {
+      fish_greeting = "";
+
+      mk = ''
+        if test (count $argv) -eq 0
+          echo "Usage: mk <directory_name>"
+          return 1
+        end
+        mkdir -p $argv[1] && cd $argv[1]
+      '';
+
+      hmg = ''
+        set current_gen (home-manager generations | head -n 1 | awk '{print $7}')
+        home-manager generations | awk '{print $7}' | tac | fzf --preview "echo {} | xargs -I % sh -c 'nvd --color=always diff $current_gen %' | xargs -I{} bash {}/activate"
+      '';
+
       _zellij_update_tabname = ''
         if set -q ZELLIJ
           set current_dir $PWD
@@ -104,21 +119,6 @@
 
           nohup zellij action rename-tab $tab_name >/dev/null 2>&1
         end
-      '';
-
-      mk = ''
-        if test (count $argv) -eq 0
-          echo "Usage: mk <directory_name>"
-          return 1
-        end
-        mkdir -p $argv[1] && cd $argv[1]
-      '';
-
-      fish_greeting = "";
-
-      hmg = ''
-        set current_gen (home-manager generations | head -n 1 | awk '{print $7}')
-        home-manager generations | awk '{print $7}' | tac | fzf --preview "echo {} | xargs -I % sh -c 'nvd --color=always diff $current_gen %' | xargs -I{} bash {}/activate"
       '';
 
       fish_command_not_found = ''

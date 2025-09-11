@@ -14,6 +14,7 @@
     ./fish.nix
     ./ghostty.nix
     ./nix-utils.nix
+    ./zellij.nix
   ];
   home = {
     username = "seungwon";
