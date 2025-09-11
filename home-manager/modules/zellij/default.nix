@@ -1,5 +1,5 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
+  stylix.targets.zellij.enable = true;
   programs.zellij = {
     enable = true;
     enableFishIntegration = true;
@@ -8,7 +8,7 @@
     settings = {
       default_mode = "normal";
       default_shell = "${pkgs.fish}/bin/fish";
-      theme = "catppuccin-macha";
+      show_startup_tips = false;
     };
   };
 }
