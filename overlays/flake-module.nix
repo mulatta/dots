@@ -6,6 +6,7 @@
         inherit (prev) system;
         config = prev.config;
       };
+      zjstatus = inputs.zjstatus.packages.${prev.system}.default;
     };
   };
 
@@ -15,12 +16,7 @@
       _module.args.pkgs = import inputs.nixpkgs {
         inherit system;
         overlays = [
-          (_final: prev: {
-            unstable = import inputs.nixpkgs-unstable {
-              inherit system;
-              config = prev.config;
-            };
-          })
+          inputs.self.overlays.default
         ];
       };
     };

@@ -17,6 +17,12 @@
 
       set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
 
+      # fifc setup
+      set -Ux fifc_editor hx
+      set -U fifc_keybinding \cx
+      bind \cx _fifc
+      bind -M insert \cx _fifc
+
       fzf_configure_bindings
 
       fish_vi_key_bindings
@@ -34,6 +40,11 @@
       if command -v jj >/dev/null 2>&1
         jj util completion fish | source
       end
+
+      function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
+        _zellij_update_tabname
+      end
+
     '';
 
     shellAliases = {
@@ -100,6 +111,12 @@
       docker-compose = "podman-compose";
 
       jjs = "jj status";
+
+      # Jujutsu
+      j = "jj";
+
+      # zellij
+      zj = "zellj";
     };
 
     shellAbbrs = shellAliases;
@@ -118,6 +135,50 @@
       hmg = ''
         set current_gen (home-manager generations | head -n 1 | awk '{print $7}')
         home-manager generations | awk '{print $7}' | tac | fzf --preview "echo {} | xargs -I % sh -c 'nvd --color=always diff $current_gen %' | xargs -I{} bash {}/activate"
+      '';
+
+      fish_greeting = "";
+
+      mk = ''
+        if test (count $argv) -eq 0
+          echo "Usage: mk <directory_name>"
+          return 1
+        end
+        mkdir -p $argv[1] && cd $argv[1]
+      '';
+
+      hmg = ''
+        set current_gen (home-manager generations | head -n 1 | awk '{print $7}')
+        home-manager generations | awk '{print $7}' | tac | fzf --preview "echo {} | xargs -I % sh -c 'nvd --color=always diff $current_gen %' | xargs -I{} bash {}/activate"
+      '';
+
+      _zellij_update_tabname = ''
+        if set -q ZELLIJ
+          set current_dir $PWD
+          if test $current_dir = $HOME
+              set tab_name "~"
+          else
+              set tab_name (basename $current_dir)
+          end
+
+          if fish_git_prompt >/dev/null
+              # we are in a git repo
+
+              # if we are in a git superproject, use the superproject name
+              # otherwise, use the toplevel repo name
+              set git_root (git rev-parse --show-superproject-working-tree)
+              if test -z $git_root
+                  set git_root (git rev-parse --show-toplevel)
+              end
+
+              #  if we are in a subdirectory of the git root, use the relative path
+              if test (string lower "$git_root") != (string lower "$current_dir")
+                  set tab_name (basename $git_root)/(basename $current_dir)
+              end
+          end
+
+          nohup zellij action rename-tab $tab_name >/dev/null 2>&1
+        end
       '';
 
       fish_command_not_found = ''

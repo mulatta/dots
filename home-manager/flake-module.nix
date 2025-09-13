@@ -13,7 +13,7 @@ let
       pkgs = import inputs.nixpkgs {
         inherit system;
         config.allowUnfree = true;
-        overlays = [ inputs.nur.overlays.default ];
+        overlays = [ self.overlays.default ];
       };
       modules = [
         {

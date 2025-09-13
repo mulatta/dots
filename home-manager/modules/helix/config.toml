@@ -87,7 +87,7 @@ q = ":q"
 Q = ":q!"
 n = ":n"
 
-
+# ===== KEYBINDINGS =====
 [keys.normal.q]
 q = ":bc"
 Q = ":bc!"
@@ -108,12 +108,6 @@ esc = ["collapse_selection", "keep_primary_selection"]
 tab = "move_parent_node_end"
 S-tab = "move_parent_node_start"
 
-# Additional useful normal mode bindings
-"C-h" = "jump_view_left"
-"C-j" = "jump_view_down"
-"C-k" = "jump_view_up"
-"C-l" = "jump_view_right"
-
 # Buffer navigation improvements
 "H" = ":buffer-previous"
 "L" = ":buffer-next"
@@ -123,11 +117,10 @@ tab = "extend_parent_node_end"
 S-tab = "extend_parent_node_start"
 
 [keys.insert]
-esc = "@<A-esc>:toggle inline-diagnostics.cursor-line warning hint <ret>"
-A-esc = "normal_mode"
+esc = "normal_mode"
 S-tab = "move_parent_node_start"
-C-h = "delete_char_backward"
-C-d = "delete_char_forward"
-C-k = "kill_to_line_end"
-C-u = "kill_to_line_start"
+C-l = "delete_char_backward"
+C-h = "delete_char_forward"
+C-A-k = "kill_to_line_end"
+C-A-u = "kill_to_line_start"
 C-w = "delete_word_backward"

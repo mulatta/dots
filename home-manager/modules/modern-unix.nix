@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     delta
@@ -64,5 +61,9 @@
 
   programs.bat = {
     enable = true;
+    extraPackages = with pkgs.bat-extras; [
+      batman
+      batgrep
+    ];
   };
 }

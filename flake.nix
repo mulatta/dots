@@ -38,6 +38,7 @@
     systems.url = "github:nix-systems/default";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    zjstatus.url = "github:dj95/zjstatus";
     # keep-sorted end
   };
 
