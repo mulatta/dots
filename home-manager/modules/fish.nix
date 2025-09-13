@@ -75,6 +75,9 @@
 
       # Jujutsu
       j = "jj";
+
+      # zellij
+      zj = "zellj";
     };
 
     shellAbbrs = shellAliases;

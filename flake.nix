@@ -5,6 +5,7 @@
     apple-silicon.inputs.treefmt-nix.follows = "treefmt-nix";
     apple-silicon.url = "github:nix-community/nixos-apple-silicon";
     catppuccin.url = "github:catppuccin/nix";
+    zjstatus.url = "github:dj95/zjstatus";
     clan-core.inputs.disko.follows = "disko";
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.nix-darwin.follows = "nix-darwin";
@@ -41,13 +42,12 @@
     # keep-sorted end
   };
 
-  outputs =
-    inputs@{
-      flake-parts,
-      systems,
-      ...
-    }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = inputs @ {
+    flake-parts,
+    systems,
+    ...
+  }:
+    flake-parts.lib.mkFlake {inherit inputs;} {
       systems = import systems;
       imports = [
         ./checks/flake-module.nix
