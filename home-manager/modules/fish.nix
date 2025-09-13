@@ -3,18 +3,11 @@
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
-      # disable fish greeting
-      set fish_greeting
       fish_config theme choose "Catppuccin Mocha"
-      fish_add_path -p ~/.nix-profile/bin /nix/var/nix/profiles/default/bin
-      set -a fish_complete_path ~/.nix-profile/share/fish/completions/ ~/.nix-profile/share/fish/vendor_completions.d/
-      set hydro_color_pwd brcyan
-      set hydro_color_git brmagenta
-      set hydro_color_error brred
-      set hydro_color_prompt brgreen
-      set hydro_color_duration bryellow
-      set hydro_multiline true
 
+      ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
+
+      set -gx SHELL ${pkgs.fish}/bin/fish
       set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
 
       # fifc setup
@@ -23,38 +16,26 @@
       bind \cx _fifc
       bind -M insert \cx _fifc
 
-      fzf_configure_bindings
+      set -U fifc_bat_opts --style=numbers --color=always
+      set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
+      set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
 
-      fish_vi_key_bindings
-      set fish_cursor_default     block      blink
-      set fish_cursor_insert      line       blink
-      set fish_cursor_replace_one underscore blink
-      set fish_cursor_visual      block
-
-      # Correct cursor for ghostty when in VI mode.
-      if string match -q -- '*ghostty*' $TERM
-        set -g fish_vi_force_cursor 1
-      end
+      _fifc_ripgrep_rule
 
       # jujutsu completion
       if command -v jj >/dev/null 2>&1
         jj util completion fish | source
       end
 
-      function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
-        _zellij_update_tabname
-      end
+       function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
+         _zellij_update_tabname
+       end
 
     '';
 
     shellAliases = {
       # Navigation
       "..." = "cd ../..";
-
-      # Git commands
-      g = "git";
-      gs = "git status";
-      gco = "git checkout";
 
       # Command replacements
       c = "clear";
@@ -66,14 +47,6 @@
       l = "eza --group --header --group-directories-first --long --git --all --binary --all --icons always";
       tree = "eza --tree";
       sudo = "sudo -E -s";
-
-      # Kubernetes
-      k = "kubectl";
-      kgp = "kubectl get pods";
-
-      # Tailscale
-      tsu = "tailscale up";
-      tsd = "tailscale down";
 
       # Nix commands
       nhd = "nh darwin switch";
@@ -101,16 +74,6 @@
 
       # neomutt
       mt = "neomutt";
-      nv = "nvim";
-
-      # Custom commands
-      weather = "curl wttr.in/incheon?0pq";
-      pfile = "fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'";
-      gdub = "git fetch -p && git branch -vv | grep ': gone]' | awk '{print }' | xargs git branch -D $argv;";
-      tldrf = ''${pkgs.tldr}/bin/tldr --list | fzf --preview "${pkgs.tldr}/bin/tldr {1} --color" --preview-window=right,70% | xargs tldr'';
-      docker-compose = "podman-compose";
-
-      jjs = "jj status";
 
       # Jujutsu
       j = "jj";
@@ -122,21 +85,6 @@
     shellAbbrs = shellAliases;
 
     functions = {
-      mk = ''
-        if test (count $argv) -eq 0
-          echo "Usage: mk <directory_name>"
-          return 1
-        end
-        mkdir -p $argv[1] && cd $argv[1]
-      '';
-
-      fish_greeting = "";
-
-      hmg = ''
-        set current_gen (home-manager generations | head -n 1 | awk '{print $7}')
-        home-manager generations | awk '{print $7}' | tac | fzf --preview "echo {} | xargs -I % sh -c 'nvd --color=always diff $current_gen %' | xargs -I{} bash {}/activate"
-      '';
-
       fish_greeting = "";
 
       mk = ''
@@ -198,16 +146,17 @@
           __fish_default_command_not_found_handler $argv
         end
       '';
+
+      _fifc_ripgrep_rule = ''
+        fifc -r '.*\*{2}.*' \
+           -s 'rg --hidden -l --no-messages (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline")' \
+           -p 'batgrep --color --paging=never (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate"' \
+           -f "--query '''" \
+           -o 'batgrep --color (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate" | less -R' \
+           -O 1
+      '';
     };
     plugins = [
-      {
-        name = "bass";
-        inherit (pkgs.fishPlugins.bass) src;
-      }
-      {
-        name = "fzf-fish";
-        inherit (pkgs.fishPlugins.fzf-fish) src;
-      }
       {
         name = "fifc";
         inherit (pkgs.fishPlugins.fifc) src;
@@ -216,18 +165,45 @@
         name = "gruvbox";
         inherit (pkgs.fishPlugins.gruvbox) src;
       }
-      # {
-      #   name = "kubectl-abbr";
-      #   src = pkgs.fetchFromGitHub {
-      #     owner = "lewisacidic";
-      #     repo = "fish-kubectl-abbr";
-      #     rev = "161450ab83da756c400459f4ba8e8861770d930c";
-      #     sha256 = "sha256-iKNaD0E7IwiQZ+7pTrbPtrUcCJiTcVpb9ksVid1J6A0=";
-      #   };
-      # }
       {
         name = "git-abbr";
         inherit (pkgs.fishPlugins.git-abbr) src;
+      }
+      {
+        name = "helix-bindings";
+        src = pkgs.fetchFromGitHub {
+          owner = "tammoippen";
+          repo = "fish-helix";
+          rev = "8addfe9eae578e6e8efd8c7002c833574824c216";
+          hash = "sha256-xTZ9Y/8yrQ7yM/R8614nezmbn05aVve5vMtCyjRMSOw=";
+        };
+      }
+      {
+        name = "jj-abbr";
+        src = pkgs.fetchFromGitHub {
+          owner = "kapsmudit";
+          repo = "plugin-jj";
+          rev = "593e00baaabac6a306b367103b5bea73316cc241";
+          hash = "sha256-XMk5UquaBFOLwHnC4yFSjykU8LZymk0a0gbBQX5Ga80=";
+        };
+      }
+      {
+        name = "completion-sync";
+        src = pkgs.fetchFromGitHub {
+          owner = "iynaix";
+          repo = "fish-completion-sync";
+          rev = "4f058ad2986727a5f510e757bc82cbbfca4596f0";
+          sha256 = "sha256-kHpdCQdYcpvi9EFM/uZXv93mZqlk1zCi2DRhWaDyK5g=";
+        };
+      }
+      {
+        name = "autopair";
+        src = pkgs.fetchFromGitHub {
+          owner = "jorgebucaran";
+          repo = "autopair.fish";
+          rev = "4d1752ff5b39819ab58d7337c69220342e9de0e2";
+          hash = "sha256-qt3t1iKRRNuiLWiVoiAYOu+9E7jsyECyIqZJ/oRIT1A=";
+        };
       }
     ];
   };
