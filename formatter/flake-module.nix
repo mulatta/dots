@@ -28,6 +28,11 @@
           "home-manager/modules/secrets.yml"
         ];
       };
+
+      settings.global.excludes = [
+        "**/secrets.yaml"
+        "**/secrets.yml"
+      ];
     };
   };
 }
