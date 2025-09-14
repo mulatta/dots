@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/users.nix
@@ -21,7 +22,7 @@
 
   nixpkgs.hostPlatform = "aarch64-linux";
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [self.inputs.apple-silicon.overlays.apple-silicon-overlay];
+  nixpkgs.overlays = [ self.inputs.apple-silicon.overlays.apple-silicon-overlay ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

@@ -11,7 +11,10 @@
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.sops-nix.nixosModules.sops
     ../../modules/nixos/users.nix
+    ../../modules/nixos/disko-zfs.nix
   ];
+
+  disko.rootDisk = "/dev/disk/by-id/nvme-CT2000P3PSSD8_2327E6EA821A";
 
   clan.core.networking.targetHost = lib.mkForce "root@macaca.local";
 

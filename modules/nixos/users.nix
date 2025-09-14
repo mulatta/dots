@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   users.users.seungwon = {
     home = "/home/seungwon";
     isNormalUser = true;

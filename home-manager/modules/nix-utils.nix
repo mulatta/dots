@@ -2,7 +2,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   # ======== Nix Development Tools ========
   home.packages = with pkgs; [
     nixd # Nix LSP
@@ -29,7 +30,7 @@
   programs.nix-init = {
     enable = true;
     settings = {
-      maintainers = ["mulatta"];
+      maintainers = [ "mulatta" ];
       nixpkgs = "<nixpkgs>";
     };
   };
