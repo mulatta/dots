@@ -1,8 +1,10 @@
-{ config, ... }:
-let
-  gitCfg = config.programs.git;
-in
 {
+  config,
+  pkgs,
+  ...
+}: let
+  gitCfg = config.programs.git;
+in {
   programs.jujutsu = {
     enable = true;
     settings = {
@@ -25,8 +27,8 @@ in
           "--template"
           "builtin_log_compact"
         ];
-        s = [ "show" ];
-        d = [ "describe" ];
+        s = ["show"];
+        d = ["describe"];
       };
 
       signing = {
@@ -45,4 +47,6 @@ in
       };
     };
   };
+
+  home.packages = [pkgs.jjui];
 }
