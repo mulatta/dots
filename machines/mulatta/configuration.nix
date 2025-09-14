@@ -1,12 +1,13 @@
 {
+  config,
   self,
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/nixos/users.nix
     self.inputs.apple-silicon.nixosModules.default
     self.inputs.srvos.nixosModules.common
     self.inputs.srvos.nixosModules.mixins-terminfo
@@ -20,15 +21,16 @@
 
   nixpkgs.hostPlatform = "aarch64-linux";
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [ self.inputs.apple-silicon.overlays.apple-silicon-overlay ];
+  nixpkgs.overlays = [self.inputs.apple-silicon.overlays.apple-silicon-overlay];
 
   users.users.seungwon = {
-    home = "/home/seungwon";
     isNormalUser = true;
+    home = "/home/seungwon";
     extraGroups = [
       "wheel"
       "networkmanager"
     ];
+    hashedPasswordFile = config.clan.core.vars.generators.mulatta-password.files.password-hash.path;
   };
 
   # Use the systemd-boot EFI boot loader.
