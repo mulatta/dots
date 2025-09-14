@@ -2,7 +2,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   homebrew.enable = true;
   system.activationScripts.homebrew.text = lib.mkIf config.homebrew.enable (
     lib.mkBefore ''

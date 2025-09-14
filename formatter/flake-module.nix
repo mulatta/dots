@@ -26,6 +26,8 @@
           "home-manager/modules/helix/languages.toml"
           "home-manager/modules/fish.nix"
           "home-manager/modules/secrets.yml"
+          "vars/**"
+          "sops/**"
         ];
       };
 

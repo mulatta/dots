@@ -33,11 +33,11 @@
       maintainers = [ "mulatta" ];
       nixpkgs = "<nixpkgs>";
       commit = true;
-      access-tokens = {
-        "github.com" = {
-          file = config.sops.secrets.github_token.path;
-        };
-      };
+      # access-tokens = {
+      #   "github.com" = {
+      #     file = config.sops.secrets.github_token.path;
+      #   };
+      # };
     };
   };
 

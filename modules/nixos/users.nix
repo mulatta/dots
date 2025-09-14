@@ -1,8 +1,12 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   clan.core.vars.generators.mulatta-password = {
     files.password-hash.neededFor = "users";
     files.password.deploy = false;
-    runtimeInputs = [pkgs.mkpasswd pkgs.xkcdpass];
+    runtimeInputs = [
+      pkgs.mkpasswd
+      pkgs.xkcdpass
+    ];
     prompts.password.type = "hidden";
     script = ''
        prompt_value="$(cat "$prompts"/password)"

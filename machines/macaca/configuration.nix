@@ -6,7 +6,6 @@
 }:
 {
   imports = [
-    ./hardware-configuration.nix
     self.inputs.apple-silicon.nixosModules.default
     self.inputs.srvos.nixosModules.common
     self.inputs.srvos.nixosModules.mixins-terminfo
