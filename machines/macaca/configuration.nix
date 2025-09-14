@@ -3,14 +3,14 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
     self.inputs.apple-silicon.nixosModules.default
     self.inputs.srvos.nixosModules.common
     self.inputs.srvos.nixosModules.mixins-terminfo
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.sops-nix.nixosModules.sops
+    ../../modules/nixos/users.nix
   ];
 
   clan.core.networking.targetHost = lib.mkForce "root@macaca.local";
@@ -19,15 +19,6 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
-
-  users.users.seungwon = {
-    home = "/home/seungwon";
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-  };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
