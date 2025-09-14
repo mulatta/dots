@@ -6,7 +6,6 @@
     ./git
     ./helix
     ./modern-unix.nix
-    ./sops.nix
     ./starship
     ./xdg.nix
     ./yazi
