@@ -4,8 +4,7 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/users.nix
@@ -40,17 +39,7 @@
 
   nixpkgs.hostPlatform = "aarch64-linux";
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [ self.inputs.apple-silicon.overlays.apple-silicon-overlay ];
-
-  users.users.seungwon = {
-    isNormalUser = true;
-    home = "/home/seungwon";
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-    hashedPasswordFile = config.clan.core.vars.generators.mulatta-password.files.password-hash.path;
-  };
+  nixpkgs.overlays = [self.inputs.apple-silicon.overlays.apple-silicon-overlay];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

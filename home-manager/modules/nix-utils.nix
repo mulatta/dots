@@ -2,8 +2,7 @@
   pkgs,
   config,
   ...
-}:
-{
+}: {
   # ======== Nix Development Tools ========
   home.packages = with pkgs; [
     nixd # Nix LSP
@@ -30,16 +29,8 @@
   programs.nix-init = {
     enable = true;
     settings = {
-      maintainers = [ "mulatta" ];
+      maintainers = ["mulatta"];
       nixpkgs = "<nixpkgs>";
-      commit = true;
-      # access-tokens = {
-      #   "github.com" = {
-      #     file = config.sops.secrets.github_token.path;
-      #   };
-      # };
     };
   };
-
-  sops.secrets.github_token = { };
 }
