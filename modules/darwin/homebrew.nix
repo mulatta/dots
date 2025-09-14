@@ -2,8 +2,7 @@
   config,
   lib,
   ...
-}:
-{
+}: {
   homebrew.enable = true;
   system.activationScripts.homebrew.text = lib.mkIf config.homebrew.enable (
     lib.mkBefore ''
@@ -28,6 +27,7 @@
     "bookends"
     "claude"
     "cleanshot"
+    "deskflow"
     "devonthink"
     "ghostty"
     "hancom-word"
