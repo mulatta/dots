@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -79,7 +78,7 @@
       j = "jj";
 
       # zellij
-      zj = "zellj";
+      zj = "zellij";
     };
 
     shellAbbrs = shellAliases;
