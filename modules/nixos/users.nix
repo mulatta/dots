@@ -2,8 +2,7 @@
   config,
   pkgs,
   ...
-}:
-{
+}: {
   users.users.seungwon = {
     home = "/home/seungwon";
     isNormalUser = true;
@@ -12,16 +11,16 @@
       "networkmanager"
     ];
     hashedPasswordFile = config.clan.vars.generators.seungwon-password.path;
+    shell = "/run/current-system/sw/bin/fish";
   };
 
   users.users.root = {
-    home = "/home/seungwon";
-    isNormalUser = true;
     extraGroups = [
       "wheel"
       "networkmanager"
     ];
     hashedPasswordFile = config.clan.vars.generators.root-password.path;
+    shell = "/run/current-system/sw/bin/bash";
   };
 
   clan.core.vars.generators.seungwon-password = {
