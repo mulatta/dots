@@ -1,1 +1,1 @@
-../secrets.tf
+../github/secrets.tf
