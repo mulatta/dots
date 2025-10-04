@@ -38,7 +38,7 @@ in
     "seungwon@mulatta" = mkHome "aarch64-linux" {
       extraModules = [ ./mulatta.nix ];
     };
-    "seungwon@psi" = mkHome "aarch64-linux" {
+    "seungwon@psi" = mkHome "x86_64-linux" {
       extraModules = [ ./psi.nix ];
     };
   };
