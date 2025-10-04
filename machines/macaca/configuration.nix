@@ -3,7 +3,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   imports = [
     self.inputs.apple-silicon.nixosModules.default
     self.inputs.srvos.nixosModules.common
