@@ -1,7 +1,6 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   imports = [
-    ./atuin
+    ./atuin.nix
     ./direnv.nix
     ./git
     ./helix
@@ -14,11 +13,15 @@
     ./ghostty.nix
     ./nix-utils.nix
     ./zellij
+    ./pueue.nix
   ];
   home = {
     username = "seungwon";
     stateVersion = "25.05";
-    homeDirectory = if pkgs.stdenv.isDarwin then "/Users/seungwon" else "/home/seungwon";
+    homeDirectory =
+      if pkgs.stdenv.isDarwin
+      then "/Users/seungwon"
+      else "/home/seungwon";
   };
 
   programs.home-manager.enable = true;
