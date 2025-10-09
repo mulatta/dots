@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
@@ -8,7 +7,7 @@
       ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
       set -gx SHELL ${pkgs.fish}/bin/fish
-      set -gx PATH $HOME/.nix-profile/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin/usr/local/bin /usr/bin ~/.local/bin $PATH
+      set -gx PATH /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
 
       # fifc setup
       set -Ux fifc_editor hx
@@ -31,6 +30,11 @@
          _zellij_update_tabname
        end
 
+      if test -n "$SSH_CONNECTION"
+        set -gx PUEUE_PROFILE local
+      else
+        set -gx PUEUE_PROFILE psi
+      end
     '';
 
     shellAliases = {
@@ -39,14 +43,12 @@
 
       # Command replacements
       c = "clear";
-      ss = "zellij -l welcome";
       cd = "z";
       cdi = "zi";
       cat = "bat";
       ls = "eza";
       l = "eza --group --header --group-directories-first --long --git --all --binary --all --icons always";
       tree = "eza --tree";
-      sudo = "sudo -E -s";
 
       # Nix commands
       nhd = "nh darwin switch";
@@ -155,7 +157,40 @@
            -o 'batgrep --color (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate" | less -R' \
            -O 1
       '';
+
+      __pueue_cmd = ''
+        set -l profile_arg
+        if set -q PUEUE_PROFILE
+          set profile_arg -p $PUEUE_PROFILE
+        end
+        pueue $profile_arg $argv
+      '';
+
+      pq = "__pueue_cmd $argv";
+      pqa = "__pueue_cmd add $argv";
+      pqs = "__pueue_cmd status $argv";
+      pql = "__pueue_cmd log $argv";
+      pqf = "__pueue_cmd follow $argv";
+      pqk = "__pueue_cmd kill $argv";
+      pqr = "__pueue_cmd remove $argv";
+      pqc = "__pueue_cmd clean $argv";
+      pqp = "__pueue_cmd pause $argv";
+      pqst = "__pueue_cmd start $argv";
+      pqw = "__pueue_cmd wait $argv";
+      pqe = "__pueue_cmd edit $argv";
+      pqpar = "__pueue_cmd parallel $argv";
+
+      pueue_profile = ''
+        if test (count $argv) -eq 0
+          echo "Current: $PUEUE_PROFILE"
+          echo "Available: local, psi, production, ..."
+          return
+        end
+        set -gx PUEUE_PROFILE $argv[1]
+        echo "→ $PUEUE_PROFILE"
+      '';
     };
+
     plugins = [
       {
         name = "fifc";
