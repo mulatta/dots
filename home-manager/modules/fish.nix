@@ -1,40 +1,36 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
-      fish_config theme choose "Catppuccin Mocha"
+       fish_config theme choose "Catppuccin Mocha"
 
-      ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
+       ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
-      set -gx SHELL ${pkgs.fish}/bin/fish
-      set -gx PATH /run/wrappers/bin /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
+       set -gx SHELL ${pkgs.fish}/bin/fish
+       set -gx PATH /run/wrappers/bin /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
 
-      # fifc setup
-      set -Ux fifc_editor hx
-      set -U fifc_keybinding \cx
-      bind \cx _fifc
-      bind -M insert \cx _fifc
+       # fifc setup
+       set -Ux fifc_editor hx
+       set -U fifc_keybinding \cx
+       bind \cx _fifc
+       bind -M insert \cx _fifc
 
-      set -U fifc_bat_opts --style=numbers --color=always
-      set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
-      set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
+       set -U fifc_bat_opts --style=numbers --color=always
+       set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
+       set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
 
-      _fifc_ripgrep_rule
+       _fifc_ripgrep_rule
 
-      # jujutsu completion
-      if command -v jj >/dev/null 2>&1
-        jj util completion fish | source
-      end
-
-       function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
-         _zellij_update_tabname
+       # jujutsu completion
+       if command -v jj >/dev/null 2>&1
+         jj util completion fish | source
        end
 
-      if test -n "$SSH_CONNECTION"
-        set -gx PUEUE_PROFILE local
-      else
-        set -gx PUEUE_PROFILE psi
+      function __auto_zellij_update_tabname --on-variable PWD --description "Update zellij tab name on directory change"
+        _zellij_update_tabname
       end
+
     '';
 
     shellAliases = {
@@ -82,6 +78,11 @@
 
       # zellij
       zj = "zellij";
+      zja = "zellij attach";
+      zjac = "zellij attach -c";
+      zjls = "zellij ls";
+      zjka = "zellij ka";
+      zjda = "zellij da";
     };
 
     shellAbbrs = shellAliases;
@@ -156,38 +157,6 @@
            -f "--query '''" \
            -o 'batgrep --color (string match -r -g \'.*\*{2}(.*)\' "$fifc_commandline") "$fifc_candidate" | less -R' \
            -O 1
-      '';
-
-      __pueue_cmd = ''
-        set -l profile_arg
-        if set -q PUEUE_PROFILE
-          set profile_arg -p $PUEUE_PROFILE
-        end
-        pueue $profile_arg $argv
-      '';
-
-      pq = "__pueue_cmd $argv";
-      pqa = "__pueue_cmd add $argv";
-      pqs = "__pueue_cmd status $argv";
-      pql = "__pueue_cmd log $argv";
-      pqf = "__pueue_cmd follow $argv";
-      pqk = "__pueue_cmd kill $argv";
-      pqr = "__pueue_cmd remove $argv";
-      pqc = "__pueue_cmd clean $argv";
-      pqp = "__pueue_cmd pause $argv";
-      pqst = "__pueue_cmd start $argv";
-      pqw = "__pueue_cmd wait $argv";
-      pqe = "__pueue_cmd edit $argv";
-      pqpar = "__pueue_cmd parallel $argv";
-
-      pueue_profile = ''
-        if test (count $argv) -eq 0
-          echo "Current: $PUEUE_PROFILE"
-          echo "Available: local, psi, production, ..."
-          return
-        end
-        set -gx PUEUE_PROFILE $argv[1]
-        echo "→ $PUEUE_PROFILE"
       '';
     };
 
