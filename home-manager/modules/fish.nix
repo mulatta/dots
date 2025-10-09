@@ -7,7 +7,7 @@
       ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
       set -gx SHELL ${pkgs.fish}/bin/fish
-      set -gx PATH /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
+      set -gx PATH /run/wrappers/bin /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
 
       # fifc setup
       set -Ux fifc_editor hx
