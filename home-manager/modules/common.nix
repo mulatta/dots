@@ -23,6 +23,7 @@
   };
 
   programs.home-manager.enable = true;
+  dconf.enable = pkgs.stdenv.isLinux;
   catppuccin.flavor = "mocha";
 
   nixpkgs.config.allowUnfree = true;

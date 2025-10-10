@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   nextflow-lsp-jar = pkgs.fetchurl {
     url = "https://github.com/nextflow-io/language-server/releases/download/v25.04.3/language-server-all.jar";
     hash = "sha256-oHdWCsDZoCs0+mfOg+bRqaTayfsAJWzcifflNLvScJs=";
@@ -7,7 +8,8 @@
   nextflow-lsp = pkgs.writeShellScriptBin "nextflow-lsp" ''
     exec ${pkgs.jdk17}/bin/java -jar ${nextflow-lsp-jar} "$@"
   '';
-in {
+in
+{
   programs.helix = {
     enable = true;
     defaultEditor = true;
@@ -38,7 +40,7 @@ in {
     ];
 
     settings = builtins.fromTOML (builtins.readFile ./config.toml);
-    languages = import ./languages.nix {inherit pkgs nextflow-lsp;};
+    languages = import ./languages.nix { inherit pkgs nextflow-lsp; };
   };
 
   xdg.configFile = {
