@@ -83,6 +83,8 @@
       zjls = "zellij ls";
       zjka = "zellij ka";
       zjda = "zellij da";
+
+      tmpd = "export TMP=$(mktemp -d) && cd $TMP";
     };
 
     shellAbbrs = shellAliases;
