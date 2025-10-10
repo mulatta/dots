@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  nextflow-lsp,
+  ...
+}:
 {
   language-server = {
     # JSON Language Server with schema support
@@ -197,6 +201,12 @@
     bash-language-server = {
       command = "${pkgs.bash-language-server}/bin/bash-language-server";
       args = [ "start" ];
+    };
+
+    # Nextflow language server
+    nextflow-lsp = {
+      command = "${nextflow-lsp}/bin/nextflow-lsp";
+      args = [ ];
     };
   };
 
@@ -409,10 +419,44 @@
       };
       auto-format = true;
     }
+
+    # Nextflow workflow scripts
+    {
+      name = "nextflow";
+      scope = "source.nextflow";
+      file-types = [ "nf" ];
+      comment-tokens = [ "//" ];
+      indent = {
+        tab-width = 4;
+        unit = "    ";
+      };
+      roots = [
+        "nextflow.config"
+        "main.nf"
+      ];
+      language-servers = [ "nextflow-lsp" ];
+      grammar = "groovy"; # Use Groovy grammar for syntax highlighting
+      auto-format = true;
+    }
+
+    # Nextflow config files
+    {
+      name = "nextflow-config";
+      scope = "source.nextflow.config";
+      file-types = [ "config" ];
+      comment-tokens = [ "//" ];
+      indent = {
+        tab-width = 4;
+        unit = "    ";
+      };
+      language-servers = [ "nextflow-lsp" ];
+      grammar = "groovy"; # Use Groovy grammar for syntax highlighting
+      auto-format = true;
+    }
   ];
 
   # Tree-sitter grammars for syntax highlighting
-  grammars = [
+  grammar = [
     {
       name = "python";
       source = {
@@ -439,6 +483,13 @@
       source = {
         git = "https://github.com/tree-sitter/tree-sitter-bash";
         rev = "275effdfc0edce774acf7d481f9ea195c6c403cd";
+      };
+    }
+    {
+      name = "groovy";
+      source = {
+        git = "https://github.com/murtaza64/tree-sitter-groovy";
+        rev = "1ca2e8a0fbb0993b3dba609bc5bff4f25b468bb3";
       };
     }
   ];
