@@ -43,11 +43,11 @@
     pkgs.nixos-rebuild
     pkgs.python3
     pkgs.uv
-    pkgs.podman
     pkgs.tree
     pkgs.curl
     pkgs.wget
     pkgs.nodejs_24
+    pkgs.parallel
   ];
 
   system.stateVersion = 6;

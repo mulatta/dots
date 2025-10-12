@@ -31,9 +31,10 @@
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
 
-  environment.systemPackages = [
-    pkgs.python3
-    pkgs.nixos-rebuild
+  environment.systemPackages = with pkgs; [
+    python3
+    nixos-rebuild
+    parallel
   ];
 
   srvos.flake = self;

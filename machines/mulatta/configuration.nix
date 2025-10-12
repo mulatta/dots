@@ -42,9 +42,10 @@
   services.xserver.enable = true;
   services.xserver.desktopManager.xfce.enable = true;
 
-  environment.systemPackages = [
-    pkgs.python3
-    pkgs.nixos-rebuild
+  environment.systemPackages = with pkgs; [
+    python3
+    nixos-rebuild
+    parallel
   ];
 
   srvos.flake = self;
