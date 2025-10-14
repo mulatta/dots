@@ -75,6 +75,93 @@
 
       # Jujutsu
       j = "jj";
+      jst = "jj status";
+      js = "jj show";
+
+      # abandon
+      ja = "jj abandon";
+
+      # bookmark
+      jbs = "jj bookmark set";
+      jbl = "jj bookmark list";
+      jbt = "jj bookmark track";
+      jbd = "jj bookmark delete";
+      jbf = "jj bookmark forget";
+      jbm = "jj bookmark move";
+
+      # log
+      jl = "jj log";
+      jlr = "jj log -r";
+      jla = "jj log -r all()";
+
+      # new
+      jn = "jj new";
+      jnn = "jj new --no-edit";
+      jna = "jj new -A";
+      jnb = "jj new -B";
+      jnna = "jj new --no-edit -A";
+      jnnb = "jj new --no-edit -B";
+
+      # git push
+      jp = "jj git push";
+      jpa = "jj git push --all";
+      jpb = "jj git push --bookmark";
+      jpc = "jj git push --change";
+      jpd = "jj git push --deleted";
+
+      # git fetch
+      jf = "jj git fetch";
+      jgcl = "jj git clone";
+
+      # rebase
+      jrb = "jj rebase";
+      jrbr = "jj rebase -r";
+      jrbs = "jj rebase -s";
+      jrbd = "jj rebase -d";
+
+      # resolve
+      jrs = "jj resolve";
+      jrsr = "jj resolve -r";
+      jrsl = "jj resolve --list";
+
+      # show
+      jshs = "jj show --summary";
+      jshg = "jj show --git";
+
+      # squash
+      jsq = "jj squash";
+
+      # describe
+      jd = "jj describe";
+      jdm = "jj describe -m";
+
+      # diff
+      jdf = "jj diff";
+      jdfs = "jj diff --stat";
+      jdfc = "jj diff --color-words";
+      jdfg = "jj diff --git";
+
+      # prev/next
+      jpr = "jj prev";
+      jnx = "jj next";
+
+      # edit
+      je = "jj edit";
+
+      # split
+      jsp = "jj split";
+
+      # evolog
+      jel = "jj evolog";
+
+      # operation
+      jol = "jj op log";
+
+      # file
+      jfa = "jj file annotate";
+      jfl = "jj file list";
+      jfc = "jj file chmod";
+      jfs = "jj file show";
 
       # zellij
       zj = "zellij";
@@ -182,15 +269,6 @@
           repo = "fish-helix";
           rev = "8addfe9eae578e6e8efd8c7002c833574824c216";
           hash = "sha256-xTZ9Y/8yrQ7yM/R8614nezmbn05aVve5vMtCyjRMSOw=";
-        };
-      }
-      {
-        name = "jj-abbr";
-        src = pkgs.fetchFromGitHub {
-          owner = "kapsmudit";
-          repo = "plugin-jj";
-          rev = "593e00baaabac6a306b367103b5bea73316cc241";
-          hash = "sha256-XMk5UquaBFOLwHnC4yFSjykU8LZymk0a0gbBQX5Ga80=";
         };
       }
       {

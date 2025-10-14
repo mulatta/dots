@@ -12,6 +12,7 @@ in
     settings = {
       user.email = gitCfg.userEmail;
       user.name = gitCfg.userName;
+
       ui = {
         pager = "less -FRX";
         show-cryptographix-signatures = true;
@@ -28,6 +29,7 @@ in
           "all()"
           "--template"
           "builtin_log_compact"
+          "--reversed"
         ];
         s = [ "show" ];
         d = [ "describe" ];
@@ -40,6 +42,15 @@ in
         backends.ssh = {
           program = gitCfg.signing.signer;
         };
+      };
+
+      templates = {
+        file_annotate = ''
+          commit_id.short() ++ " (" ++
+          author.name() ++ " " ++
+          author.timestamp().ago() ++
+          ") "
+        '';
       };
 
       template-aliases = {
