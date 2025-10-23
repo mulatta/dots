@@ -8,7 +8,7 @@
     enable = true;
     userName = "mulatta";
     userEmail = "67085791+mulatta@users.noreply.github.com";
-    delta.enable = true;
+
     lfs.enable = true;
 
     signing = {
@@ -32,14 +32,6 @@
         autocrlf = "input";
         whitespace = "trailing-space,space-before-tab";
         precomposeunicode = true;
-      };
-
-      delta = {
-        enable = true;
-        navigate = true;
-        light = false;
-        side-by-side = false;
-        options.syntax-theme = "catppuccin";
       };
 
       color = {

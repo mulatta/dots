@@ -39,7 +39,10 @@ in
       extraModules = [ ./mulatta.nix ];
     };
     "seungwon@psi" = mkHome "x86_64-linux" {
-      extraModules = [ ./psi.nix ];
+      extraModules = [
+        ./psi.nix
+        inputs.vscode-server.homeModules.default
+      ];
     };
   };
 }

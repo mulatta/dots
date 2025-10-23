@@ -2,7 +2,9 @@
 {
   imports = [
     ./modules/common.nix
+    ./modules/vscode
   ];
+
   home.sessionVariables = {
     DOCKER_HOST = "unix://${config.home.homeDirectory}/.colima/default/docker.sock";
   };

@@ -2,9 +2,8 @@
   inputs = {
     # keep-sorted start
     apple-silicon.inputs.nixpkgs.follows = "nixpkgs";
-    apple-silicon.inputs.treefmt-nix.follows = "treefmt-nix";
     apple-silicon.url = "github:nix-community/nixos-apple-silicon";
-    catppuccin.url = "github:catppuccin/nix";
+    catppuccin.url = "github:catppuccin/nix/release-25.05";
     clan-core.inputs.disko.follows = "disko";
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.nix-darwin.follows = "nix-darwin";
@@ -38,6 +37,7 @@
     systems.url = "github:nix-systems/default";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
     zjstatus.url = "github:dj95/zjstatus";
     # keep-sorted end
   };
