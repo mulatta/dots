@@ -414,6 +414,33 @@
         "type": "github"
       }
     },
+    "nix-casks": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766707265,
+        "narHash": "sha256-1eT3IaVDKZakoCpDA6OHvVBPsD2XOrMUg7wb6P2oncA=",
+        "owner": "atahanyorganci",
+        "repo": "nix-casks",
+        "rev": "961b20738e1c3e8d566cf770f9d5d7016ffdcba7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "atahanyorganci",
+        "ref": "archive",
+        "repo": "nix-casks",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -663,6 +690,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "nix-ai-tools": "nix-ai-tools",
+        "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nix-index-database": "nix-index-database",
         "nixos-facter-modules": "nixos-facter-modules",

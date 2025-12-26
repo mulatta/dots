@@ -15,12 +15,13 @@
         ];
       };
 
+      # Provider names were renamed in nixpkgs 25.11
       packages.terraform = pkgs.opentofu.withPlugins (p: [
-        p.github
-        p.gitlab
-        p.vultr
-        p.sops
-        p.local
+        p.integrations_github
+        p.gitlabhq_gitlab
+        p.vultr_vultr
+        p.carlpett_sops
+        p.hashicorp_local
       ]);
 
       packages.terraform-validate =

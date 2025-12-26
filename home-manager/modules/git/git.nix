@@ -6,9 +6,6 @@
 {
   programs.git = {
     enable = true;
-    userName = "mulatta";
-    userEmail = "67085791+mulatta@users.noreply.github.com";
-
     lfs.enable = true;
 
     signing = {
@@ -18,7 +15,12 @@
       signer = "${pkgs.openssh}/bin/ssh-keygen";
     };
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = "mulatta";
+        email = "67085791+mulatta@users.noreply.github.com";
+      };
+
       merge.ConflictStyle = "zdiff3";
       commit.verbose = true;
       diff.algorithm = "histogram";

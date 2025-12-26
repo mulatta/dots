@@ -19,6 +19,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
+    nix-casks.inputs.flake-parts.follows = "flake-parts";
+    nix-casks.inputs.nixpkgs.follows = "nixpkgs";
+    nix-casks.inputs.treefmt-nix.follows = "treefmt-nix";
+    nix-casks.url = "github:atahanyorganci/nix-casks/archive";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -51,6 +55,7 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
       imports = [
+        ./apps/flake-module.nix
         ./checks/flake-module.nix
         ./formatter/flake-module.nix
         ./home-manager/flake-module.nix

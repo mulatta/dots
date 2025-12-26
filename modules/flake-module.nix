@@ -1,12 +1,12 @@
 {
   flake.nixosModules = {
     imports = [
-      ./nixos
+      ../nixosModules
     ];
   };
   flake.darwinModules = {
     imports = [
-      ./darwin
+      ../darwinModules
     ];
   };
 }

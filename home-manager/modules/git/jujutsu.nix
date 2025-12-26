@@ -10,8 +10,8 @@ in
   programs.jujutsu = {
     enable = true;
     settings = {
-      user.email = gitCfg.userEmail;
-      user.name = gitCfg.userName;
+      user.email = gitCfg.settings.user.email;
+      user.name = gitCfg.settings.user.name;
 
       ui = {
         pager = "less -FRX";

@@ -47,13 +47,8 @@
       tree = "eza --tree";
 
       # Nix commands
-      nhd = "nh darwin switch";
-      nhh = "nh home switch";
-      nho = "nh os switch";
-      nhu = "nh os --update";
       drs = "sudo darwin-rebuild switch --flake $NH_FLAKE";
       nrs = "sudo nixos-rebuild switch --flake $NH_FLAKE";
-      hms = "home-manager switch --flake $NH_FLAKE -b backup";
 
       nfu = "nix flake update";
       nfc = "nix flake check";
@@ -178,6 +173,14 @@
 
     functions = {
       fish_greeting = "";
+
+      hm = ''
+        if test -d "$HOME/dots"
+          nix run "$HOME/dots#hm" -- $argv
+        else
+          nix run "github:mulatta/dots#hm" -- $argv
+        end
+      '';
 
       mk = ''
         if test (count $argv) -eq 0

@@ -17,13 +17,14 @@
     self.inputs.srvos.darwinModules.mixins-terminfo
     self.inputs.srvos.darwinModules.mixins-nix-experimental
     self.inputs.sops-nix.darwinModules.sops
-    ../../modules/darwin/app-store
-    ../../modules/darwin/docker.nix
-    ../../modules/darwin/homebrew.nix
-    ../../modules/darwin/nix-daemon.nix
-    ../../modules/darwin/nix-index.nix
-    ../../modules/darwin/sudo.nix
-    ../../modules/darwin/desktop.nix
+    ../../darwinModules/app-store
+    ../../darwinModules/docker.nix
+    ../../darwinModules/homebrew.nix
+    ../../darwinModules/nix-casks.nix
+    ../../darwinModules/nix-daemon.nix
+    ../../darwinModules/nix-index.nix
+    ../../darwinModules/sudo.nix
+    ../../darwinModules/desktop.nix
   ];
 
   system.activationScripts.postActivation.text = ''

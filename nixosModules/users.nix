@@ -11,7 +11,7 @@
       "wheel"
       "networkmanager"
     ];
-    hashedPasswordFile = config.clan.vars.generators.seungwon-password.path;
+    hashedPasswordFile = config.clan.core.vars.generators.seungwon-password.files.password-hash.path;
     shell = "/run/current-system/sw/bin/fish";
   };
 
@@ -20,7 +20,7 @@
       "wheel"
       "networkmanager"
     ];
-    hashedPasswordFile = config.clan.vars.generators.root-password.path;
+    hashedPasswordFile = config.clan.core.vars.generators.root-password.files.password-hash.path;
     shell = "/run/current-system/sw/bin/bash";
   };
 

@@ -7,13 +7,16 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/users.nix
+    ../../nixosModules/users.nix
     self.inputs.apple-silicon.nixosModules.default
     self.inputs.srvos.nixosModules.common
     self.inputs.srvos.nixosModules.mixins-terminfo
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.sops-nix.nixosModules.sops
   ];
+
+  # sops-nix requires a key source
+  sops.age.keyFile = "/var/lib/sops-nix/age-keys.txt";
 
   clan.core.networking.targetHost = lib.mkForce "root@mulatta.local";
 
@@ -27,8 +30,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  hardware.asahi.peripheralFirmwareDirectory = /boot/asahi;
-  hardware.asahi.extractPeripheralFirmware = true;
+  # Peripheral firmware path - use string to avoid pure eval issues
+  hardware.asahi.peripheralFirmwareDirectory = "/boot/asahi";
+  hardware.asahi.extractPeripheralFirmware = false; # Firmware already extracted on disk
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
