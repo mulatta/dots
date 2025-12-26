@@ -16,12 +16,12 @@
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/System Settings.app"
-      "/Applications/Nix Apps/Claude.app"
-      "/Applications/Nix Apps/Slack.app"
-      "/Applications/Nix Apps/Zen.app"
+      "/Applications/Claude.app"
+      "/Applications/Slack.app"
+      "/Applications/Zen.app"
       "${pkgs.firefox-bin}/Applications/Firefox.app"
       "${pkgs.obsidian}/Applications/Obsidian.app"
-      "/Applications/Nix Apps/Ghostty.app"
+      "/Applications/Ghostty.app"
       "/Applications/KakaoTalk.app"
     ];
   };

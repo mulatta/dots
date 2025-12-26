@@ -1,4 +1,7 @@
+{ self, ... }:
 {
+  nixpkgs.overlays = [ self.overlays.default ];
+
   # this extends srvos's common settings
   nix = {
     gc.automatic = true;

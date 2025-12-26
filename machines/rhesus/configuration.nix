@@ -17,10 +17,8 @@
     self.inputs.srvos.darwinModules.mixins-terminfo
     self.inputs.srvos.darwinModules.mixins-nix-experimental
     self.inputs.sops-nix.darwinModules.sops
-    ../../darwinModules/app-store
     ../../darwinModules/docker.nix
     ../../darwinModules/homebrew.nix
-    ../../darwinModules/nix-casks.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
     ../../darwinModules/sudo.nix
@@ -29,7 +27,7 @@
 
   system.activationScripts.postActivation.text = ''
     # disable spotlight
-    launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist >/dev/null 2>&1 || true
+    # launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist >/dev/null 2>&1 || true
     # disable fseventsd on /nix volume
     mkdir -p /nix/.fseventsd
     test -e /nix/.fseventsd/no_log || touch /nix/.fseventsd/no_log
