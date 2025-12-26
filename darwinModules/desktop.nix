@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   # dock
   system.defaults.dock = {
     autohide = true;
@@ -16,12 +15,12 @@
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/System Settings.app"
-      "/Applications/Claude.app"
-      "/Applications/Slack.app"
-      "${pkgs.code-cursor}/Applications/Cursor.app"
+      "/Applications/Nix Apps/Claude.app"
+      "/Applications/Nix Apps/Slack.app"
+      "/Applications/Nix Apps/Zen.app"
       "${pkgs.firefox-bin}/Applications/Firefox.app"
       "${pkgs.obsidian}/Applications/Obsidian.app"
-      "/Applications/Ghostty.app"
+      "/Applications/Nix Apps/Ghostty.app"
       "/Applications/KakaoTalk.app"
     ];
   };
