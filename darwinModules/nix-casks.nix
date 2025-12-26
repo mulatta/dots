@@ -2,9 +2,11 @@
   self,
   pkgs,
   ...
-}: let
+}:
+let
   cask = self.inputs.nix-casks.packages.${pkgs.stdenv.hostPlatform.system};
-in {
+in
+{
   environment.systemPackages = [
     # keep-sorted start
     cask."1password"
@@ -17,8 +19,8 @@ in {
     cask.raycast
     cask.secretive
     cask.slack
-    cask.zotero
     cask.zen-browser
+    cask.zotero
     # keep-sorted end
   ];
 }
