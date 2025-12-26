@@ -3,10 +3,10 @@
   flake.overlays = {
     default = _final: prev: {
       unstable = import inputs.nixpkgs-unstable {
-        inherit (prev) system;
+        system = prev.stdenv.hostPlatform.system;
         config = prev.config;
       };
-      zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+      zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
     };
   };
 

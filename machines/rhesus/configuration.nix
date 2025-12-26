@@ -39,7 +39,7 @@
   users.users.seungwon.home = "/Users/seungwon";
 
   environment.systemPackages = [
-    self.packages.${pkgs.system}.systemctl-macos
+    self.packages.${pkgs.stdenv.hostPlatform.system}.systemctl-macos
     pkgs.nixos-rebuild
     pkgs.python3
     pkgs.uv
