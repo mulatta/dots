@@ -18,6 +18,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
     nix-casks.inputs.flake-parts.follows = "flake-parts";
     nix-casks.inputs.nixpkgs.follows = "nixpkgs";

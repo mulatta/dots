@@ -11,6 +11,7 @@
     ../modules/fish.nix
     ../modules/git
     ../modules/helix
+    ../modules/llm-agents.nix
     ../modules/modern-unix.nix
     ../modules/nix-utils.nix
     ../modules/packages.nix

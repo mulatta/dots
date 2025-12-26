@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # dock
   system.defaults.dock = {
     autohide = true;
