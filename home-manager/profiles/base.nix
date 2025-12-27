@@ -12,13 +12,21 @@
     ../modules/git
     ../modules/helix
     ../modules/llm-agents.nix
-    ../modules/modern-unix.nix
-    ../modules/nix-utils.nix
     ../modules/packages.nix
     ../modules/starship
     ../modules/xdg.nix
     ../modules/yazi
     ../modules/zellij
+    # CLI tools
+    ../modules/bat.nix
+    ../modules/cli-tools.nix
+    ../modules/eza.nix
+    ../modules/fzf.nix
+    ../modules/zoxide.nix
+    # Nix tools
+    ../modules/nh.nix
+    ../modules/nix-init.nix
+    ../modules/nix-tools.nix
   ];
 
   home = {
