@@ -56,7 +56,6 @@
                 # Profile mapping (hostname -> profile)
                 declare -A profiles=(
                   ["rhesus"]="seungwon@rhesus"
-                  ["mulatta"]="seungwon@mulatta"
                   ["psi"]="seungwon@psi"
                 )
 
@@ -149,12 +148,6 @@
       // lib.optionalAttrs (system == "aarch64-linux") {
         desktop = homeManagerConfiguration {
           extraModules = [ ./profiles/desktop.nix ];
-        };
-        "seungwon@mulatta" = homeManagerConfiguration {
-          extraModules = [
-            ./profiles/desktop.nix
-            ./machines/mulatta.nix
-          ];
         };
       }
       // lib.optionalAttrs (system == "x86_64-linux") {

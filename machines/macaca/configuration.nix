@@ -6,38 +6,62 @@
 }:
 {
   imports = [
-    self.inputs.srvos.nixosModules.common
+    self.inputs.srvos.nixosModules.server
     self.inputs.srvos.nixosModules.mixins-terminfo
     self.inputs.srvos.nixosModules.mixins-nix-experimental
-    self.inputs.sops-nix.nixosModules.sops
+    self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
-    ../../nixosModules/disko-zfs.nix
+    ../../nixosModules/disko-vps.nix
+    ../../nixosModules/zerotier.nix
+    ./modules/network.nix
   ];
+  # sops-nix is managed by clan-core
 
-  # sops-nix requires a key source
-  sops.age.keyFile = "/var/lib/sops-nix/age-keys.txt";
+  # Clan networking - use public IP, change to macaca.i after ZeroTier
+  clan.core.networking.targetHost = "root@64.176.225.253";
 
-  disko.rootDisk = "/dev/disk/by-id/nvme-CT2000P3PSSD8_2327E6EA821A";
+  # Block RFC1918 on ZeroTier to avoid Vultr abuse reports
+  # TODO: Enable after ZeroTier is configured
+  # services.zerotierone.blockRfc1918Addresses = true;
 
-  clan.core.networking.targetHost = lib.mkForce "root@macaca.local";
+  # sops-nix keyFile is managed by clan.core.vars.sops
+
+  # VPS uses /dev/vda
+  disko.rootDisk = "/dev/vda";
 
   networking.hostName = "macaca";
 
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # Use GRUB for VPS (no EFI)
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+  };
 
-  # Configure network connections interactively with nmcli or nmtui.
-  networking.networkmanager.enable = true;
+  # Network: use systemd-networkd (srvos default)
+  # Static IP will be configured via facter.json or manually
+  networking.useDHCP = lib.mkDefault true;
 
   environment.systemPackages = with pkgs; [
-    python3
-    nixos-rebuild
-    parallel
+    vim
+    git
+    htop
   ];
+
+  # Enable fish shell for seungwon user
+  programs.fish.enable = true;
+
+  # Enable SSH
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "prohibit-password";
+      PasswordAuthentication = false;
+    };
+  };
 
   srvos.flake = self;
 
