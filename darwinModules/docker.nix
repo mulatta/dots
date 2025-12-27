@@ -1,4 +1,16 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
+let
+  dockerContextScript = pkgs.writeShellScript "set-docker-context" ''
+    # Wait for colima context to be available (max 30s)
+    for i in {1..30}; do
+      if ${pkgs.docker}/bin/docker context inspect colima &> /dev/null; then
+        ${pkgs.docker}/bin/docker context use colima &> /dev/null
+        exit 0
+      fi
+      sleep 1
+    done
+  '';
+in
 {
   environment.systemPackages = with pkgs; [
     docker
@@ -23,6 +35,19 @@
       RunAtLoad = true;
       StandardOutPath = "/tmp/colima.stdout.log";
       StandardErrorPath = "/tmp/colima.stderr.log";
+    };
+  };
+
+  # Set docker context when colima socket is created
+  launchd.user.agents.docker-context = {
+    serviceConfig = {
+      ProgramArguments = [ "${dockerContextScript}" ];
+      WatchPaths = [
+        "${config.users.users.${config.system.primaryUser}.home}/.config/colima/default/docker.sock"
+      ];
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/docker-context.stdout.log";
+      StandardErrorPath = "/tmp/docker-context.stderr.log";
     };
   };
 }
