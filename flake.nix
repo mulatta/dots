@@ -56,7 +56,6 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
       imports = [
-        ./apps/flake-module.nix
         ./checks/flake-module.nix
         ./formatter/flake-module.nix
         ./home-manager/flake-module.nix
