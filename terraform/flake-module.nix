@@ -1,4 +1,3 @@
-# https://github.com/nix-community/infra/tree/e25c9f72a56641d5b4646d2711e59ccc63e171b8/dev/terraform.nix
 {
   perSystem =
     {
@@ -11,17 +10,25 @@
         packages = [
           pkgs.sops
           pkgs.terragrunt
+          pkgs.hurl
+          pkgs.jq
+          pkgs.yq-go
+          pkgs.just
+          pkgs.awscli2
+          pkgs.jtbl
+          pkgs.glow
           config.packages.terraform
         ];
       };
 
-      # Provider names were renamed in nixpkgs 25.11
       packages.terraform = pkgs.opentofu.withPlugins (p: [
+        p.cloudflare_cloudflare
         p.integrations_github
         p.gitlabhq_gitlab
         p.vultr_vultr
         p.carlpett_sops
         p.hashicorp_local
+        p.hashicorp_null
       ]);
 
       packages.terraform-validate =

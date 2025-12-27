@@ -1,0 +1,137 @@
+set shell := ["bash", "-euo", "pipefail", "-c"]
+scripts_dir := justfile_directory() / "scripts"
+
+# Show available commands
+_default:
+    @just --list
+
+# Check API keys status and expiration [provider] [--json]
+expire *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    json_out=false; [[ "{{args}}" == *"--json"* ]] && json_out=true
+    provider=$(echo "{{args}}" | sed 's/--json//g' | xargs)
+
+    fetch_cf() {
+        local r=$({{scripts_dir}}/run expire/cloudflare.hurl)
+        echo "$r" | jq '{provider:"cloudflare", status:(if .status_code==200 then "active" else "error" end), expires:((.response.result.expires_on // null) | if . then .[0:10] else "never" end)}'
+    }
+    fetch_gh() {
+        local r=$({{scripts_dir}}/run expire/github.hurl)
+        echo "$r" | jq '{provider:"github", status:(if .status_code==200 then "active" else "error" end), expires:((.expires // null) | if . then (split(" ")[0]) else "oauth" end)}'
+    }
+    fetch_gl() {
+        local r=$({{scripts_dir}}/run expire/gitlab.hurl)
+        echo "$r" | jq '{provider:"gitlab", status:(if .status_code==200 then "active" else "error" end), expires:(.response.expires_at // "never")}'
+    }
+    fetch_vt() {
+        local r=$({{scripts_dir}}/run expire/vultr.hurl)
+        local ok=$(echo "$r" | jq -r 'if .status_code==200 then "active" else "error" end')
+        local exp="-"
+        if [[ "$ok" == "active" ]]; then
+            local token=$(sops -d --extract '["VULTR_API"]' {{justfile_directory()}}/secrets.yaml)
+            local uid=$(curl -s "https://api.vultr.com/v2/users" -H "Authorization: Bearer $token" | jq -r '.users[0].id // empty')
+            [[ -n "$uid" ]] && exp=$(curl -s "https://api.vultr.com/v2/users/$uid/apikeys" -H "Authorization: Bearer $token" | jq -r '(.api_keys[0].date_expire // null) | if . then .[0:10] else "-" end')
+        fi
+        jq -n --arg ok "$ok" --arg exp "$exp" '{provider:"vultr", status:$ok, expires:$exp}'
+    }
+    fetch_aws() {
+        local r=$(aws sts get-caller-identity 2>&1) || true
+        if echo "$r" | jq -e '.Account' &>/dev/null; then
+            jq -n '{provider:"aws", status:"active", expires:"rotate"}'
+        else
+            jq -n '{provider:"aws", status:"error", expires:"-"}'
+        fi
+    }
+
+    results=()
+    case "$provider" in
+        cloudflare|cf) results+=("$(fetch_cf)") ;;
+        github|gh)     results+=("$(fetch_gh)") ;;
+        gitlab|gl)     results+=("$(fetch_gl)") ;;
+        vultr|vt)      results+=("$(fetch_vt)") ;;
+        aws)           results+=("$(fetch_aws)") ;;
+        "")            results+=("$(fetch_cf)" "$(fetch_gh)" "$(fetch_gl)" "$(fetch_vt)" "$(fetch_aws)") ;;
+        *) echo "Unknown: $provider. Use: cloudflare|github|gitlab|vultr|aws" >&2; exit 1 ;;
+    esac
+
+    if $json_out; then
+        printf '%s\n' "${results[@]}" | jq -s '.'
+    else
+        printf '%s\n' "${results[@]}" | jq -s '.' | jtbl -f
+    fi
+
+# Get billing/usage info [provider] [--json]
+billing *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    json_out=false; [[ "{{args}}" == *"--json"* ]] && json_out=true
+    provider=$(echo "{{args}}" | sed 's/--json//g' | xargs)
+
+    fetch_cf() {
+        local token=$(sops -d --extract '["CLOUDFLARE_API_TOKEN"]' {{justfile_directory()}}/secrets.yaml)
+        local accounts=$(curl -s "https://api.cloudflare.com/client/v4/accounts" -H "Authorization: Bearer $token")
+        local account_id=$(echo "$accounts" | jq -r '.result[0].id // empty')
+        if [[ -n "$account_id" ]]; then
+            # Get all buckets and their usage
+            local buckets=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$account_id/r2/buckets" -H "Authorization: Bearer $token")
+            local total_storage=0
+            for bucket in $(echo "$buckets" | jq -r '.result[]?.name // empty'); do
+                local usage=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$account_id/r2/buckets/$bucket/usage" -H "Authorization: Bearer $token")
+                local size=$(echo "$usage" | jq -r '.result.payloadSize // 0')
+                total_storage=$((total_storage + size))
+            done
+            # Calculate cost: $0.015/GB/month, convert bytes to GB
+            local gb=$(echo "scale=2; $total_storage / 1073741824" | bc)
+            local cost=$(echo "scale=4; $gb * 0.015" | bc)
+            jq -n --arg storage "${gb} GB" --arg cost "\$${cost}" '{provider:"cloudflare", balance:"-", pending:$cost, note:$storage}'
+        else
+            jq -n '{provider:"cloudflare", balance:"-", pending:"-", note:"no account"}'
+        fi
+    }
+    fetch_vt() {
+        local r=$({{scripts_dir}}/run get/vultr.hurl)
+        echo "$r" | jq '{provider:"vultr", balance:"$\(.response.account.balance)", pending:"$\(.response.account.pending_charges)", note:"-"}'
+    }
+    fetch_aws() {
+        local start=$(date -u +%Y-%m-01)
+        local end=$(date -u +%Y-%m-%d)
+        local r=$(aws ce get-cost-and-usage \
+            --time-period Start="$start",End="$end" \
+            --granularity MONTHLY \
+            --metrics UnblendedCost 2>&1) || true
+        if echo "$r" | jq -e '.ResultsByTime' &>/dev/null; then
+            local cost=$(echo "$r" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Amount // "0"')
+            jq -n --arg cost "\$${cost}" '{provider:"aws", balance:"-", pending:$cost, note:"MTD"}'
+        else
+            jq -n '{provider:"aws", balance:"-", pending:"-", note:"no permission"}'
+        fi
+    }
+
+    results=()
+    case "$provider" in
+        cloudflare|cf) results+=("$(fetch_cf)") ;;
+        vultr|vt)      results+=("$(fetch_vt)") ;;
+        aws)           results+=("$(fetch_aws)") ;;
+        "")            results+=("$(fetch_vt)" "$(fetch_aws)" "$(fetch_cf)") ;;
+        *) echo "Unknown: $provider. Use: cloudflare|vultr|aws" >&2; exit 1 ;;
+    esac
+
+    if $json_out; then
+        printf '%s\n' "${results[@]}" | jq -s '.'
+    else
+        printf '%s\n' "${results[@]}" | jq -s '.' | jtbl -f
+    fi
+
+# Show token refresh instructions (cloudflare|github|gitlab|vultr|aws)
+refresh provider:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{provider}}" in
+        cloudflare|cf) glow "{{scripts_dir}}/docs/cloudflare.md" ;;
+        github|gh)     glow "{{scripts_dir}}/docs/github.md" ;;
+        gitlab|gl)     glow "{{scripts_dir}}/docs/gitlab.md" ;;
+        vultr|vt)      glow "{{scripts_dir}}/docs/vultr.md" ;;
+        aws)           glow "{{scripts_dir}}/docs/aws.md" ;;
+        *) echo "Unknown: {{provider}}. Use: cloudflare|github|gitlab|vultr|aws" >&2; exit 1 ;;
+    esac

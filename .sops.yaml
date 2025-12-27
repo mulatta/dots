@@ -1,0 +1,32 @@
+keys:
+  # Machines
+  - &rhesus age1axh7747a46nm8x6l42nalaptf6xh7q9t9z8qlwrwqg4xc89leqjsaaeu6r
+  - &mulatta age1k46ehpwmt657emehm77hzrteladez2fcf66ypr2vqpgaulx979qqfy853x
+  - &macaca age1guq4nu7v4gx03qzhj6juumwvy98qnhn0uk722ur5ueaekczvrutqqcnwnh
+  # Users
+  - &seungwon age1axh7747a46nm8x6l42nalaptf6xh7q9t9z8qlwrwqg4xc89leqjsaaeu6r
+creation_rules:
+  # Terraform secrets
+  - path_regex: terraform/secrets\.yaml
+    key_groups:
+      - age:
+          - *seungwon
+  # clan secrets (vars/)
+  - path_regex: vars/per-machine/rhesus/.*
+    key_groups:
+      - age:
+          - *rhesus
+  - path_regex: vars/per-machine/mulatta/.*
+    key_groups:
+      - age:
+          - *mulatta
+  - path_regex: vars/per-machine/macaca/.*
+    key_groups:
+      - age:
+          - *macaca
+  # Shared secrets (sops/secrets/) - accessible from dev machine
+  - path_regex: sops/secrets/.*/secret
+    key_groups:
+      - age:
+          - *seungwon
+          - *rhesus

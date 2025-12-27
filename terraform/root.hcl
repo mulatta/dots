@@ -1,30 +1,19 @@
 locals {
-  gitlab_project_id = "74242347"
+  aws_region = get_env("AWS_REGION", "ap-northeast-2")
 }
 
 remote_state {
-  backend = "http"
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
   config = {
-    address        = "https://gitlab.com/api/v4/projects/${local.gitlab_project_id}/terraform/state/${path_relative_to_include()}"
-    lock_address   = "https://gitlab.com/api/v4/projects/${local.gitlab_project_id}/terraform/state/${path_relative_to_include()}/lock"
-    unlock_address = "https://gitlab.com/api/v4/projects/${local.gitlab_project_id}/terraform/state/${path_relative_to_include()}/lock"
-    username       = "mulatta"
-    lock_method    = "POST"
-    unlock_method  = "DELETE"
-  }
-}
-
-terraform {
-  before_hook "reset old terraform state" {
-    commands = ["init"]
-    execute  = ["rm", "-f", ".terraform.lock.hcl"]
-  }
-
-  extra_arguments "backend_auth" {
-    commands = ["init"]
-    arguments = [
-      "-backend-config=password=${get_env("GITLAB_TOKEN")}"
-    ]
+    bucket         = "mulatta-dots-tfstate"
+    key            = "${path_relative_to_include()}/terraform.tfstate"
+    region         = local.aws_region
+    encrypt        = true
+    dynamodb_table = "dots-terraform-locks"
   }
 }
 
@@ -35,12 +24,24 @@ generate "terraform" {
   contents  = <<EOF
 terraform {
   required_providers {
-    github = { source = "integrations/github" }
-    gitlab = { source = "gitlabhq/gitlab" }
-    sops   = { source = "carlpett/sops" }
+    github     = { source = "integrations/github" }
+    gitlab     = { source = "gitlabhq/gitlab" }
+    cloudflare = { source = "cloudflare/cloudflare" }
+    vultr      = { source = "vultr/vultr" }
+    sops       = { source = "carlpett/sops" }
+    local      = { source = "hashicorp/local" }
+    null       = { source = "hashicorp/null" }
   }
+}
+EOF
+}
 
-  backend "http" {}
+generate "secrets" {
+  path      = "secrets.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+data "sops_file" "secrets" {
+  source_file = "${get_parent_terragrunt_dir()}/secrets.yaml"
 }
 EOF
 }

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Usage: ./run <hurl-file> [extra-vars]
+# Always outputs JSON. Formatting handled by caller.
+
+set -euo pipefail
+cd "$(dirname "$0")"
+
+hurl_file="$1"
+extra_vars="${2:-}"
+
+tmp=$(mktemp) && trap "rm -f $tmp" EXIT
+sops -d --output-type dotenv ../secrets.yaml > "$tmp"
+[[ -n "$extra_vars" ]] && echo "$extra_vars" >> "$tmp"
+
+# Parse captures + extract expiration header for GitHub
+parse='
+  (.entries[0].captures | map({(.name): .value}) | add) as $captures |
+  (.entries[0].calls[0].response.headers // [] | map(select(.name == "github-authentication-token-expiration")) | .[0].value // null) as $gh_expires |
+  $captures |
+  if .response then .response |= fromjson else . end |
+  if $gh_expires then . + {expires: $gh_expires} else . end
+'
+(hurl --json --continue-on-error --variables-file "$tmp" "$hurl_file" 2>/dev/null || true) | jq "$parse"
