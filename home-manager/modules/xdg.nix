@@ -1,4 +1,3 @@
-{ ... }:
 {
   xdg.enable = true;
 }

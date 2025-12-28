@@ -44,7 +44,6 @@
     "raycast"
     "secretive"
     "slack"
-    "tailscale-app"
     "zen"
     "zoom"
     "zotero"
