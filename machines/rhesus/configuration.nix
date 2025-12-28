@@ -33,7 +33,8 @@
     test -e /nix/.fseventsd/no_log || touch /nix/.fseventsd/no_log
   '';
 
-  sops.age.keyFile = "/Library/Application Support/sops-nix/age-keys.txt";
+  # Use user's existing age key for sops-nix
+  sops.age.keyFile = "/Users/seungwon/.config/sops/age/keys.txt";
 
   users.users.seungwon.home = "/Users/seungwon";
 
