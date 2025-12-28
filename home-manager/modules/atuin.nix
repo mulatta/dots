@@ -1,4 +1,9 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   socketPath = "${config.home.homeDirectory}/.local/share/atuin/daemon.sock";
 in
@@ -9,11 +14,13 @@ in
     flags = [ "--disable-up-arrow" ];
     enableZshIntegration = true;
     enableFishIntegration = true;
-    daemon.enable = false; # We manage it ourselves
+    daemon.enable = false;
+    settings = {
+      sync_address = "http://macaca.x:58888";
+    };
   };
 
-  # Custom launchd agent with socket cleanup
-  launchd.agents.atuin-daemon = {
+  launchd.agents.atuin-daemon = lib.mkIf pkgs.stdenv.isDarwin {
     enable = true;
     config = {
       Label = "com.atuin.daemon";

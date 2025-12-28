@@ -13,6 +13,7 @@
     ../../nixosModules/users.nix
     ../../nixosModules/disko-vps.nix
     ../../nixosModules/zerotier.nix
+    ../../nixosModules/atuin-server.nix
     ./modules/network.nix
   ];
   # sops-nix is managed by clan-core
