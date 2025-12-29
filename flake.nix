@@ -61,12 +61,14 @@
         ./home-manager/flake-module.nix
         ./overlays/flake-module.nix
         ./machines/flake-module.nix
-        ./modules/flake-module.nix
         ./packages/flake-module.nix
         ./shells/flake-module.nix
         ./terraform/flake-module.nix
         inputs.clan-core.flakeModules.default
         inputs.home-manager.flakeModules.home-manager
       ];
+
+      flake.nixosModules.imports = [ ./nixosModules ];
+      flake.darwinModules.imports = [ ./darwinModules ];
     };
 }
