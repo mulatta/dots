@@ -3,7 +3,7 @@
   networking = {
     useDHCP = false;
 
-    interfaces.eth0 = {
+    interfaces.enp1s0 = {
       useDHCP = false;
       ipv4.addresses = [
         {
@@ -13,7 +13,10 @@
       ];
     };
 
-    defaultGateway = "10.80.169.254";
+    defaultGateway = {
+      address = "10.80.169.254";
+      interface = "enp1s0";
+    };
 
     nameservers = [
       "117.16.191.6"

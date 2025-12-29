@@ -16,9 +16,6 @@
 
   clan.core.networking.targetHost = "root@10.80.169.67";
 
-  # ZFS requires hostId
-  networking.hostId = "a1b2c3d4"; # TODO: Generate unique ID on target machine
-
   # Disk configuration
   disko.rootDisk = "/dev/nvme0n1";
 
@@ -32,8 +29,7 @@
 
   environment.systemPackages = with pkgs; [
     vim
-    git
-    htop
+    btop
   ];
 
   programs.fish.enable = true;

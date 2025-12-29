@@ -12,6 +12,7 @@
           inputs'.clan-core.packages.clan-app
           pkgs.sops
           pkgs.ssh-to-age
+          pkgs.age
         ];
       };
     };

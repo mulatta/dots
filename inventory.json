@@ -2,6 +2,9 @@
   "machines": {
     "macaca": {
       "installedAt": 1766933741
+    },
+    "malt": {
+      "installedAt": 1767060458
     }
   }
 }
