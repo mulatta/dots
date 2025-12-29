@@ -16,6 +16,7 @@
 
       machines.rhesus.machineClass = "darwin";
       machines.macaca.machineClass = "nixos";
+      machines.malt.machineClass = "nixos";
       # machines.mulatta.machineClass = "nixos"; # TODO: Enable when ready
 
       instances = {
