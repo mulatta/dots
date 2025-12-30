@@ -74,6 +74,9 @@
               "local" # mDNS/Bonjour
             ];
           };
+          roles.client.extraModules = [
+            ../nixosModules/ssh.nix
+          ];
         };
       };
     };

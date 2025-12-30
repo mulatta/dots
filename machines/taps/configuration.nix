@@ -12,13 +12,14 @@
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
-    ../../nixosModules/sshd.nix
     ../../nixosModules/auditd.nix
+    ./modules/sshd.nix # VPS hardening + fail2ban
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/auto-upgrade.nix
     ./modules/disko-vps.nix
     ./modules/atuin-server.nix
     ./modules/network.nix
+    ./modules/step-ca.nix
   ];
   # sops-nix is managed by clan-core
 
