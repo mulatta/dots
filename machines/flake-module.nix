@@ -16,12 +16,14 @@
 
       machines.rhesus.machineClass = "darwin";
       machines.macaca.machineClass = "nixos";
+      machines.malt.machineClass = "nixos";
       # machines.mulatta.machineClass = "nixos"; # TODO: Enable when ready
 
       instances = {
         # Emergency/admin access
         admin = {
           roles.default.machines.macaca = { };
+          roles.default.machines.malt = { };
           roles.default.settings = {
             allowedKeys = {
               seungwon = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL";

@@ -11,8 +11,13 @@
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
-    ../../nixosModules/disko-vps.nix
     ../../nixosModules/zerotier.nix
+    ../../nixosModules/sshd.nix
+    ../../nixosModules/auditd.nix
+    ../../nixosModules/kernel-hardening.nix
+    ../../nixosModules/auto-upgrade.nix
+    ./modules/disko-vps.nix
+    ./modules/atuin-server.nix
     ./modules/network.nix
   ];
   # sops-nix is managed by clan-core
@@ -51,17 +56,7 @@
     htop
   ];
 
-  # Enable fish shell for seungwon user
   programs.fish.enable = true;
-
-  # Enable SSH
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "prohibit-password";
-      PasswordAuthentication = false;
-    };
-  };
 
   srvos.flake = self;
 
