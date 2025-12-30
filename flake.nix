@@ -29,6 +29,7 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     nix-index-database.url = "github:nix-community/nix-index-database";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nur.inputs.flake-parts.follows = "flake-parts";
