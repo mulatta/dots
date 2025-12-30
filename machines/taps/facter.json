@@ -3174,7 +3174,7 @@
           "bhi",
           "its"
         ],
-        "bogo": 5786.34,
+        "bogo": 5985.93,
         "cache": 16384,
         "units": 2,
         "physical_id": 0,
@@ -3543,7 +3543,7 @@
           {
             "type": "mem",
             "base": 0,
-            "range": 4095012864,
+            "range": 4095070208,
             "enabled": true,
             "access": "read_write",
             "prefetch": "unknown"
@@ -3881,6 +3881,29 @@
     "network_interface": [
       {
         "index": 62,
+        "attached_to": 0,
+        "class_list": [
+          "network_interface"
+        ],
+        "base_class": {
+          "hex": "0107",
+          "name": "Network Interface",
+          "value": 263
+        },
+        "sub_class": {
+          "hex": "0000",
+          "name": "Loopback",
+          "value": 0
+        },
+        "model": "Loopback network interface",
+        "sysfs_id": "/class/net/lo",
+        "unix_device_name": "lo",
+        "unix_device_names": [
+          "lo"
+        ]
+      },
+      {
+        "index": 63,
         "attached_to": 54,
         "class_list": [
           "network_interface"
@@ -3919,29 +3942,6 @@
         ],
         "driver_modules": [
           "virtio_net"
-        ]
-      },
-      {
-        "index": 63,
-        "attached_to": 0,
-        "class_list": [
-          "network_interface"
-        ],
-        "base_class": {
-          "hex": "0107",
-          "name": "Network Interface",
-          "value": 263
-        },
-        "sub_class": {
-          "hex": "0000",
-          "name": "Loopback",
-          "value": 0
-        },
-        "model": "Loopback network interface",
-        "sysfs_id": "/class/net/lo",
-        "unix_device_name": "lo",
-        "unix_device_names": [
-          "lo"
         ]
       }
     ],

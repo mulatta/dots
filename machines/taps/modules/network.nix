@@ -1,6 +1,6 @@
 { ... }:
 {
-  # macaca is a VPS with public IP
+  # taps is a VPS with public IP
   # WireGuard controller configuration
 
   config = {

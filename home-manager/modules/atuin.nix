@@ -16,7 +16,7 @@ in
     enableFishIntegration = true;
     daemon.enable = false;
     settings = {
-      sync_address = "http://macaca.x:58888";
+      sync_address = "http://taps.x:58888";
     };
   };
 
