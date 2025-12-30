@@ -7,29 +7,17 @@ let
   domain = "ca.x"; # WireGuard mesh domain
 in
 {
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "seungwon.letsencrypt@mulatta.io";
-    certs.${domain}.server = "https://${domain}:1443/acme/acme/directory";
-  };
+  # Use internal step-ca ACME for ca.x domain
+  security.acme.certs.${domain}.server = "https://${domain}:1443/acme/acme/directory";
 
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-  ];
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    virtualHosts.${domain} = {
-      addSSL = true;
-      enableACME = true;
-      locations."/" = {
-        proxyPass = "https://localhost:1443";
-      };
-      locations."= /ca.crt".alias =
-        config.clan.core.vars.generators.step-intermediate-cert.files."intermediate.crt".path;
+  services.nginx.virtualHosts.${domain} = {
+    addSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "https://localhost:1443";
     };
+    locations."= /ca.crt".alias =
+      config.clan.core.vars.generators.step-intermediate-cert.files."intermediate.crt".path;
   };
 
   clan.core.vars.generators = {

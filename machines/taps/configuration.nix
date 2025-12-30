@@ -19,7 +19,9 @@
     ./modules/disko-vps.nix
     ./modules/atuin-server.nix
     ./modules/network.nix
+    ./modules/nginx
     ./modules/step-ca.nix
+    ./modules/vaultwarden.nix
   ];
   # sops-nix is managed by clan-core
 
