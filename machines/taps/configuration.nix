@@ -25,6 +25,7 @@
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix
+    ./modules/vaultwarden.nix
   ];
 
   clan.core.networking.targetHost = "root@64.176.225.253";
@@ -38,6 +39,7 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [ self.overlays.default ];
 
   boot.loader.grub = {
     enable = true;
