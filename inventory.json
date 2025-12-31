@@ -2,6 +2,9 @@
   "machines": {
     "malt": {
       "installedAt": 1767060458
+    },
+    "pint": {
+      "installedAt": 1767200523
     }
   }
 }
