@@ -22,6 +22,7 @@
     ../modules/cli-tools.nix
     ../modules/eza.nix
     ../modules/fzf.nix
+    ../modules/rbw.nix
     ../modules/zoxide.nix
     # Nix tools
     ../modules/nh.nix
