@@ -10,6 +10,7 @@
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
+    ../../nixosModules/zerotier.nix
     ../../nixosModules/disko-zfs.nix
     ./modules/network.nix
   ];

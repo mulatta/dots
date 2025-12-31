@@ -29,15 +29,6 @@
           };
         };
 
-        # ZeroTier VPN - taps as controller
-        # TODO: Enable after taps is deployed (network ID generated on first run)
-        # zerotier = {
-        #   module.name = "zerotier";
-        #   module.input = "clan-core";
-        #   roles.controller.machines.taps = { };
-        #   roles.peer.tags.nixos = { };
-        # };
-
         # WireGuard VPN - taps as controller
         wireguard = {
           module.name = "wireguard";

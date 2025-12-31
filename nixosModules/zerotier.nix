@@ -1,4 +1,8 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 {
   options.services.zerotierone.blockRfc1918Addresses = lib.mkOption {
     type = lib.types.bool;
@@ -10,11 +14,24 @@
     '';
   };
 
-  config = lib.mkIf config.services.zerotierone.blockRfc1918Addresses {
-    systemd.services.zerotierone.serviceConfig.IPAddressDeny = [
-      "10.0.0.0/8"
-      "172.16.0.0/12"
-      "192.168.0.0/16"
-    ];
+  config = {
+    services.zerotierone.enable = true;
+
+    # Block RFC1918 addresses if enabled
+    systemd.services.zerotierone.serviceConfig.IPAddressDeny =
+      lib.mkIf config.services.zerotierone.blockRfc1918Addresses
+        [
+          "10.0.0.0/8"
+          "172.16.0.0/12"
+          "192.168.0.0/16"
+        ];
+
+    # ZeroTier local configuration
+    # Prevent ZeroTier from using WireGuard interface for peer discovery
+    services.zerotierone.localConf.settings = {
+      interfacePrefixBlacklist = [
+        "wireguard" # clan wireguard mesh
+      ];
+    };
   };
 }
