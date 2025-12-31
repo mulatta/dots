@@ -37,7 +37,9 @@
           roles.moon.machines.taps.settings = {
             stableEndpoints = [ "64.176.225.253" ];
           };
-          roles.peer.tags.all = { };
+          roles.peer.tags.nixos = { };
+          # Darwin machines need explicit peer role (not in nixos tag)
+          roles.peer.machines.rhesus = { };
         };
 
         # WireGuard VPN - taps as controller
