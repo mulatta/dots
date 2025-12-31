@@ -12,6 +12,7 @@
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
+    ../../nixosModules/dns-client.nix
     ./modules/disko-sd.nix
     ./modules/network.nix
   ];
