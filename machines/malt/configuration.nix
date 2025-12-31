@@ -16,7 +16,8 @@
     ./modules/network.nix
   ];
 
-  clan.core.networking.targetHost = "root@10.80.169.67";
+  # Use WireGuard .x domain for clan connectivity
+  clan.core.networking.targetHost = "root@malt.x";
 
   # Disk configuration
   disko.rootDisk = "/dev/nvme0n1";

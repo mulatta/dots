@@ -5,7 +5,8 @@
   ...
 }:
 {
-  clan.core.networking.targetHost = lib.mkForce "root@rhesus.local";
+  # Use WireGuard .x domain for clan connectivity (mkForce to override defaults)
+  clan.core.networking.targetHost = lib.mkForce "root@rhesus.x";
   system.primaryUser = "seungwon";
 
   networking.hostName = "rhesus";
