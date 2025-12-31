@@ -7,11 +7,7 @@ let
   domain = "ca.x"; # WireGuard mesh domain
 in
 {
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "seungwon.letsencrypt@mulatta.io";
-    certs.${domain}.server = "https://${domain}:1443/acme/acme/directory";
-  };
+  security.acme.certs.${domain}.server = "https://${domain}:1443/acme/acme/directory";
 
   networking.firewall.allowedTCPPorts = [
     80
