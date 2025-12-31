@@ -29,6 +29,17 @@
           };
         };
 
+        # ZeroTier VPN - taps as controller
+        zerotier = {
+          module.name = "zerotier";
+          module.input = "clan-core";
+          roles.controller.machines.taps = { };
+          roles.moon.machines.taps.settings = {
+            stableEndpoints = [ "64.176.225.253" ];
+          };
+          roles.peer.tags.all = { };
+        };
+
         # WireGuard VPN - taps as controller
         wireguard = {
           module.name = "wireguard";
