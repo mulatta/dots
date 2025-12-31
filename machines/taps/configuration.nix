@@ -20,6 +20,7 @@
     ./modules/atuin-server.nix
     ./modules/network.nix
     ./modules/step-ca.nix
+    ./modules/coredns.nix
   ];
   # sops-nix is managed by clan-core
 
