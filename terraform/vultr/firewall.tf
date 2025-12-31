@@ -1,9 +1,9 @@
-resource "vultr_firewall_group" "macaca" {
-  description = "Firewall rules for macaca"
+resource "vultr_firewall_group" "taps" {
+  description = "Firewall rules for taps"
 }
 
 resource "vultr_firewall_rule" "ssh" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "tcp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -13,7 +13,7 @@ resource "vultr_firewall_rule" "ssh" {
 }
 
 resource "vultr_firewall_rule" "http" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "tcp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -23,7 +23,7 @@ resource "vultr_firewall_rule" "http" {
 }
 
 resource "vultr_firewall_rule" "https" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "tcp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -33,7 +33,7 @@ resource "vultr_firewall_rule" "https" {
 }
 
 resource "vultr_firewall_rule" "wireguard_mgnt" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "udp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -43,7 +43,7 @@ resource "vultr_firewall_rule" "wireguard_mgnt" {
 }
 
 resource "vultr_firewall_rule" "wireguard_serv" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "udp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -53,7 +53,7 @@ resource "vultr_firewall_rule" "wireguard_serv" {
 }
 
 resource "vultr_firewall_rule" "zerotier" {
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "udp"
   ip_type           = "v4"
   subnet            = "0.0.0.0"
@@ -63,10 +63,10 @@ resource "vultr_firewall_rule" "zerotier" {
 }
 
 output "firewall_info" {
-  description = "Firewall configuration dmacacails"
+  description = "Firewall configuration dtapsils"
   value = {
-    firewall_group_id   = vultr_firewall_group.macaca.id
-    description         = vultr_firewall_group.macaca.description
-    applied_to_instance = vultr_instance.macaca.id
+    firewall_group_id   = vultr_firewall_group.taps.id
+    description         = vultr_firewall_group.taps.description
+    applied_to_instance = vultr_instance.taps.id
   }
 }

@@ -11,19 +11,19 @@
           # All NixOS machines (excludes Darwin and mulatta for now)
           nixos = builtins.filter (name: name != "rhesus" && name != "mulatta") config.all;
           # WireGuard peers (excludes controller and mulatta)
-          wireguard-peers = builtins.filter (name: name != "macaca" && name != "mulatta") config.all;
+          wireguard-peers = builtins.filter (name: name != "taps" && name != "mulatta") config.all;
         };
 
       machines.rhesus.machineClass = "darwin";
-      machines.macaca.machineClass = "nixos";
       machines.malt.machineClass = "nixos";
+      machines.taps.machineClass = "nixos";
       # machines.mulatta.machineClass = "nixos"; # TODO: Enable when ready
 
       instances = {
         # Emergency/admin access
         admin = {
-          roles.default.machines.macaca = { };
           roles.default.machines.malt = { };
+          roles.default.machines.taps = { };
           roles.default.settings = {
             allowedKeys = {
               seungwon = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL";
@@ -31,16 +31,16 @@
           };
         };
 
-        # ZeroTier VPN - macaca as controller
-        # TODO: Enable after macaca is deployed (network ID generated on first run)
+        # ZeroTier VPN - taps as controller
+        # TODO: Enable after taps is deployed (network ID generated on first run)
         # zerotier = {
         #   module.name = "zerotier";
         #   module.input = "clan-core";
-        #   roles.controller.machines.macaca = { };
+        #   roles.controller.machines.taps = { };
         #   roles.peer.tags.nixos = { };
         # };
 
-        # WireGuard VPN - macaca as controller
+        # WireGuard VPN - taps as controller
         wireguard = {
           module.name = "wireguard";
           module.input = "clan-core";
@@ -49,8 +49,8 @@
           roles.controller.settings.domain = "x";
           roles.peer.settings.domain = "x";
 
-          # macaca is the controller with public endpoint
-          roles.controller.machines.macaca = {
+          # taps is the controller with public endpoint
+          roles.controller.machines.taps = {
             settings = {
               endpoint = "64.176.225.253";
               port = 51820;
@@ -74,6 +74,9 @@
               "local" # mDNS/Bonjour
             ];
           };
+          roles.client.extraModules = [
+            ../nixosModules/ssh.nix
+          ];
         };
       };
     };

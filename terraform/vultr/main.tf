@@ -12,23 +12,23 @@ data "vultr_plan" "selected" {
   }
 }
 
-resource "vultr_ssh_key" "macaca" {
+resource "vultr_ssh_key" "taps" {
   name    = "${var.hostname}-ssh-key"
   ssh_key = file(var.ssh_public_key_path)
 }
 
 # Main instance resource
-# Provision with Ubuntu, then use: clan machines install macaca --target-host root@<IP>
-resource "vultr_instance" "macaca" {
+# Provision with Ubuntu, then use: clan machines install taps --target-host root@<IP>
+resource "vultr_instance" "taps" {
   hostname = var.hostname
   region   = data.vultr_region.selected.id
   plan     = data.vultr_plan.selected.id
   os_id    = 1743 # Ubuntu 22.04 LTS x64
 
-  ssh_key_ids = [vultr_ssh_key.macaca.id]
+  ssh_key_ids = [vultr_ssh_key.taps.id]
 
   enable_ipv6 = false
   backups     = "disabled"
 
-  firewall_group_id = vultr_firewall_group.macaca.id
+  firewall_group_id = vultr_firewall_group.taps.id
 }

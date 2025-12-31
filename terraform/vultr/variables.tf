@@ -12,7 +12,7 @@ variable "plan" {
 variable "hostname" {
   description = "NixOS hostname"
   type        = string
-  default     = "macaca"
+  default     = "taps"
 }
 
 variable "ssh_public_key_path" {
