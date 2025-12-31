@@ -21,9 +21,9 @@
 
   homebrew.casks = [
     # keep-sorted start
-    "1password"
     "aldente"
     "alt-tab"
+    "bitwarden"
     "claude"
     "cleanshot"
     "devonthink"
