@@ -11,6 +11,7 @@
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/users.nix
+    ../../nixosModules/zerotier.nix
     ./modules/disko-sd.nix
     ./modules/network.nix
   ];
