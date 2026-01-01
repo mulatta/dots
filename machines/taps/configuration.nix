@@ -27,8 +27,7 @@
   clan.core.networking.targetHost = "root@64.176.225.253";
 
   # Block RFC1918 on ZeroTier to avoid Vultr abuse reports
-  # TODO: Enable after ZeroTier is configured
-  # services.zerotierone.blockRfc1918Addresses = true;
+  services.zerotierone.blockRfc1918Addresses = true;
 
   # sops-nix keyFile is managed by clan.core.vars.sops
 

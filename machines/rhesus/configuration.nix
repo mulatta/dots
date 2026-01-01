@@ -24,7 +24,14 @@
     ../../darwinModules/nix-index.nix
     ../../darwinModules/sudo.nix
     ../../darwinModules/desktop.nix
+    ../../darwinModules/zerotier.nix
   ];
+
+  # ZeroTier VPN
+  services.zerotierone = {
+    enable = true;
+    joinNetworks = [ "82ae67e3be75f405" ];
+  };
 
   system.activationScripts.postActivation.text = ''
     # disable spotlight

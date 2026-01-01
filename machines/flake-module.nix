@@ -30,13 +30,17 @@
         };
 
         # ZeroTier VPN - taps as controller
-        # TODO: Enable after taps is deployed (network ID generated on first run)
-        # zerotier = {
-        #   module.name = "zerotier";
-        #   module.input = "clan-core";
-        #   roles.controller.machines.taps = { };
-        #   roles.peer.tags.nixos = { };
-        # };
+        zerotier = {
+          module.name = "zerotier";
+          module.input = "clan-core";
+          roles.controller.machines.taps = { };
+          roles.moon.machines.taps.settings = {
+            stableEndpoints = [ "64.176.225.253" ];
+          };
+          roles.peer.tags.nixos = { };
+          # Darwin machines need explicit peer role (not in nixos tag)
+          roles.peer.machines.rhesus = { };
+        };
 
         # WireGuard VPN - taps as controller
         wireguard = {
