@@ -3,11 +3,9 @@
     meta.name = "seungwon";
 
     inventory = {
-      # Tags for grouping machines
       tags =
         { config, ... }:
         {
-          # All NixOS machines (excludes Darwin)
           nixos = builtins.filter (name: name != "rhesus") config.all;
           wireguard-peers = builtins.filter (name: name != "taps") config.all;
         };
@@ -18,9 +16,6 @@
       machines.pint.machineClass = "nixos";
 
       instances = {
-        # NOTE: admin service removed - SSH keys managed in nixosModules/users.nix
-        # This avoids hostKeys duplication from admin + sshd services
-
         # ZeroTier VPN - taps as controller
         zerotier = {
           module.name = "zerotier";
