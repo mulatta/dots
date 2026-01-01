@@ -25,6 +25,7 @@
     ../../darwinModules/sudo.nix
     ../../darwinModules/desktop.nix
     ../../darwinModules/zerotier.nix
+    ../../darwinModules/dns-client.nix
   ];
 
   # ZeroTier VPN
