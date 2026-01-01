@@ -24,7 +24,8 @@
   # raspberry pi kernel doesnot have tpm module
   boot.initrd.availableKernelModules = lib.mkForce [ ];
 
-  clan.core.networking.targetHost = "root@10.80.169.64";
+  # Use WireGuard .x domain for clan connectivity
+  clan.core.networking.targetHost = "root@pint.x";
 
   nixpkgs.hostPlatform = "aarch64-linux";
   nixpkgs.config.allowUnfree = true;
