@@ -47,6 +47,7 @@
   # Use user's existing age key for sops-nix
   sops.age.keyFile = "/Users/seungwon/.config/sops/age/keys.txt";
   sops.age.sshKeyPaths = [ ];
+  sops.gnupg.sshKeyPaths = [ ];
 
   users.users.seungwon.home = "/Users/seungwon";
 
