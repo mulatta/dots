@@ -18,16 +18,8 @@
       machines.pint.machineClass = "nixos";
 
       instances = {
-        admin = {
-          roles.default.machines.malt = { };
-          roles.default.machines.taps = { };
-          roles.default.machines.pint = { };
-          roles.default.settings = {
-            allowedKeys = {
-              seungwon = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL";
-            };
-          };
-        };
+        # NOTE: admin service removed - SSH keys managed in nixosModules/users.nix
+        # This avoids hostKeys duplication from admin + sshd services
 
         # ZeroTier VPN - taps as controller
         zerotier = {
