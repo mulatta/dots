@@ -14,14 +14,9 @@
     ''
   );
 
-  # Don't quarantine apps installed by homebrew with gatekeeper
   homebrew.caskArgs.no_quarantine = true;
-  # Remove all homebrew packages when they get removed from the configuration
   homebrew.onActivation.cleanup = "uninstall";
-  # Upgrade outdated casks on darwin-rebuild
   homebrew.onActivation.upgrade = true;
-
-  # Required for masApps
   homebrew.brews = [ "mas" ];
 
   homebrew.casks = [
