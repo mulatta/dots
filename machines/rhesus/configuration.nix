@@ -26,13 +26,14 @@
     ../../darwinModules/sudo.nix
     ../../darwinModules/desktop.nix
     ../../darwinModules/zerotier.nix
+    ../../darwinModules/clan-zerotier.nix
     ../../darwinModules/dns-client.nix
   ];
 
-  # ZeroTier VPN
-  services.zerotierone = {
+  # ZeroTier VPN - uses clan's self-hosted controller on taps
+  clan.core.networking.zerotier = {
     enable = true;
-    joinNetworks = [ "82ae67e3be75f405" ];
+    controller.machineName = "taps";
   };
 
   system.activationScripts.postActivation.text = ''

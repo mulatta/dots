@@ -3,6 +3,11 @@
   pkgs,
   ...
 }:
+let
+  seungwonKey = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL"
+  ];
+in
 {
   users.users.seungwon = {
     home = "/home/seungwon";
@@ -13,18 +18,16 @@
     ];
     hashedPasswordFile = config.clan.core.vars.generators.seungwon-password.files.password-hash.path;
     shell = "/run/current-system/sw/bin/fish";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL"
-    ];
+    openssh.authorizedKeys.keys = seungwonKey;
   };
 
-  # root user SSH keys and password managed via clan.inventory.instances.admin
   users.users.root = {
     extraGroups = [
       "wheel"
       "networkmanager"
     ];
     shell = "/run/current-system/sw/bin/bash";
+    openssh.authorizedKeys.keys = seungwonKey;
   };
 
   clan.core.vars.generators.seungwon-password = {

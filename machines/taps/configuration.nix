@@ -24,7 +24,7 @@
   ];
   # sops-nix is managed by clan-core
 
-  # Clan networking - use public IP, change to taps.i after ZeroTier
+  # Clan networking - use public IP (accessible from any network)
   clan.core.networking.targetHost = "root@64.176.225.253";
 
   # Block RFC1918 on ZeroTier to avoid Vultr abuse reports

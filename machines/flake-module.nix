@@ -3,11 +3,9 @@
     meta.name = "seungwon";
 
     inventory = {
-      # Tags for grouping machines
       tags =
         { config, ... }:
         {
-          # All NixOS machines (excludes Darwin)
           nixos = builtins.filter (name: name != "rhesus") config.all;
           wireguard-peers = builtins.filter (name: name != "taps") config.all;
         };
@@ -18,17 +16,6 @@
       machines.pint.machineClass = "nixos";
 
       instances = {
-        admin = {
-          roles.default.machines.malt = { };
-          roles.default.machines.taps = { };
-          roles.default.machines.pint = { };
-          roles.default.settings = {
-            allowedKeys = {
-              seungwon = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL";
-            };
-          };
-        };
-
         # ZeroTier VPN - taps as controller
         zerotier = {
           module.name = "zerotier";
