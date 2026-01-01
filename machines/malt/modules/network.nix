@@ -1,5 +1,4 @@
 {
-  # Static IP configuration for malt
   networking = {
     useDHCP = false;
 
