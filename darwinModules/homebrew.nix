@@ -45,6 +45,7 @@
     "secretive"
     "slack"
     "zen"
+    "zerotier-one"
     "zoom"
     "zotero"
     # keep-sorted end
