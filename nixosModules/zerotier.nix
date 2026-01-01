@@ -17,6 +17,8 @@
   config = {
     services.zerotierone.enable = true;
 
+    networking.firewall.trustedInterfaces = [ "zt+" ];
+
     # Block RFC1918 addresses if enabled
     systemd.services.zerotierone.serviceConfig.IPAddressDeny =
       lib.mkIf config.services.zerotierone.blockRfc1918Addresses
