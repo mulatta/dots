@@ -5,10 +5,16 @@
 }:
 let
   sshPort = toString (lib.head (config.services.openssh.ports or [ 22 ]));
+  vars = config.clan.core.vars.generators;
+
+  wgPrefix = vars.wireguard-network-wireguard.files.prefix.value;
+  ztNetworkId = vars.zerotier.files.zerotier-network-id.value;
+  ztPrefix = "fd${builtins.substring 0 2 ztNetworkId}:${builtins.substring 2 4 ztNetworkId}:${
+    builtins.substring 6 4 ztNetworkId
+  }:${builtins.substring 10 4 ztNetworkId}::/64";
 in
 {
   services.openssh.settings = {
-    # Authentication
     PermitRootLogin = lib.mkDefault "prohibit-password";
     PubkeyAuthentication = true;
     PermitEmptyPasswords = false;
@@ -18,7 +24,6 @@ in
     PermitUserEnvironment = false;
     Compression = false;
 
-    # Connection limits
     MaxAuthTries = 3;
     MaxSessions = 5;
     LoginGraceTime = 30;
@@ -40,11 +45,11 @@ in
   # Allow root login from internal networks only
   services.openssh.extraConfig = ''
     # WireGuard mesh network
-    Match Address 10.100.0.0/24
+    Match Address ${wgPrefix}::/64
         PermitRootLogin prohibit-password
 
     # ZeroTier network
-    Match Address 10.200.0.0/24
+    Match Address ${ztPrefix}
         PermitRootLogin prohibit-password
   '';
 
@@ -58,7 +63,8 @@ in
     ignoreIP = [
       "127.0.0.1/8"
       "::1/128"
-      "10.0.0.0/8" # Private networks (WireGuard, ZeroTier)
+      "${wgPrefix}::/64"
+      ztPrefix
     ];
 
     jails = {
@@ -79,9 +85,9 @@ in
           enabled = true;
           port = sshPort;
           filter = "sshd[mode=aggressive]";
-          maxretry = 3; # 1은 너무 엄격함
-          findtime = 3600; # 1시간
-          bantime = 86400; # 1일 (7일은 너무 김)
+          maxretry = 3;
+          findtime = 3600;
+          bantime = 86400;
           backend = "systemd";
         };
       };
