@@ -14,6 +14,14 @@ in
     ../modules/bat.nix
     ../modules/bitwarden.nix
     ../modules/btop.nix
+    ../modules/fish.nix
+    ../modules/git
+    ../modules/helix
+    ../modules/llm-agents.nix
+    ../modules/packages.nix
+    ../modules/radicle.nix
+    ../modules/starship
+    ../modules/zellij
     ../modules/direnv.nix
     ../modules/eza.nix
     ../modules/fish.nix
