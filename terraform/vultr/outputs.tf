@@ -33,3 +33,11 @@ output "console_url" {
   description = "Vultr console (click 'View Console' for VNC)"
   value       = "https://my.vultr.com/subs/?id=${vultr_instance.taps.id}"
 }
+
+output "ptr_record" {
+  description = "PTR record for mail server"
+  value = {
+    ip      = vultr_reverse_ipv4.mail.ip
+    reverse = vultr_reverse_ipv4.mail.reverse
+  }
+}

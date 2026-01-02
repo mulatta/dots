@@ -62,8 +62,59 @@ resource "vultr_firewall_rule" "zerotier" {
   notes             = "ZeroTier VPN"
 }
 
+# Mail server
+resource "vultr_firewall_rule" "smtp" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "25"
+  notes             = "SMTP"
+}
+
+resource "vultr_firewall_rule" "smtps" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "465"
+  notes             = "SMTPS"
+}
+
+resource "vultr_firewall_rule" "submission" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "587"
+  notes             = "SMTP submission"
+}
+
+resource "vultr_firewall_rule" "imap" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "143"
+  notes             = "IMAP"
+}
+
+resource "vultr_firewall_rule" "imaps" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "993"
+  notes             = "IMAPS"
+}
+
 output "firewall_info" {
-  description = "Firewall configuration dtapsils"
+  description = "Firewall configuration"
   value = {
     firewall_group_id   = vultr_firewall_group.taps.id
     description         = vultr_firewall_group.taps.description

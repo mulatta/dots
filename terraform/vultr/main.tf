@@ -14,7 +14,7 @@ data "vultr_plan" "selected" {
 
 resource "vultr_ssh_key" "taps" {
   name    = "${var.hostname}-ssh-key"
-  ssh_key = file(var.ssh_public_key_path)
+  ssh_key = chomp(file(var.ssh_public_key_path))
 }
 
 # Main instance resource
@@ -31,4 +31,11 @@ resource "vultr_instance" "taps" {
   backups     = "disabled"
 
   firewall_group_id = vultr_firewall_group.taps.id
+}
+
+# Reverse DNS (PTR) for mail server
+resource "vultr_reverse_ipv4" "mail" {
+  instance_id = vultr_instance.taps.id
+  ip          = vultr_instance.taps.main_ip
+  reverse     = "mail.mulatta.io"
 }

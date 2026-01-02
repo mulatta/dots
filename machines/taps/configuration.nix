@@ -18,6 +18,8 @@
     ../../nixosModules/auto-upgrade.nix
     ./modules/disko-vps.nix
     ./modules/atuin-server.nix
+    ./modules/nginx.nix
+    ./modules/stalwart-mail.nix
     ./modules/network.nix
     ./modules/step-ca.nix
     ./modules/coredns.nix
