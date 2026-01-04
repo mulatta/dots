@@ -21,7 +21,7 @@
     ./modules/coredns.nix
     ./modules/disko-vps.nix
     ./modules/network.nix
-    ./modules/nginx.nix
+    ./modules/nginx
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix
