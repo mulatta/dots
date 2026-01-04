@@ -1,0 +1,28 @@
+version: 1
+metadata:
+  name: Users and Groups
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+entries:
+  # Groups
+  - model: authentik_core.group
+    id: mail-users-group
+    identifiers:
+      name: mail-users
+    attrs:
+      name: mail-users
+  # Admin user
+  - model: authentik_core.user
+    id: admin-user
+    identifiers:
+      username: seungwon
+    attrs:
+      username: seungwon
+      name: Seungwon
+      email: seungwon@mulatta.io
+      path: users
+      is_active: true
+      password: !Env [AUTHENTIK_ADMIN_PASSWORD, ""]
+      groups:
+        - !Find [authentik_core.group, [name, authentik Admins]]
+        - !KeyOf mail-users-group

@@ -14,6 +14,13 @@ in
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
 
+    # Fix "could not build optimal proxy_headers_hash" warning
+    proxyTimeout = "3600s";
+    appendHttpConfig = ''
+      proxy_headers_hash_max_size 1024;
+      proxy_headers_hash_bucket_size 128;
+    '';
+
     virtualHosts."_" = {
       default = true;
       rejectSSL = true;
