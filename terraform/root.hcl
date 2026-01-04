@@ -36,10 +36,16 @@ terraform {
 EOF
 }
 
+# Generate secrets.tf for modules that use the shared secrets.yaml
+# Cloudflare module overrides this with its own secrets configuration (clan vars)
 generate "secrets" {
   path      = "secrets.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
+
+  # Skip generation for cloudflare module (it has its own secrets.tf)
+  disable = strcontains(path_relative_to_include(), "cloudflare")
+
+  contents = <<EOF
 data "sops_file" "secrets" {
   source_file = "${get_parent_terragrunt_dir()}/secrets.yaml"
 }
