@@ -3,6 +3,7 @@
     # keep-sorted start
     apple-silicon.inputs.nixpkgs.follows = "nixpkgs";
     apple-silicon.url = "github:nix-community/nixos-apple-silicon";
+    authentik-nix.url = "github:nix-community/authentik-nix";
     catppuccin.url = "github:catppuccin/nix";
     clan-core.inputs.disko.follows = "disko";
     clan-core.inputs.flake-parts.follows = "flake-parts";

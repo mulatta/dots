@@ -20,6 +20,7 @@
     ./modules/atuin-server.nix
     ./modules/nginx.nix
     ./modules/stalwart-mail.nix
+    ./modules/authentik
     ./modules/network.nix
     ./modules/step-ca.nix
     ./modules/coredns.nix
