@@ -3,31 +3,7 @@
   pkgs,
   ...
 }:
-let
-  domain = "ca.x"; # WireGuard mesh domain
-in
 {
-  security.acme.certs.${domain}.server = "https://${domain}:1443/acme/acme/directory";
-
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-  ];
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    virtualHosts.${domain} = {
-      addSSL = true;
-      enableACME = true;
-      locations."/" = {
-        proxyPass = "https://localhost:1443";
-      };
-      locations."= /ca.crt".alias =
-        config.clan.core.vars.generators.step-intermediate-cert.files."intermediate.crt".path;
-    };
-  };
-
   clan.core.vars.generators = {
     # Root CA generator
     "step-ca" = {
@@ -113,7 +89,7 @@ in
       root = config.clan.core.vars.generators.step-ca.files."ca.crt".path;
       crt = config.clan.core.vars.generators.step-intermediate-cert.files."intermediate.crt".path;
       key = config.clan.core.vars.generators.step-intermediate-key.files."intermediate.key".path;
-      dnsNames = [ domain ];
+      dnsNames = [ "ca.x" ];
       logger.format = "text";
       db = {
         type = "badger";

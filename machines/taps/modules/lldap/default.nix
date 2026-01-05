@@ -11,7 +11,7 @@ in
   clan.core.vars.generators.lldap-secrets = {
     files."admin-password" = {
       secret = true;
-      owner = "authelia-main"; # Authelia needs to read this for LDAP binding
+      owner = "authelia-main";
     };
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
@@ -35,6 +35,9 @@ in
       ldap_user_email = "admin@${baseDomain}";
 
       database_url = "sqlite:///var/lib/lldap/lldap.db?mode=rwc";
+
+      # Keep built-in admin password fixed to nix-generated value
+      force_ldap_user_pass_reset = "always";
     };
     environment = {
       LLDAP_LDAP_USER_PASS_FILE = "%d/admin-password";
@@ -46,7 +49,4 @@ in
     "admin-password:${config.clan.core.vars.generators.lldap-secrets.files."admin-password".path}"
     "jwt-secret:${config.clan.core.vars.generators.lldap-secrets.files."jwt-secret".path}"
   ];
-
-  # LLDAP Web UI is internal only - access via SSH tunnel:
-  # ssh -L 17170:127.0.0.1:17170 root@taps
 }

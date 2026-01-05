@@ -22,6 +22,7 @@
     ../modules/cli-tools.nix
     ../modules/eza.nix
     ../modules/fzf.nix
+    ../modules/bitwarden.nix
     ../modules/zoxide.nix
     # Nix tools
     ../modules/nh.nix
