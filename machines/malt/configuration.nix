@@ -15,6 +15,7 @@
     ../../nixosModules/disko-zfs.nix
     ./modules/network.nix
     ./modules/n8n.nix
+    ./modules/nextcloud.nix
   ];
 
   clan.core.networking.targetHost = "root@malt.x";

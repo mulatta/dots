@@ -16,15 +16,16 @@ in
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
     script = ''
-      openssl rand -base64 32 | tr -d '\n' > "$out/admin-password"
-      openssl rand -base64 48 | tr -d '\n' > "$out/jwt-secret"
+      openssl rand -hex 24 > "$out/admin-password"
+      openssl rand -hex 32 > "$out/jwt-secret"
     '';
   };
 
   services.lldap = {
     enable = true;
     settings = {
-      ldap_host = "127.0.0.1";
+      # Bind to all interfaces - firewall restricts access
+      ldap_host = "::";
       ldap_port = 3890;
       http_host = "127.0.0.1";
       http_port = 17170;
@@ -49,4 +50,7 @@ in
     "admin-password:${config.clan.core.vars.generators.lldap-secrets.files."admin-password".path}"
     "jwt-secret:${config.clan.core.vars.generators.lldap-secrets.files."jwt-secret".path}"
   ];
+
+  # Allow LDAP access from WireGuard mesh (for Nextcloud on malt)
+  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 3890 ];
 }
