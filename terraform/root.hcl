@@ -1,5 +1,6 @@
 locals {
-  aws_region = get_env("AWS_REGION", "ap-northeast-2")
+  secrets       = yamldecode(sops_decrypt_file("${get_parent_terragrunt_dir()}/secrets.yaml"))
+  r2_account_id = local.secrets.CLOUDFLARE_ACCOUNT_ID
 }
 
 remote_state {
@@ -9,11 +10,20 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket         = "mulatta-dots-tfstate"
+    bucket         = "dots-tfstate"
     key            = "${path_relative_to_include()}/terraform.tfstate"
-    region         = local.aws_region
-    encrypt        = true
-    dynamodb_table = "dots-terraform-locks"
+    region         = "auto"
+
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+    use_path_style              = true
+
+    endpoints = {
+      s3 = "https://${local.r2_account_id}.r2.cloudflarestorage.com"
+    }
   }
 }
 
