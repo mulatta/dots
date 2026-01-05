@@ -22,6 +22,7 @@
     ./modules/disko-vps.nix
     ./modules/network.nix
     ./modules/nginx
+    ./modules/niks3.nix
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix
