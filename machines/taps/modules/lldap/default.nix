@@ -9,7 +9,10 @@ let
 in
 {
   clan.core.vars.generators.lldap-secrets = {
-    files."admin-password".secret = true;
+    files."admin-password" = {
+      secret = true;
+      owner = "authelia-main"; # Authelia needs to read this for LDAP binding
+    };
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
     script = ''
