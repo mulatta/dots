@@ -18,7 +18,6 @@ in
     ../modules/git
     ../modules/helix
     ../modules/llm-agents.nix
-    ../modules/packages.nix
     ../modules/radicle.nix
     ../modules/starship
     ../modules/zellij

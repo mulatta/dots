@@ -3,6 +3,8 @@
     ./atuin.nix
     ./immich.nix
     ./n8n.nix
+    ./radicle.nix
+    ./vaultwarden.nix
     ./stalwart.nix
     ./step-ca.nix
     ./vaultwarden.nix
