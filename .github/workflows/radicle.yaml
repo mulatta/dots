@@ -22,5 +22,4 @@ jobs:
           radicle-identity-public-key: "${{ secrets.RADICLE_IDENTITY_PUBLIC_KEY }}"
           radicle-project-name: "${{ secrets.RADICLE_PROJECT_NAME }}"
           radicle-repository-id: "${{ secrets.RADICLE_REPOSITORY_ID }}"
-          # TODO: Update with taps DID after deployment
-          # preferred-seeds: "<taps-did>@64.176.225.253:8776"
+          preferred-seeds: "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@64.176.225.253:8776"

@@ -4,6 +4,9 @@
   ...
 }:
 {
+  # Add radicle-node to system packages for CLI access
+  environment.systemPackages = [ pkgs.radicle-node ];
+
   # SSH key generation via clan vars
   clan.core.vars.generators.radicle = {
     files.ssh-private-key = {
