@@ -1,10 +1,36 @@
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 let
+  clanLib = self.inputs.clan-core.lib;
   baseDomain = "mulatta.io";
   ldapBaseDn = "dc=mulatta,dc=io";
   autheliaPort = 9091;
+
+  # Read immich OAuth client secret hash from malt (public value)
+  immichClientSecretHash = clanLib.getPublicValue {
+    flake = config.clan.core.settings.directory;
+    machine = "malt";
+    generator = "immich-oauth";
+    file = "client-secret-hash";
+  };
 in
 {
+
+  clan.core.vars.generators.authelia-oidc-jwks = {
+    files."jwks.pem" = {
+      secret = true;
+      owner = "authelia-main";
+    };
+    runtimeInputs = with pkgs; [ openssl ];
+    script = ''
+      openssl genrsa -out "$out/jwks.pem" 4096
+    '';
+  };
+
   clan.core.vars.generators.authelia-secrets = {
     files."jwt-secret" = {
       secret = true;
@@ -34,6 +60,8 @@ in
       storageEncryptionKeyFile =
         config.clan.core.vars.generators.authelia-secrets.files."storage-encryption-key".path;
       sessionSecretFile = config.clan.core.vars.generators.authelia-secrets.files."session-secret".path;
+      oidcIssuerPrivateKeyFile =
+        config.clan.core.vars.generators.authelia-oidc-jwks.files."jwks.pem".path;
     };
 
     # LDAP bind password - use LLDAP admin account (auto-created on first start)
@@ -112,6 +140,30 @@ in
           {
             domain = "*.${baseDomain}";
             policy = "one_factor";
+          }
+        ];
+      };
+
+      # OIDC Identity Provider
+      identity_providers.oidc = {
+        clients = [
+          {
+            client_id = "immich";
+            client_name = "Immich";
+            client_secret = immichClientSecretHash;
+            public = false;
+            authorization_policy = "one_factor";
+            redirect_uris = [
+              "https://immich.${baseDomain}/auth/login"
+              "https://immich.${baseDomain}/user-settings"
+              "app.immich:///oauth-callback"
+            ];
+            scopes = [
+              "openid"
+              "email"
+              "profile"
+            ];
+            token_endpoint_auth_method = "client_secret_post";
           }
         ];
       };
