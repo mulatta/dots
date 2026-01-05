@@ -10,11 +10,18 @@ let
   ldapBaseDn = "dc=mulatta,dc=io";
   autheliaPort = 9091;
 
-  # Read immich OAuth client secret hash from malt (public value)
+  # Read OAuth client secret hashes from malt (public values)
   immichClientSecretHash = clanLib.getPublicValue {
     flake = config.clan.core.settings.directory;
     machine = "malt";
     generator = "immich-oauth";
+    file = "client-secret-hash";
+  };
+
+  nextcloudClientSecretHash = clanLib.getPublicValue {
+    flake = config.clan.core.settings.directory;
+    machine = "malt";
+    generator = "nextcloud-oauth";
     file = "client-secret-hash";
   };
 in
@@ -162,6 +169,23 @@ in
               "openid"
               "email"
               "profile"
+            ];
+            token_endpoint_auth_method = "client_secret_post";
+          }
+          {
+            client_id = "nextcloud";
+            client_name = "Nextcloud";
+            client_secret = nextcloudClientSecretHash;
+            public = false;
+            authorization_policy = "one_factor";
+            redirect_uris = [
+              "https://nextcloud.${baseDomain}/apps/user_oidc/code"
+            ];
+            scopes = [
+              "openid"
+              "email"
+              "profile"
+              "groups"
             ];
             token_endpoint_auth_method = "client_secret_post";
           }

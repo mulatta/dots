@@ -5,8 +5,7 @@
 }:
 let
   # Use .x domain for WireGuard mesh access
-  tapsHost = "taps.x";
-  ldapBaseDn = "dc=mulatta,dc=io";
+  autheliaIssuer = "https://auth.mulatta.io";
 in
 {
   # ZFS dataset for Nextcloud data
@@ -23,16 +22,30 @@ in
       secret = true;
       owner = "nextcloud";
     };
-    files.ldap-bind-password = {
-      secret = true;
-      owner = "nextcloud";
-    };
 
     runtimeInputs = [ pkgs.openssl ];
 
     script = ''
       openssl rand -hex 24 > "$out/admin-password"
-      openssl rand -hex 24 > "$out/ldap-bind-password"
+    '';
+  };
+
+  # OAuth client secret (generated on malt, hash shared to taps)
+  clan.core.vars.generators.nextcloud-oauth = {
+    files."client-secret" = {
+      secret = true;
+      owner = "nextcloud";
+    };
+    files."client-secret-hash".secret = false; # Public for taps to read
+    runtimeInputs = with pkgs; [
+      openssl
+      authelia
+      gnused
+    ];
+    script = ''
+      SECRET=$(openssl rand -base64 32 | tr -d '\n=')
+      echo -n "$SECRET" > "$out/client-secret"
+      authelia crypto hash generate argon2 --password "$SECRET" | sed 's/^Digest: //' | tr -d '\n' > "$out/client-secret-hash"
     '';
   };
 
@@ -62,52 +75,32 @@ in
     "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
   ];
 
-  # LDAP configuration via occ commands
-  # Requires creating a service account 'nextcloud' in LLDAP with the generated password
-  systemd.services.nextcloud-ldap-config = {
-    description = "Configure Nextcloud LDAP integration";
+  # OIDC configuration via occ commands
+  systemd.services.nextcloud-oidc-config = {
+    description = "Configure Nextcloud OIDC integration";
     after = [ "nextcloud-setup.service" ];
     wantedBy = [ "multi-user.target" ];
 
     path = [ config.services.nextcloud.occ ];
 
     script = ''
-      # Enable LDAP app
-      nextcloud-occ app:enable user_ldap || true
+      # Enable OIDC app
+      nextcloud-occ app:enable user_oidc || true
 
-      # Check if LDAP config exists, create if not
-      if ! nextcloud-occ ldap:show-config s01 &>/dev/null; then
-        nextcloud-occ ldap:create-empty-config
-      fi
+      # Get client secret
+      CLIENT_SECRET=$(cat ${config.clan.core.vars.generators.nextcloud-oauth.files."client-secret".path})
 
-      # Configure LDAP settings for LLDAP
-      nextcloud-occ ldap:set-config s01 ldapHost "${tapsHost}"
-      nextcloud-occ ldap:set-config s01 ldapPort "3890"
-      nextcloud-occ ldap:set-config s01 ldapAgentName "uid=nextcloud,ou=people,${ldapBaseDn}"
-      nextcloud-occ ldap:set-config s01 ldapAgentPassword "$(cat ${config.clan.core.vars.generators.nextcloud.files.ldap-bind-password.path})"
-      nextcloud-occ ldap:set-config s01 ldapBase "${ldapBaseDn}"
-      nextcloud-occ ldap:set-config s01 ldapBaseUsers "ou=people,${ldapBaseDn}"
-      nextcloud-occ ldap:set-config s01 ldapBaseGroups "ou=groups,${ldapBaseDn}"
-
-      # User filters - only 'users' group members can log in
-      nextcloud-occ ldap:set-config s01 ldapUserFilter "(&(objectClass=person)(memberOf=cn=users,ou=groups,${ldapBaseDn}))"
-      nextcloud-occ ldap:set-config s01 ldapUserFilterObjectclass "person"
-      nextcloud-occ ldap:set-config s01 ldapLoginFilter "(&(objectClass=person)(memberOf=cn=users,ou=groups,${ldapBaseDn})(|(uid=%uid)(mail=%uid)))"
-      nextcloud-occ ldap:set-config s01 ldapLoginFilterEmail "1"
-      nextcloud-occ ldap:set-config s01 ldapLoginFilterUsername "1"
-
-      # Group filters
-      nextcloud-occ ldap:set-config s01 ldapGroupFilter "(objectClass=groupOfUniqueNames)"
-      nextcloud-occ ldap:set-config s01 ldapGroupFilterObjectclass "groupOfUniqueNames"
-      nextcloud-occ ldap:set-config s01 ldapGroupMemberAssocAttr "uniqueMember"
-
-      # Attribute mappings
-      nextcloud-occ ldap:set-config s01 ldapUserDisplayName "displayName"
-      nextcloud-occ ldap:set-config s01 ldapEmailAttribute "mail"
-      nextcloud-occ ldap:set-config s01 ldapExpertUsernameAttr "uid"
-
-      # Enable the configuration
-      nextcloud-occ ldap:set-config s01 ldapConfigurationActive "1"
+      # Create or update provider
+      nextcloud-occ user_oidc:provider authelia \
+        --clientid="nextcloud" \
+        --clientsecret="$CLIENT_SECRET" \
+        --discoveryuri="${autheliaIssuer}/.well-known/openid-configuration" \
+        --scope="openid email profile" \
+        --unique-uid="0" \
+        --mapping-uid="preferred_username" \
+        --mapping-display-name="name" \
+        --mapping-email="email" \
+        --check-bearer="0"
     '';
 
     serviceConfig = {
