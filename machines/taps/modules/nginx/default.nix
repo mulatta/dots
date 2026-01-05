@@ -4,6 +4,7 @@
     ./stalwart.nix
     ./step-ca.nix
     ./vaultwarden.nix
+    ./nextcloud.nix
   ];
 
   services.nginx = {

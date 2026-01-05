@@ -16,8 +16,8 @@ in
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
     script = ''
-      openssl rand -base64 32 | tr -d '\n' > "$out/admin-password"
-      openssl rand -base64 48 | tr -d '\n' > "$out/jwt-secret"
+      openssl rand -hex 24 > "$out/admin-password"
+      openssl rand -hex 32 > "$out/jwt-secret"
     '';
   };
 
