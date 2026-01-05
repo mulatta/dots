@@ -25,7 +25,6 @@ generate "terraform" {
 terraform {
   required_providers {
     github     = { source = "integrations/github" }
-    gitlab     = { source = "gitlabhq/gitlab" }
     cloudflare = { source = "cloudflare/cloudflare" }
     vultr      = { source = "vultr/vultr" }
     sops       = { source = "carlpett/sops" }
