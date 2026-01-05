@@ -16,7 +16,8 @@
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
     ./modules/atuin-server.nix
-    ./modules/authentik
+    ./modules/authelia
+    ./modules/lldap
     ./modules/coredns.nix
     ./modules/disko-vps.nix
     ./modules/network.nix
