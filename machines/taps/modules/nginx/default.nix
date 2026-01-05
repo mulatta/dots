@@ -1,8 +1,9 @@
 {
   imports = [
-    ./vaultwarden.nix
+    ./n8n.nix
     ./stalwart.nix
     ./step-ca.nix
+    ./vaultwarden.nix
   ];
 
   services.nginx = {
