@@ -1,0 +1,26 @@
+name: Radicle Sync
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Run daily at 3 AM UTC to sync any Radicle contributions
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    environment: radicle
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: Mic92/radicle-sync@main
+        with:
+          radicle-identity-alias: "${{ secrets.RADICLE_IDENTITY_ALIAS }}"
+          radicle-identity-passphrase: "${{ secrets.RADICLE_IDENTITY_PASSPHRASE }}"
+          radicle-identity-private-key: "${{ secrets.RADICLE_IDENTITY_PRIVATE_KEY }}"
+          radicle-identity-public-key: "${{ secrets.RADICLE_IDENTITY_PUBLIC_KEY }}"
+          radicle-project-name: "${{ secrets.RADICLE_PROJECT_NAME }}"
+          radicle-repository-id: "${{ secrets.RADICLE_REPOSITORY_ID }}"
+          # TODO: Update with taps DID after deployment
+          # preferred-seeds: "<taps-did>@64.176.225.253:8776"
