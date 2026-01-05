@@ -14,6 +14,7 @@
     ../../nixosModules/dns-client.nix
     ../../nixosModules/disko-zfs.nix
     ./modules/network.nix
+    ./modules/n8n.nix
   ];
 
   clan.core.networking.targetHost = "root@malt.x";
