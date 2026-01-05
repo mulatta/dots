@@ -42,15 +42,17 @@ in
     ];
   };
 
-  # Allow root login from internal networks only
+  # Allow root login and TCP forwarding from internal networks only
   services.openssh.extraConfig = ''
     # WireGuard mesh network
     Match Address ${wgPrefix}::/64
         PermitRootLogin prohibit-password
+        AllowTcpForwarding yes
 
     # ZeroTier network
     Match Address ${ztPrefix}
         PermitRootLogin prohibit-password
+        AllowTcpForwarding yes
   '';
 
   # Fail2ban for VPS protection
