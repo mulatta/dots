@@ -1,5 +1,6 @@
 {
   imports = [
+    ./immich.nix
     ./n8n.nix
     ./stalwart.nix
     ./step-ca.nix

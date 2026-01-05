@@ -13,6 +13,7 @@
     ../../nixosModules/zerotier.nix
     ../../nixosModules/dns-client.nix
     ../../nixosModules/disko-zfs.nix
+    ./modules/immich.nix
     ./modules/network.nix
     ./modules/n8n.nix
     ./modules/nextcloud.nix
