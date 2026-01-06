@@ -179,7 +179,7 @@ in
           directory = [
             {
               "if" = "listener != 'smtp'";
-              "then" = "'lldap'";
+              "then" = "lldap";
             }
             { "else" = false; }
           ];
@@ -236,21 +236,25 @@ in
 
       tracing.stdout = {
         enable = true;
-        level = "debug";
+        level = "info";
         ansi = false;
       };
 
       tracer.stdout = {
         type = "stdout";
         enable = true;
-        level = "debug";
+        level = "info";
         ansi = false;
       };
     };
   };
 
-  # Grant stalwart access to nginx ACME certs and SOPS secrets
-  users.users.stalwart-mail.extraGroups = [ "acme" ];
+  # Grant stalwart access to nginx ACME certs and LLDAP bind password
+  # ACME certs are owned by acme:nginx, so we need nginx group
+  users.users.stalwart-mail.extraGroups = [
+    "nginx"
+    "lldap-bind"
+  ];
 
   # Reload stalwart when certs are renewed
   security.acme.certs.${domain}.reloadServices = [ "stalwart-mail.service" ];
