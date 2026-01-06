@@ -12,12 +12,14 @@ in
     files."admin-password" = {
       secret = true;
       owner = "authelia-main";
+      group = "lldap-bind";
+      mode = "0440";
     };
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
     script = ''
-      openssl rand -hex 24 > "$out/admin-password"
-      openssl rand -hex 32 > "$out/jwt-secret"
+      openssl rand -hex 24 | tr -d '\n' > "$out/admin-password"
+      openssl rand -hex 32 | tr -d '\n' > "$out/jwt-secret"
     '';
   };
 
@@ -53,4 +55,7 @@ in
 
   # Allow LDAP access from WireGuard mesh (for Nextcloud on malt)
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 3890 ];
+
+  # Group for services that need LDAP bind access
+  users.groups.lldap-bind = { };
 }

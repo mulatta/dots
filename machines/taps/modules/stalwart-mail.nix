@@ -5,7 +5,6 @@
 }:
 let
   domain = "mail.mulatta.io";
-  baseDomain = "mulatta.io";
 in
 {
   clan.core.vars.generators = {
@@ -43,16 +42,6 @@ in
       '';
     };
 
-    stalwart-oidc = {
-      files."client-secret" = {
-        secret = true;
-        owner = "stalwart-mail";
-      };
-      runtimeInputs = [ pkgs.openssl ];
-      script = ''
-        openssl rand -base64 32 | tr -d '\n' > "$out/client-secret"
-      '';
-    };
   };
 
   services.stalwart-mail = {
@@ -127,7 +116,7 @@ in
         fts = "rocksdb";
         blob = "rocksdb";
         lookup = "rocksdb";
-        directory = "internal";
+        directory = "lldap";
       };
 
       store.rocksdb = {
@@ -147,23 +136,28 @@ in
         store = "rocksdb";
       };
 
-      directory.authentik = {
-        type = "oidc";
-        url = "https://auth.${baseDomain}/application/o/stalwart-mail/.well-known/openid-configuration";
+      directory.lldap = {
+        type = "ldap";
+        url = "ldap://127.0.0.1:3890";
         timeout = "15s";
+        base-dn = "dc=mulatta,dc=io";
 
-        oauth = {
-          client-id = "stalwart-mail";
-          client-secret = "%{file:${
-            config.clan.core.vars.generators.stalwart-oidc.files."client-secret".path
-          }}%";
+        bind = {
+          dn = "uid=admin,ou=people,dc=mulatta,dc=io";
+          secret = "%{file:${config.clan.core.vars.generators.lldap-secrets.files."admin-password".path}}%";
+          auth.method = "lookup";
+        };
+
+        filter = {
+          name = "(&(|(uid=?)(mail=?))(objectClass=person))";
+          email = "(&(|(uid=?)(mail=?))(objectClass=person))";
         };
 
         attributes = {
-          username = "preferred_username";
-          email = "email";
-          name = "name";
-          groups = "groups";
+          name = "uid";
+          email = "mail";
+          description = "displayName";
+          groups = "memberOf";
         };
       };
 
@@ -185,7 +179,7 @@ in
           directory = [
             {
               "if" = "listener != 'smtp'";
-              "then" = "'internal'";
+              "then" = "lldap";
             }
             { "else" = false; }
           ];
@@ -196,26 +190,36 @@ in
         duration = "10m";
       };
 
-      queue = {
-        notify = [
-          {
-            "if" = "rcpt_domain = '${baseDomain}'";
-            "then" = "[orcpt]";
-          }
-          { "else" = "[]"; }
-        ];
+      # Routing strategy - local delivery or relay through AWS SES
+      queue.strategy.route = [
+        {
+          "if" = "is_local_domain('', rcpt_domain)";
+          "then" = "'local'";
+        }
+        { "else" = "'ses'"; }
+      ];
 
-        # AWS SES SMTP Relay for outbound mail
-        outbound = {
-          hostname = "email-smtp.us-east-1.amazonaws.com";
-          port = 587;
-          tls = "require";
+      # Local delivery route
+      queue.route.local = {
+        type = "local";
+      };
 
-          auth = {
-            enable = true;
-            username = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."username".path}}%";
-            secret = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."password".path}}%";
-          };
+      # AWS SES relay route
+      queue.route.ses = {
+        type = "relay";
+        address = "email-smtp.us-east-1.amazonaws.com";
+        port = 587;
+        protocol = "smtp";
+
+        tls = {
+          implicit = false;
+          allow-invalid-certs = false;
+        };
+
+        auth = {
+          enable = true;
+          username = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."username".path}}%";
+          secret = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."password".path}}%";
         };
       };
 
@@ -245,8 +249,12 @@ in
     };
   };
 
-  # Grant stalwart access to nginx ACME certs and SOPS secrets
-  users.users.stalwart-mail.extraGroups = [ "acme" ];
+  # Grant stalwart access to nginx ACME certs and LLDAP bind password
+  # ACME certs are owned by acme:nginx, so we need nginx group
+  users.users.stalwart-mail.extraGroups = [
+    "nginx"
+    "lldap-bind"
+  ];
 
   # Reload stalwart when certs are renewed
   security.acme.certs.${domain}.reloadServices = [ "stalwart-mail.service" ];
