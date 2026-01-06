@@ -24,7 +24,6 @@
       packages.terraform = pkgs.opentofu.withPlugins (p: [
         p.cloudflare_cloudflare
         p.integrations_github
-        p.gitlabhq_gitlab
         p.vultr_vultr
         p.carlpett_sops
         p.hashicorp_local

@@ -20,10 +20,6 @@ expire *args:
         local r=$({{scripts_dir}}/run expire/github.hurl)
         echo "$r" | jq '{provider:"github", status:(if .status_code==200 then "active" else "error" end), expires:((.expires // null) | if . then (split(" ")[0]) else "oauth" end)}'
     }
-    fetch_gl() {
-        local r=$({{scripts_dir}}/run expire/gitlab.hurl)
-        echo "$r" | jq '{provider:"gitlab", status:(if .status_code==200 then "active" else "error" end), expires:(.response.expires_at // "never")}'
-    }
     fetch_vt() {
         local r=$({{scripts_dir}}/run expire/vultr.hurl)
         local ok=$(echo "$r" | jq -r 'if .status_code==200 then "active" else "error" end')
@@ -48,11 +44,10 @@ expire *args:
     case "$provider" in
         cloudflare|cf) results+=("$(fetch_cf)") ;;
         github|gh)     results+=("$(fetch_gh)") ;;
-        gitlab|gl)     results+=("$(fetch_gl)") ;;
         vultr|vt)      results+=("$(fetch_vt)") ;;
         aws)           results+=("$(fetch_aws)") ;;
-        "")            results+=("$(fetch_cf)" "$(fetch_gh)" "$(fetch_gl)" "$(fetch_vt)" "$(fetch_aws)") ;;
-        *) echo "Unknown: $provider. Use: cloudflare|github|gitlab|vultr|aws" >&2; exit 1 ;;
+        "")            results+=("$(fetch_cf)" "$(fetch_gh)" "$(fetch_vt)" "$(fetch_aws)") ;;
+        *) echo "Unknown: $provider. Use: cloudflare|github|vultr|aws" >&2; exit 1 ;;
     esac
 
     if $json_out; then
@@ -123,15 +118,14 @@ billing *args:
         printf '%s\n' "${results[@]}" | jq -s '.' | jtbl -f
     fi
 
-# Show token refresh instructions (cloudflare|github|gitlab|vultr|aws)
+# Show token refresh instructions (cloudflare|github|vultr|aws)
 refresh provider:
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{provider}}" in
         cloudflare|cf) glow "{{scripts_dir}}/docs/cloudflare.md" ;;
         github|gh)     glow "{{scripts_dir}}/docs/github.md" ;;
-        gitlab|gl)     glow "{{scripts_dir}}/docs/gitlab.md" ;;
         vultr|vt)      glow "{{scripts_dir}}/docs/vultr.md" ;;
         aws)           glow "{{scripts_dir}}/docs/aws.md" ;;
-        *) echo "Unknown: {{provider}}. Use: cloudflare|github|gitlab|vultr|aws" >&2; exit 1 ;;
+        *) echo "Unknown: {{provider}}. Use: cloudflare|github|vultr|aws" >&2; exit 1 ;;
     esac

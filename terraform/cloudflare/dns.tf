@@ -5,9 +5,18 @@ data "cloudflare_zones" "mulatta_io" {
 data "terraform_remote_state" "vultr" {
   backend = "s3"
   config = {
-    bucket = "mulatta-dots-tfstate"
-    key    = "vultr/terraform.tfstate"
-    region = "ap-northeast-2"
+    bucket                      = "dots-tfstate"
+    key                         = "vultr/terraform.tfstate"
+    region                      = "auto"
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+    use_path_style              = true
+    endpoints = {
+      s3 = "https://${local.cloudflare_account_id}.r2.cloudflarestorage.com"
+    }
   }
 }
 
