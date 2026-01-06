@@ -7,8 +7,6 @@ let
   domain = "mulatta.io";
   mailDomain = "mail.${domain}";
   cfTokenPath = config.clan.core.vars.generators.cloudflare-api.files."token".path;
-  dkimSelectorEd25519 = "202501e";
-  dkimSelectorRsa = "202501r";
 
   syncDnsScript = pkgs.writeShellScript "cloudflare-dns-sync" ''
     set -euo pipefail
@@ -109,29 +107,15 @@ let
 
     upsert_record "@" "MX" "${mailDomain}" "10"
 
-    upsert_record "@" "TXT" "v=spf1 mx ~all"
+    # SPF: Allow AWS SES and local mail server
+    upsert_record "@" "TXT" "v=spf1 include:amazonses.com mx ~all"
     upsert_record "_dmarc" "TXT" "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}"
-    upsert_record "_mta-sts" "TXT" "v=STSv1; id=20250102"
+    upsert_record "_mta-sts" "TXT" "v=STSv1; id=20250106"
     upsert_record "_smtp._tls" "TXT" "v=TLSRPTv1; rua=mailto:tls-reports@${domain}"
 
-    DKIM_ED25519_FILE="${
-      config.clan.core.vars.generators.stalwart-dkim-ed25519.files."public-key".path
-    }"
-    DKIM_RSA_FILE="${config.clan.core.vars.generators.stalwart-dkim-rsa.files."public-key".path}"
-
-    if [ -f "$DKIM_ED25519_FILE" ]; then
-      DKIM_ED25519=$(cat "$DKIM_ED25519_FILE")
-      upsert_record "${dkimSelectorEd25519}._domainkey" "TXT" "v=DKIM1; k=ed25519; p=$DKIM_ED25519"
-    else
-      echo "WARNING: DKIM ed25519 public key not found at $DKIM_ED25519_FILE"
-    fi
-
-    if [ -f "$DKIM_RSA_FILE" ]; then
-      DKIM_RSA=$(cat "$DKIM_RSA_FILE")
-      upsert_record "${dkimSelectorRsa}._domainkey" "TXT" "v=DKIM1; k=rsa; p=$DKIM_RSA"
-    else
-      echo "WARNING: DKIM RSA public key not found at $DKIM_RSA_FILE"
-    fi
+    # NOTE: DKIM records are now managed by Terraform AWS SES module
+    # Stalwart DKIM has been removed in favor of AWS SES Easy DKIM
+    # See: terraform/aws/ses.tf for DKIM CNAME records
 
     upsert_record "autodiscover" "CNAME" "${mailDomain}"
     upsert_record "autoconfig" "CNAME" "${mailDomain}"
