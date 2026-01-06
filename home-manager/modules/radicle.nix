@@ -1,9 +1,13 @@
 {
   pkgs,
+  self,
   ...
 }:
 {
-  home.packages = [ pkgs.radicle-node ];
+  home.packages = [
+    pkgs.radicle-node
+    self.packages.${pkgs.stdenv.hostPlatform.system}.gh-radicle
+  ];
 
   # jujutsu radicle integration (based on radicle blog)
   # https://radicle.xyz/2025/08/14/jujutsu-with-radicle
