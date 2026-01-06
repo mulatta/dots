@@ -14,6 +14,10 @@ remote_state {
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = "auto"
 
+    # Cloudflare R2 credentials
+    access_key = local.secrets.R2_ACCESS_KEY_ID
+    secret_key = local.secrets.R2_SECRET_ACCESS_KEY
+
     skip_credentials_validation = true
     skip_metadata_api_check     = true
     skip_region_validation      = true
@@ -34,6 +38,7 @@ generate "terraform" {
   contents  = <<EOF
 terraform {
   required_providers {
+    aws        = { source = "hashicorp/aws" }
     github     = { source = "integrations/github" }
     cloudflare = { source = "cloudflare/cloudflare" }
     vultr      = { source = "vultr/vultr" }
