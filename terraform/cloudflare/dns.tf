@@ -17,7 +17,7 @@ data "terraform_remote_state" "vultr" {
     skip_s3_checksum            = true
     use_path_style              = true
     endpoints = {
-      s3 = "https://${local.cloudflare_account_id}.r2.cloudflarestorage.com"
+      s3 = "https://${local.account_id}.r2.cloudflarestorage.com"
     }
   }
 }
