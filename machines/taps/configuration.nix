@@ -18,6 +18,7 @@
     ../../nixosModules/zerotier.nix
     ./modules/atuin-server.nix
     ./modules/authelia
+    ./modules/cloudflare-dns.nix
     ./modules/lldap
     ./modules/coredns.nix
     ./modules/disko-vps.nix
