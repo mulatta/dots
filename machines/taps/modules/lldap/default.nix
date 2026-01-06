@@ -12,6 +12,8 @@ in
     files."admin-password" = {
       secret = true;
       owner = "authelia-main";
+      group = "lldap-bind";
+      mode = "0440";
     };
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
@@ -53,4 +55,8 @@ in
 
   # Allow LDAP access from WireGuard mesh (for Nextcloud on malt)
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 3890 ];
+
+  # Group for services that need LDAP bind access
+  users.groups.lldap-bind = { };
+  users.users.stalwart-mail.extraGroups = [ "lldap-bind" ];
 }
