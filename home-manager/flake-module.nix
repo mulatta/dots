@@ -57,6 +57,7 @@
                 declare -A profiles=(
                   ["rhesus"]="seungwon@rhesus"
                   ["psi"]="seungwon@psi"
+                  ["malt"]="seungwon@malt"
                 )
 
                 # OS-based fallback
@@ -159,6 +160,12 @@
             ./profiles/base.nix
             ./machines/psi.nix
             inputs.vscode-server.homeModules.default
+          ];
+        };
+        "seungwon@malt" = homeManagerConfiguration {
+          extraModules = [
+            ./profiles/base.nix
+            ./machines/malt.nix
           ];
         };
       };
