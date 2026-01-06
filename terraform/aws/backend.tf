@@ -6,7 +6,7 @@ terraform {
     endpoints = {
       s3 = "https://a36871be6860124304dfb5c3b3eb8c1a.r2.cloudflarestorage.com"
     }
-    key                         = "vultr/terraform.tfstate"
+    key                         = "aws/terraform.tfstate"
     region                      = "auto"
     secret_key                  = "0fcf60e21518984b22e1e6fa898ca1ae4a9ea8d2556e9de6514581ad0e43b0aa"
     skip_credentials_validation = true

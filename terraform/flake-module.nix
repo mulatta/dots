@@ -22,6 +22,7 @@
       };
 
       packages.terraform = pkgs.opentofu.withPlugins (p: [
+        p.hashicorp_aws
         p.cloudflare_cloudflare
         p.integrations_github
         p.vultr_vultr
