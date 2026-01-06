@@ -18,8 +18,8 @@ in
     files."jwt-secret".secret = true;
     runtimeInputs = [ pkgs.openssl ];
     script = ''
-      openssl rand -hex 24 > "$out/admin-password"
-      openssl rand -hex 32 > "$out/jwt-secret"
+      openssl rand -hex 24 | tr -d '\n' > "$out/admin-password"
+      openssl rand -hex 32 | tr -d '\n' > "$out/jwt-secret"
     '';
   };
 
@@ -58,5 +58,4 @@ in
 
   # Group for services that need LDAP bind access
   users.groups.lldap-bind = { };
-  users.users.stalwart-mail.extraGroups = [ "lldap-bind" ];
 }
