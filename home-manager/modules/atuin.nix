@@ -15,9 +15,6 @@ in
     enableZshIntegration = true;
     enableFishIntegration = true;
     daemon.enable = false;
-    settings = {
-      sync_address = "http://taps.x:58888";
-    };
   };
 
   launchd.agents.atuin-daemon = lib.mkIf pkgs.stdenv.isDarwin {
