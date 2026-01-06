@@ -20,6 +20,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    niks3.inputs.nixpkgs.follows = "nixpkgs";
+    niks3.url = "github:Mic92/niks3";
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
     nix-casks.inputs.flake-parts.follows = "flake-parts";
     nix-casks.inputs.nixpkgs.follows = "nixpkgs";
