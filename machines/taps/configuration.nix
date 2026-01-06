@@ -16,7 +16,6 @@
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
-    ./modules/atuin-server.nix
     ./modules/authelia
     ./modules/lldap
     ./modules/coredns.nix
