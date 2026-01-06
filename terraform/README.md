@@ -4,12 +4,11 @@ Infrastructure-as-Code for mulatta.io services.
 
 ## Modules
 
-| Module     | Purpose                   | Secrets Used                                                         |
-| ---------- | ------------------------- | -------------------------------------------------------------------- |
-| vultr      | VPS provisioning          | `VULTR_API`                                                          |
-| cloudflare | DNS A records, R2 buckets | Cloudflare token from clan vars                                      |
-| github     | Repository management     | `GITHUB_TOKEN`                                                       |
-| aws        | SES SMTP relay            | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFLARE_API_TOKEN` |
+| Module     | Purpose                   | Secrets Used                    |
+| ---------- | ------------------------- | ------------------------------- |
+| vultr      | VPS provisioning          | `VULTR_API`                     |
+| cloudflare | DNS A records, R2 buckets | Cloudflare token from clan vars |
+| github     | Repository management     | `GITHUB_TOKEN`                  |
 
 ## Secrets Management
 
@@ -19,9 +18,7 @@ Secrets used exclusively by Terraform are stored in `terraform/secrets.yaml` (SO
 
 - `VULTR_API` - Vultr API key for VPS management
 - `GITHUB_TOKEN` - GitHub API token for repo management
-- `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` - Cloudflare R2 for Terraform state backend
-- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - AWS (SES, IAM)
-- `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` - Cloudflare (shared, also in Terraform)
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - S3 backend for state
 
 ### Shared secrets (clan.core.vars)
 
@@ -34,10 +31,9 @@ Secrets shared between Terraform and NixOS are managed by clan.core.vars:
 ## Dependency Order
 
 ```
-1. vultr      → Creates VPS, outputs IP
+1. vultr     → Creates VPS, outputs IP
 2. cloudflare → Creates A records (reads vultr state for IP)
-3. aws        → Creates SES domain, DKIM records in Cloudflare
-4. NixOS      → Deploys services (reads cloudflare-api token from clan vars, SES credentials)
+3. NixOS     → Deploys services (reads cloudflare-api token from clan vars)
 ```
 
 ## Usage
@@ -47,11 +43,8 @@ Secrets shared between Terraform and NixOS are managed by clan.core.vars:
 CLAN_NO_COMMIT=1 clan vars generate taps
 
 # Apply infrastructure
-cd terraform/vultr && terragrunt apply
-cd terraform/cloudflare && terragrunt apply
-cd terraform/aws && terragrunt apply
-
-# Copy SES SMTP credentials to NixOS secrets (see aws/README.md)
+cd terraform/vultr && terraform apply
+cd terraform/cloudflare && terraform apply
 
 # Deploy NixOS
 clan machines update taps

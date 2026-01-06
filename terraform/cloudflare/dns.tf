@@ -8,8 +8,6 @@ data "terraform_remote_state" "vultr" {
     bucket                      = "dots-tfstate"
     key                         = "vultr/terraform.tfstate"
     region                      = "auto"
-    access_key                  = local.r2_access_key_id
-    secret_key                  = local.r2_secret_access_key
     skip_credentials_validation = true
     skip_metadata_api_check     = true
     skip_region_validation      = true
