@@ -10,6 +10,7 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.srvos.nixosModules.mixins-terminfo
+    ../../nixosModules/nix-daemon.nix
     ../../nixosModules/auditd.nix
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
@@ -22,6 +23,7 @@
     ./modules/disko-vps.nix
     ./modules/network.nix
     ./modules/nginx
+    ./modules/niks3.nix
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix

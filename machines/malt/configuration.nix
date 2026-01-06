@@ -9,6 +9,7 @@
     self.inputs.srvos.nixosModules.mixins-terminfo
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.disko.nixosModules.disko
+    ../../nixosModules/nix-daemon.nix
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
     ../../nixosModules/dns-client.nix
