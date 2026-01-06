@@ -8,5 +8,6 @@ terraform.tfstate
 .terraform.lock.hcl
 *.tfstate.backup
 terraform.tf
+backend.tf
 
 .jj/

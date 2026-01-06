@@ -6,38 +6,29 @@
 let
   domain = "mail.mulatta.io";
   baseDomain = "mulatta.io";
-
-  # DKIM selectors - must match cloudflare-dns.nix
-  dkimSelectorEd25519 = "202501e";
-  dkimSelectorRsa = "202501r";
 in
 {
   clan.core.vars.generators = {
-    stalwart-dkim-ed25519 = {
-      files."private-key" = {
+    aws-ses-smtp = {
+      files."username" = {
         secret = true;
         owner = "stalwart-mail";
       };
-      files."public-key".secret = false;
-      runtimeInputs = [ pkgs.openssl ];
-      script = ''
-        openssl genpkey -algorithm ED25519 > "$out/private-key"
-        openssl pkey -in "$out/private-key" -pubout -outform DER 2>/dev/null \
-          | openssl base64 -A > "$out/public-key"
-      '';
-    };
-
-    stalwart-dkim-rsa = {
-      files."private-key" = {
+      files."password" = {
         secret = true;
         owner = "stalwart-mail";
       };
-      files."public-key".secret = false;
-      runtimeInputs = [ pkgs.openssl ];
+      prompts.username = {
+        description = "AWS SES SMTP username (from terraform output ses_smtp_username)";
+        type = "hidden";
+      };
+      prompts.password = {
+        description = "AWS SES SMTP password (from terraform output ses_smtp_password)";
+        type = "hidden";
+      };
       script = ''
-        openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$out/private-key"
-        openssl rsa -in "$out/private-key" -pubout -outform DER 2>/dev/null \
-          | openssl base64 -A > "$out/public-key"
+        cp "$prompts/username" "$out/username"
+        cp "$prompts/password" "$out/password"
       '';
     };
 
@@ -120,63 +111,9 @@ in
         default = true;
       };
 
-      signature = {
-        ed25519 = {
-          private-key = "%{file:${
-            config.clan.core.vars.generators.stalwart-dkim-ed25519.files."private-key".path
-          }}%";
-          domain = baseDomain;
-          selector = dkimSelectorEd25519;
-          algorithm = "ed25519-sha256";
-          canonicalization = "relaxed/relaxed";
-          headers = [
-            "From"
-            "To"
-            "Cc"
-            "Date"
-            "Subject"
-            "Message-ID"
-            "In-Reply-To"
-            "References"
-            "MIME-Version"
-            "Content-Type"
-          ];
-          set-body-length = false;
-          report = true;
-        };
-
-        rsa = {
-          private-key = "%{file:${
-            config.clan.core.vars.generators.stalwart-dkim-rsa.files."private-key".path
-          }}%";
-          domain = baseDomain;
-          selector = dkimSelectorRsa;
-          algorithm = "rsa-sha256";
-          canonicalization = "relaxed/relaxed";
-          headers = [
-            "From"
-            "To"
-            "Cc"
-            "Date"
-            "Subject"
-            "Message-ID"
-            "In-Reply-To"
-            "References"
-            "MIME-Version"
-            "Content-Type"
-          ];
-          set-body-length = false;
-          report = true;
-        };
-      };
-
-      auth.dkim.sign = [
-        {
-          "if" = "listener != 'smtp'";
-          "then" = "['ed25519', 'rsa']";
-        }
-        { "else" = false; }
-      ];
+      # DKIM signing is handled by AWS SES for outbound mail
+      # No local DKIM signing needed since we relay through SES
+      auth.dkim.sign = false;
 
       resolver = {
         type = "system";
@@ -259,13 +196,28 @@ in
         duration = "10m";
       };
 
-      queue.notify = [
-        {
-          "if" = "rcpt_domain = '${baseDomain}'";
-          "then" = "[orcpt]";
-        }
-        { "else" = "[]"; }
-      ];
+      queue = {
+        notify = [
+          {
+            "if" = "rcpt_domain = '${baseDomain}'";
+            "then" = "[orcpt]";
+          }
+          { "else" = "[]"; }
+        ];
+
+        # AWS SES SMTP Relay for outbound mail
+        outbound = {
+          hostname = "email-smtp.us-east-1.amazonaws.com";
+          port = 587;
+          tls = "require";
+
+          auth = {
+            enable = true;
+            username = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."username".path}}%";
+            secret = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."password".path}}%";
+          };
+        };
+      };
 
       spam-filter = {
         enable = true;
