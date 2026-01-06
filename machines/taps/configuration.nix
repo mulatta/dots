@@ -10,6 +10,7 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.srvos.nixosModules.mixins-nix-experimental
     self.inputs.srvos.nixosModules.mixins-terminfo
+    ../../nixosModules/nix-daemon.nix
     ../../nixosModules/auditd.nix
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
