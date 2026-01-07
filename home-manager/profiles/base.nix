@@ -6,28 +6,50 @@
 }:
 {
   imports = [
+    # Shell & Terminal
     ../modules/atuin.nix
-    ../modules/direnv.nix
     ../modules/fish.nix
-    ../modules/git
-    ../modules/helix
-    ../modules/llm-agents.nix
-    ../modules/packages.nix
     ../modules/starship
-    ../modules/xdg.nix
-    ../modules/yazi
     ../modules/zellij
+    ../modules/direnv.nix
+
     # CLI tools
     ../modules/bat.nix
     ../modules/cli-tools.nix
     ../modules/eza.nix
     ../modules/fzf.nix
-    ../modules/bitwarden.nix
     ../modules/zoxide.nix
+
+    # Editors
+    ../modules/helix
+
+    # Git & VCS
+    ../modules/git
+
     # Nix tools
     ../modules/nh.nix
     ../modules/nix-init.nix
     ../modules/nix-tools.nix
+
+    # AI & LLM
+    ../modules/llm-agents.nix
+
+    # Media
+    ../modules/media.nix
+
+    # Password management
+    ../modules/bitwarden.nix
+
+    # PIM (Email, Calendar, Contacts)
+    ../modules/mail.nix
+    ../modules/calendar.nix
+
+    # File management
+    ../modules/yazi
+    ../modules/xdg.nix
+
+    # Misc
+    ../modules/packages.nix
   ];
 
   home = {
