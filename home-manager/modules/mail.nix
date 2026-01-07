@@ -6,8 +6,6 @@
 }:
 let
   maildir = "${config.home.homeDirectory}/mail";
-  # macOS: /etc/ssl/cert.pem,
-  # Linux: /etc/ssl/certs/ca-certificates.crt
   certFile =
     if pkgs.stdenv.isDarwin then "/etc/ssl/cert.pem" else "/etc/ssl/certs/ca-certificates.crt";
 
@@ -42,7 +40,7 @@ let
       notmuch new
 
       echo "Tagging emails with afew..."
-      afew -tn || true
+      PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
 
       echo "Email sync complete."
     '';
@@ -76,11 +74,11 @@ in
 lib.mkMerge [
   {
     home.packages = with pkgs; [
-      aerc
       mblaze
       w3m
       email-sync
       rbw
+      gnupg
     ];
 
     accounts.email = {
@@ -114,10 +112,23 @@ lib.mkMerge [
             "!Shared Folders/*"
           ];
           extraConfig.account = {
-            SSLType = "IMAPS";
+            TLSType = "IMAPS";
+            CertificateFile = certFile;
           };
           extraConfig.local = {
-            SubFolders = "Maildir++";
+            SubFolders = "Verbatim";
+          };
+        };
+
+        aerc = {
+          enable = true;
+          extraAccounts = {
+            source = "notmuch://${maildir}";
+            outgoing = "msmtp";
+            default = "INBOX";
+            copy-to = "Sent";
+            archive = "Archive";
+            postpone = "Drafts";
           };
         };
 
@@ -132,23 +143,26 @@ lib.mkMerge [
       };
     };
 
-    programs.mbsync = {
-      enable = true;
-      extraConfig = ''
-        CertificateFile ${certFile}
-      '';
-    };
+    programs.mbsync.enable = true;
 
     programs.msmtp = {
       enable = true;
       package = msmtp-with-sent; # wrapper that saves sent mail to maildir
-      configContent = lib.mkBefore ''
-        defaults
-        auth on
-        tls on
-        tls_trust_file ${certFile}
-        logfile ~/.local/state/msmtp.log
-      '';
+    };
+
+    programs.aerc = {
+      enable = true;
+      extraConfig = {
+        general = {
+          unsafe-accounts-conf = true;
+          pgp-provider = "auto";
+          disable-ipc = true;
+          log-file = "~/.local/state/aerc.log";
+        };
+        ui = {
+          styleset-name = "dracula";
+        };
+      };
     };
 
     programs.notmuch = {
@@ -179,16 +193,6 @@ lib.mkMerge [
       '';
     };
 
-    xdg.configFile."aerc/accounts.conf".text = ''
-      [mulatta.io]
-      source = notmuch://${maildir}
-      outgoing = msmtp
-      default = INBOX
-      from = seungwon <seungwon@mulatta.io>
-      copy-to = Sent
-      archive = Archive
-      postpone = Drafts
-    '';
   }
 
   # Linux: systemd user services for email sync

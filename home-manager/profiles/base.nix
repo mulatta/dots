@@ -13,6 +13,7 @@ in
     ../modules/atuin.nix
     ../modules/bat.nix
     ../modules/bitwarden.nix
+    ../modules/btop.nix
     ../modules/calendar.nix
     ../modules/direnv.nix
     ../modules/eza.nix
@@ -24,6 +25,7 @@ in
     ../modules/mail.nix
     ../modules/nh.nix
     ../modules/niks3.nix
+    ../modules/sops.nix
     ../modules/starship
     ../modules/yazi
     ../modules/zellij
@@ -47,7 +49,6 @@ in
       dust
       fd
       grex
-      htop
       hyperfine
       jq
       ntfy-sh
@@ -65,6 +66,13 @@ in
     ];
 
   xdg.enable = true;
+
+  home.enableNixpkgsReleaseCheck = false;
+
+  # better eval time
+  manual.html.enable = false;
+  manual.manpages.enable = false;
+  manual.json.enable = false;
 
   home.username = lib.mkDefault "seungwon";
   home.stateVersion = "25.05";

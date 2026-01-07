@@ -128,7 +128,7 @@ lib.mkMerge [
       };
       settings = {
         default = {
-          default_calendar = "stalwart";
+          default_calendar = "default";
           highlight_event_days = true;
         };
       };

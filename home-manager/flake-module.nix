@@ -25,6 +25,7 @@
             {
               _module.args.self = self;
               _module.args.inputs = self.inputs;
+              _module.args.system = system;
               imports = extraModules ++ [
                 inputs.sops-nix.homeManagerModules.sops
                 inputs.nix-index-database.homeModules.nix-index
