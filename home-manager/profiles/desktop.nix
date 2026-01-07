@@ -2,8 +2,9 @@
 { pkgs, ... }:
 {
   imports = [
-    ../modules/hyprland
+    ../modules/mail
     ../modules/stylix.nix
+    ../modules/thunderbird.nix
   ];
 
   home.packages = with pkgs; [

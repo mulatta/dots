@@ -14,7 +14,6 @@ in
     ../modules/bat.nix
     ../modules/bitwarden.nix
     ../modules/btop.nix
-    ../modules/calendar.nix
     ../modules/direnv.nix
     ../modules/eza.nix
     ../modules/fish.nix
@@ -22,7 +21,6 @@ in
     ../modules/git
     ../modules/helix
     ../modules/llm-agents.nix
-    ../modules/mail.nix
     ../modules/nh.nix
     ../modules/niks3.nix
     ../modules/sops.nix

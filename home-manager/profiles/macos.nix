@@ -1,12 +1,18 @@
-{ pkgs, self, ... }:
+{
+  pkgs,
+  self,
+  ...
+}:
 {
   imports = [
     ../modules/ghostty.nix
-    ../modules/vscode
+    ../modules/mail
     ../modules/stylix.nix
+    ../modules/thunderbird.nix
+    ../modules/vscode
   ];
 
-  home.packages = with pkgs; [
+  home.packages = [
     self.packages.${pkgs.stdenv.hostPlatform.system}.spacedrive
   ];
 }
