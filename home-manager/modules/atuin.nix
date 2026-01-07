@@ -5,7 +5,7 @@
   ...
 }:
 let
-  socketPath = "${config.home.homeDirectory}/.local/share/atuin/daemon.sock";
+  socketPath = "${config.xdg.dataHome}/atuin/daemon.sock";
 in
 {
   programs.atuin = {

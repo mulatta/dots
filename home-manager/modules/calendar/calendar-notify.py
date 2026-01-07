@@ -2,6 +2,7 @@
 """Calendar notification daemon - checks for upcoming events and sends alerts."""
 import dbm
 import logging
+import os
 import platform
 import subprocess
 import sys
@@ -14,9 +15,13 @@ from dateutil.rrule import rrulestr
 from icalendar import Calendar, Event
 from icalendar.prop import vDDDTypes, vDuration
 
-STATE_DIR = Path.home() / ".local/state/calendar-notify"
+# XDG Base Directory paths
+XDG_STATE_HOME = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+XDG_DATA_HOME = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+
+STATE_DIR = XDG_STATE_HOME / "calendar-notify"
 STATE_FILE = STATE_DIR / "notified-events.db"
-CALENDAR_DIR = Path.home() / ".local/share/calendars"
+CALENDAR_DIR = XDG_DATA_HOME / "calendars"
 
 # Type aliases
 type DateOrDateTime = date | datetime

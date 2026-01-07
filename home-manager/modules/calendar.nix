@@ -47,8 +47,8 @@ lib.mkMerge [
     ];
 
     # Base paths for calendar and contacts
-    accounts.calendar.basePath = "${config.home.homeDirectory}/.local/share/calendars";
-    accounts.contact.basePath = "${config.home.homeDirectory}/.local/share/contacts";
+    accounts.calendar.basePath = "${config.xdg.dataHome}/calendars";
+    accounts.contact.basePath = "${config.xdg.dataHome}/contacts";
 
     # Calendar account (CalDAV)
     accounts.calendar.accounts.stalwart = {
@@ -236,8 +236,8 @@ lib.mkMerge [
         ProgramArguments = [ "${calendar-sync}/bin/calendar-sync" ];
         StartInterval = 900;
         RunAtLoad = true;
-        StandardOutPath = "${config.home.homeDirectory}/.local/state/calendar-sync.log";
-        StandardErrorPath = "${config.home.homeDirectory}/.local/state/calendar-sync.err";
+        StandardOutPath = "${config.xdg.stateHome}/calendar-sync.log";
+        StandardErrorPath = "${config.xdg.stateHome}/calendar-sync.err";
         EnvironmentVariables.HOME = config.home.homeDirectory;
       };
     };
@@ -248,8 +248,8 @@ lib.mkMerge [
         ProgramArguments = [ "${calendar-notify}/bin/calendar-notify" ];
         StartInterval = 300;
         RunAtLoad = true;
-        StandardOutPath = "${config.home.homeDirectory}/.local/state/calendar-notify.log";
-        StandardErrorPath = "${config.home.homeDirectory}/.local/state/calendar-notify.err";
+        StandardOutPath = "${config.xdg.stateHome}/calendar-notify.log";
+        StandardErrorPath = "${config.xdg.stateHome}/calendar-notify.err";
         EnvironmentVariables.HOME = config.home.homeDirectory;
       };
     };
