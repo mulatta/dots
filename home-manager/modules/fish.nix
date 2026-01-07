@@ -10,6 +10,9 @@
        set -gx SHELL ${pkgs.fish}/bin/fish
        set -gx PATH /run/wrappers/bin /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
 
+       # direnv-instant: spawn mux pane after 30s instead of 4s
+       set -gx DIRENV_INSTANT_MUX_DELAY 30
+
        # fifc setup
        set -Ux fifc_editor hx
        set -U fifc_keybinding \cx

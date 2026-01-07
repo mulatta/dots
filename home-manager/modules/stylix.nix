@@ -4,14 +4,13 @@
   ...
 }:
 let
-  inherit (pkgs.stdenv) isDarwin;
+  inherit (pkgs.stdenv) isLinux;
 in
 {
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
     nerd-fonts.symbols-only
     open-sans
-    # wallpapers
   ];
 
   stylix = {
@@ -19,32 +18,14 @@ in
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
 
-    # iconTheme = {
-    #   enable = true;
-    #   # Linux Only pkgs
-    #   package = pkgs.catppuccin-papirus-folders.override {
-    #     flavor = "mocha";
-    #     accent = "lavender";
-    #   };
-    #   dark = "Papirus-Dark";
-    # };
-
     targets = {
       firefox = {
         colorTheme.enable = true;
-        firefoxGnomeTheme.enable = !isDarwin;
+        firefoxGnomeTheme.enable = isLinux;
         profileNames = [ config.home.username ];
       };
-      gnome.enable = !isDarwin;
+      gnome.enable = isLinux;
     };
-
-    # image = pkgs.wallpapers.windows-error;
-
-    # cursor = {
-    #   name = "Bibata-Modern-Classic";
-    #   package = pkgs.bibata-cursors;
-    #   size = 24;
-    # };
 
     fonts = {
       sizes = {
