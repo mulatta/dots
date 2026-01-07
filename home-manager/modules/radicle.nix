@@ -7,6 +7,7 @@
   home.packages = [
     pkgs.radicle-node
     self.packages.${pkgs.stdenv.hostPlatform.system}.gh-radicle
+    self.packages.${pkgs.stdenv.hostPlatform.system}.create-gh-app
   ];
 
   # jujutsu radicle integration (based on radicle blog)
