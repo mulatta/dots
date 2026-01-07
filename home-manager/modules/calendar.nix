@@ -5,9 +5,6 @@
   ...
 }:
 let
-  calendarsPath = "${config.home.homeDirectory}/.local/share/calendars";
-  contactsPath = "${config.home.homeDirectory}/.local/share/contacts";
-
   # Python environment for calendar-notify
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
@@ -45,85 +42,80 @@ lib.mkMerge [
       calendar-sync
       calendar-notify
       pkgs.rbw
+      pkgs.khal
+      pkgs.khard
     ];
 
-    programs.vdirsyncer = {
-      enable = true;
-      config = {
-        general = {
-          status_path = "~/.local/share/vdirsyncer/status/";
-        };
+    # Base paths for calendar and contacts
+    accounts.calendar.basePath = "${config.home.homeDirectory}/.local/share/calendars";
+    accounts.contact.basePath = "${config.home.homeDirectory}/.local/share/contacts";
 
-        # Calendars
-        "pair calendars" = {
-          a = "calendars_local";
-          b = "calendars_stalwart";
-          collections = [
-            "from a"
-            "from b"
-          ];
-          metadata = [
-            "color"
-            "displayname"
-          ];
-          conflict_resolution = [
-            "command"
-            "vimdiff"
-          ];
-        };
-
-        "storage calendars_local" = {
-          type = "filesystem";
-          path = calendarsPath;
-          fileext = ".ics";
-        };
-
-        "storage calendars_stalwart" = {
-          type = "caldav";
-          url = "https://mail.mulatta.io/dav/cal/seungwon/";
-          username = "seungwon@mulatta.io";
-          "password.fetch" = [
-            "command"
-            "rbw"
-            "get"
-            "mulatta.io"
-          ];
-        };
-
-        # Contacts
-        "pair contacts" = {
-          a = "contacts_local";
-          b = "contacts_stalwart";
-          collections = [
-            "from a"
-            "from b"
-          ];
-          conflict_resolution = [
-            "command"
-            "vimdiff"
-          ];
-        };
-
-        "storage contacts_local" = {
-          type = "filesystem";
-          path = contactsPath;
-          fileext = ".vcf";
-        };
-
-        "storage contacts_stalwart" = {
-          type = "carddav";
-          url = "https://mail.mulatta.io/dav/card/seungwon/";
-          username = "seungwon@mulatta.io";
-          "password.fetch" = [
-            "command"
-            "rbw"
-            "get"
-            "mulatta.io"
-          ];
-        };
+    # Calendar account (CalDAV)
+    accounts.calendar.accounts.stalwart = {
+      primary = true;
+      local = {
+        type = "filesystem";
+        fileExt = ".ics";
+      };
+      remote = {
+        type = "caldav";
+        url = "https://mail.mulatta.io/dav/cal/seungwon/";
+        userName = "seungwon@mulatta.io";
+        passwordCommand = [
+          "rbw"
+          "get"
+          "mulatta.io"
+        ];
+      };
+      vdirsyncer = {
+        enable = true;
+        collections = [
+          "from a"
+          "from b"
+        ];
+        metadata = [
+          "color"
+          "displayname"
+        ];
+        conflictResolution = "remote wins";
+      };
+      khal = {
+        enable = true;
+        type = "discover";
       };
     };
 
+    # Contact account (CardDAV)
+    accounts.contact.accounts.stalwart = {
+      local = {
+        type = "filesystem";
+        fileExt = ".vcf";
+      };
+      remote = {
+        type = "carddav";
+        url = "https://mail.mulatta.io/dav/card/seungwon/";
+        userName = "seungwon@mulatta.io";
+        passwordCommand = [
+          "rbw"
+          "get"
+          "mulatta.io"
+        ];
+      };
+      vdirsyncer = {
+        enable = true;
+        collections = [
+          "from a"
+          "from b"
+        ];
+        conflictResolution = "remote wins";
+      };
+      khard.enable = true;
+    };
+
+    # Enable vdirsyncer
+    programs.vdirsyncer.enable = true;
+
+    # khal configuration
     programs.khal = {
       enable = true;
       locale = {
@@ -136,19 +128,24 @@ lib.mkMerge [
       };
       settings = {
         default = {
-          default_calendar = "default";
+          default_calendar = "stalwart";
           highlight_event_days = true;
         };
       };
     };
 
+    # khard configuration
     programs.khard = {
       enable = true;
       settings = {
         general = {
           default_action = "list";
-          editor = [ "hx" ];
-          merge_editor = [ "vimdiff" ];
+          editor = [
+            "hx"
+          ];
+          merge_editor = [
+            "vimdiff"
+          ];
         };
         "contact table" = {
           display = "formatted_name";
@@ -167,23 +164,22 @@ lib.mkMerge [
       };
     };
 
+    # todoman configuration
     programs.todoman = {
       enable = true;
-      settings = {
-        main = {
-          path = "${calendarsPath}/*";
-          date_format = "%Y-%m-%d";
-          time_format = "%H:%M";
-          default_list = "default";
-          default_due = 0;
-        };
-      };
+      glob = "*/*";
+      extraConfig = ''
+        date_format = "%Y-%m-%d"
+        time_format = "%H:%M"
+        default_list = "stalwart"
+        default_due = 0
+      '';
     };
 
     # Create calendar/contacts directories
     home.activation.createPimDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p "${calendarsPath}/default"
-      run mkdir -p "${contactsPath}/default"
+      run mkdir -p "${config.accounts.calendar.basePath}"
+      run mkdir -p "${config.accounts.contact.basePath}"
     '';
   }
 

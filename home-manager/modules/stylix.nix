@@ -9,7 +9,12 @@ in
 {
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
+    # Nerd Fonts
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.d2coding
     nerd-fonts.symbols-only
+    # System fonts
+    noto-fonts-cjk-sans
     open-sans
   ];
 

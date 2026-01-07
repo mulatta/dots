@@ -7,7 +7,6 @@
       batgrep
     ];
     config = {
-      theme = "Catppuccin Mocha";
       style = "numbers,changes";
       italic-text = "always";
       paging = "auto";
@@ -19,6 +18,4 @@
       ];
     };
   };
-
-  catppuccin.bat.enable = true;
 }

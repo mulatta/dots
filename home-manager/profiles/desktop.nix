@@ -2,12 +2,15 @@
 { pkgs, ... }:
 {
   imports = [
-    ./base.nix
     ../modules/hyprland
     ../modules/stylix.nix
   ];
 
-  home.packages = [
+  home.packages = with pkgs; [
     pkgs.bitwarden-desktop
+
+    mpv
+    yt-dlp
+    graphicsmagick
   ];
 }

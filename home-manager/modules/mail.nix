@@ -6,7 +6,8 @@
 }:
 let
   maildir = "${config.home.homeDirectory}/mail";
-  # macOS: /etc/ssl/cert.pem, Linux: /etc/ssl/certs/ca-certificates.crt
+  # macOS: /etc/ssl/cert.pem,
+  # Linux: /etc/ssl/certs/ca-certificates.crt
   certFile =
     if pkgs.stdenv.isDarwin then "/etc/ssl/cert.pem" else "/etc/ssl/certs/ca-certificates.crt";
 
@@ -19,7 +20,7 @@ let
         isync
         notmuch
         afew
-        coreutils
+        uutils-coreutils-noprefix
         gnugrep
         jq
         rbw
@@ -79,7 +80,6 @@ lib.mkMerge [
       mblaze
       w3m
       email-sync
-      msmtp-with-sent
       rbw
     ];
 
@@ -141,7 +141,8 @@ lib.mkMerge [
 
     programs.msmtp = {
       enable = true;
-      extraConfig = ''
+      package = msmtp-with-sent; # wrapper that saves sent mail to maildir
+      configContent = lib.mkBefore ''
         defaults
         auth on
         tls on

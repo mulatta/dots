@@ -2,67 +2,77 @@
   pkgs,
   lib,
   config,
+  self,
   ...
 }:
+let
+  system = pkgs.stdenv.hostPlatform.system;
+in
 {
   imports = [
-    # Shell & Terminal
     ../modules/atuin.nix
-    ../modules/fish.nix
-    ../modules/starship
-    ../modules/zellij
-    ../modules/direnv.nix
-
-    # CLI tools
     ../modules/bat.nix
-    ../modules/cli-tools.nix
-    ../modules/eza.nix
-    ../modules/fzf.nix
-    ../modules/zoxide.nix
-
-    # Editors
-    ../modules/helix
-
-    # Git & VCS
-    ../modules/git
-
-    # Nix tools
-    ../modules/nh.nix
-    ../modules/nix-init.nix
-    ../modules/nix-tools.nix
-
-    # AI & LLM
-    ../modules/llm-agents.nix
-
-    # Media
-    ../modules/media.nix
-
-    # Password management
     ../modules/bitwarden.nix
-
-    # PIM (Email, Calendar, Contacts)
-    ../modules/mail.nix
     ../modules/calendar.nix
-
-    # File management
+    ../modules/direnv.nix
+    ../modules/eza.nix
+    ../modules/fish.nix
+    ../modules/fzf.nix
+    ../modules/git
+    ../modules/helix
+    ../modules/llm-agents.nix
+    ../modules/mail.nix
+    ../modules/nh.nix
+    ../modules/niks3.nix
+    ../modules/starship
     ../modules/yazi
-    ../modules/xdg.nix
-
-    # Misc
-    ../modules/packages.nix
+    ../modules/zellij
+    ../modules/zoxide.nix
   ];
 
-  home = {
-    username = lib.mkDefault (builtins.getEnv "USER");
-    stateVersion = "25.05";
-    homeDirectory = lib.mkDefault (
-      if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}"
-    );
-  };
+  home.packages =
+    with pkgs;
+    [
+      nix-diff
+      nix-output-monitor
+      nix-prefetch
+      nix-tree
+      nixd
+      nixfmt-rfc-style
+      nixpkgs-review
+      nurl
+      nvd
+
+      delta
+      dust
+      fd
+      grex
+      htop
+      hyperfine
+      jq
+      ntfy-sh
+      ouch
+      procs
+      pueue
+      ripgrep
+      sd
+      xcp
+      yq-go
+    ]
+    ++ [
+      self.packages.${system}.jmt
+      self.packages.${system}.merge-when-green
+    ];
+
+  xdg.enable = true;
+
+  home.username = lib.mkDefault "seungwon";
+  home.stateVersion = "25.05";
+  home.homeDirectory =
+    if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
 
   programs.home-manager.enable = true;
-  dconf.enable = pkgs.stdenv.isLinux;
-  catppuccin.flavor = "mocha";
 
+  dconf.enable = pkgs.stdenv.isLinux;
   nixpkgs.config.allowUnfree = true;
 }
