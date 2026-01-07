@@ -252,46 +252,23 @@ def bookmark_to_title(bookmark: str) -> str:
     return bookmark.replace("-", " ")
 
 
-def get_commits_body(default_branch: str) -> str:
-    """Get commit log as PR body."""
-    result = run(
-        [
-            "jj", "log", "-r", f"{default_branch}@origin..@",
-            "--no-graph", "-T", r'"- " ++ description.first_line() ++ "\n"',
-        ],
-        capture=True,
-        check=False,
-    )
-    if result.returncode != 0 or not result.stdout.strip():
-        return ""
-
-    commits = result.stdout.strip()
-    return f"## Commits\n{commits}"
-
-
-def create_pr(bookmark: str, title: str | None = None, default_branch: str = "main", dry_run: bool = False) -> bool:
+def create_pr(bookmark: str, title: str | None = None, dry_run: bool = False) -> bool:
     """Create PR with squash merge and auto-delete."""
-    # Title: explicit > bookmark-derived > commit message
+    # Title: explicit > bookmark-derived
     if not title:
         title = bookmark_to_title(bookmark)
 
-    # Body: commit log
-    body = get_commits_body(default_branch)
-
     print_header(f"Creating PR: {title}")
-    if body:
-        print_info("Body:")
-        print(body)
 
     if dry_run:
-        print_warning("[dry-run] Would create PR")
+        print_warning("[dry-run] Would create PR (body from --fill)")
         return True
 
     result = run(
         [
             "gh", "pr", "create",
+            "--fill",  # Body from commit messages
             "--title", title,
-            "--body", body,
             "--head", bookmark,
         ],
         check=False,
@@ -410,15 +387,15 @@ def wait_for_merge(bookmark: str) -> bool:
 
 
 def rebase_all_branches(default_branch: str) -> None:
-    """Rebase all local branches onto new default branch."""
+    """Rebase all local mutable branches onto new default branch."""
     print_header("Rebasing all branches...")
     run(["jj", "git", "fetch"])
 
-    # Rebase all roots from old main to new main
+    # Rebase only mutable roots (excludes remote tracking branches)
     result = run(
         [
             "jj", "rebase",
-            "-s", f"roots({default_branch}@origin..)",
+            "-s", f"roots({default_branch}@origin..) & mutable()",
             "-d", f"{default_branch}@origin",
         ],
         check=False,
@@ -432,6 +409,26 @@ def rebase_all_branches(default_branch: str) -> None:
 def delete_bookmark(bookmark: str) -> None:
     """Delete local bookmark after merge."""
     run(["jj", "bookmark", "delete", bookmark], check=False)
+
+
+def get_bookmark_commits(bookmark: str, default_branch: str) -> list[str]:
+    """Get change IDs for commits in bookmark range."""
+    result = run(
+        ["jj", "log", "-r", f"{default_branch}@origin..{bookmark}",
+         "--no-graph", "-T", 'change_id ++ "\n"'],
+        capture=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return []
+    return [cid for cid in result.stdout.strip().split("\n") if cid]
+
+
+def abandon_merged_commits(change_ids: list[str]) -> None:
+    """Abandon commits that were squash-merged into main."""
+    if change_ids:
+        print_info(f"Abandoning {len(change_ids)} merged commits...")
+        run(["jj", "abandon"] + change_ids, check=False)
 
 
 def main() -> int:
@@ -461,6 +458,10 @@ def main() -> int:
     parser.add_argument(
         "--dry-run", "-n", action="store_true",
         help="Show what would be done without making changes"
+    )
+    parser.add_argument(
+        "--keep-commits", action="store_true",
+        help="Don't abandon original commits after merge"
     )
     args = parser.parse_args()
 
@@ -507,9 +508,25 @@ def main() -> int:
 
     # Dry-run: show what would happen, then cleanup
     if args.dry_run:
-        print_warning(f"[dry-run] Would push bookmark: {bookmark}")
-        create_pr(bookmark, args.title, default_branch, dry_run=True)
+        # Show commits that will be pushed
+        commits = get_bookmark_commits(bookmark, default_branch)
+        print_header("Commits to push:")
+        result = run(
+            ["jj", "log", "-r", f"{default_branch}@origin..{bookmark}",
+             "--no-graph", "-T", '"  " ++ change_id.shortest(8) ++ " " ++ description.first_line() ++ "\n"'],
+            capture=True, check=False,
+        )
+        if result.stdout.strip():
+            print(result.stdout.strip())
+
+        print_warning(f"\n[dry-run] Would push bookmark: {bookmark}")
+        create_pr(bookmark, args.title, dry_run=True)
         print_warning("[dry-run] Would enable auto-merge and wait")
+        if args.keep_commits:
+            print_info(f"[dry-run] Would keep {len(commits)} commits (--keep-commits)")
+        else:
+            print_warning(f"[dry-run] Would abandon {len(commits)} commits after merge")
+
         # Cleanup: delete temporarily created bookmark
         if created_bookmark:
             delete_bookmark(bookmark)
@@ -520,25 +537,36 @@ def main() -> int:
     if not push_bookmark(bookmark):
         return 1
 
+    # Save commits for later cleanup (before merge)
+    commits_to_abandon = get_bookmark_commits(bookmark, default_branch)
+
     # 6. Create PR or enable auto-merge on existing
     if pr_exists(bookmark):
         print_success("PR already exists")
     else:
-        if not create_pr(bookmark, args.title, default_branch, dry_run=False):
+        if not create_pr(bookmark, args.title, dry_run=False):
             return 1
 
-    # 7. Enable auto-merge
-    enable_auto_merge(bookmark)
+    # 7. Check if already merged, otherwise enable auto-merge and wait
+    pr_data = get_pr_status(bookmark)
+    already_merged = pr_data and pr_data.get("state") == "MERGED"
 
-    # 8. Wait for merge
-    if not args.no_wait:
-        if not wait_for_merge(bookmark):
-            return 1
+    if already_merged:
+        print_success("PR already merged!")
+    else:
+        enable_auto_merge(bookmark)
 
-        print_success("\nPR merged!")
+        # 8. Wait for merge
+        if not args.no_wait:
+            if not wait_for_merge(bookmark):
+                return 1
+            print_success("\nPR merged!")
 
-        # 9. Cleanup and rebase all
+    # 9. Cleanup and rebase all (always run after merge)
+    if already_merged or not args.no_wait:
         delete_bookmark(bookmark)
+        if not args.keep_commits:
+            abandon_merged_commits(commits_to_abandon)
         rebase_all_branches(default_branch)
         print_success("Done!")
 
