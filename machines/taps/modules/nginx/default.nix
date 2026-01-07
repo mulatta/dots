@@ -38,6 +38,15 @@
     };
   };
 
+  security.acme = {
+    acceptTerms = true;
+    defaults = {
+      email = "acme@mulatta.io";
+      # Use Let's Encrypt production server instead of minica
+      server = "https://acme-v02.api.letsencrypt.org/directory";
+    };
+  };
+
   networking.firewall.allowedTCPPorts = [
     80
     443
