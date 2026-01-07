@@ -1,8 +1,26 @@
 resource "github_repository" "dots" {
-  name             = "dots"
-  description      = "My personal dotfiles"
-  visibility       = "public"
-  allow_auto_merge = true
+  name                   = "dots"
+  description            = "My personal dotfiles"
+  visibility             = "public"
+  allow_auto_merge       = true
+  delete_branch_on_merge = true
+
+  security_and_analysis {
+    secret_scanning {
+      status = "enabled"
+    }
+    secret_scanning_push_protection {
+      status = "enabled"
+    }
+  }
+}
+
+resource "github_branch_protection" "main" {
+  repository_id = github_repository.dots.node_id
+  pattern       = "main"
+
+  allows_force_pushes = false
+  allows_deletions    = false
 }
 
 resource "github_actions_secret" "app_id" {
