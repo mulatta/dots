@@ -46,6 +46,8 @@ let
     '';
   };
 
+  # Open message in Thunderbird (reads from stdin, saves to temp file, opens)
+
   # msmtp wrapper that saves sent mail to maildir
   msmtp-with-sent = pkgs.writeShellScriptBin "msmtp" ''
     tmpfile=$(mktemp)
@@ -129,6 +131,9 @@ lib.mkMerge [
             copy-to = "Sent";
             archive = "Archive";
             postpone = "Drafts";
+            query-map = "${maildir}/query-map";
+            maildir-store = "${maildir}/mulatta";
+            multi-file-strategy = "act-all";
           };
         };
 
@@ -162,8 +167,37 @@ lib.mkMerge [
         ui = {
           styleset-name = "dracula";
         };
+        openers = {
+          "text/html" = "${pkgs.w3m}/bin/w3m -T text/html";
+          "message/rfc822" =
+            if pkgs.stdenv.isDarwin then
+              "/usr/bin/open -a Thunderbird" # macOS system binary
+            else
+              "${pkgs.thunderbird}/bin/thunderbird";
+          # Fallback to system handler
+          "*" =
+            if pkgs.stdenv.isDarwin then
+              "/usr/bin/open" # macOS system binary (no nix equivalent)
+            else
+              "${pkgs.xdg-utils}/bin/xdg-open";
+        };
       };
+      stylesets.dracula = builtins.readFile "${pkgs.aerc}/share/aerc/stylesets/dracula";
     };
+
+    # Custom aerc bindings - include defaults then add custom
+    xdg.configFile."aerc/binds.conf".text = ''
+      # Include system defaults
+      ${builtins.readFile "${pkgs.aerc}/share/aerc/binds.conf"}
+
+      # Custom bindings
+      [messages]
+      Q = :quit<Enter>
+      <C-o> = :pipe -m open-in-thunderbird<Enter>
+
+      [view]
+      <C-o> = :pipe -m open-in-thunderbird<Enter>
+    '';
 
     programs.notmuch = {
       enable = true;
@@ -192,7 +226,6 @@ lib.mkMerge [
         [InboxFilter]
       '';
     };
-
   }
 
   # Linux: systemd user services for email sync
