@@ -11,3 +11,5 @@ terraform.tf
 backend.tf
 
 .jj/
+
+__pycache__
