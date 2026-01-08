@@ -19,7 +19,7 @@ in
 {
   options.claude-desktop = {
     enable = lib.mkEnableOption "Use claude-desktop";
-    packages = lib.mkPackageOption inputs.nix-ai-tools "claude-desktop" { nullable = true; };
+    packages = lib.mkPackageOption inputs.llm-agents "claude-desktop" { nullable = true; };
     mcpServers = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {
