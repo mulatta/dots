@@ -14,6 +14,7 @@
     ../../nixosModules/kernel-hardening.nix
     ./modules/authelia
     ./modules/cloudflare-dns.nix
+    ./modules/kanidm
     ./modules/lldap
     ./modules/coredns.nix
     ./modules/disko-vps.nix
