@@ -90,4 +90,10 @@
 
     cacheUrl = "https://cache.mulatta.io";
   };
+
+  # Additional nginx tuning for niks3 (large NAR uploads)
+  services.nginx.virtualHosts."niks3.mulatta.io".locations."/".extraConfig = ''
+    proxy_buffering off;
+    proxy_request_buffering off;
+  '';
 }
