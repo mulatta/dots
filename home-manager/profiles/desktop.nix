@@ -1,6 +1,8 @@
 # Only for NixOS Desktop (Not macOS)
 { pkgs, ... }:
 {
+  dconf.enable = true;
+
   imports = [
     ../modules/mail
     ../modules/stylix.nix
