@@ -255,10 +255,6 @@
         inherit (pkgs.fishPlugins.fifc) src;
       }
       {
-        name = "gruvbox";
-        inherit (pkgs.fishPlugins.gruvbox) src;
-      }
-      {
         name = "git-abbr";
         inherit (pkgs.fishPlugins.git-abbr) src;
       }
