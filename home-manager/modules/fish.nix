@@ -47,17 +47,14 @@
       l = "eza --group --header --group-directories-first --long --git --all --binary --all --icons always";
       tree = "eza --tree";
 
-      # Nix commands
-      drs = "sudo darwin-rebuild switch --flake $NH_FLAKE";
-      nrs = "sudo nixos-rebuild switch --flake $NH_FLAKE";
-
+      nhs = "nh home switch -b backup";
       nfu = "nix flake update";
       nfc = "nix flake check";
       nfca = "nix flake check --all-systems";
       nfs = "nix flake show";
-
-      # devenvs
+      nb = "nix build";
       nd = "nix develop";
+
       dra = "direnv allow";
       drb = "direnv block";
       drr = "direnv reload";
@@ -65,9 +62,6 @@
       # terraform
       tf = "tofu";
       tg = "terragrunt";
-
-      # neomutt
-      mt = "neomutt";
 
       # Jujutsu
       j = "jj";
