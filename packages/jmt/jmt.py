@@ -76,7 +76,8 @@ def needs_rebuild(flake_root: Path, cache_path: Path) -> bool:
         debug("Cache doesn't exist")
         return True
 
-    cache_mtime = cache_path.stat().st_mtime
+    # Use lstat() to get symlink's own mtime (not the target in nix store)
+    cache_mtime = cache_path.lstat().st_mtime
 
     for filename in ["flake.nix", "flake.lock"]:
         file_path = flake_root / filename
