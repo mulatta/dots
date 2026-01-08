@@ -47,9 +47,9 @@ resource "cloudflare_dns_record" "mta_sts_a" {
   proxied = false
 }
 
-resource "cloudflare_dns_record" "auth_a" {
+resource "cloudflare_dns_record" "idm_a" {
   zone_id = local.zone_id
-  name    = "auth"
+  name    = "idm"
   content = local.taps_ip
   type    = "A"
   ttl     = 300
