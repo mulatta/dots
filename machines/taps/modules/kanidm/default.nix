@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   ...
 }:
 let
@@ -7,6 +8,7 @@ let
   baseDomain = "mulatta.io";
   bindAddress = "127.0.0.1";
   port = 8443;
+  stalwartTokenFile = "/var/lib/stalwart-mail/kanidm-token";
 in
 {
   services.kanidm = {
@@ -173,4 +175,34 @@ in
       '';
     };
   };
+
+  # Run manually: kanidm login -D idm_admin && systemctl start kanidm-stalwart-token
+  systemd.services.kanidm-stalwart-token = {
+    description = "Generate Kanidm service account token for Stalwart";
+    after = [ "kanidm.service" ];
+    requires = [ "kanidm.service" ];
+    # Not in wantedBy - must be started manually after idm_admin login
+    path = [ config.services.kanidm.package ];
+    unitConfig.ConditionPathExists = "!${stalwartTokenFile}";
+    script = ''
+      set -euo pipefail
+      # Verify idm_admin is logged in
+      if ! kanidm self whoami --name idm_admin 2>/dev/null; then
+        echo "Error: idm_admin not logged in. Run 'kanidm login --name idm_admin' first."
+        exit 1
+      fi
+      kanidm service-account create stalwart_ldap "Stalwart Mail LDAP" idm_admins --name idm_admin || true
+      kanidm group add-members idm_people_read stalwart_ldap --name idm_admin || true
+      TOKEN=$(kanidm service-account api-token generate stalwart_ldap "ldap-bind" --name idm_admin 2>&1 | tail -1)
+      install -m 600 -o stalwart-mail -g stalwart-mail /dev/null "${stalwartTokenFile}"
+      echo -n "$TOKEN" > "${stalwartTokenFile}"
+      echo "Stalwart LDAP token generated successfully."
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      User = "root";
+    };
+  };
+
 }
