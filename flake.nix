@@ -18,7 +18,7 @@
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     llm-agents.url = "github:numtide/llm-agents.nix";
     niks3.inputs.nixpkgs.follows = "nixpkgs";
-    niks3.url = "github:Mic92/niks3";
+    niks3.url = "github:Mic92/niks3/speed-up-create-pending";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
