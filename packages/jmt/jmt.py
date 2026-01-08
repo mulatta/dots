@@ -180,12 +180,15 @@ def get_inline_command(name: str, command: str, options: list[str], mode: str) -
     ext_map = {"deadnix": ".nix", "statix": ".nix", "shellcheck": ".sh"}
     ext = ext_map.get(name, "")
 
+    # Use JMT_MKTEMP env var for GNU-compatible mktemp (macOS compatibility)
+    mktemp_cmd = os.environ.get("JMT_MKTEMP", "mktemp")
+
     if mode == "passthrough":
         # Linter: show warnings on stderr, pass content unchanged
-        script = f't=$(mktemp --suffix={ext}); cat >"$t"; {command} {opts_str} "$t" >&2 || true; cat "$t"; rm "$t"'
+        script = f't=$({mktemp_cmd} --suffix={ext}); cat >"$t"; {command} {opts_str} "$t" >&2 || true; cat "$t"; rm "$t"'
     else:
         # Editor: modify file and output result
-        script = f't=$(mktemp --suffix={ext}); cat >"$t"; {command} {opts_str} "$t" >/dev/null 2>&1 || true; cat "$t"; rm "$t"'
+        script = f't=$({mktemp_cmd} --suffix={ext}); cat >"$t"; {command} {opts_str} "$t" >/dev/null 2>&1 || true; cat "$t"; rm "$t"'
 
     return ["bash", "-c", script]
 

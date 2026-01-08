@@ -4,6 +4,7 @@
   makeWrapper,
   nix,
   jujutsu,
+  uutils-coreutils-noprefix,
 }:
 python3.pkgs.buildPythonApplication {
   pname = "jmt";
@@ -27,7 +28,8 @@ python3.pkgs.buildPythonApplication {
           nix
           jujutsu
         ]
-      }
+      } \
+      --set JMT_MKTEMP "${uutils-coreutils-noprefix}/bin/mktemp"
     runHook postInstall
   '';
 
