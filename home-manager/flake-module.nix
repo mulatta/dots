@@ -12,7 +12,6 @@
       ...
     }:
     let
-
       # Home-manager configuration builder
       mkHomeConfig =
         {
@@ -71,7 +70,7 @@
                 fi
 
                 echo "==> Activating home-manager..."
-                home-manager switch --flake "$DOTFILES_DIR"
+                home-manager switch --flake "$DOTFILES_DIR" -b bak
 
                 echo "==> Done! You may need to restart your shell."
               '';
