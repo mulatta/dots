@@ -12,10 +12,10 @@
     ../../nixosModules/auditd.nix
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
-    ./modules/authelia
+    ../../nixosModules/users.nix
+    ../../nixosModules/zerotier.nix
     ./modules/cloudflare-dns.nix
     ./modules/kanidm
-    ./modules/lldap
     ./modules/coredns.nix
     ./modules/disko-vps.nix
     ./modules/network.nix
