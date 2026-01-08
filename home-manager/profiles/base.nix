@@ -79,6 +79,5 @@ in
 
   programs.home-manager.enable = true;
 
-  dconf.enable = pkgs.stdenv.isLinux;
   nixpkgs.config.allowUnfree = true;
 }
