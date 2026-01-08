@@ -10,6 +10,7 @@
 
   services.nginx = {
     enable = true;
+    recommendedBrotliSettings = true;
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
     recommendedProxySettings = true;

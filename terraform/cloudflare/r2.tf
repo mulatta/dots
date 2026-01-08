@@ -13,3 +13,25 @@ resource "cloudflare_r2_custom_domain" "cache" {
   zone_id     = local.zone_id
   enabled     = true
 }
+
+# Rewrite / to /index.html for R2 custom domain
+resource "cloudflare_ruleset" "cache_index_rewrite" {
+  zone_id = local.zone_id
+  name    = "Cache index.html rewrite"
+  kind    = "zone"
+  phase   = "http_request_transform"
+
+  rules = [{
+    action = "rewrite"
+    action_parameters = {
+      uri = {
+        path = {
+          value = "/index.html"
+        }
+      }
+    }
+    expression  = "(http.host eq \"cache.mulatta.io\" and http.request.uri.path eq \"/\")"
+    description = "Serve index.html at root for cache.mulatta.io"
+    enabled     = true
+  }]
+}
