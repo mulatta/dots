@@ -21,7 +21,7 @@
       "/Applications/Zen.app"
       "${pkgs.firefox-bin}/Applications/Firefox.app"
       "${pkgs.obsidian}/Applications/Obsidian.app"
-      "/Applications/Ghostty.app"
+      "${pkgs.ghostty-bin}/Applications/Ghostty.app"
       "/Applications/KakaoTalk.app"
     ];
   };

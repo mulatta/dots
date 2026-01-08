@@ -27,7 +27,6 @@
     "claude"
     "cleanshot"
     "devonthink"
-    "ghostty"
     "hancom-word"
     "hazel"
     "hookmark"
