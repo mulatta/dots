@@ -23,6 +23,7 @@ in
     ../modules/llm-agents.nix
     ../modules/nh.nix
     ../modules/niks3.nix
+    ../modules/pueue.nix
     ../modules/sops.nix
     ../modules/starship
     ../modules/stylix.nix
@@ -53,7 +54,6 @@ in
       ntfy-sh
       ouch
       procs
-      pueue
       ripgrep
       sd
       xcp
