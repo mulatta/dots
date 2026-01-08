@@ -8,6 +8,24 @@
     enable = true;
     lfs.enable = true;
 
+    ignores = [
+      # macOS
+      ".DS_Store"
+      ".AppleDouble"
+      ".LSOverride"
+      "._*"
+
+      # Editor
+      "*~"
+      "*.swp"
+      "*.swo"
+
+      # Nix
+      "result"
+      "result-*"
+      ".direnv/"
+    ];
+
     signing = {
       key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
       format = "ssh";
