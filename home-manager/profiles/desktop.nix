@@ -1,17 +1,27 @@
 # Only for NixOS Desktop (Not macOS)
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   dconf.enable = true;
 
   imports = [
     ../modules/mail
-    ../modules/stylix.nix
     ../modules/thunderbird.nix
   ];
 
-  home.packages = with pkgs; [
-    pkgs.bitwarden-desktop
+  # NixOS desktop stylix targets
+  stylix.targets = {
+    gnome.enable = true;
+    gtk.enable = true;
+    firefox = {
+      enable = true;
+      colorTheme.enable = true;
+      firefoxGnomeTheme.enable = true;
+      profileNames = [ config.home.username ];
+    };
+  };
 
+  home.packages = with pkgs; [
+    bitwarden-desktop
     mpv
     yt-dlp
     graphicsmagick

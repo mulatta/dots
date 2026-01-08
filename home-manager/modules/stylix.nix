@@ -1,11 +1,8 @@
 {
+  lib,
   pkgs,
-  config,
   ...
 }:
-let
-  inherit (pkgs.stdenv) isLinux;
-in
 {
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
@@ -23,13 +20,11 @@ in
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
 
+    # GUI targets disabled by default (override in desktop/macos profiles)
     targets = {
-      firefox = {
-        colorTheme.enable = true;
-        firefoxGnomeTheme.enable = isLinux;
-        profileNames = [ config.home.username ];
-      };
-      gnome.enable = isLinux;
+      firefox.enable = lib.mkDefault false;
+      gnome.enable = lib.mkDefault false;
+      gtk.enable = lib.mkDefault false;
     };
 
     fonts = {

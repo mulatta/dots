@@ -25,6 +25,7 @@ in
     ../modules/niks3.nix
     ../modules/sops.nix
     ../modules/starship
+    ../modules/stylix.nix
     ../modules/yazi
     ../modules/zellij
     ../modules/zoxide.nix
