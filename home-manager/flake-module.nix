@@ -65,8 +65,10 @@
                 if [[ ! -d "$DOTFILES_DIR" ]]; then
                   jj git clone "https://github.com/mulatta/dots.git" "$DOTFILES_DIR"
                 else
-                  echo "    Already exists, fetching latest..."
-                  jj git fetch --repository "$DOTFILES_DIR"
+                  echo "    Already exists, fetching and updating..."
+                  cd "$DOTFILES_DIR"
+                  jj git fetch
+                  jj new main@origin --no-edit
                 fi
 
                 echo "==> Activating home-manager..."
