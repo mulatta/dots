@@ -1,12 +1,8 @@
 {
   pkgs,
   lib,
-  config,
   ...
 }:
-let
-  socketPath = "${config.xdg.dataHome}/atuin/daemon.sock";
-in
 {
   programs.atuin = {
     enable = true;
@@ -15,25 +11,40 @@ in
     enableZshIntegration = true;
     enableFishIntegration = true;
     daemon.enable = false;
+    settings = {
+      sync_address = "https://atuin.mulatta.io";
+      auto_sync = false;
+    };
   };
 
-  launchd.agents.atuin-daemon = lib.mkIf pkgs.stdenv.isDarwin {
+  launchd.agents.atuin-sync = lib.mkIf pkgs.stdenv.isDarwin {
     enable = true;
     config = {
-      Label = "com.atuin.daemon";
+      Label = "com.atuin.sync";
       ProgramArguments = [
-        "${pkgs.bash}/bin/bash"
-        "-c"
-        "rm -f ${socketPath}; exec ${pkgs.atuin}/bin/atuin daemon"
+        "${pkgs.atuin}/bin/atuin"
+        "sync"
       ];
-      RunAtLoad = true;
-      KeepAlive = {
-        Crashed = true;
-        SuccessfulExit = false;
-      };
-      ProcessType = "Background";
-      StandardOutPath = "${config.home.homeDirectory}/Library/Logs/atuin-daemon.stdout.log";
-      StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/atuin-daemon.stderr.log";
+      StartInterval = 3600;
+      StandardOutPath = "/dev/null";
+      StandardErrorPath = "/dev/null";
     };
+  };
+
+  systemd.user.services.atuin-sync = lib.mkIf pkgs.stdenv.isLinux {
+    Unit.Description = "Atuin sync";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.atuin}/bin/atuin sync";
+    };
+  };
+
+  systemd.user.timers.atuin-sync = lib.mkIf pkgs.stdenv.isLinux {
+    Unit.Description = "Atuin sync timer";
+    Timer = {
+      OnCalendar = "hourly";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 }

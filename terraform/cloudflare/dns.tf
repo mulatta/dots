@@ -103,6 +103,15 @@ resource "cloudflare_dns_record" "niks3_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "atuin_a" {
+  zone_id = local.zone_id
+  name    = "atuin"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 output "mail_dns" {
   value = {
     mail_server = local.mail_domain
