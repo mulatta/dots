@@ -41,56 +41,53 @@ in
         openssl rand -base64 32 | tr -d '\n' > "$out/password"
       '';
     };
-
   };
 
   services.stalwart-mail = {
     enable = true;
     openFirewall = true;
 
-    settings = {
-      server = {
-        hostname = domain;
+    settings.server = {
+      hostname = domain;
 
-        tls = {
-          enable = true;
-          implicit = false;
+      tls = {
+        enable = true;
+        implicit = false;
+      };
+
+      listener = {
+        smtp = {
+          bind = [ "[::]:25" ];
+          protocol = "smtp";
         };
 
-        listener = {
-          smtp = {
-            bind = [ "[::]:25" ];
-            protocol = "smtp";
-          };
+        submissions = {
+          bind = [ "[::]:465" ];
+          protocol = "smtp";
+          tls.implicit = true;
+        };
 
-          submissions = {
-            bind = [ "[::]:465" ];
-            protocol = "smtp";
-            tls.implicit = true;
-          };
+        submission = {
+          bind = [ "[::]:587" ];
+          protocol = "smtp";
+          tls.implicit = false;
+        };
 
-          submission = {
-            bind = [ "[::]:587" ];
-            protocol = "smtp";
-            tls.implicit = false;
-          };
+        imap = {
+          bind = [ "[::]:143" ];
+          protocol = "imap";
+        };
 
-          imap = {
-            bind = [ "[::]:143" ];
-            protocol = "imap";
-          };
+        imaptls = {
+          bind = [ "[::]:993" ];
+          protocol = "imap";
+          tls.implicit = true;
+        };
 
-          imaptls = {
-            bind = [ "[::]:993" ];
-            protocol = "imap";
-            tls.implicit = true;
-          };
-
-          http = {
-            bind = [ "127.0.0.1:8080" ];
-            protocol = "http";
-            tls.implicit = false;
-          };
+        http = {
+          bind = [ "127.0.0.1:8080" ];
+          protocol = "http";
+          tls.implicit = false;
         };
       };
 
@@ -125,12 +122,6 @@ in
         compression = "lz4";
       };
 
-      store.db = {
-        type = "rocksdb";
-        path = "/var/lib/stalwart-mail/db";
-        compression = "lz4";
-      };
-
       directory.internal = {
         type = "internal";
         store = "rocksdb";
@@ -142,9 +133,12 @@ in
         timeout = "15s";
         base-dn = "dc=mulatta,dc=io";
 
+        # Service account for searches and user authentication via LDAP bind
         bind = {
           dn = "uid=admin,ou=people,dc=mulatta,dc=io";
           secret = "%{file:${config.clan.core.vars.generators.lldap-secrets.files."admin-password".path}}%";
+          # User authentication via LDAP bind (required for lldap)
+          # Uses "lookup" method: search for user DN first, then bind as user
           auth.method = "lookup";
         };
 
@@ -158,6 +152,8 @@ in
           email = "mail";
           description = "displayName";
           groups = "memberOf";
+          # For OAuth token generation when using bind auth (lldap doesn't expose userPassword)
+          secret-changed = "modifyTimestamp";
         };
       };
 
@@ -172,14 +168,14 @@ in
           mechanisms = [
             {
               "if" = "listener != 'smtp'";
-              "then" = "[plain, login]";
+              "then" = "'[plain, login]'";
             }
             { "else" = false; }
           ];
           directory = [
             {
               "if" = "listener != 'smtp'";
-              "then" = "lldap";
+              "then" = "'lldap'";
             }
             { "else" = false; }
           ];

@@ -1,6 +1,7 @@
 { config, ... }:
 {
   imports = [
+    ../modules/calendar
     ../modules/ghostty.nix
     ../modules/mail
     ../modules/thunderbird.nix

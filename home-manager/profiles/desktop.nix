@@ -1,9 +1,14 @@
 # Only for NixOS Desktop (Not macOS)
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  ...
+}:
 {
   dconf.enable = true;
 
   imports = [
+    ../modules/calendar
     ../modules/mail
     ../modules/thunderbird.nix
   ];

@@ -32,7 +32,7 @@ let
     name = "calendar-notify";
     runtimeInputs = lib.optionals pkgs.stdenv.isLinux [ pkgs.libnotify ];
     text = ''
-      exec ${pythonEnv}/bin/python ${./calendar/calendar-notify.py}
+      exec ${pythonEnv}/bin/python ${./calendar-notify.py}
     '';
   };
 in
