@@ -15,6 +15,9 @@ let
   };
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${wgPrefix}:${maltSuffix}";
+
+  # Kanidm OIDC settings
+  kanidmDomain = "idm.mulatta.io";
 in
 {
   # ZFS dataset for immich media storage
@@ -44,24 +47,7 @@ in
     '';
   };
 
-  # OAuth client secret (generated on malt, hash shared to taps)
-  clan.core.vars.generators.immich-oauth = {
-    files."client-secret" = {
-      secret = true;
-      owner = "immich";
-    };
-    files."client-secret-hash".secret = false; # Public for taps to read
-    runtimeInputs = with pkgs; [
-      openssl
-      authelia
-      gnused
-    ];
-    script = ''
-      SECRET=$(openssl rand -base64 32 | tr -d '\n=')
-      echo -n "$SECRET" > "$out/client-secret"
-      authelia crypto hash generate argon2 --password "$SECRET" | sed 's/^Digest: //' | tr -d '\n' > "$out/client-secret-hash"
-    '';
-  };
+  # Note: OAuth client secret not needed - using Kanidm public client with PKCE
 
   # Immich service
   services.immich = {
@@ -86,14 +72,15 @@ in
       server.externalDomain = "https://immich.mulatta.io";
       newVersionCheck.enabled = false;
 
-      # OAuth via Authelia (client_secret set via UI)
+      # OAuth via Kanidm (public client with PKCE - no secret needed)
       oauth = {
         enabled = true;
-        issuerUrl = "https://auth.mulatta.io";
+        issuerUrl = "https://${kanidmDomain}/oauth2/openid/immich";
         clientId = "immich";
         scope = "openid email profile";
-        buttonText = "Login with Authelia";
+        buttonText = "Login with Kanidm";
         autoRegister = true;
+        # Public client uses PKCE, no clientSecret needed
       };
     };
   };
@@ -102,21 +89,6 @@ in
   systemd.tmpfiles.rules = [
     "Z /var/lib/immich 0750 immich immich -"
   ];
-
-  # Inject OAuth client secret into config.json at runtime
-  systemd.services.immich-server.serviceConfig.ExecStartPre =
-    let
-      clientSecretPath = config.clan.core.vars.generators.immich-oauth.files."client-secret".path;
-      injectScript = pkgs.writeShellScript "inject-oauth-secret" ''
-        if [ -f "${clientSecretPath}" ]; then
-          CLIENT_SECRET=$(cat "${clientSecretPath}")
-          ${pkgs.jq}/bin/jq --arg secret "$CLIENT_SECRET" '.oauth.clientSecret = $secret' \
-            /run/immich/config.json > /run/immich/config.json.tmp
-          mv /run/immich/config.json.tmp /run/immich/config.json
-        fi
-      '';
-    in
-    pkgs.lib.mkAfter [ injectScript ];
 
   # Firewall: allow access from WireGuard network
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 2283 ];

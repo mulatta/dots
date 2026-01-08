@@ -4,8 +4,9 @@
   ...
 }:
 let
-  # Use .x domain for WireGuard mesh access
-  autheliaIssuer = "https://auth.mulatta.io";
+  # Kanidm OIDC settings
+  kanidmDomain = "idm.mulatta.io";
+  kanidmIssuer = "https://${kanidmDomain}/oauth2/openid/nextcloud";
 in
 {
   # ZFS dataset for Nextcloud data
@@ -30,24 +31,7 @@ in
     '';
   };
 
-  # OAuth client secret (generated on malt, hash shared to taps)
-  clan.core.vars.generators.nextcloud-oauth = {
-    files."client-secret" = {
-      secret = true;
-      owner = "nextcloud";
-    };
-    files."client-secret-hash".secret = false; # Public for taps to read
-    runtimeInputs = with pkgs; [
-      openssl
-      authelia
-      gnused
-    ];
-    script = ''
-      SECRET=$(openssl rand -base64 32 | tr -d '\n=')
-      echo -n "$SECRET" > "$out/client-secret"
-      authelia crypto hash generate argon2 --password "$SECRET" | sed 's/^Digest: //' | tr -d '\n' > "$out/client-secret-hash"
-    '';
-  };
+  # Note: OAuth client secret not needed - using Kanidm public client with PKCE
 
   services.nextcloud = {
     enable = true;
@@ -76,8 +60,9 @@ in
   ];
 
   # OIDC configuration via occ commands
+  # Using Kanidm public client with PKCE (no client secret needed)
   systemd.services.nextcloud-oidc-config = {
-    description = "Configure Nextcloud OIDC integration";
+    description = "Configure Nextcloud OIDC integration with Kanidm";
     after = [ "nextcloud-setup.service" ];
     wantedBy = [ "multi-user.target" ];
 
@@ -87,15 +72,14 @@ in
       # Enable OIDC app
       nextcloud-occ app:enable user_oidc || true
 
-      # Get client secret
-      CLIENT_SECRET=$(cat ${config.clan.core.vars.generators.nextcloud-oauth.files."client-secret".path})
-
-      # Create or update provider
-      nextcloud-occ user_oidc:provider authelia \
+      # Create or update provider (public client - no secret needed)
+      # Nextcloud user_oidc app may require a secret even for public clients
+      # Use a placeholder or empty string if PKCE is supported
+      nextcloud-occ user_oidc:provider kanidm \
         --clientid="nextcloud" \
-        --clientsecret="$CLIENT_SECRET" \
-        --discoveryuri="${autheliaIssuer}/.well-known/openid-configuration" \
-        --scope="openid email profile" \
+        --clientsecret="" \
+        --discoveryuri="${kanidmIssuer}/.well-known/openid-configuration" \
+        --scope="openid email profile groups" \
         --unique-uid="0" \
         --mapping-uid="preferred_username" \
         --mapping-display-name="name" \

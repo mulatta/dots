@@ -5,6 +5,9 @@
 }:
 let
   domain = "mail.mulatta.io";
+  baseDomain = "mulatta.io";
+
+  kanidmTokenFile = "/var/lib/stalwart-mail/kanidm-token";
 in
 {
   clan.core.vars.generators = {
@@ -113,7 +116,7 @@ in
         fts = "rocksdb";
         blob = "rocksdb";
         lookup = "rocksdb";
-        directory = "lldap";
+        directory = "kanidm";
       };
 
       store.rocksdb = {
@@ -127,33 +130,29 @@ in
         store = "rocksdb";
       };
 
-      directory.lldap = {
+      # Kanidm LDAP directory
+      directory.kanidm = {
         type = "ldap";
-        url = "ldap://127.0.0.1:3890";
+        url = "ldap://127.0.0.1:3636";
         timeout = "15s";
-        base-dn = "dc=mulatta,dc=io";
+        base-dn = "dc=${baseDomain}";
 
-        # Service account for searches and user authentication via LDAP bind
         bind = {
-          dn = "uid=admin,ou=people,dc=mulatta,dc=io";
-          secret = "%{file:${config.clan.core.vars.generators.lldap-secrets.files."admin-password".path}}%";
-          # User authentication via LDAP bind (required for lldap)
-          # Uses "lookup" method: search for user DN first, then bind as user
+          dn = "dn=token";
+          secret = "%{file:${kanidmTokenFile}}%";
           auth.method = "lookup";
         };
 
         filter = {
-          name = "(&(|(uid=?)(mail=?))(objectClass=person))";
-          email = "(&(|(uid=?)(mail=?))(objectClass=person))";
+          name = "(&(objectClass=person)(|(uid=?)(spn=?)(name=?)(mail=?)))";
+          email = "(&(objectClass=person)(mail=?))";
         };
 
         attributes = {
-          name = "uid";
+          name = "name";
           email = "mail";
-          description = "displayName";
-          groups = "memberOf";
-          # For OAuth token generation when using bind auth (lldap doesn't expose userPassword)
-          secret-changed = "modifyTimestamp";
+          description = "displayname";
+          groups = "memberof";
         };
       };
 
@@ -175,7 +174,7 @@ in
           directory = [
             {
               "if" = "listener != 'smtp'";
-              "then" = "'lldap'";
+              "then" = "'kanidm'";
             }
             { "else" = false; }
           ];
@@ -245,12 +244,8 @@ in
     };
   };
 
-  # Grant stalwart access to nginx ACME certs and LLDAP bind password
-  # ACME certs are owned by acme:nginx, so we need nginx group
-  users.users.stalwart-mail.extraGroups = [
-    "nginx"
-    "lldap-bind"
-  ];
+  # Grant stalwart access to nginx ACME certs
+  users.users.stalwart-mail.extraGroups = [ "nginx" ];
 
   # Reload stalwart when certs are renewed
   security.acme.certs.${domain}.reloadServices = [ "stalwart-mail.service" ];
@@ -259,9 +254,12 @@ in
     after = [
       "acme-${domain}.service"
       "acme-finished-${domain}.target"
-      "sops-nix.service"
+      "kanidm.service"
     ];
-    wants = [ "acme-finished-${domain}.target" ];
+    wants = [
+      "acme-finished-${domain}.target"
+      "kanidm.service"
+    ];
     serviceConfig = {
       ProtectClock = true;
       ProtectKernelLogs = true;

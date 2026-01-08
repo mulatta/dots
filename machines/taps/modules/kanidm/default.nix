@@ -24,6 +24,9 @@ in
       origin = "https://${domain}";
       bindaddress = "${bindAddress}:${toString port}";
 
+      # LDAP server for IMAP/SMTP authentication (Stalwart, etc.)
+      ldapbindaddress = "127.0.0.1:3636";
+
       # TLS via ACME (nginx handles public TLS, kanidm uses self-signed internally)
       # For direct TLS, use ACME certs:
       tls_chain = "/var/lib/acme/${domain}/fullchain.pem";
