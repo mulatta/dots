@@ -2,12 +2,16 @@
 { pkgs, ... }:
 {
   imports = [
-    ./base.nix
-    ../modules/hyprland
+    ../modules/mail
     ../modules/stylix.nix
+    ../modules/thunderbird.nix
   ];
 
-  home.packages = [
+  home.packages = with pkgs; [
     pkgs.bitwarden-desktop
+
+    mpv
+    yt-dlp
+    graphicsmagick
   ];
 }

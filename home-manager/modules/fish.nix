@@ -3,12 +3,13 @@
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
-       fish_config theme choose "Catppuccin Mocha"
-
        ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
        set -gx SHELL ${pkgs.fish}/bin/fish
        set -gx PATH /run/wrappers/bin /run/current-system/sw/bin /usr/bin /bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin /usr/local/bin ~/.local/bin $PATH
+
+       # nh flake path
+       set -gx NH_FLAKE "$HOME/dots"
 
        # fifc setup
        set -Ux fifc_editor hx
@@ -75,6 +76,7 @@
 
       # abandon
       ja = "jj abandon";
+      jabs = "jj absorb";
 
       # bookmark
       jbs = "jj bookmark set";
@@ -83,6 +85,7 @@
       jbd = "jj bookmark delete";
       jbf = "jj bookmark forget";
       jbm = "jj bookmark move";
+      jbr = "jj bookmark rename";
 
       # log
       jl = "jj log";
@@ -126,6 +129,9 @@
       # squash
       jsq = "jj squash";
 
+      # fix
+      jfx = "jj fix";
+
       # describe
       jd = "jj describe";
       jdm = "jj describe -m";
@@ -166,22 +172,13 @@
       zjka = "zellij ka";
       zjda = "zellij da";
 
-      tmpd = "export TMP=$(mktemp -d) && cd $TMP";
+      tmpd = "cd $(mktemp -d)";
     };
 
     shellAbbrs = shellAliases;
 
     functions = {
       fish_greeting = "";
-
-      hm = ''
-        if test -d "$HOME/dots"
-          nix run "$HOME/dots#hm" -- $argv
-        else
-          nix run "github:mulatta/dots#hm" -- $argv
-        end
-      '';
-
       mk = ''
         if test (count $argv) -eq 0
           echo "Usage: mk <directory_name>"
@@ -294,6 +291,4 @@
       }
     ];
   };
-
-  catppuccin.fish.enable = true;
 }

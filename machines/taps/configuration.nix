@@ -54,7 +54,7 @@
   environment.systemPackages = with pkgs; [
     vim
     git
-    htop
+    btop
   ];
 
   programs.fish.enable = true;
