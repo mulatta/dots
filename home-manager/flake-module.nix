@@ -1,5 +1,4 @@
 {
-  config,
   self,
   inputs,
   ...
@@ -7,6 +6,7 @@
 {
   perSystem =
     {
+      config,
       pkgs,
       lib,
       system,
