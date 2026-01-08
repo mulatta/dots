@@ -54,8 +54,13 @@ in
     [messages]
     Q = :quit<Enter>
     <C-o> = :pipe -m open-in-thunderbird<Enter>
+    # Override delete to move to Trash (for mbsync sync)
+    d = :move Trash<Enter>
+    D = :delete<Enter>
 
     [view]
     <C-o> = :pipe -m open-in-thunderbird<Enter>
+    d = :move Trash<Enter>
+    D = :delete<Enter>
   '';
 }
