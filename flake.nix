@@ -1,9 +1,6 @@
 {
   inputs = {
     # keep-sorted start
-    apple-silicon.inputs.nixpkgs.follows = "nixpkgs";
-    apple-silicon.url = "github:nix-community/nixos-apple-silicon";
-    authentik-nix.url = "github:nix-community/authentik-nix";
     catppuccin.url = "github:catppuccin/nix";
     clan-core.inputs.disko.follows = "disko";
     clan-core.inputs.flake-parts.follows = "flake-parts";
@@ -22,11 +19,6 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     niks3.inputs.nixpkgs.follows = "nixpkgs";
     niks3.url = "github:Mic92/niks3";
-    nix-ai-tools.url = "github:numtide/nix-ai-tools";
-    nix-casks.inputs.flake-parts.follows = "flake-parts";
-    nix-casks.inputs.nixpkgs.follows = "nixpkgs";
-    nix-casks.inputs.treefmt-nix.follows = "treefmt-nix";
-    nix-casks.url = "github:atahanyorganci/nix-casks/archive";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
