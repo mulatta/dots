@@ -1,4 +1,5 @@
 {
+  config,
   self,
   inputs,
   ...
@@ -38,7 +39,7 @@
       # Hostname → profile mapping
       profileMap = {
         "seungwon@rhesus" = "macos";
-        "seungwon@psi" = "desktop";
+        "seungwon@psi" = "base";
         "seungwon@malt" = "desktop";
       };
 
@@ -67,8 +68,8 @@
                 else
                   echo "    Already exists, fetching and updating..."
                   cd "$DOTFILES_DIR"
-                  jj git fetch
-                  jj new main@origin --no-edit
+                  jj git fetch --quiet
+                  jj new main@origin --no-edit --quiet
                 fi
 
                 echo "==> Activating home-manager..."
@@ -80,6 +81,7 @@
           in
           "${script}/bin/bootstrap-dotfiles";
       };
+      apps.default = config.apps.bootstrap;
 
       legacyPackages.homeConfigurations =
         let
