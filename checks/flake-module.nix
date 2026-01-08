@@ -1,16 +1,29 @@
+{ self, ... }:
 {
   perSystem =
     {
-      self',
       lib,
+      system,
       ...
     }:
     {
       checks =
         let
-          devShells = lib.mapAttrs' (n: lib.nameValuePair "devShell-${n}") self'.devShells;
-          packages = lib.mapAttrs' (n: lib.nameValuePair "packages-${n}") self'.packages;
+          # System configuration checks (filter by current system)
+          nixosChecks =
+            lib.mapAttrs' (name: cfg: lib.nameValuePair "nixos-${name}" cfg.config.system.build.toplevel)
+              (
+                lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) (
+                  self.nixosConfigurations or { }
+                )
+              );
+
+          darwinChecks = lib.mapAttrs' (name: cfg: lib.nameValuePair "darwin-${name}" cfg.system) (
+            lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) (
+              self.darwinConfigurations or { }
+            )
+          );
         in
-        { inherit (self') formatter; } // devShells // packages;
+        nixosChecks // darwinChecks;
     };
 }
