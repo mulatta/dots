@@ -13,6 +13,7 @@
           pkgs.sops
           pkgs.ssh-to-age
           pkgs.age
+          pkgs.awscli2
         ];
       };
     };
