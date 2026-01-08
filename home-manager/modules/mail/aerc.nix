@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   ...
 }:
 let
@@ -29,7 +30,7 @@ in
         unsafe-accounts-conf = true;
         pgp-provider = "auto";
         disable-ipc = true;
-        log-file = "~/.local/state/aerc.log";
+        log-file = "${config.xdg.stateHome}/aerc.log";
       };
       ui = {
         styleset-name = "dracula";
