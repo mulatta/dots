@@ -1,4 +1,7 @@
 {
+  # Export default nixosModule for use by all NixOS machines
+  flake.nixosModules.default = ../nixosModules/default.nix;
+
   clan = {
     meta.name = "seungwon";
 

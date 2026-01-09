@@ -36,11 +36,6 @@
     };
   };
 
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "acme@mulatta.io";
-  };
-
   networking.firewall.allowedTCPPorts = [
     80
     443

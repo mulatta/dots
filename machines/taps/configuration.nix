@@ -6,16 +6,12 @@
 }:
 {
   imports = [
+    self.nixosModules.default
     self.inputs.disko.nixosModules.disko
     self.inputs.srvos.nixosModules.server
-    self.inputs.srvos.nixosModules.mixins-nix-experimental
-    self.inputs.srvos.nixosModules.mixins-terminfo
-    ../../nixosModules/nix-daemon.nix
     ../../nixosModules/auditd.nix
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
-    ../../nixosModules/users.nix
-    ../../nixosModules/zerotier.nix
     ./modules/authelia
     ./modules/cloudflare-dns.nix
     ./modules/lldap
@@ -59,8 +55,6 @@
   ];
 
   programs.fish.enable = true;
-
-  srvos.flake = self;
 
   system.stateVersion = "25.05";
 }
