@@ -230,6 +230,64 @@ in
           "op"
           "log"
         ];
+
+        # Stack Workflow
+        nt = [
+          "new"
+          "trunk()"
+        ];
+        stack = [
+          "log"
+          "-r"
+          "stack()"
+        ];
+        open = [
+          "log"
+          "-r"
+          "open()"
+        ];
+        examine = [
+          "log"
+          "-r"
+          "@"
+          "-p"
+          "--git"
+        ];
+
+        # Rebase to trunk
+        rom = [
+          "rebase"
+          "-d"
+          "trunk()"
+        ];
+        sandwich = [
+          "rebase"
+          "-r"
+          "@"
+          "-d"
+          "trunk()"
+        ];
+        ram = [
+          "rebase"
+          "-s"
+          "all:roots(mutable())"
+          "-d"
+          "trunk()"
+        ];
+        consume = [
+          "squash"
+          "--from"
+          "@-"
+          "--into"
+          "@"
+        ];
+        eject = [
+          "squash"
+          "--from"
+          "@"
+          "--into"
+          "@-"
+        ];
       };
 
       signing = {
@@ -254,6 +312,17 @@ in
         "format_short_signature(signature)" = "signature.name()";
         "format_timestamp(timestamp)" = "timestamp.ago()";
         "format_short_id(id)" = "id.shortest(8)";
+      };
+
+      revset-aliases = {
+        "trunk()" = "main@origin | present(master@origin)";
+        "mine()" = "author(exact:${builtins.toJSON gitCfg.userEmail})";
+        "draft()" = "mutable() ~ ::remote_bookmarks()";
+        "stack()" = "trunk()..@";
+        "open()" = "stack() & draft()";
+        "wip()" = ''description(glob:"wip:*") | description(glob:"WIP:*")'';
+        "ready()" = "heads(stack()) & draft() & ~wip()";
+        "unpushed()" = "remote_bookmarks()..@";
       };
     };
   };
