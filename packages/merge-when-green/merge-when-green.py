@@ -3,16 +3,16 @@
 merge-when-green - PR workflow for jujutsu
 
 Features:
-- Auto-formatting with jmt + jj fix before push
-- Squash merge with auto-delete branch
+- Auto-formatting with jmt before push
+- Rebase merge with auto-delete branch
 - CI monitoring with real-time status
 - Rebase all local branches after merge
+- Auto branch: merge-when-green-<user> when no bookmark exists
 """
 
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 import time
@@ -70,18 +70,36 @@ def get_default_branch() -> str:
     return result.stdout.strip() or "main"
 
 
-def get_current_bookmark() -> str | None:
-    """Get bookmark pointing to current commit (@) or parent (@-) if @ is empty."""
-    # Try @ first, then @- (after jj commit, @ is empty)
+def get_current_bookmark(default_branch: str = "main") -> str | None:
+    """Get bookmark pointing to @ or @-. Prefer merge-when-green-* pattern."""
     for rev in ["@", "@-"]:
-        result = run(["jj", "log", "-r", rev, "--no-graph", "-T", "bookmarks"], capture=True, check=False)
+        result = run(
+            ["jj", "log", "-r", rev, "--no-graph", "-T", "bookmarks"],
+            capture=True,
+            check=False,
+        )
         if result.returncode != 0 or not result.stdout.strip():
             continue
 
-        # Parse bookmarks, filter out remote tracking ones
-        for bookmark in result.stdout.strip().split():
-            if "@" not in bookmark:  # Skip remote bookmarks like "main@origin"
-                return bookmark
+        # Filter out remote bookmarks (containing @) and default branch
+        bookmarks = [
+            b for b in result.stdout.strip().split()
+            if "@" not in b and b != default_branch
+        ]
+        if not bookmarks:
+            continue
+
+        # Prefer merge-when-green-* pattern (reusable branch)
+        for b in bookmarks:
+            if b.startswith("merge-when-green-"):
+                return b
+
+        # Multiple bookmarks: warn and use first
+        if len(bookmarks) > 1:
+            print_warning(f"Multiple bookmarks: {', '.join(bookmarks)}. Using: {bookmarks[0]}")
+
+        return bookmarks[0]
+
     return None
 
 
@@ -89,7 +107,18 @@ def is_commit_empty(rev: str) -> bool:
     """Check if a commit has no changes (empty)."""
     result = run(
         ["jj", "log", "-r", rev, "--no-graph", "-T", "empty"],
-        capture=True, check=False
+        capture=True,
+        check=False,
+    )
+    return result.stdout.strip() == "true"
+
+
+def has_conflict(rev: str) -> bool:
+    """Check if a commit has conflicts."""
+    result = run(
+        ["jj", "log", "-r", rev, "--no-graph", "-T", "conflict"],
+        capture=True,
+        check=False,
     )
     return result.stdout.strip() == "true"
 
@@ -98,67 +127,60 @@ def get_description(rev: str) -> str:
     """Get first line of commit description."""
     result = run(
         ["jj", "log", "-r", rev, "--no-graph", "-T", "description.first_line()"],
-        capture=True, check=False
+        capture=True,
+        check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
-class TargetRevisionError(Exception):
-    """Raised when target revision cannot be determined."""
-    pass
+def validate_state() -> None:
+    """Check for unsupported states before proceeding."""
+    # Conflict check
+    if has_conflict("@"):
+        print_error("@ has conflicts. Resolve with: jj resolve")
+        sys.exit(1)
+
+    # Empty check (both @ and @-)
+    if is_commit_empty("@") and is_commit_empty("@-"):
+        print_error("No changes to push. Create a commit first.")
+        sys.exit(1)
 
 
 def get_target_revision(title_provided: bool = False) -> str:
-    """Get the revision to use for PR.
-
-    Logic:
-    - @ has description → @
-    - @ has changes but no description → error (unless --title provided)
-    - @ is empty and has no description → @-
-
-    Raises:
-        TargetRevisionError: if @ has changes but no description and no --title
-    """
+    """Get the revision to use for PR."""
     desc = get_description("@")
     empty = is_commit_empty("@")
 
-    # @ has description → use @
     if desc:
         return "@"
 
-    # @ has changes but no description
     if not empty:
         if title_provided:
-            # --title provided, ok to proceed with @
             return "@"
-        raise TargetRevisionError(
+        print_error(
             "@ has changes but no description.\n"
             "Options:\n"
             "  1. jj describe -m 'your message'\n"
             "  2. merge-when-green --title 'your title'"
         )
+        sys.exit(1)
 
-    # @ is empty (no changes, no description) → use @-
     return "@-"
 
 
-def create_bookmark(name: str | None = None, title_provided: bool = False) -> str:
-    """Create bookmark from commit description if not provided."""
+def get_or_create_bookmark(default_branch: str = "main", title_provided: bool = False) -> str:
+    """Get existing bookmark or create merge-when-green-<user>."""
+    # 1. Check for existing bookmark (prefers merge-when-green-*)
+    current = get_current_bookmark(default_branch)
+    if current:
+        return current
+
+    # 2. No bookmark → use merge-when-green-<user>
+    name = f"merge-when-green-{os.environ.get('USER', 'user')}"
     rev = get_target_revision(title_provided=title_provided)
 
-    if name:
-        run(["jj", "bookmark", "create", name, "-r", rev])
-        return name
-
-    # Generate name from commit description or title
-    desc = get_description(rev)
-
-    # Convert to branch name: "feat(foo): bar baz" -> "feat-foo-bar-baz"
-    name = re.sub(r"[^a-zA-Z0-9]+", "-", desc.lower()).strip("-")[:50]
-    if not name:
-        name = f"pr-{os.environ.get('USER', 'user')}"
-
-    run(["jj", "bookmark", "create", name, "-r", rev])
+    # Use 'set' to create or move the bookmark
+    run(["jj", "bookmark", "set", name, "-r", rev], check=False)
     return name
 
 
@@ -171,17 +193,14 @@ def sync_repo(default_branch: str) -> None:
 
 
 def run_format_check() -> bool:
-    """Run jmt for formatting (syncs config + runs jj fix)."""
+    """Run jmt for formatting."""
     print_header("Checking formatting...")
-
-    print_info("Running jmt...")
     result = run(["jmt"], check=False, capture=True)
     if result.returncode != 0:
         print_error("jmt failed")
         if result.stderr:
             print_error(result.stderr.strip())
         return False
-
     print_success("Formatting OK")
     return True
 
@@ -192,7 +211,6 @@ def has_changes(default_branch: str) -> bool:
         ["jj", "log", "-r", f"{default_branch}@origin..@", "--no-graph", "-T", "commit_id"],
         capture=True,
     )
-    # Filter out empty lines
     commits = [line for line in result.stdout.strip().split("\n") if line.strip()]
     return len(commits) > 0
 
@@ -228,46 +246,19 @@ def pr_exists(bookmark: str) -> bool:
         return False
 
 
-CONVENTIONAL_PREFIXES = {"feat", "fix", "chore", "docs", "refactor", "test", "ci", "perf", "style", "build"}
-
-
-def bookmark_to_title(bookmark: str) -> str:
-    """Convert bookmark name to PR title.
-
-    feat/add-jmt → feat: add jmt
-    fix/login-bug → fix: login bug
-    feat-add-jmt → feat: add jmt
-    add-jmt → add jmt
-    """
-    # Handle / separator
-    if "/" in bookmark:
-        prefix, rest = bookmark.split("/", 1)
-        return f"{prefix}: {rest.replace('-', ' ')}"
-
-    # Handle - separator with conventional prefix
-    parts = bookmark.split("-", 1)
-    if len(parts) == 2 and parts[0] in CONVENTIONAL_PREFIXES:
-        return f"{parts[0]}: {parts[1].replace('-', ' ')}"
-
-    return bookmark.replace("-", " ")
-
-
-def create_pr(bookmark: str, title: str | None = None, dry_run: bool = False) -> bool:
-    """Create PR with squash merge and auto-delete."""
-    # Title: explicit > bookmark-derived
+def create_pr(bookmark: str, title: str | None = None) -> bool:
+    """Create PR."""
+    # Use commit description as title if not provided
     if not title:
-        title = bookmark_to_title(bookmark)
+        title = get_description(get_target_revision(title_provided=False))
+    if not title:
+        title = bookmark
 
     print_header(f"Creating PR: {title}")
-
-    if dry_run:
-        print_warning("[dry-run] Would create PR (body from --fill)")
-        return True
-
     result = run(
         [
             "gh", "pr", "create",
-            "--fill",  # Body from commit messages
+            "--fill",
             "--title", title,
             "--head", bookmark,
         ],
@@ -276,16 +267,15 @@ def create_pr(bookmark: str, title: str | None = None, dry_run: bool = False) ->
     if result.returncode != 0:
         print_error("PR creation failed")
         return False
-
     print_success("PR created")
     return True
 
 
 def enable_auto_merge(bookmark: str) -> bool:
-    """Enable auto-merge with squash strategy."""
-    print_info("Enabling auto-merge (squash)...")
+    """Enable auto-merge with rebase strategy."""
+    print_info("Enabling auto-merge (rebase)...")
     result = run(
-        ["gh", "pr", "merge", bookmark, "--auto", "--squash", "--delete-branch"],
+        ["gh", "pr", "merge", bookmark, "--auto", "--rebase", "--delete-branch"],
         check=False,
     )
     if result.returncode != 0:
@@ -356,17 +346,14 @@ def wait_for_merge(bookmark: str) -> bool:
             print_error("PR was closed without merging")
             return False
 
-        # Check auto-merge status
         if not pr_data.get("autoMergeRequest"):
             print_error("Auto-merge was disabled")
             return False
 
-        # Check for conflicts
         if pr_data.get("mergeable") == "CONFLICTING":
             print_error("PR has merge conflicts")
             return False
 
-        # Show CI status
         checks = pr_data.get("statusCheckRollup", [])
         passed, failed, pending = count_checks(checks)
 
@@ -378,7 +365,6 @@ def wait_for_merge(bookmark: str) -> bool:
         )
         print(status_line)
 
-        # Check for failures
         if failed > 0 and pending == 0:
             print_error(f"\n{failed} checks failed")
             return False
@@ -391,7 +377,6 @@ def rebase_all_branches(default_branch: str) -> None:
     print_header("Rebasing all branches...")
     run(["jj", "git", "fetch"])
 
-    # Rebase only mutable roots (excludes remote tracking branches)
     result = run(
         [
             "jj", "rebase",
@@ -411,26 +396,6 @@ def delete_bookmark(bookmark: str) -> None:
     run(["jj", "bookmark", "delete", bookmark], check=False)
 
 
-def get_bookmark_commits(bookmark: str, default_branch: str) -> list[str]:
-    """Get change IDs for commits in bookmark range."""
-    result = run(
-        ["jj", "log", "-r", f"{default_branch}@origin..{bookmark}",
-         "--no-graph", "-T", 'change_id ++ "\n"'],
-        capture=True,
-        check=False,
-    )
-    if result.returncode != 0 or not result.stdout.strip():
-        return []
-    return [cid for cid in result.stdout.strip().split("\n") if cid]
-
-
-def abandon_merged_commits(change_ids: list[str]) -> None:
-    """Abandon commits that were squash-merged into main."""
-    if change_ids:
-        print_info(f"Abandoning {len(change_ids)} merged commits...")
-        run(["jj", "abandon"] + change_ids, check=False)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Create PR and merge when CI passes (jujutsu workflow)"
@@ -440,51 +405,23 @@ def main() -> int:
         help="Don't wait for CI checks to complete"
     )
     parser.add_argument(
-        "--no-format", action="store_true",
-        help="Skip formatting check (jmt + jj fix)"
-    )
-    parser.add_argument(
-        "--sync", "-s", action="store_true",
-        help="Just sync (fetch + rebase all branches)"
-    )
-    parser.add_argument(
         "--title", "-t",
         help="PR title (default: commit message)"
-    )
-    parser.add_argument(
-        "--bookmark", "-b",
-        help="Bookmark name (default: auto-detect or create)"
-    )
-    parser.add_argument(
-        "--dry-run", "-n", action="store_true",
-        help="Show what would be done without making changes"
-    )
-    parser.add_argument(
-        "--keep-commits", action="store_true",
-        help="Don't abandon original commits after merge"
     )
     args = parser.parse_args()
 
     default_branch = get_default_branch()
     print_info(f"Target: {Colors.BOLD}{default_branch}{Colors.RESET}")
 
-    # Sync only mode
-    if args.sync:
-        rebase_all_branches(default_branch)
-        return 0
+    # 0. Validate state
+    validate_state()
 
-    # 1. Sync (skip in dry-run)
-    if args.dry_run:
-        print_warning("[dry-run] Would sync repository (fetch + rebase)")
-    else:
-        sync_repo(default_branch)
+    # 1. Sync
+    sync_repo(default_branch)
 
-    # 2. Format check (skip in dry-run)
-    if not args.no_format:
-        if args.dry_run:
-            print_warning("[dry-run] Would run format check (jmt)")
-        elif not run_format_check():
-            return 1
+    # 2. Format check
+    if not run_format_check():
+        return 1
 
     # 3. Check for changes
     if not has_changes(default_branch):
@@ -493,65 +430,25 @@ def main() -> int:
 
     # 4. Get or create bookmark
     title_provided = bool(args.title)
-    bookmark = args.bookmark or get_current_bookmark()
-    created_bookmark = False
-    if not bookmark:
-        try:
-            bookmark = create_bookmark(title_provided=title_provided)
-            created_bookmark = True
-        except TargetRevisionError as e:
-            print_error(str(e))
-            return 1
-        print_info(f"Created bookmark: {bookmark}")
-    else:
-        print_info(f"Using bookmark: {bookmark}")
-
-    # Dry-run: show what would happen, then cleanup
-    if args.dry_run:
-        # Show commits that will be pushed
-        commits = get_bookmark_commits(bookmark, default_branch)
-        print_header("Commits to push:")
-        result = run(
-            ["jj", "log", "-r", f"{default_branch}@origin..{bookmark}",
-             "--no-graph", "-T", '"  " ++ change_id.shortest(8) ++ " " ++ description.first_line() ++ "\n"'],
-            capture=True, check=False,
-        )
-        if result.stdout.strip():
-            print(result.stdout.strip())
-
-        print_warning(f"\n[dry-run] Would push bookmark: {bookmark}")
-        create_pr(bookmark, args.title, dry_run=True)
-        print_warning("[dry-run] Would enable auto-merge and wait")
-        if args.keep_commits:
-            print_info(f"[dry-run] Would keep {len(commits)} commits (--keep-commits)")
-        else:
-            print_warning(f"[dry-run] Would abandon {len(commits)} commits after merge")
-
-        # Cleanup: delete temporarily created bookmark
-        if created_bookmark:
-            delete_bookmark(bookmark)
-            print_info(f"Cleaned up temporary bookmark: {bookmark}")
-        return 0
+    bookmark = get_or_create_bookmark(default_branch, title_provided=title_provided)
+    print_info(f"Using bookmark: {bookmark}")
 
     # 5. Push
     if not push_bookmark(bookmark):
         return 1
 
-    # Save commits for later cleanup (before merge)
-    commits_to_abandon = get_bookmark_commits(bookmark, default_branch)
-
-    # 6. Create PR or enable auto-merge on existing
+    # 6. Create PR or use existing
     if pr_exists(bookmark):
         print_success("PR already exists")
     else:
-        if not create_pr(bookmark, args.title, dry_run=False):
+        if not create_pr(bookmark, args.title):
             return 1
 
-    # 7. Check if already merged, otherwise enable auto-merge and wait
+    # 7. Enable auto-merge (rebase strategy)
     pr_data = get_pr_status(bookmark)
-    already_merged = pr_data and pr_data.get("state") == "MERGED"
+    merged = pr_data and pr_data.get("state") == "MERGED"
 
-    if already_merged:
+    if merged:
         print_success("PR already merged!")
     else:
         enable_auto_merge(bookmark)
@@ -561,14 +458,17 @@ def main() -> int:
             if not wait_for_merge(bookmark):
                 return 1
             print_success("\nPR merged!")
+            merged = True
+        else:
+            # Re-check if PR was instantly merged
+            pr_data = get_pr_status(bookmark)
+            merged = pr_data and pr_data.get("state") == "MERGED"
 
-    # 9. Cleanup and rebase all (always run after merge)
-    if already_merged or not args.no_wait:
+    # 9. Cleanup and rebase
+    if merged:
         delete_bookmark(bookmark)
-        if not args.keep_commits:
-            abandon_merged_commits(commits_to_abandon)
-        rebase_all_branches(default_branch)
-        print_success("Done!")
+    rebase_all_branches(default_branch)
+    print_success("Done!")
 
     return 0
 
