@@ -66,6 +66,9 @@ in
 
   xdg.enable = true;
 
+  # Disable dconf on non-desktop systems (no dbus session available)
+  dconf.enable = lib.mkDefault false;
+
   home.enableNixpkgsReleaseCheck = false;
 
   # better eval time
