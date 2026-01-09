@@ -1,8 +1,44 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  ...
+}:
+let
+  c = config.lib.stylix.colors.withHashtag;
+in
 {
   programs.fish = rec {
     enable = true;
     interactiveShellInit = ''
+       # Colors from stylix (base16)
+       set -U fish_color_normal ${c.base05}
+       set -U fish_color_command ${c.base0D}
+       set -U fish_color_keyword ${c.base0E}
+       set -U fish_color_quote ${c.base0B}
+       set -U fish_color_redirection ${c.base0E}
+       set -U fish_color_end ${c.base09}
+       set -U fish_color_comment ${c.base03}
+       set -U fish_color_error ${c.base08}
+       set -U fish_color_param ${c.base05}
+       set -U fish_color_option ${c.base0E}
+       set -U fish_color_operator ${c.base0C}
+       set -U fish_color_escape ${c.base09}
+       set -U fish_color_autosuggestion ${c.base04}
+       set -U fish_color_cwd ${c.base0A}
+       set -U fish_color_cwd_root ${c.base08}
+       set -U fish_color_user ${c.base0C}
+       set -U fish_color_host ${c.base0D}
+       set -U fish_color_host_remote ${c.base0A}
+       set -U fish_color_status ${c.base08}
+       set -U fish_color_cancel ${c.base08}
+       set -U fish_color_search_match --background=${c.base02}
+       set -U fish_color_selection --background=${c.base02}
+       set -U fish_color_valid_path --underline
+       set -U fish_pager_color_progress ${c.base0D}
+       set -U fish_pager_color_prefix ${c.base0E}
+       set -U fish_pager_color_completion ${c.base05}
+       set -U fish_pager_color_description ${c.base03}
+
        ${pkgs.nix-your-shell}/bin/nix-your-shell fish | source
 
        set -gx SHELL ${pkgs.fish}/bin/fish
@@ -16,6 +52,9 @@
        set -U fifc_keybinding \cx
        bind \cx _fifc
        bind -M insert \cx _fifc
+
+       # Enable helix-style key bindings (set as universal variable)
+       set -U fish_key_bindings fish_helix_key_bindings
 
        set -U fifc_bat_opts --style=numbers --color=always
        set -U fifc_fd_opts --hidden --color=always --follow --exclude .git

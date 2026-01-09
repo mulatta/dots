@@ -20,6 +20,8 @@
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
 
+    opacity.terminal = 0.9;
+
     # GUI targets disabled by default (override in desktop/macos profiles)
     targets = {
       firefox.enable = lib.mkDefault false;
