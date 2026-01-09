@@ -53,6 +53,9 @@ in
        bind \cx _fifc
        bind -M insert \cx _fifc
 
+       # Enable helix-style key bindings (set as universal variable)
+       set -U fish_key_bindings fish_helix_key_bindings
+
        set -U fifc_bat_opts --style=numbers --color=always
        set -U fifc_fd_opts --hidden --color=always --follow --exclude .git
        set -U fifc_exa_opts --icons --tree --git --group-directories-first --header --all
