@@ -292,7 +292,7 @@ in
 
       signing = {
         backend = "ssh";
-        behaviour = "own";
+        behaviour = "true";
         key = gitCfg.signing.key;
         backends.ssh = {
           program = gitCfg.signing.signer;
