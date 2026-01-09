@@ -4,6 +4,25 @@ resource "cloudflare_r2_bucket" "cache" {
   location   = "APAC"
 }
 
+# Abort incomplete multipart uploads after 1 day (minimum)
+resource "cloudflare_r2_bucket_lifecycle" "cache" {
+  account_id  = local.account_id
+  bucket_name = cloudflare_r2_bucket.cache.name
+  rules = [{
+    id      = "abort-incomplete-multipart-uploads"
+    enabled = true
+    conditions = {
+      prefix = ""
+    }
+    abort_multipart_uploads_transition = {
+      condition = {
+        max_age = 21600 # 1 day in seconds
+        type    = "Age"
+      }
+    }
+  }]
+}
+
 # Public access via custom domain
 # Note: R2 API token (S3 credentials) must be created manually in Dashboard
 resource "cloudflare_r2_custom_domain" "cache" {
