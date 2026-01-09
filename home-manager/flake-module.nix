@@ -31,6 +31,7 @@
                 inputs.nix-index-database.homeModules.nix-index
                 { programs.nix-index-database.comma.enable = true; }
                 inputs.stylix.homeModules.stylix
+                inputs.catppuccin.homeModules.catppuccin
               ];
             }
           ];
