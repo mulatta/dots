@@ -17,8 +17,6 @@
       alpha-blending = "linear";
       auto-update-channel = "tip";
       background-blur = true;
-      background-opacity = 0.9;
-      theme = "nightfox";
 
       # ===== Clipboard =====
       clipboard-paste-protection = false;
@@ -32,13 +30,13 @@
       cursor-color = "#C4A7E7";
 
       # ===== Font =====
-      font-family = "BerkeleyMono Nerd Font";
+      font-family = lib.mkForce "BerkeleyMono Nerd Font";
       font-feature = [
         "calt"
         "liga"
         "zero"
       ];
-      font-size = 15;
+      font-size = lib.mkForce 15;
       font-codepoint-map = [
         "U+e0b0-U+e0b3,U+e0b4-U+e0c8,U+e0cc-U+e0d4,U+e0ca=JetBrainsMono Nerd Font Mono"
         "U+e5fa-U+e6b1=JetBrainsMono Nerd Font Mono"

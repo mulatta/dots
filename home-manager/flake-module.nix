@@ -40,7 +40,7 @@
       profileMap = {
         "seungwon@rhesus" = "macos";
         "seungwon@psi" = "base";
-        "seungwon@malt" = "desktop";
+        "seungwon@malt" = "base";
       };
 
       runtimeInputs = with pkgs; [
