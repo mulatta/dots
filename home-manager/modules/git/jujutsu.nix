@@ -15,7 +15,7 @@ in
 
       ui = {
         pager = "less -FRX";
-        show-cryptographix-signatures = true;
+        show-cryptographic-signatures = true;
         default-command = [
           "log"
           "--reversed"
@@ -292,10 +292,11 @@ in
 
       signing = {
         backend = "ssh";
-        behaviour = "true";
+        behaviour = "force";
         key = gitCfg.signing.key;
         backends.ssh = {
           program = gitCfg.signing.signer;
+          allowed-signers = "${config.home.homeDirectory}/.ssh/allowed_signers";
         };
       };
 
