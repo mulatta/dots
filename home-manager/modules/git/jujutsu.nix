@@ -23,6 +23,9 @@ in
       };
 
       aliases = {
+        st = [ "status" ];
+
+        # Log
         l = [
           "log"
           "-r"
@@ -31,8 +34,202 @@ in
           "builtin_log_compact"
           "--reversed"
         ];
+        lr = [
+          "log"
+          "-r"
+        ];
+        la = [
+          "log"
+          "-r"
+          "all()"
+        ];
+
+        # Show
         s = [ "show" ];
+        ss = [
+          "show"
+          "--summary"
+        ];
+        sg = [
+          "show"
+          "--git"
+        ];
+
+        # Describe
         d = [ "describe" ];
+        dm = [
+          "describe"
+          "-m"
+        ];
+
+        # Diff
+        df = [ "diff" ];
+        dfs = [
+          "diff"
+          "--stat"
+        ];
+        dfc = [
+          "diff"
+          "--color-words"
+        ];
+        dfg = [
+          "diff"
+          "--git"
+        ];
+
+        # New
+        n = [ "new" ];
+        nn = [
+          "new"
+          "--no-edit"
+        ];
+        na = [
+          "new"
+          "-A"
+        ];
+        nb = [
+          "new"
+          "-B"
+        ];
+        nna = [
+          "new"
+          "--no-edit"
+          "-A"
+        ];
+        nnb = [
+          "new"
+          "--no-edit"
+          "-B"
+        ];
+
+        # Edit / Navigation
+        e = [ "edit" ];
+        pr = [ "prev" ];
+        nx = [ "next" ];
+
+        # Bookmark
+        bs = [
+          "bookmark"
+          "set"
+        ];
+        bl = [
+          "bookmark"
+          "list"
+        ];
+        bt = [
+          "bookmark"
+          "track"
+        ];
+        bd = [
+          "bookmark"
+          "delete"
+        ];
+        bf = [
+          "bookmark"
+          "forget"
+        ];
+        bm = [
+          "bookmark"
+          "move"
+        ];
+        br = [
+          "bookmark"
+          "rename"
+        ];
+
+        # Git
+        gf = [
+          "git"
+          "fetch"
+        ];
+        gp = [
+          "git"
+          "push"
+        ];
+        gpa = [
+          "git"
+          "push"
+          "--all"
+        ];
+        gpb = [
+          "git"
+          "push"
+          "--bookmark"
+        ];
+        gpc = [
+          "git"
+          "push"
+          "--change"
+        ];
+        gpd = [
+          "git"
+          "push"
+          "--deleted"
+        ];
+        gcl = [
+          "git"
+          "clone"
+        ];
+
+        # Rebase
+        rb = [ "rebase" ];
+        rbr = [
+          "rebase"
+          "-r"
+        ];
+        rbs = [
+          "rebase"
+          "-s"
+        ];
+        rbd = [
+          "rebase"
+          "-d"
+        ];
+
+        # Resolve
+        rs = [ "resolve" ];
+        rsr = [
+          "resolve"
+          "-r"
+        ];
+        rsl = [
+          "resolve"
+          "--list"
+        ];
+
+        # Squash / Split / Fix
+        sq = [ "squash" ];
+        sp = [ "split" ];
+        fx = [ "fix" ];
+
+        # Abandon / Absorb
+        a = [ "abandon" ];
+        abs = [ "absorb" ];
+
+        # File
+        fa = [
+          "file"
+          "annotate"
+        ];
+        fl = [
+          "file"
+          "list"
+        ];
+        fc = [
+          "file"
+          "chmod"
+        ];
+        fs = [
+          "file"
+          "show"
+        ];
+
+        # History / Operation
+        el = [ "evolog" ];
+        ol = [
+          "op"
+          "log"
+        ];
       };
 
       signing = {
