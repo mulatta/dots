@@ -24,6 +24,7 @@
 
     # GUI targets disabled by default (override in desktop/macos profiles)
     targets = {
+      fish.enable = false;
       firefox.enable = lib.mkDefault false;
       gnome.enable = lib.mkDefault false;
       gtk.enable = lib.mkDefault false;
