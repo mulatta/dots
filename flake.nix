@@ -27,9 +27,6 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nur.inputs.flake-parts.follows = "flake-parts";
-    nur.inputs.nixpkgs.follows = "nixpkgs";
-    nur.url = "github:nix-community/NUR";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.inputs.nixpkgs.follows = "nixpkgs";
     srvos.url = "github:nix-community/srvos";
