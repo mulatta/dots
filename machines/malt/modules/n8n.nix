@@ -6,23 +6,19 @@
 }:
 let
   clanLib = self.inputs.clan-core.lib;
-
   wgPrefix = clanLib.getPublicValue {
     flake = config.clan.core.settings.directory;
     machine = "taps";
     generator = "wireguard-network-wireguard";
     file = "prefix";
   };
-
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${wgPrefix}:${maltSuffix}";
 
-  # Hook file for header-based authentication (Mic92 pattern)
   hooksFile = pkgs.writeText "n8n-hooks.js" ''
     const { resolve } = require('path');
     const fs = require('fs');
 
-    // Find the router module dynamically by scanning node_modules/.pnpm
     const n8nBasePath = '${pkgs.n8n}/lib/n8n';
     const pnpmDir = resolve(n8nBasePath, 'node_modules/.pnpm');
     const routerDir = fs.readdirSync(pnpmDir).find(dir => dir.startsWith('router@'));
@@ -46,7 +42,6 @@ let
                         if (req.cookies?.['n8n-auth']) return next()
                         if (!process.env.N8N_FORWARD_AUTH_HEADER) return next()
 
-                        // SECURITY: Only enable header-based auth for specific hostname
                         const allowedHost = process.env.N8N_SSO_HOSTNAME;
                         if (req.headers.host !== allowedHost) return next()
 
@@ -82,14 +77,11 @@ in
       N8N_DIAGNOSTICS_ENABLED = "false";
       N8N_EDITOR_BASE_URL = "https://n8n.mulatta.io";
       WEBHOOK_URL = "https://n8n.mulatta.io";
-
-      # SSO configuration (Mic92 pattern)
       EXTERNAL_HOOK_FILES = "${hooksFile}";
-      N8N_FORWARD_AUTH_HEADER = "X-Email";
+      N8N_FORWARD_AUTH_HEADER = "X-Auth-Request-Email";
       N8N_SSO_HOSTNAME = "n8n.mulatta.io";
     };
   };
 
-  # Allow n8n access only via WireGuard
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 5678 ];
 }
