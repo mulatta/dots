@@ -129,6 +129,23 @@ in
             "groups"
           ];
         };
+
+        # n8n via oauth2-proxy
+        n8n = {
+          displayName = "n8n Automation";
+          originUrl = [
+            "https://n8n.${baseDomain}"
+            "https://n8n.${baseDomain}/oauth2/callback"
+          ];
+          originLanding = "https://n8n.${baseDomain}";
+          public = true;
+          enableLocalhostRedirects = false;
+          scopeMaps.automation_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
       };
     };
   };
