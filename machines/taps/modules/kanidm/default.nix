@@ -203,14 +203,21 @@ in
     unitConfig.ConditionPathExists = "!${stalwartTokenFile}";
     script = ''
       set -euo pipefail
-      # Verify idm_admin is logged in
-      if ! kanidm self whoami --name idm_admin 2>/dev/null; then
-        echo "Error: idm_admin not logged in. Run 'kanidm login --name idm_admin' first."
+      # Verify idm_admin is logged in (uses cached session token)
+      if ! kanidm self whoami 2>/dev/null | grep -q idm_admin; then
+        echo "Error: idm_admin not logged in. Run 'kanidm login -D idm_admin' first."
         exit 1
       fi
-      kanidm service-account create stalwart_ldap "Stalwart Mail LDAP" idm_admins --name idm_admin || true
-      kanidm group add-members idm_people_read stalwart_ldap --name idm_admin || true
-      TOKEN=$(kanidm service-account api-token generate stalwart_ldap "ldap-bind" --name idm_admin 2>&1 | tail -1)
+
+      # Create service account for Stalwart LDAP access
+      kanidm service-account create stalwart_ldap "Stalwart Mail LDAP" idm_admins || true
+
+      # Grant read access to people directory
+      kanidm group add-members idm_people_pii_read stalwart_ldap || echo "WARN: Failed to add stalwart_ldap to idm_people_pii_read"
+
+      # Generate API token for LDAP bind
+      TOKEN=$(kanidm service-account api-token generate stalwart_ldap "ldap-bind" 2>&1 | tail -1)
+
       install -m 600 -o stalwart-mail -g stalwart-mail /dev/null "${stalwartTokenFile}"
       echo -n "$TOKEN" > "${stalwartTokenFile}"
       echo "Stalwart LDAP token generated successfully."
