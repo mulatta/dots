@@ -15,7 +15,6 @@ in
 
       ui = {
         pager = "less -FRX";
-        show-cryptographic-signatures = true;
         default-command = [
           "log"
           "--reversed"
@@ -324,7 +323,7 @@ in
 
       revset-aliases = {
         "trunk()" = "main@origin | present(master@origin)";
-        "mine()" = "author(exact:${builtins.toJSON gitCfg.userEmail})";
+        "mine()" = "author(exact:${builtins.toJSON gitCfg.settings.user.email})";
         "draft()" = "mutable() ~ ::remote_bookmarks()";
         "stack()" = "trunk()..@";
         "open()" = "stack() & draft()";
