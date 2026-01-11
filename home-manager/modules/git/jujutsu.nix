@@ -287,6 +287,15 @@ in
           "--into"
           "@-"
         ];
+
+        # Radicle workflow
+        tug = [
+          "bookmark"
+          "set"
+          "-r"
+          "@-"
+          "master"
+        ];
       };
 
       signing = {
@@ -322,7 +331,8 @@ in
       };
 
       revset-aliases = {
-        "trunk()" = "main@origin | present(master@origin)";
+        # fallback: master@rad -> main@origin -> master@origin -> root()
+        "trunk()" = "latest(present(master@rad) | present(main@origin) | present(master@origin) | root())";
         "mine()" = "author(exact:${builtins.toJSON gitCfg.settings.user.email})";
         "draft()" = "mutable() ~ ::remote_bookmarks()";
         "stack()" = "trunk()..@";
