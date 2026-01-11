@@ -9,6 +9,34 @@ let
   bindAddress = "127.0.0.1";
   port = 8443;
   stalwartTokenFile = "/var/lib/stalwart-mail/kanidm-token";
+
+  # OAuth2 client logos (pinned to package versions)
+  icons = {
+    # Nextcloud 32.0.3 - pinned to nextcloud.com repo commit
+    nextcloud = pkgs.fetchurl {
+      name = "nextcloud.svg";
+      url = "https://raw.githubusercontent.com/nextcloud/nextcloud.com/35505202100647f0363b3e12efd66a19bf060d6f/assets/img/logo/logo_nextcloud_blue.svg";
+      hash = "sha256-vKr7ILKaS1emP3/TcoctglXugvFP+hEQthXS4cGRXzY=";
+    };
+    # Immich 2.4.1
+    immich = pkgs.fetchurl {
+      name = "immich.svg";
+      url = "https://raw.githubusercontent.com/immich-app/immich/v2.4.1/design/immich-logo.svg";
+      hash = "sha256-36XvcE0HhUkUMGwMIkFzvaJxD4/A3/6314aQ9Y+YEaY=";
+    };
+    # Stalwart 0.14.1
+    stalwart = pkgs.fetchurl {
+      name = "stalwart.svg";
+      url = "https://raw.githubusercontent.com/stalwartlabs/mail-server/v0.14.1/img/logo-red.svg";
+      hash = "sha256-SUwYWRjKZPaB8QcIFtc2c0YJEVIsZsCPXAuhgx8bUPA=";
+    };
+    # n8n 1.120.4 - from simple-icons repo (pinned commit)
+    n8n = pkgs.fetchurl {
+      name = "n8n.svg";
+      url = "https://raw.githubusercontent.com/simple-icons/simple-icons/faa4f93283a90f0196f3d320968bd38972a27894/icons/n8n.svg";
+      hash = "sha256-9aYGGIx4vxNP59ha49ExD29Le+r80dL73vKvAskiQKg=";
+    };
+  };
 in
 {
   services.kanidm = {
@@ -87,6 +115,7 @@ in
         # Stalwart Mail - public client with PKCE
         stalwart = {
           displayName = "Stalwart Mail";
+          imageFile = icons.stalwart;
           originUrl = "https://mail.${baseDomain}";
           originLanding = "https://mail.${baseDomain}";
           public = true;
@@ -101,6 +130,7 @@ in
         # Immich - public client with PKCE
         immich = {
           displayName = "Immich Photos";
+          imageFile = icons.immich;
           originUrl = "https://immich.${baseDomain}";
           originLanding = "https://immich.${baseDomain}";
           public = true;
@@ -115,6 +145,7 @@ in
         # Nextcloud - public client with PKCE
         nextcloud = {
           displayName = "Nextcloud";
+          imageFile = icons.nextcloud;
           originUrl = [
             "https://cloud.${baseDomain}"
             "https://cloud.${baseDomain}/apps/user_oidc/code"
@@ -122,6 +153,9 @@ in
           originLanding = "https://cloud.${baseDomain}";
           public = true;
           enableLocalhostRedirects = false;
+          # Use short username (seungwon) instead of SPN (seungwon@idm.mulatta.io)
+          # Required for vdirsyncer CalDAV/CardDAV URL compatibility
+          preferShortUsername = true;
           scopeMaps.cloud_users = [
             "openid"
             "email"
@@ -133,6 +167,7 @@ in
         # n8n via oauth2-proxy
         n8n = {
           displayName = "n8n Automation";
+          imageFile = icons.n8n;
           originUrl = [
             "https://n8n.${baseDomain}"
             "https://n8n.${baseDomain}/oauth2/callback"
