@@ -51,6 +51,16 @@ in
       overwriteprotocol = "https";
       trusted_proxies = [ "fd28:387a:57:8f00::1" ];
       default_phone_region = "KR";
+      maintenance_window_start = 3; # 3 AM UTC
+      # File-based logging for logreader app compatibility
+      log_type = "file";
+      logfile = "/var/lib/nextcloud/data/nextcloud.log";
+      loglevel = 2; # 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+    };
+
+    # PHP opcache settings
+    phpOptions = {
+      "opcache.interned_strings_buffer" = "16";
     };
 
     # PIM apps: Calendar, Contacts, Tasks
