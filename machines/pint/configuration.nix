@@ -13,6 +13,7 @@
     ../../nixosModules/radicle-mulatta.nix
     ./modules/disko-sd.nix
     ./modules/network.nix
+    ./modules/radicle.nix
   ];
 
   boot.initrd.systemd.enable = lib.mkForce false;
