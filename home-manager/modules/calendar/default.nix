@@ -60,8 +60,8 @@ lib.mkMerge [
       };
       remote = {
         type = "caldav";
-        url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon%40idm.mulatta.io/";
-        userName = "seungwon@idm.mulatta.io";
+        url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon/";
+        userName = "seungwon";
         passwordCommand = [
           "rbw"
           "get"
@@ -94,8 +94,8 @@ lib.mkMerge [
       };
       remote = {
         type = "carddav";
-        url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon%40idm.mulatta.io/";
-        userName = "seungwon@idm.mulatta.io";
+        url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon/";
+        userName = "seungwon";
         passwordCommand = [
           "rbw"
           "get"
