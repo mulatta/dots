@@ -1,15 +1,13 @@
 name: Auto Merge Dependency Updates
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-    # Only run for bot-created PRs with auto-merge label
-    if: contains(github.event.pull_request.labels.*.name, 'auto-merge')
     concurrency:
       group: "auto-merge:${{ github.head_ref }}"
       cancel-in-progress: true
@@ -20,8 +18,8 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - name: Enable auto-merge
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Auto Merge
+        uses: Mic92/auto-merge@main
+        with:
+          repo-token: ${{ steps.app-token.outputs.token }}
+          merge-method: squash
