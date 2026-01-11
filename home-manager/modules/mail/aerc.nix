@@ -35,6 +35,10 @@ in
       ui = {
         styleset-name = "dracula";
       };
+      compose = {
+        # khard integration for address auto-completion
+        address-book-cmd = "${pkgs.khard}/bin/khard email --parsable %s";
+      };
       openers = {
         "text/html" = "${pkgs.w3m}/bin/w3m -T text/html";
         "message/rfc822" =
@@ -62,5 +66,7 @@ in
     <C-o> = :pipe -m open-in-thunderbird<Enter>
     d = :move Trash<Enter>
     D = :delete<Enter>
+    # Add sender to contacts via khard
+    A = :pipe -m ${pkgs.khard}/bin/khard add-email -a contacts<Enter>
   '';
 }
