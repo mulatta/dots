@@ -221,7 +221,7 @@ def push_bookmark(bookmark: str, rev: str = "@") -> bool:
     print_header("Pushing...")
 
     # Force set bookmark to resolve any divergence (local wins)
-    run(["jj", "bookmark", "set", bookmark, "-r", rev, "--force"], check=False)
+    run(["jj", "bookmark", "set", bookmark, "-r", rev, "-B"], check=False)
 
     result = run(
         ["jj", "git", "push", "--bookmark", bookmark, "--allow-new"],
