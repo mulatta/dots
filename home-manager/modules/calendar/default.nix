@@ -50,21 +50,22 @@ lib.mkMerge [
     accounts.calendar.basePath = "${config.xdg.dataHome}/calendars";
     accounts.contact.basePath = "${config.xdg.dataHome}/contacts";
 
-    # Calendar account (CalDAV)
-    accounts.calendar.accounts.stalwart = {
+    # Calendar account (CalDAV via Nextcloud)
+    accounts.calendar.accounts.nextcloud = {
       primary = true;
+      primaryCollection = "personal";
       local = {
         type = "filesystem";
         fileExt = ".ics";
       };
       remote = {
         type = "caldav";
-        url = "https://mail.mulatta.io/dav/cal/seungwon/";
-        userName = "seungwon@mulatta.io";
+        url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon%40idm.mulatta.io/";
+        userName = "seungwon@idm.mulatta.io";
         passwordCommand = [
           "rbw"
           "get"
-          "mulatta.io"
+          "nextcloud"
         ];
       };
       vdirsyncer = {
@@ -85,20 +86,20 @@ lib.mkMerge [
       };
     };
 
-    # Contact account (CardDAV)
-    accounts.contact.accounts.stalwart = {
+    # Contact account (CardDAV via Nextcloud)
+    accounts.contact.accounts.nextcloud = {
       local = {
         type = "filesystem";
         fileExt = ".vcf";
       };
       remote = {
         type = "carddav";
-        url = "https://mail.mulatta.io/dav/card/seungwon/";
-        userName = "seungwon@mulatta.io";
+        url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon%40idm.mulatta.io/";
+        userName = "seungwon@idm.mulatta.io";
         passwordCommand = [
           "rbw"
           "get"
-          "mulatta.io"
+          "nextcloud"
         ];
       };
       vdirsyncer = {
@@ -109,7 +110,11 @@ lib.mkMerge [
         ];
         conflictResolution = "remote wins";
       };
-      khard.enable = true;
+      khard = {
+        enable = true;
+        type = "discover";
+        glob = "*";
+      };
     };
 
     # Enable vdirsyncer
@@ -128,7 +133,6 @@ lib.mkMerge [
       };
       settings = {
         default = {
-          default_calendar = "default";
           highlight_event_days = true;
         };
       };
@@ -140,12 +144,8 @@ lib.mkMerge [
       settings = {
         general = {
           default_action = "list";
-          editor = [
-            "hx"
-          ];
-          merge_editor = [
-            "vimdiff"
-          ];
+          editor = [ "hx" ];
+          merge_editor = [ "vimdiff" ];
         };
         "contact table" = {
           display = "formatted_name";
@@ -171,7 +171,7 @@ lib.mkMerge [
       extraConfig = ''
         date_format = "%Y-%m-%d"
         time_format = "%H:%M"
-        default_list = "stalwart"
+        default_list = "personal"
         default_due = 0
       '';
     };
