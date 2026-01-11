@@ -116,10 +116,10 @@ in
         nextcloud = {
           displayName = "Nextcloud";
           originUrl = [
-            "https://nextcloud.${baseDomain}"
-            "https://nextcloud.${baseDomain}/apps/user_oidc/code"
+            "https://cloud.${baseDomain}"
+            "https://cloud.${baseDomain}/apps/user_oidc/code"
           ];
-          originLanding = "https://nextcloud.${baseDomain}";
+          originLanding = "https://cloud.${baseDomain}";
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.cloud_users = [

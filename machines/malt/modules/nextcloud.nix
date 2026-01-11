@@ -36,7 +36,7 @@ in
   services.nextcloud = {
     enable = true;
     package = pkgs.nextcloud32;
-    hostName = "nextcloud.mulatta.io";
+    hostName = "cloud.mulatta.io";
 
     config = {
       adminuser = "admin";

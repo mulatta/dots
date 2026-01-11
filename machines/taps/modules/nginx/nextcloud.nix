@@ -17,7 +17,7 @@ let
   maltWgIP = "[${wgPrefix}:${maltSuffix}]"; # IPv6 needs brackets in URLs
 in
 {
-  services.nginx.virtualHosts."nextcloud.mulatta.io" = {
+  services.nginx.virtualHosts."cloud.mulatta.io" = {
     forceSSL = true;
     enableACME = true;
 
