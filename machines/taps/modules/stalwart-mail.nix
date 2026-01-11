@@ -5,7 +5,6 @@
 }:
 let
   domain = "mail.mulatta.io";
-  baseDomain = "mulatta.io";
 
   kanidmTokenFile = "/var/lib/stalwart-mail/kanidm-token";
 in
@@ -50,47 +49,49 @@ in
     enable = true;
     openFirewall = true;
 
-    settings.server = {
-      hostname = domain;
+    settings = {
+      server = {
+        hostname = domain;
 
-      tls = {
-        enable = true;
-        implicit = false;
-      };
-
-      listener = {
-        smtp = {
-          bind = [ "[::]:25" ];
-          protocol = "smtp";
+        tls = {
+          enable = true;
+          implicit = false;
         };
 
-        submissions = {
-          bind = [ "[::]:465" ];
-          protocol = "smtp";
-          tls.implicit = true;
-        };
+        listener = {
+          smtp = {
+            bind = [ "[::]:25" ];
+            protocol = "smtp";
+          };
 
-        submission = {
-          bind = [ "[::]:587" ];
-          protocol = "smtp";
-          tls.implicit = false;
-        };
+          submissions = {
+            bind = [ "[::]:465" ];
+            protocol = "smtp";
+            tls.implicit = true;
+          };
 
-        imap = {
-          bind = [ "[::]:143" ];
-          protocol = "imap";
-        };
+          submission = {
+            bind = [ "[::]:587" ];
+            protocol = "smtp";
+            tls.implicit = false;
+          };
 
-        imaptls = {
-          bind = [ "[::]:993" ];
-          protocol = "imap";
-          tls.implicit = true;
-        };
+          imap = {
+            bind = [ "[::]:143" ];
+            protocol = "imap";
+          };
 
-        http = {
-          bind = [ "127.0.0.1:8080" ];
-          protocol = "http";
-          tls.implicit = false;
+          imaptls = {
+            bind = [ "[::]:993" ];
+            protocol = "imap";
+            tls.implicit = true;
+          };
+
+          http = {
+            bind = [ "127.0.0.1:8080" ];
+            protocol = "http";
+            tls.implicit = false;
+          };
         };
       };
 
@@ -133,14 +134,22 @@ in
       # Kanidm LDAP directory
       directory.kanidm = {
         type = "ldap";
-        url = "ldap://127.0.0.1:3636";
+        url = "ldaps://127.0.0.1:3636";
         timeout = "15s";
-        base-dn = "dc=${baseDomain}";
+        tls = {
+          enable = true;
+          allow-invalid-certs = true;
+        };
+        base-dn = "dc=idm,dc=mulatta,dc=io";
 
         bind = {
           dn = "dn=token";
           secret = "%{file:${kanidmTokenFile}}%";
-          auth.method = "lookup";
+          auth = {
+            method = "template";
+            template = "spn={username}@idm.mulatta.io,dc=idm,dc=mulatta,dc=io";
+            search = false;
+          };
         };
 
         filter = {
@@ -156,7 +165,6 @@ in
         };
       };
 
-      # Fallback admin account - uses sops secret
       authentication.fallback-admin = {
         user = "admin";
         secret = "%{file:${config.clan.core.vars.generators.stalwart-admin.files."password".path}}%";
