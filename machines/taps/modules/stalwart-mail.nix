@@ -101,8 +101,7 @@ in
         default = true;
       };
 
-      # DKIM signing is handled by AWS SES for outbound mail
-      # No local DKIM signing needed since we relay through SES
+      # DKIM handled by AWS SES relay
       auth.dkim.sign = false;
 
       resolver = {
@@ -162,6 +161,9 @@ in
           email = "mail";
           description = "displayname";
           groups = "memberof";
+          # Workaround: Kanidm doesn't expose password via LDAP
+          secret = "entryuuid";
+          secret-changed = "entryuuid";
         };
       };
 
@@ -193,7 +195,6 @@ in
         duration = "10m";
       };
 
-      # Routing strategy - local delivery or relay through AWS SES
       queue.strategy.route = [
         {
           "if" = "is_local_domain('', rcpt_domain)";
@@ -202,12 +203,10 @@ in
         { "else" = "'ses'"; }
       ];
 
-      # Local delivery route
       queue.route.local = {
         type = "local";
       };
 
-      # AWS SES relay route
       queue.route.ses = {
         type = "relay";
         address = "email-smtp.us-east-1.amazonaws.com";
