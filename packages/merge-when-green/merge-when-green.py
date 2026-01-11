@@ -82,9 +82,10 @@ def get_current_bookmark(default_branch: str = "main") -> str | None:
             continue
 
         # Filter out remote bookmarks (containing @) and default branch
+        # Strip trailing * from diverged bookmarks
         bookmarks = [
-            b for b in result.stdout.strip().split()
-            if "@" not in b and b != default_branch
+            b.rstrip("*") for b in result.stdout.strip().split()
+            if "@" not in b and b.rstrip("*") != default_branch
         ]
         if not bookmarks:
             continue
@@ -215,9 +216,13 @@ def has_changes(default_branch: str) -> bool:
     return len(commits) > 0
 
 
-def push_bookmark(bookmark: str) -> bool:
-    """Push bookmark to origin."""
+def push_bookmark(bookmark: str, rev: str = "@") -> bool:
+    """Push bookmark to origin. Resolves divergence if needed."""
     print_header("Pushing...")
+
+    # Force set bookmark to resolve any divergence (local wins)
+    run(["jj", "bookmark", "set", bookmark, "-r", rev, "--force"], check=False)
+
     result = run(
         ["jj", "git", "push", "--bookmark", bookmark, "--allow-new"],
         check=False,
@@ -431,10 +436,11 @@ def main() -> int:
     # 4. Get or create bookmark
     title_provided = bool(args.title)
     bookmark = get_or_create_bookmark(default_branch, title_provided=title_provided)
+    target_rev = get_target_revision(title_provided=title_provided)
     print_info(f"Using bookmark: {bookmark}")
 
-    # 5. Push
-    if not push_bookmark(bookmark):
+    # 5. Push (resolves divergence if any)
+    if not push_bookmark(bookmark, rev=target_rev):
         return 1
 
     # 6. Create PR or use existing
