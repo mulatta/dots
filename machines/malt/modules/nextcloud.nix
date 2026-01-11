@@ -52,6 +52,16 @@ in
       trusted_proxies = [ "fd28:387a:57:8f00::1" ];
       default_phone_region = "KR";
     };
+
+    # PIM apps: Calendar, Contacts, Tasks
+    extraAppsEnable = true;
+    extraApps = {
+      inherit (pkgs.nextcloud32Packages.apps)
+        calendar
+        contacts
+        tasks
+        ;
+    };
   };
 
   # Ensure correct ownership for ZFS dataset
