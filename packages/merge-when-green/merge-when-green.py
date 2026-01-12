@@ -8,6 +8,7 @@ Features:
 - CI monitoring with real-time status
 - Rebase all local branches after merge
 - Auto branch: merge-when-green-<user> when no bookmark exists
+- Fork workflow: push to origin, PR to upstream
 """
 
 import argparse
@@ -58,6 +59,25 @@ def run(
             raise subprocess.CalledProcessError(result.returncode, cmd)
         return result
     return subprocess.run(cmd, check=check, text=True)
+
+
+def get_remotes() -> list[str]:
+    """Get list of git remotes."""
+    result = run(
+        ["jj", "git", "remote", "list"],
+        capture=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+    # Output format: "remote-name url"
+    return [line.split()[0] for line in result.stdout.strip().split("\n") if line.strip()]
+
+
+def get_upstream_remote() -> str:
+    """Get remote for fetching/comparing: upstream if exists, else origin."""
+    remotes = get_remotes()
+    return "upstream" if "upstream" in remotes else "origin"
 
 
 def get_default_branch() -> str:
@@ -185,11 +205,11 @@ def get_or_create_bookmark(default_branch: str = "main", title_provided: bool = 
     return name
 
 
-def sync_repo(default_branch: str) -> None:
+def sync_repo(default_branch: str, upstream_remote: str) -> None:
     """Fetch and rebase onto latest default branch."""
     print_header("Syncing repository...")
-    run(["jj", "git", "fetch"])
-    run(["jj", "rebase", "-d", f"{default_branch}@origin"], check=False)
+    run(["jj", "git", "fetch", "--all-remotes"])
+    run(["jj", "rebase", "-d", f"{default_branch}@{upstream_remote}"], check=False)
     print_success("Synced")
 
 
@@ -206,10 +226,10 @@ def run_format_check() -> bool:
     return True
 
 
-def has_changes(default_branch: str) -> bool:
+def has_changes(default_branch: str, upstream_remote: str) -> bool:
     """Check if there are changes to merge."""
     result = run(
-        ["jj", "log", "-r", f"{default_branch}@origin..@", "--no-graph", "-T", "commit_id"],
+        ["jj", "log", "-r", f"{default_branch}@{upstream_remote}..@", "--no-graph", "-T", "commit_id"],
         capture=True,
     )
     commits = [line for line in result.stdout.strip().split("\n") if line.strip()]
@@ -217,14 +237,14 @@ def has_changes(default_branch: str) -> bool:
 
 
 def push_bookmark(bookmark: str, rev: str = "@") -> bool:
-    """Push bookmark to origin. Resolves divergence if needed."""
+    """Push bookmark to origin. Always pushes to origin (fork in fork workflow)."""
     print_header("Pushing...")
 
     # Force set bookmark to resolve any divergence (local wins)
     run(["jj", "bookmark", "set", bookmark, "-r", rev, "-B"], check=False)
 
     result = run(
-        ["jj", "git", "push", "--bookmark", bookmark, "--allow-new"],
+        ["jj", "git", "push", "--remote", "origin", "--bookmark", bookmark, "--allow-new"],
         check=False,
         capture=True,
     )
@@ -377,16 +397,16 @@ def wait_for_merge(bookmark: str) -> bool:
         time.sleep(10)
 
 
-def rebase_all_branches(default_branch: str) -> None:
+def rebase_all_branches(default_branch: str, upstream_remote: str) -> None:
     """Rebase all local mutable branches onto new default branch."""
     print_header("Rebasing all branches...")
-    run(["jj", "git", "fetch"])
+    run(["jj", "git", "fetch", "--all-remotes"])
 
     result = run(
         [
             "jj", "rebase",
-            "-s", f"roots({default_branch}@origin..) & mutable()",
-            "-d", f"{default_branch}@origin",
+            "-s", f"roots({default_branch}@{upstream_remote}..) & mutable()",
+            "-d", f"{default_branch}@{upstream_remote}",
         ],
         check=False,
     )
@@ -415,21 +435,23 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # Detect upstream remote (upstream if exists, else origin)
+    upstream_remote = get_upstream_remote()
     default_branch = get_default_branch()
-    print_info(f"Target: {Colors.BOLD}{default_branch}{Colors.RESET}")
+    print_info(f"Target: {Colors.BOLD}{default_branch}@{upstream_remote}{Colors.RESET}")
 
     # 0. Validate state
     validate_state()
 
     # 1. Sync
-    sync_repo(default_branch)
+    sync_repo(default_branch, upstream_remote)
 
     # 2. Format check
     if not run_format_check():
         return 1
 
     # 3. Check for changes
-    if not has_changes(default_branch):
+    if not has_changes(default_branch, upstream_remote):
         print_success("No changes to merge")
         return 0
 
@@ -439,7 +461,7 @@ def main() -> int:
     target_rev = get_target_revision(title_provided=title_provided)
     print_info(f"Using bookmark: {bookmark}")
 
-    # 5. Push (resolves divergence if any)
+    # 5. Push to origin (always origin, even in fork workflow)
     if not push_bookmark(bookmark, rev=target_rev):
         return 1
 
@@ -473,7 +495,7 @@ def main() -> int:
     # 9. Cleanup and rebase
     if merged:
         delete_bookmark(bookmark)
-    rebase_all_branches(default_branch)
+    rebase_all_branches(default_branch, upstream_remote)
     print_success("Done!")
 
     return 0
