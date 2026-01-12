@@ -2,6 +2,7 @@
 {
   perSystem =
     {
+      config,
       lib,
       system,
       ...
@@ -23,7 +24,12 @@
               self.darwinConfigurations or { }
             )
           );
+
+          # Home-manager configuration checks
+          homeChecks = lib.mapAttrs' (
+            name: cfg: lib.nameValuePair "home-manager-${name}" cfg.activationPackage
+          ) (config.legacyPackages.homeConfigurations or { });
         in
-        nixosChecks // darwinChecks;
+        nixosChecks // darwinChecks // homeChecks;
     };
 }
