@@ -9,12 +9,11 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/disko-zfs.nix
-    ../../nixosModules/radicle-mulatta.nix
+    ../../nixosModules/radicle/node.nix
     ./modules/immich.nix
     ./modules/network.nix
     ./modules/n8n.nix
     ./modules/nextcloud.nix
-    ./modules/radicle.nix
   ];
 
   clan.core.networking.targetHost = "root@malt.x";

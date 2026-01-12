@@ -1,6 +1,10 @@
+# Regular node configuration (malt, pint)
+# Internal nodes without httpd
+{ ... }:
 {
-  imports = [ ./radicle-node.nix ];
-
+  imports = [
+    ./default.nix
+  ];
   services.radicle = {
     # Follow own DID to auto-accept own repos
     followDids = [
@@ -14,7 +18,6 @@
     ];
 
     # Connect to other personal nodes (NID@host:port)
-    # Will be populated after malt/pint deployment
     connectNodes = [
       "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776"
       "z6MkqRXPuCo1ykP1korSc2sMKjTQxyHcvuSG3D2CQ17ZmFgd@malt.mulatta.io:8776"
