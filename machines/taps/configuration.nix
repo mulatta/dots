@@ -14,7 +14,7 @@
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
-    ../../nixosModules/radicle-mulatta.nix
+    ../../nixosModules/radicle/seed.nix
     ./modules/cloudflare-dns.nix
     ./modules/kanidm
     ./modules/coredns.nix
@@ -23,7 +23,6 @@
     ./modules/nginx
     ./modules/niks3.nix
     ./modules/oauth2-proxy.nix
-    ./modules/radicle-seed.nix
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix

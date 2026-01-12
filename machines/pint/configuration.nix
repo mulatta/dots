@@ -10,10 +10,9 @@
     self.inputs.nixos-hardware.nixosModules.raspberry-pi-5
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/raspberry-pi
-    ../../nixosModules/radicle-mulatta.nix
+    ../../nixosModules/radicle/node.nix
     ./modules/disko-sd.nix
     ./modules/network.nix
-    ./modules/radicle.nix
   ];
 
   boot.initrd.systemd.enable = lib.mkForce false;
