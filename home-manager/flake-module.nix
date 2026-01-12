@@ -95,7 +95,10 @@
           // lib.optionalAttrs (system == "x86_64-linux" || system == "aarch64-linux") {
             desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
           };
+
+          # Filter profileMap to only include entries with existing profiles
+          filteredProfileMap = lib.filterAttrs (_: p: profiles ? ${p}) profileMap;
         in
-        profiles // lib.mapAttrs (_: p: profiles.${p}) profileMap;
+        profiles // lib.mapAttrs (_: p: profiles.${p}) filteredProfileMap;
     };
 }
