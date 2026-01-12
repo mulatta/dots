@@ -34,3 +34,10 @@ resource "github_actions_secret" "app_private_key" {
   secret_name     = "APP_PRIVATE_KEY"
   plaintext_value = data.sops_file.secrets.data["GITHUB_APP_PRIVATE_KEY"]
 }
+
+resource "github_issue_label" "auto_merge" {
+  repository  = github_repository.dots.name
+  name        = "auto-merge"
+  description = "Auto-merge this PR"
+  color       = "7D7C02"
+}
