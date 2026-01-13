@@ -25,7 +25,7 @@ let
       set -euo pipefail
 
       echo "Syncing emails from IMAP servers..."
-      mbsync -a
+      mbsync -c "$HOME/.config/isyncrc" -a
 
       if [ ! -d "${maildir}/.notmuch" ]; then
         echo "Initializing notmuch database..."
@@ -36,7 +36,7 @@ let
       notmuch new
 
       echo "Tagging emails with afew..."
-      PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
+      NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
 
       echo "Email sync complete."
     '';

@@ -65,7 +65,7 @@ lib.mkMerge [
         passwordCommand = [
           "rbw"
           "get"
-          "nextcloud"
+          "nextcloud-app-pass"
         ];
       };
       vdirsyncer = {
@@ -99,7 +99,7 @@ lib.mkMerge [
         passwordCommand = [
           "rbw"
           "get"
-          "nextcloud"
+          "nextcloud-app-pass"
         ];
       };
       vdirsyncer = {

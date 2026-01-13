@@ -14,7 +14,7 @@ in
     accounts.mulatta = {
       primary = true;
       address = "seungwon@mulatta.io";
-      userName = "seungwon@mulatta.io";
+      userName = "seungwon";
       realName = "seungwon";
       passwordCommand = "rbw get 'mulatta.io'";
 
