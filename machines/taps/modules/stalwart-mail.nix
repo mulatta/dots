@@ -58,6 +58,8 @@ in
           implicit = false;
         };
 
+        allowed-ip."61.84.68.70" = "";
+
         listener = {
           smtp = {
             bind = [ "[::]:25" ];
