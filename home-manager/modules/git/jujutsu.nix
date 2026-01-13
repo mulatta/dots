@@ -106,6 +106,15 @@ in
         pr = [ "prev" ];
         nx = [ "next" ];
 
+        # Swap adjacent commits (@ and @-)
+        swap = [
+          "rebase"
+          "-r"
+          "@-"
+          "-A"
+          "@"
+        ];
+
         # Bookmark
         bs = [
           "bookmark"
