@@ -113,6 +113,17 @@ resource "vultr_firewall_rule" "imaps" {
   notes             = "IMAPS"
 }
 
+# Radicle P2P
+resource "vultr_firewall_rule" "radicle" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "8776"
+  notes             = "Radicle P2P"
+}
+
 output "firewall_info" {
   description = "Firewall configuration"
   value = {
