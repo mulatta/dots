@@ -121,9 +121,6 @@
           "nix-darwin"
         ],
         "nix-select": "nix-select",
-        "nixos-facter-modules": [
-          "nixos-facter-modules"
-        ],
         "nixpkgs": "nixpkgs_2",
         "sops-nix": [
           "sops-nix"
@@ -136,11 +133,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768239901,
-        "narHash": "sha256-8Olr9hN8UyX6KvAJcFn5IiSk0CYmy4kTZTIFFIYUuSs=",
-        "rev": "784c9566ac64b03044a93abb7253b79073b650ea",
+        "lastModified": 1768317059,
+        "narHash": "sha256-UzooAUVzIkkDET0+H9/prdCiMgH/fyr9sL7JNPv+j68=",
+        "rev": "8eae494cb31031e0c48e08636814d960e99bb21d",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/784c9566ac64b03044a93abb7253b79073b650ea.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/8eae494cb31031e0c48e08636814d960e99bb21d.tar.gz"
       },
       "original": {
         "type": "tarball",
