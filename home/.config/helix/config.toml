@@ -1,0 +1,119 @@
+theme = "catppuccin_mocha"
+
+[editor]
+auto-info = true
+bufferline = "multiple"
+color-modes = true
+cursorline = true
+default-line-ending = "lf"
+end-of-line-diagnostics = "hint"
+indent-heuristic = "hybrid"
+line-number = "relative"
+mouse = false
+popup-border = "all"
+rulers = [120]
+scroll-lines = 2
+text-width = 512
+true-color = true
+undercurl = false
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+deduplicate-links = true
+follow-symlinks = true
+hidden = false
+max-depth = 5
+parents = true
+
+[editor.gutters]
+layout = ["diff", "diagnostics", "line-numbers", "spacer"]
+
+[editor.gutters.line-numbers]
+min-width = 3
+
+[editor.indent-guides]
+character = "╎"
+render = true
+
+[editor.inline-diagnostics]
+cursor-line = "error"
+other-lines = "disable"
+
+[editor.lsp]
+auto-signature-help = false
+display-messages = true
+
+[editor.smart-tab]
+enable = true
+supersede-menu = true
+
+[editor.soft-wrap]
+enable = true
+
+[editor.statusline]
+center = ["register"]
+left = ["mode", "spinner", "version-control", "file-base-name"]
+right = ["diagnostics", "selections", "position", "file-encoding"]
+separator = "︙"
+
+[editor.statusline.mode]
+insert = "[+]"
+normal = ""
+select = "[^]"
+
+[editor.whitespace.characters]
+nbsp = "⍽"
+newline = "⏎"
+nnbsp = "␣"
+space = "·"
+tab = "→"
+tabpad = "-"
+
+[editor.whitespace.render]
+nbsp = "all"
+newline = "all"
+nnbsp = "all"
+space = "all"
+tab = "all"
+
+[keys.insert]
+C-A-k = "kill_to_line_end"
+C-A-u = "kill_to_line_start"
+C-h = "delete_char_forward"
+C-l = "delete_char_backward"
+C-w = "delete_word_backward"
+S-tab = "move_parent_node_start"
+esc = "normal_mode"
+
+[keys.normal]
+A-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
+A-k = [
+  "extend_to_line_bounds",
+  "delete_selection",
+  "move_line_up",
+  "paste_before",
+]
+H = ":buffer-previous"
+L = ":buffer-next"
+S-tab = "move_parent_node_start"
+esc = ["collapse_selection", "keep_primary_selection"]
+tab = "move_parent_node_end"
+
+[keys.normal.q]
+Q = ":bc!"
+q = ":bc"
+
+[keys.normal.space]
+Q = ":q!"
+n = ":n"
+q = ":q"
+space = "file_picker"
+w = ":w"
+
+[keys.select]
+S-tab = "extend_parent_node_start"
+tab = "extend_parent_node_end"

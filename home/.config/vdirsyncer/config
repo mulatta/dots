@@ -1,0 +1,44 @@
+[general]
+status_path = "/Users/seungwon/.local/share/vdirsyncer/status"
+
+### Pairs
+
+[pair calendar_nextcloud]
+a = "calendar_nextcloud_remote"
+b = "calendar_nextcloud_local"
+collections = ["from a", "from b"]
+conflict_resolution = "a wins"
+metadata = ["color", "displayname"]
+
+[pair contacts_nextcloud]
+a = "contacts_nextcloud_remote"
+b = "contacts_nextcloud_local"
+collections = ["from a", "from b"]
+conflict_resolution = "a wins"
+
+
+### Local storages
+
+[storage calendar_nextcloud_local]
+fileext = ".ics"
+path = "/Users/seungwon/.local/share/calendars/nextcloud"
+type = "filesystem"
+
+[storage contacts_nextcloud_local]
+fileext = ".vcf"
+path = "/Users/seungwon/.local/share/contacts/nextcloud"
+type = "filesystem"
+
+### Remote storages
+
+[storage calendar_nextcloud_remote]
+password.fetch = ["command", "rbw", "get", "nextcloud-app-pass"]
+type = "caldav"
+url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon/"
+username = "seungwon"
+
+[storage contacts_nextcloud_remote]
+password.fetch = ["command", "rbw", "get", "nextcloud-app-pass"]
+type = "carddav"
+url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon/"
+username = "seungwon"

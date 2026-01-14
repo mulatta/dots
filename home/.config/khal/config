@@ -1,0 +1,21 @@
+[calendars]
+[[nextcloud]]
+path = /Users/seungwon/.local/share/calendars/nextcloud/*
+priority=10
+type=discover
+
+
+
+[default]
+default_calendar=personal
+highlight_event_days=true
+
+[locale]
+dateformat=%Y-%m-%d
+datetimeformat=%Y-%m-%d %H:%M
+firstweekday=0
+longdateformat=%Y-%m-%d %a
+longdatetimeformat=%Y-%m-%d %H:%M %a
+timeformat=%H:%M
+unicode_symbols=true
+weeknumbers=off

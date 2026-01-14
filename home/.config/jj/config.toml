@@ -1,0 +1,110 @@
+[aliases]
+a = ["abandon"]
+abs = ["absorb"]
+bd = ["bookmark", "delete"]
+bf = ["bookmark", "forget"]
+bl = ["bookmark", "list"]
+bm = ["bookmark", "move"]
+br = ["bookmark", "rename"]
+bs = ["bookmark", "set"]
+bt = ["bookmark", "track"]
+consume = ["squash", "--from", "@-", "--into", "@"]
+d = ["describe"]
+df = ["diff"]
+dfc = ["diff", "--color-words"]
+dfg = ["diff", "--git"]
+dfs = ["diff", "--stat"]
+dm = ["describe", "-m"]
+e = ["edit"]
+eject = ["squash", "--from", "@", "--into", "@-"]
+el = ["evolog"]
+examine = ["log", "-r", "@", "-p", "--git"]
+fa = ["file", "annotate"]
+fc = ["file", "chmod"]
+fl = ["file", "list"]
+fs = ["file", "show"]
+fx = ["fix"]
+gcl = ["git", "clone"]
+gf = ["git", "fetch"]
+gp = ["git", "push"]
+gpa = ["git", "push", "--all"]
+gpb = ["git", "push", "--bookmark"]
+gpc = ["git", "push", "--change"]
+gpd = ["git", "push", "--deleted"]
+l = ["log", "-r", "all()", "--template", "builtin_log_compact", "--reversed"]
+la = ["log", "-r", "all()"]
+lr = ["log", "-r"]
+n = ["new"]
+na = ["new", "-A"]
+nb = ["new", "-B"]
+nn = ["new", "--no-edit"]
+nna = ["new", "--no-edit", "-A"]
+nnb = ["new", "--no-edit", "-B"]
+nt = ["new", "trunk()"]
+nx = ["next"]
+ol = ["op", "log"]
+open = ["log", "-r", "open()"]
+pr = ["prev"]
+ram = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
+rb = ["rebase"]
+rbd = ["rebase", "-d"]
+rbr = ["rebase", "-r"]
+rbs = ["rebase", "-s"]
+rom = ["rebase", "-d", "trunk()"]
+rs = ["resolve"]
+rsl = ["resolve", "--list"]
+rsr = ["resolve", "-r"]
+s = ["show"]
+sandwich = ["rebase", "-r", "@", "-d", "trunk()"]
+sg = ["show", "--git"]
+sig = [
+  "log",
+  "--template",
+  "change_id.short() ++ \" \" ++ format_signature_status(signature) ++ \" \" ++ description.first_line() ++ \"\\n\"",
+]
+sp = ["split"]
+sq = ["squash"]
+ss = ["show", "--summary"]
+st = ["status"]
+stack = ["log", "-r", "stack()"]
+swap = ["rebase", "-r", "@-", "-A", "@"]
+
+[git]
+sign-on-push = true
+
+[revset-aliases]
+"draft()" = "mutable() ~ ::remote_bookmarks()"
+"mine()" = "author(exact:\"67085791+mulatta@users.noreply.github.com\")"
+"open()" = "stack() & draft()"
+"ready()" = "heads(stack()) & draft() & ~wip()"
+"stack()" = "trunk()..@"
+"trunk()" = "latest(present(master@rad) | present(main@origin) | present(master@origin) | root())"
+"unpushed()" = "remote_bookmarks()..@"
+"wip()" = "description(glob:\"wip:*\") | description(glob:\"WIP:*\")"
+
+[signing]
+backend = "ssh"
+behavior = "force"
+key = "/Users/seungwon/.ssh/id_ed25519.pub"
+
+[signing.backends.ssh]
+allowed-signers = "/Users/seungwon/.ssh/allowed_signers"
+program = "ssh-keygen"
+
+[template-aliases]
+"format_short_id(id)" = "id.shortest(8)"
+"format_short_signature(signature)" = "signature.name()"
+"format_signature_status(sig)" = "if(sig, sig.status(), \"unsigned\")"
+"format_timestamp(timestamp)" = "timestamp.ago()"
+
+[templates]
+draft_commit_description = "concat(\n  builtin_draft_commit_description,\n  \"\\nJJ: ignore-rest\\n\",\n  diff.git(),\n)\n"
+file_annotate = "commit_id.short() ++ \" (\" ++\nauthor.name() ++ \" \" ++\nauthor.timestamp().ago() ++\n\") \"\n"
+
+[ui]
+default-command = ["log", "--reversed"]
+pager = "less -FRX"
+
+[user]
+email = "67085791+mulatta@users.noreply.github.com"
+name = "mulatta"

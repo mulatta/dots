@@ -1,0 +1,80 @@
+[alias]
+	patch = "push rad HEAD:refs/patches"
+
+[branch]
+	sort = "committerdate"
+
+[color]
+	branch = "auto"
+	diff = "auto"
+	status = "auto"
+	ui = true
+
+[commit]
+	gpgSign = true
+	verbose = true
+
+[core]
+	autocrlf = "input"
+	compression = -1
+	editor = "hx"
+	precomposeunicode = true
+	whitespace = "trailing-space,space-before-tab"
+
+[credential "https://gist.github.com"]
+	helper = ""
+	helper = "gh auth git-credential"
+
+[credential "https://github.com"]
+	helper = ""
+	helper = "gh auth git-credential"
+
+[diff]
+	algorithm = "histogram"
+
+[filter "lfs"]
+	clean = "git-lfs clean -- %f"
+	process = "git-lfs filter-process"
+	required = true
+	smudge = "git-lfs smudge -- %f"
+
+[gpg]
+	format = "ssh"
+
+[gpg "ssh"]
+	program = "ssh-keygen"
+
+[init]
+	defaultBranch = "main"
+
+[log]
+	date = "iso"
+
+[merge]
+	ConflictStyle = "zdiff3"
+
+[pull]
+	ff = "only"
+
+[push]
+	autoSetupRemote = true
+	default = "current"
+
+[rerere]
+	enabled = true
+
+[sendemail "mulatta"]
+	envelopeSender = "auto"
+	from = "seungwon <seungwon@mulatta.io>"
+	sendmailCmd = "msmtp"
+
+[tag]
+	gpgSign = true
+
+[url "git@github.com:"]
+	insteadOf = "https://github.com/"
+
+[user]
+	email = "67085791+mulatta@users.noreply.github.com"
+	name = "mulatta"
+	signingKey = "/Users/seungwon/.ssh/id_ed25519.pub"

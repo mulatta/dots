@@ -1,0 +1,6 @@
+auto_sync = true
+sync_address = "https://atuin.mulatta.io"
+
+[daemon]
+enabled = true
+socket_path = "/Users/seungwon/.local/share/atuin/daemon.sock"

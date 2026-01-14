@@ -1,0 +1,11 @@
+--italic-text=always
+--map-syntax='*.json:JSON'
+--map-syntax='*.jsonl:JSON'
+--map-syntax='*.*rc:INI'
+--map-syntax='.*rc:INI'
+--map-syntax='*.conf:INI'
+--map-syntax='*.cfg:INI'
+--map-syntax='~/.config/ghostty/config:Ghostty Config'
+--paging=auto
+--style=numbers,changes
+--theme=Catppuccin Mocha
