@@ -1,12 +1,11 @@
-# Regular node configuration (malt, pint)
-# Internal nodes without httpd
+# Personal Radicle configuration for mulatta
+# Repositories, DIDs, and nodes for personal infrastructure
 { ... }:
 {
-  imports = [
-    ./default.nix
-  ];
+  imports = [ ./radicle-node.nix ];
+
   services.radicle = {
-    # Follow own DID to auto-accept own repos
+    # DIDs to follow (auto-accept repos from these identities)
     followDids = [
       "did:key:z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY" # taps
       "did:key:z6MkrAWJwxJwP8DPKL7aaMQpDq9FurZ6WfrnaRz3uVAUnPg9" # dots_actions (GitHub)
@@ -17,7 +16,7 @@
       "rad:z4SMvWSqp66q9fMnmvbZ2uhWmn28y" # dots
     ];
 
-    # Connect to other personal nodes (NID@host:port)
+    # Personal nodes to connect
     connectNodes = [
       "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776"
       "z6MkqRXPuCo1ykP1korSc2sMKjTQxyHcvuSG3D2CQ17ZmFgd@malt.mulatta.io:8776"

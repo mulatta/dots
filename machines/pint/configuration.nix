@@ -10,7 +10,7 @@
     self.inputs.nixos-hardware.nixosModules.raspberry-pi-5
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/raspberry-pi
-    ../../nixosModules/radicle/node.nix
+    ../../nixosModules/radicle-mulatta.nix
     ./modules/disko-sd.nix
     ./modules/network.nix
   ];

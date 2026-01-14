@@ -1,11 +1,19 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   services.nginx.virtualHosts."rad.mulatta.io" = {
     forceSSL = true;
     enableACME = true;
 
-    # Serve radicle-explorer static files
-    root = "${pkgs.radicle-explorer}";
+    # Serve radicle-explorer with custom preferred seed
+    root = lib.mkForce "${pkgs.radicle-explorer.withConfig {
+      preferredSeeds = [
+        {
+          hostname = "rad.mulatta.io";
+          port = 443;
+          scheme = "https";
+        }
+      ];
+    }}";
 
     locations."/" = {
       tryFiles = "$uri $uri/ /index.html";

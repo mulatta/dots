@@ -14,7 +14,7 @@
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
-    ../../nixosModules/radicle/seed.nix
+    ./modules/radicle.nix
     ./modules/cloudflare-dns.nix
     ./modules/kanidm
     ./modules/coredns.nix
