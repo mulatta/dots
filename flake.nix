@@ -5,7 +5,6 @@
     clan-core.inputs.disko.follows = "disko";
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.nix-darwin.follows = "nix-darwin";
-    clan-core.inputs.nixos-facter-modules.follows = "nixos-facter-modules";
     clan-core.inputs.sops-nix.follows = "sops-nix";
     clan-core.inputs.systems.follows = "systems";
     clan-core.inputs.treefmt-nix.follows = "treefmt-nix";
