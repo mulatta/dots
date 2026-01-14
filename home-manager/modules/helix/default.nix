@@ -17,7 +17,7 @@ in
       # Language servers
       nil # Nix LSP (legacy)
       nixd # Nix LSP (modern)
-      marksman # Markdown LSP
+      # marksman # Markdown LSP
       vscode-langservers-extracted # JSON, HTML, CSS, ESLint LSPs
       yaml-language-server # YAML LSP
       bash-language-server # Bash LSP
