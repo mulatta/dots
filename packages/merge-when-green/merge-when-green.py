@@ -80,6 +80,35 @@ def get_upstream_remote() -> str:
     return "upstream" if "upstream" in remotes else "origin"
 
 
+def is_fork_workflow() -> bool:
+    """Check if this is a fork workflow (has both origin and upstream)."""
+    remotes = get_remotes()
+    return "upstream" in remotes and "origin" in remotes
+
+
+def get_origin_owner() -> str | None:
+    """Get the owner of the origin remote (for fork workflow)."""
+    result = run(
+        ["git", "remote", "get-url", "origin"],
+        capture=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    url = result.stdout.strip()
+    # Parse owner from git@github.com:owner/repo.git or https://github.com/owner/repo.git
+    if ":" in url and "@" in url:
+        # SSH format: git@github.com:owner/repo.git
+        path = url.split(":")[-1]
+    elif "/" in url:
+        # HTTPS format: https://github.com/owner/repo.git
+        path = "/".join(url.split("/")[-2:])
+    else:
+        return None
+    owner = path.split("/")[0]
+    return owner if owner else None
+
+
 def get_default_branch() -> str:
     """Get default branch from GitHub."""
     result = run(
@@ -280,12 +309,20 @@ def create_pr(bookmark: str, title: str | None = None) -> bool:
         title = bookmark
 
     print_header(f"Creating PR: {title}")
+
+    # For fork workflow, use owner:bookmark format for --head
+    head_ref = bookmark
+    if is_fork_workflow():
+        owner = get_origin_owner()
+        if owner:
+            head_ref = f"{owner}:{bookmark}"
+
     result = run(
         [
             "gh", "pr", "create",
             "--fill",
             "--title", title,
-            "--head", bookmark,
+            "--head", head_ref,
         ],
         check=False,
     )
