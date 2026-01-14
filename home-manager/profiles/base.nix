@@ -47,7 +47,6 @@ in
       nix-prefetch
       nix-tree
       nixd
-      nixfmt-rfc-style
       nixpkgs-review
       nurl
       nvd
