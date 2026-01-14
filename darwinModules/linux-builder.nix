@@ -12,9 +12,4 @@
       };
     };
   };
-
-  nix.settings.trusted-users = [
-    "@admin"
-    "seungwon"
-  ];
 }
