@@ -28,6 +28,7 @@ STDIN_ARGS = {
     "keep-sorted": ["-"],
     "tofu": ["-"],      # tofu fmt -
     "terraform": ["-"], # terraform fmt -
+    "prettier": ["--stdin-filepath=$path"],
 }
 
 # Tools that need wrapper scripts (no stdin support, but do modify files)
