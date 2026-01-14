@@ -13,7 +13,6 @@
       ...
     }:
     let
-      # Home-manager configuration builder
       mkHomeConfig =
         {
           extraModules ? [ ],
@@ -35,51 +34,99 @@
           ];
         };
 
-      # Hostname → profile mapping
       profileMap = {
-        "seungwon@rhesus" = "macos";
-        "seungwon@psi" = "base";
-        "seungwon@malt" = "base";
+        "rhesus" = "macos";
+        "psi" = "base";
+        "malt" = "base";
       };
 
+      dotfilesDir = "$HOME/dots";
+
       runtimeInputs = with pkgs; [
-        jujutsu
-        uutils-coreutils-noprefix
+        coreutils
         findutils
         hostname
+        stow
         inputs.home-manager.packages.${system}.home-manager
       ];
     in
     {
-      apps.bootstrap = {
-        type = "app";
-        program =
-          let
-            script = pkgs.writeShellApplication {
-              name = "bootstrap-dotfiles";
-              runtimeInputs = runtimeInputs ++ [ pkgs.bash ];
-              text = ''
-                DOTFILES_DIR="$HOME/dots"
+      apps.hm =
+        let
+          profileMapBash = lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (host: profile: ''profiles["${host}"]="${profile}"'') profileMap
+          );
+          script = pkgs.writeShellApplication {
+            name = "hm";
+            inherit runtimeInputs;
+            text = ''
+              set -euo pipefail
 
-                echo "==> Cloning dotfiles..."
-                if [[ ! -d "$DOTFILES_DIR" ]]; then
-                  jj git clone "https://github.com/mulatta/dots.git" "$DOTFILES_DIR"
-                else
-                  echo "    Already exists, fetching and updating..."
-                  cd "$DOTFILES_DIR"
-                  jj git fetch --quiet
-                  jj new main@origin --no-edit --quiet
-                fi
+              DOTFILES_DIR="${dotfilesDir}"
 
-                echo "==> Activating home-manager..."
-                home-manager switch --flake "$DOTFILES_DIR" -b bak
+              # Determine profile based on hostname
+              declare -A profiles
+              ${profileMapBash}
 
-                echo "==> Done! You may need to restart your shell."
-              '';
-            };
-          in
-          "${script}/bin/bootstrap-dotfiles";
-      };
+              HOSTNAME=$(hostname -s)
+              PROFILE="''${profiles[$HOSTNAME]:-base}"
+
+              # Handle 'profile' subcommand
+              if [[ "''${1:-}" == "profile" ]]; then
+                echo "$PROFILE"
+                exit 0
+              fi
+
+              # Stow dotfiles before home-manager switch
+              if [[ "''${1:-}" == "switch" ]] && [[ -d "$DOTFILES_DIR/home" ]]; then
+                echo "==> Stowing dotfiles..."
+                stow -d "$DOTFILES_DIR" -t "$HOME" --restow home
+              fi
+
+              # Run home-manager with determined profile
+              echo "==> Running home-manager with profile: $PROFILE"
+              home-manager --flake "$DOTFILES_DIR#$PROFILE" "$@"
+            '';
+          };
+        in
+        {
+          type = "app";
+          program = lib.getExe script;
+        };
+
+      apps.bootstrap =
+        let
+          script = pkgs.writeShellApplication {
+            name = "bootstrap-dotfiles";
+            runtimeInputs = runtimeInputs ++ [ pkgs.git ];
+            text = ''
+              set -euo pipefail
+
+              DOTFILES_DIR="${dotfilesDir}"
+
+              echo "==> Cloning dotfiles..."
+              if [[ ! -d "$DOTFILES_DIR" ]]; then
+                git clone "https://github.com/mulatta/dots.git" "$DOTFILES_DIR"
+              else
+                echo "    Already exists, pulling latest..."
+                git -C "$DOTFILES_DIR" pull --rebase || true
+              fi
+
+              echo "==> Stowing dotfiles..."
+              stow -d "$DOTFILES_DIR" -t "$HOME" --restow home
+
+              echo "==> Activating home-manager..."
+              nix run "$DOTFILES_DIR#hm" -- switch
+
+              echo "==> Done! You may need to restart your shell."
+            '';
+          };
+        in
+        {
+          type = "app";
+          program = lib.getExe script;
+        };
+
       apps.default = config.apps.bootstrap;
 
       legacyPackages.homeConfigurations =
@@ -94,8 +141,7 @@
             desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
           };
 
-          # Filter profileMap to only include entries with existing profiles
-          filteredProfileMap = lib.filterAttrs (_: p: profiles ? ${p}) profileMap;
+          filteredProfileMap = lib.filterAttrs (_host: p: profiles ? ${p}) profileMap;
         in
         profiles // lib.mapAttrs (_: p: profiles.${p}) filteredProfileMap;
     };
