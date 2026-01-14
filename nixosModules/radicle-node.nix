@@ -1,3 +1,5 @@
+# Base Radicle node configuration
+# Provides common settings for all radicle nodes
 {
   config,
   lib,
@@ -8,10 +10,36 @@ let
   cfg = config.services.radicle;
 in
 {
-  imports = [ ./options.nix ];
+  options.services.radicle = {
+    seedRepositories = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "List of Radicle repository IDs to automatically seed.";
+      example = [ "rad:z2dqRKkK5yu89w3CMX2dVsYrRwvFk" ];
+    };
+
+    autoSeedFollowed = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Automatically discover and seed repositories from followed users.";
+    };
+
+    followDids = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "List of DIDs to follow. Repos from these users will be accepted.";
+      example = [ "did:key:z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY" ];
+    };
+
+    connectNodes = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "List of nodes to maintain persistent connections with (NID@host:port).";
+      example = [ "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776" ];
+    };
+  };
 
   config = {
-    # Add radicle-node to system packages for CLI access
     environment.systemPackages = [ pkgs.radicle-node ];
 
     # SSH key generation via clan vars
@@ -20,9 +48,7 @@ in
         secret = true;
         owner = "radicle";
       };
-      files.ssh-public-key = {
-        secret = false;
-      };
+      files.ssh-public-key.secret = false;
       runtimeInputs = [ pkgs.openssh ];
       script = ''
         ssh-keygen -t ed25519 -N "" -f $out/ssh-private-key -C "radicle@${config.networking.hostName}"
@@ -87,23 +113,14 @@ in
           };
           path = [ cfg.package ];
           script = ''
-            # Wait for radicle-node to be ready
             for i in {1..30}; do
-              if rad node status &>/dev/null; then
-                break
-              fi
+              if rad node status &>/dev/null; then break; fi
               sleep 1
             done
-
-            # Set follow policies
-            ${lib.concatMapStringsSep "\n" (did: ''
-              rad follow ${lib.escapeShellArg did} || true
-            '') cfg.followDids}
-
-            # Seed configured repositories
-            ${lib.concatMapStringsSep "\n" (rid: ''
-              rad seed ${lib.escapeShellArg rid} --scope all || true
-            '') cfg.seedRepositories}
+            ${lib.concatMapStringsSep "\n" (did: "rad follow ${lib.escapeShellArg did} || true") cfg.followDids}
+            ${lib.concatMapStringsSep "\n" (
+              rid: "rad seed ${lib.escapeShellArg rid} --scope all || true"
+            ) cfg.seedRepositories}
           '';
         };
 
@@ -131,7 +148,6 @@ in
       };
       path = [ cfg.package ];
       script = ''
-        # Get all followed DIDs and auto-seed their repos
         rad follow 2>/dev/null | grep 'did:key:' | while read -r line; do
           nid=$(echo "$line" | sed 's/.*did:key:\([a-zA-Z0-9]*\).*/\1/')
           echo "Discovering repos from followed user $nid..."
