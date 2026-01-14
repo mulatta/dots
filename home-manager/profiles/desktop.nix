@@ -1,9 +1,4 @@
-# Only for NixOS Desktop (Not macOS)
-{
-  config,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 {
   dconf.enable = true;
 
@@ -12,18 +7,6 @@
     ../modules/mail
     ../modules/thunderbird.nix
   ];
-
-  # NixOS desktop stylix targets
-  stylix.targets = {
-    gnome.enable = true;
-    gtk.enable = true;
-    firefox = {
-      enable = true;
-      colorTheme.enable = true;
-      firefoxGnomeTheme.enable = true;
-      profileNames = [ config.home.username ];
-    };
-  };
 
   home.packages = with pkgs; [
     bitwarden-desktop
