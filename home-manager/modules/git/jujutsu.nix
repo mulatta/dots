@@ -296,6 +296,13 @@ in
           "@-"
           "master"
         ];
+
+        # Signature
+        sig = [
+          "log"
+          "--template"
+          ''change_id.short() ++ " " ++ format_signature_status(signature) ++ " " ++ description.first_line() ++ "\n"''
+        ];
       };
 
       signing = {
@@ -328,6 +335,7 @@ in
         "format_short_signature(signature)" = "signature.name()";
         "format_timestamp(timestamp)" = "timestamp.ago()";
         "format_short_id(id)" = "id.shortest(8)";
+        "format_signature_status(sig)" = ''if(sig, sig.status(), "unsigned")'';
       };
 
       revset-aliases = {
