@@ -35,6 +35,10 @@
 
   nix.package = pkgs.nixVersions.latest;
 
+  home.packages = [
+    config.nix.package
+  ];
+
   home.sessionVariables = {
     NIKS3_SERVER_URL = "https://niks3.mulatta.io";
   };
