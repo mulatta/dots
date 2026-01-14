@@ -15,7 +15,13 @@
         programs.deadnix.enable = true;
         programs.nixfmt.enable = true;
         programs.shfmt.enable = true;
-        programs.taplo.enable = true;
+        programs.taplo = {
+          enable = true;
+          excludes = [
+            "**/.direnv/**"
+            "**/result/**"
+          ];
+        };
         programs.rustfmt.enable = true;
         programs.shellcheck.enable = true;
 
@@ -55,6 +61,7 @@
         };
 
         settings.global.excludes = [
+          "**/.direnv/**"
           "**/secrets.yaml"
           "**/secrets.yml"
         ];
