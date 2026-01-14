@@ -119,6 +119,15 @@ def get_default_branch() -> str:
     return result.stdout.strip() or "main"
 
 
+def get_head_ref(bookmark: str) -> str:
+    """Get head ref for gh commands. Returns owner:bookmark for fork workflow."""
+    if is_fork_workflow():
+        owner = get_origin_owner()
+        if owner:
+            return f"{owner}:{bookmark}"
+    return bookmark
+
+
 def get_current_bookmark(default_branch: str = "main") -> str | None:
     """Get bookmark pointing to @ or @-. Prefer merge-when-green-* pattern."""
     for rev in ["@", "@-"]:
@@ -286,8 +295,9 @@ def push_bookmark(bookmark: str, rev: str = "@") -> bool:
 
 def pr_exists(bookmark: str) -> bool:
     """Check if PR exists for this bookmark."""
+    head_ref = get_head_ref(bookmark)
     result = run(
-        ["gh", "pr", "view", bookmark, "--json", "state"],
+        ["gh", "pr", "view", head_ref, "--json", "state"],
         check=False,
         capture=True,
     )
@@ -310,13 +320,7 @@ def create_pr(bookmark: str, title: str | None = None) -> bool:
 
     print_header(f"Creating PR: {title}")
 
-    # For fork workflow, use owner:bookmark format for --head
-    head_ref = bookmark
-    if is_fork_workflow():
-        owner = get_origin_owner()
-        if owner:
-            head_ref = f"{owner}:{bookmark}"
-
+    head_ref = get_head_ref(bookmark)
     result = run(
         [
             "gh", "pr", "create",
@@ -336,8 +340,9 @@ def create_pr(bookmark: str, title: str | None = None) -> bool:
 def enable_auto_merge(bookmark: str) -> bool:
     """Enable auto-merge with rebase strategy."""
     print_info("Enabling auto-merge (rebase)...")
+    head_ref = get_head_ref(bookmark)
     result = run(
-        ["gh", "pr", "merge", bookmark, "--auto", "--rebase", "--delete-branch"],
+        ["gh", "pr", "merge", head_ref, "--auto", "--rebase", "--delete-branch"],
         check=False,
     )
     if result.returncode != 0:
@@ -349,9 +354,10 @@ def enable_auto_merge(bookmark: str) -> bool:
 
 def get_pr_status(bookmark: str) -> dict[str, Any] | None:
     """Get PR status from GitHub."""
+    head_ref = get_head_ref(bookmark)
     result = run(
         [
-            "gh", "pr", "view", bookmark,
+            "gh", "pr", "view", head_ref,
             "--json", "state,mergeable,autoMergeRequest,statusCheckRollup",
         ],
         check=False,
@@ -453,6 +459,28 @@ def rebase_all_branches(default_branch: str, upstream_remote: str) -> None:
         print_warning("Some branches may need manual rebase")
 
 
+def sync_fork_main(default_branch: str, upstream_remote: str) -> None:
+    """Sync default branch from upstream to origin (fork workflow only)."""
+    if not is_fork_workflow():
+        return
+
+    print_header("Syncing fork...")
+    result = run(
+        [
+            "jj", "git", "push",
+            "--remote", "origin",
+            "--bookmark", default_branch,
+            "--allow-new",
+        ],
+        check=False,
+        capture=True,
+    )
+    if result.returncode == 0:
+        print_success(f"{default_branch} synced to origin")
+    else:
+        print_warning(f"Could not sync {default_branch} to origin")
+
+
 def delete_bookmark(bookmark: str) -> None:
     """Delete local bookmark after merge."""
     run(["jj", "bookmark", "delete", bookmark], check=False)
@@ -533,6 +561,7 @@ def main() -> int:
     if merged:
         delete_bookmark(bookmark)
     rebase_all_branches(default_branch, upstream_remote)
+    sync_fork_main(default_branch, upstream_remote)
     print_success("Done!")
 
     return 0
