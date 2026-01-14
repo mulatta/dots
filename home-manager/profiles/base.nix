@@ -3,7 +3,8 @@
   lib,
   config,
   ...
-}: {
+}:
+{
   imports = [
     ../modules/packages.nix
     ../modules/fonts.nix
@@ -26,13 +27,13 @@
   home.username = lib.mkDefault "seungwon";
   home.stateVersion = "25.05";
   home.homeDirectory =
-    if pkgs.stdenv.isDarwin
-    then "/Users/${config.home.username}"
-    else "/home/${config.home.username}";
+    if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
 
   programs.home-manager.enable = true;
 
   nixpkgs.config.allowUnfree = true;
+
+  nix.package = pkgs.nixVersions.latest;
 
   home.sessionVariables = {
     NIKS3_SERVER_URL = "https://niks3.mulatta.io";
