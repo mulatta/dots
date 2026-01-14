@@ -3,11 +3,13 @@
 **URL:** https://console.aws.amazon.com/iam/home#/security_credentials
 
 ## Steps
+
 1. Access keys section
 2. Create new access key (or deactivate old one)
 3. Download CSV or copy credentials
 
 ## IAM Policy (Terraform + Cost Explorer)
+
 ```json
 {
   "Version": "2012-10-17",
@@ -41,11 +43,7 @@
     {
       "Sid": "S3ObjectOperations",
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject"
-      ],
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
       "Resource": "arn:aws:s3:::mulatta-dots-tfstate/*"
     },
     {
@@ -65,10 +63,7 @@
     {
       "Sid": "CostExplorerRead",
       "Effect": "Allow",
-      "Action": [
-        "ce:GetCostAndUsage",
-        "ce:GetCostForecast"
-      ],
+      "Action": ["ce:GetCostAndUsage", "ce:GetCostForecast"],
       "Resource": "*"
     },
     {
@@ -82,12 +77,14 @@
 ```
 
 ## Update secrets
+
 ```bash
 sops terraform/secrets.yaml
 # Update AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 ```
 
 ## Verify
+
 ```bash
 aws sts get-caller-identity
 aws ce get-cost-and-usage --time-period Start=2024-01-01,End=2024-01-31 --granularity MONTHLY --metrics UnblendedCost

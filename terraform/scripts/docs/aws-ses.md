@@ -3,6 +3,7 @@
 IAM user and permission setup guide for AWS SES.
 
 **Note**: These credentials are different from Terraform backend R2 credentials.
+
 - **R2 credentials**: `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` (Cloudflare R2)
 - **AWS credentials**: `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (AWS SES, IAM, etc.)
 
@@ -11,6 +12,7 @@ IAM user and permission setup guide for AWS SES.
 **URL:** https://console.aws.amazon.com/iam/home#/users
 
 ### Steps
+
 1. Click "Add users"
 2. User name: `terraform-ses-admin` (or any preferred name)
 3. Select "Attach policies directly"
@@ -25,9 +27,7 @@ IAM user and permission setup guide for AWS SES.
     {
       "Sid": "SESFullAccess",
       "Effect": "Allow",
-      "Action": [
-        "ses:*"
-      ],
+      "Action": ["ses:*"],
       "Resource": "*"
     },
     {
@@ -57,10 +57,7 @@ IAM user and permission setup guide for AWS SES.
     {
       "Sid": "CloudflareDNSRead",
       "Effect": "Allow",
-      "Action": [
-        "route53:GetHostedZone",
-        "route53:ListResourceRecordSets"
-      ],
+      "Action": ["route53:GetHostedZone", "route53:ListResourceRecordSets"],
       "Resource": "*",
       "Condition": {
         "StringEquals": {
@@ -74,11 +71,11 @@ IAM user and permission setup guide for AWS SES.
 
 ### Policy Description
 
-| Statement | Purpose |
-|-----------|---------|
-| `SESFullAccess` | Manage SES domain identity, DKIM, and sending settings |
-| `IAMUserManagement` | Allow Terraform to create IAM users for SMTP auth (restricted to ses/* path) |
-| `CloudflareDNSRead` | (Optional) Route53 lookup (Cloudflare is used in practice) |
+| Statement           | Purpose                                                                       |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `SESFullAccess`     | Manage SES domain identity, DKIM, and sending settings                        |
+| `IAMUserManagement` | Allow Terraform to create IAM users for SMTP auth (restricted to ses/\* path) |
+| `CloudflareDNSRead` | (Optional) Route53 lookup (Cloudflare is used in practice)                    |
 
 ## Create Access Key
 
@@ -94,14 +91,15 @@ IAM user and permission setup guide for AWS SES.
 sops terraform/secrets.yaml
 ```
 
-**Add** the following keys (keep existing R2_* keys):
+**Add** the following keys (keep existing R2\_\* keys):
 
 ```yaml
-AWS_ACCESS_KEY_ID: AKIA...  # AWS IAM Access Key ID
-AWS_SECRET_ACCESS_KEY: xxx...  # AWS IAM Secret Access Key
+AWS_ACCESS_KEY_ID: AKIA... # AWS IAM Access Key ID
+AWS_SECRET_ACCESS_KEY: xxx... # AWS IAM Secret Access Key
 ```
 
 **Full structure**:
+
 ```yaml
 # Cloudflare R2 (Terraform state backend)
 R2_ACCESS_KEY_ID: xxx
@@ -140,22 +138,27 @@ aws ses list-identities --region us-east-1
 ## Notes
 
 ### Least Privilege Principle
+
 - This IAM user can only manage SES and limited IAM operations
 - No permissions for EC2, S3, or other AWS services
 - IAM user creation restricted to `/ses/*` path
 
 ### Cost Monitoring
+
 SES costs are low, but accidental bulk sending can incur charges:
+
 - Recommended to set up CloudWatch Alarms
 - Check sending quota limits (after sandbox removal)
 
 ### Access Key Rotation
+
 - Rotate Access Keys every 90 days
 - Manage in AWS IAM → Security credentials → Access keys
 
 ## Next Steps
 
 After setting up credentials:
+
 1. Run `terraform/aws` module
 2. Create SES domain identity
 3. DKIM records auto-created (Cloudflare)
