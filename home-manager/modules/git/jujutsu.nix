@@ -297,15 +297,6 @@ in
           "@-"
         ];
 
-        # Radicle workflow
-        tug = [
-          "bookmark"
-          "set"
-          "-r"
-          "@-"
-          "master"
-        ];
-
         # Signature
         sig = [
           "log"
