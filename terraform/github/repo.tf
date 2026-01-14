@@ -4,6 +4,7 @@ resource "github_repository" "dots" {
   visibility             = "public"
   allow_auto_merge       = true
   delete_branch_on_merge = true
+  topics                 = ["build-with-buildbot"]
 
   security_and_analysis {
     secret_scanning {
@@ -41,3 +42,4 @@ resource "github_issue_label" "auto_merge" {
   description = "Auto-merge this PR"
   color       = "7D7C02"
 }
+
