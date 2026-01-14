@@ -315,6 +315,8 @@ in
         };
       };
 
+      git.sign-on-push = true;
+
       templates = {
         file_annotate = ''
           commit_id.short() ++ " (" ++
