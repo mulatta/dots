@@ -62,8 +62,10 @@ in
       tls_chain = "/var/lib/acme/${domain}/fullchain.pem";
       tls_key = "/var/lib/acme/${domain}/key.pem";
 
-      # Trust X-Forwarded-For from nginx
-      trust_x_forward_for = true;
+      # Trust X-Forwarded-For from nginx reverse proxy
+      http_client_address_info = {
+        x-forward-for = [ "127.0.0.1" ];
+      };
 
       # Online backup
       online_backup = {
