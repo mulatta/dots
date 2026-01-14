@@ -1,0 +1,9 @@
+# See https://afew.readthedocs.io/
+
+[SpamFilter]
+[KillThreadsFilter]
+[ListMailsFilter]
+[ArchiveSentMailsFilter]
+[FolderNameFilter]
+[InboxFilter]
+

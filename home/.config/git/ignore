@@ -1,0 +1,10 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*~
+*.swp
+*.swo
+result
+result-*
+.direnv/

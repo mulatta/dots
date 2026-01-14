@@ -1,0 +1,53 @@
+alpha-blending = linear
+auto-update-channel = tip
+background-blur = true
+background-opacity = 0.900000
+clipboard-paste-protection = false
+clipboard-read = allow
+command = fish
+confirm-close-surface = true
+copy-on-select = clipboard
+cursor-color = #C4A7E7
+cursor-style = block_hollow
+cursor-style-blink = false
+font-codepoint-map = U+e0b0-U+e0b3,U+e0b4-U+e0c8,U+e0cc-U+e0d4,U+e0ca=JetBrainsMono Nerd Font Mono
+font-codepoint-map = U+e5fa-U+e6b1=JetBrainsMono Nerd Font Mono
+font-codepoint-map = U+ea60-U+ebeb=JetBrainsMono Nerd Font Mono
+font-codepoint-map = U+f000-U+f2e0,U+e200-U+e2a9=JetBrainsMono Nerd Font Mono
+font-family = BerkeleyMono Nerd Font
+font-feature = calt
+font-feature = liga
+font-feature = zero
+font-size = 15
+keybind = clear
+keybind = cmd+v=paste_from_clipboard
+keybind = cmd+c=copy_to_clipboard
+keybind = cmd+w=close_window
+keybind = cmd+n=new_window
+keybind = cmd+q=quit
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+0=reset_font_size
+keybind = global:ctrl+;=toggle_quick_terminal
+macos-auto-secure-input = true
+macos-non-native-fullscreen = visible-menu
+macos-option-as-alt = true
+macos-secure-input-indication = true
+macos-titlebar-style = hidden
+mouse-hide-while-typing = true
+palette = 0=#1b1b1b
+quick-terminal-animation-duration = 0.200000
+quick-terminal-autohide = true
+quick-terminal-position = bottom
+quick-terminal-screen = mouse
+quick-terminal-space-behavior = move
+shell-integration = fish
+shell-integration-features = no-cursor,sudo,no-title
+theme = Catppuccin Mocha
+window-colorspace = display-p3
+window-decoration = auto
+window-height = 9999
+window-padding-balance = true
+window-save-state = always
+window-theme = dark
+window-width = 9999

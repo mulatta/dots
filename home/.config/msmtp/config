@@ -1,0 +1,11 @@
+account mulatta
+auth on
+from seungwon@mulatta.io
+host mail.mulatta.io
+passwordeval rbw get 'mulatta.io'
+port 465
+tls on
+tls_starttls off
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+user seungwon
+account default : mulatta
