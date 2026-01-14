@@ -566,18 +566,19 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1768242861,
-        "narHash": "sha256-F4IIxa5xDHjtrmMcayM8lHctUq1oGltfBQu2+oqDWP4=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "1327e798cb055f96f92685df444e9a2c326ab5ed",
-        "type": "github"
+        "lastModified": 1768356722,
+        "narHash": "sha256-S9yrryk/nFjP5R8pl+Uok7tFYQf7ywc5cBFijHoOLG8=",
+        "ref": "main",
+        "rev": "1d22aaecc4392d770a84a6858798cf29aa5de27b",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/mulatta/nixpkgs"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixos-25.11",
-        "repo": "nixpkgs",
-        "type": "github"
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/mulatta/nixpkgs"
       }
     },
     "nixpkgs_5": {
