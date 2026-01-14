@@ -32,7 +32,8 @@ STDIN_ARGS = {
 
 # Tools that need wrapper scripts (no stdin support, but do modify files)
 NEEDS_WRAPPER = {
-    "deadnix",  # Requires file path, uses --edit
+    "deadnix",     # Requires file path, uses --edit
+    "ruff-isort",  # ruff check --fix doesn't support stdin/stdout
 }
 
 
@@ -79,12 +80,22 @@ def needs_rebuild(flake_root: Path, cache_path: Path) -> bool:
     # Use lstat() to get symlink's own mtime (not the target in nix store)
     cache_mtime = cache_path.lstat().st_mtime
 
+    # Check flake files
     for filename in ["flake.nix", "flake.lock"]:
         file_path = flake_root / filename
         if file_path.exists():
             file_mtime = file_path.stat().st_mtime
             if file_mtime > cache_mtime:
                 debug(f"{filename} is newer than cache")
+                return True
+
+    # Check formatter directory (flake-module.nix etc.)
+    formatter_dir = flake_root / "formatter"
+    if formatter_dir.exists():
+        for file_path in formatter_dir.glob("*.nix"):
+            file_mtime = file_path.stat().st_mtime
+            if file_mtime > cache_mtime:
+                debug(f"{file_path.name} is newer than cache")
                 return True
 
     debug("Cache is valid")
@@ -178,7 +189,12 @@ def get_inline_command(name: str, command: str, options: list[str], mode: str) -
     opts_str = " ".join(f'"{opt}"' for opt in filtered_opts)
 
     # File extension for temp file
-    ext_map = {"deadnix": ".nix", "statix": ".nix", "shellcheck": ".sh"}
+    ext_map = {
+        "deadnix": ".nix",
+        "statix": ".nix",
+        "shellcheck": ".sh",
+        "ruff-isort": ".py",
+    }
     ext = ext_map.get(name, "")
 
     # Use JMT_MKTEMP env var for GNU-compatible mktemp (macOS compatibility)
