@@ -29,6 +29,7 @@ STDIN_ARGS = {
     "tofu": ["-"],      # tofu fmt -
     "terraform": ["-"], # terraform fmt -
     "prettier": ["--stdin-filepath=$path"],
+    "taplo": ["-"],     # taplo format -
 }
 
 # Tools that need wrapper scripts (no stdin support, but do modify files)
