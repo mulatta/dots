@@ -278,7 +278,7 @@ in
         ram = [
           "rebase"
           "-s"
-          "all:roots(mutable())"
+          "roots(mutable())"
           "-d"
           "trunk()"
         ];
