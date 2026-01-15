@@ -1,3 +1,5 @@
+# Calendar module - configs managed by stow (home/.config/)
+# This module only provides packages, scripts, and services
 {
   pkgs,
   config,
@@ -22,6 +24,12 @@ let
       rbw
     ];
     text = ''
+      # Check if rbw is unlocked (skip if not to avoid pinentry spam)
+      if ! rbw unlocked 2>/dev/null; then
+        echo "rbw vault is locked, skipping sync."
+        exit 0
+      fi
+
       vdirsyncer discover || true
       vdirsyncer sync
     '';
@@ -35,151 +43,25 @@ let
       exec ${pythonEnv}/bin/python ${./calendar-notify.py}
     '';
   };
+
+  dataHome = config.xdg.dataHome;
 in
 lib.mkMerge [
   {
     home.packages = [
       calendar-sync
       calendar-notify
-      pkgs.rbw
       pkgs.khal
       pkgs.khard
+      pkgs.vdirsyncer
+      pkgs.todoman
     ];
-
-    # Base paths for calendar and contacts
-    accounts.calendar.basePath = "${config.xdg.dataHome}/calendars";
-    accounts.contact.basePath = "${config.xdg.dataHome}/contacts";
-
-    # Calendar account (CalDAV via Nextcloud)
-    accounts.calendar.accounts.nextcloud = {
-      primary = true;
-      primaryCollection = "personal";
-      local = {
-        type = "filesystem";
-        fileExt = ".ics";
-      };
-      remote = {
-        type = "caldav";
-        url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon/";
-        userName = "seungwon";
-        passwordCommand = [
-          "rbw"
-          "get"
-          "nextcloud-app-pass"
-        ];
-      };
-      vdirsyncer = {
-        enable = true;
-        collections = [
-          "from a"
-          "from b"
-        ];
-        metadata = [
-          "color"
-          "displayname"
-        ];
-        conflictResolution = "remote wins";
-      };
-      khal = {
-        enable = true;
-        type = "discover";
-      };
-    };
-
-    # Contact account (CardDAV via Nextcloud)
-    accounts.contact.accounts.nextcloud = {
-      local = {
-        type = "filesystem";
-        fileExt = ".vcf";
-      };
-      remote = {
-        type = "carddav";
-        url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon/";
-        userName = "seungwon";
-        passwordCommand = [
-          "rbw"
-          "get"
-          "nextcloud-app-pass"
-        ];
-      };
-      vdirsyncer = {
-        enable = true;
-        collections = [
-          "from a"
-          "from b"
-        ];
-        conflictResolution = "remote wins";
-      };
-      khard = {
-        enable = true;
-        type = "discover";
-        glob = "*";
-      };
-    };
-
-    # Enable vdirsyncer
-    programs.vdirsyncer.enable = true;
-
-    # khal configuration
-    programs.khal = {
-      enable = true;
-      locale = {
-        timeformat = "%H:%M";
-        dateformat = "%Y-%m-%d";
-        longdateformat = "%Y-%m-%d %a";
-        datetimeformat = "%Y-%m-%d %H:%M";
-        longdatetimeformat = "%Y-%m-%d %H:%M %a";
-        firstweekday = 0;
-      };
-      settings = {
-        default = {
-          highlight_event_days = true;
-        };
-      };
-    };
-
-    # khard configuration
-    programs.khard = {
-      enable = true;
-      settings = {
-        general = {
-          default_action = "list";
-          editor = [ "hx" ];
-          merge_editor = [ "vimdiff" ];
-        };
-        "contact table" = {
-          display = "formatted_name";
-          group_by_addressbook = false;
-          reverse = false;
-          show_nicknames = true;
-          show_uids = false;
-          sort = "last_name";
-          localize_dates = true;
-        };
-        vcard = {
-          preferred_version = "3.0";
-          search_in_source_files = false;
-          skip_unparsable = false;
-        };
-      };
-    };
-
-    # todoman configuration
-    programs.todoman = {
-      enable = true;
-      glob = "*/*";
-      extraConfig = ''
-        date_format = "%Y-%m-%d"
-        time_format = "%H:%M"
-        default_list = "personal"
-        default_due = 0
-      '';
-    };
 
     # Create calendar/contacts directories
     home.activation.createPimDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p "${config.accounts.calendar.basePath}"
-      run mkdir -p "${config.accounts.contact.basePath}"
+      run mkdir -p "${dataHome}/calendars"
+      run mkdir -p "${dataHome}/contacts"
+      run mkdir -p "${dataHome}/vdirsyncer/status"
     '';
   }
 
