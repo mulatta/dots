@@ -5,11 +5,13 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   maildir = "${config.home.homeDirectory}/mail";
   email-sync = pkgs.writeShellApplication {
     name = "email-sync";
-    runtimeInputs = with pkgs;
+    runtimeInputs =
+      with pkgs;
       [
         isync
         notmuch
@@ -19,75 +21,75 @@
         jq
         rbw
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [libnotify]
-      ++ lib.optionals pkgs.stdenv.isDarwin [terminal-notifier];
-    text =
-      ''
-        set -euo pipefail
+      ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
+      ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
+    text = ''
+      set -euo pipefail
 
-        # Prevent concurrent runs with lock directory (atomic on all platforms)
-        LOCKDIR="$HOME/.local/state/email-sync.lock"
-        cleanup() { rmdir "$LOCKDIR" 2>/dev/null || true; }
-        trap cleanup EXIT
-        if ! mkdir "$LOCKDIR" 2>/dev/null; then
-          echo "Another email-sync is running, exiting."
-          exit 0
-        fi
+      # Prevent concurrent runs with lock directory (atomic on all platforms)
+      LOCKDIR="$HOME/.local/state/email-sync.lock"
+      cleanup() { rmdir "$LOCKDIR" 2>/dev/null || true; }
+      trap cleanup EXIT
+      if ! mkdir "$LOCKDIR" 2>/dev/null; then
+        echo "Another email-sync is running, exiting."
+        exit 0
+      fi
 
-        # Check if rbw is unlocked (skip if not to avoid pinentry spam)
-        if ! rbw unlocked 2>/dev/null; then
-          echo "rbw vault is locked, skipping sync."
-          exit 0
-        fi
+      # Check if rbw is unlocked (skip if not to avoid pinentry spam)
+      if ! rbw unlocked 2>/dev/null; then
+        echo "rbw vault is locked, skipping sync."
+        exit 0
+      fi
 
-        echo "Syncing emails from IMAP servers..."
-        mbsync -c "$HOME/.config/isyncrc" -a
+      echo "Syncing emails from IMAP servers..."
+      mbsync -c "$HOME/.config/isyncrc" -a
 
-        if [ ! -d "${maildir}/.notmuch" ]; then
-          echo "Initializing notmuch database..."
-          notmuch new
-        fi
-
-        echo "Indexing new emails..."
+      if [ ! -d "${maildir}/.notmuch" ]; then
+        echo "Initializing notmuch database..."
         notmuch new
+      fi
 
-        echo "Tagging emails with afew..."
-        NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
+      echo "Indexing new emails..."
+      notmuch new
 
-        # Check for new mail and send notification (Mic92 style with notified tag)
-        new_query="date:7days.. AND tag:unread AND NOT tag:notified"
-        new_count=$(notmuch count "$new_query")
-        if [ "$new_count" -gt 0 ]; then
-          echo "Found $new_count new email(s) to notify"
+      echo "Tagging emails with afew..."
+      NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
 
-          # Get summary of new emails (up to 3 subjects)
-          summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject' | tr '\n' ' ')
+      # Check for new mail and send notification (Mic92 style with notified tag)
+      new_query="date:7days.. AND tag:unread AND NOT tag:notified"
+      new_count=$(notmuch count "$new_query")
+      if [ "$new_count" -gt 0 ]; then
+        echo "Found $new_count new email(s) to notify"
 
-      ''
-      + (
-        if pkgs.stdenv.isDarwin
-        then ''
+        # Get summary of new emails (up to 3 subjects)
+        summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject' | tr '\n' ' ')
+
+    ''
+    + (
+      if pkgs.stdenv.isDarwin then
+        ''
           terminal-notifier \
             -title "New Mail ($new_count)" \
             -message "$summary" \
             -group "email-sync" \
             -sound default
         ''
-        else ''
+      else
+        ''
           notify-send \
             -u normal \
             -i mail-unread \
             "New Mail ($new_count)" \
             "$summary"
         ''
-      )
-      + ''
-          # Mark as notified to prevent duplicate notifications
-          notmuch tag +notified -- "$new_query"
-        fi
+    )
+    + ''
+        # Mark as notified to prevent duplicate notifications
+        notmuch tag +notified -- "$new_query"
+      fi
 
-        echo "Email sync complete."
-      '';
+      echo "Email sync complete."
+    '';
   };
 
   msmtp-wrapper = pkgs.writeShellScriptBin "msmtp" ''
@@ -112,7 +114,8 @@
       exit $?
     fi
   '';
-in {
+in
+{
   imports = [
     ./aerc.nix
     ./thunderbird.nix
@@ -146,7 +149,7 @@ in {
           OnBootSec = "2m";
           OnUnitActiveSec = "5m";
         };
-        Install.WantedBy = ["timers.target"];
+        Install.WantedBy = [ "timers.target" ];
       };
     })
 
@@ -155,7 +158,7 @@ in {
       launchd.agents.mbsync = {
         enable = true;
         config = {
-          ProgramArguments = ["${email-sync}/bin/email-sync"];
+          ProgramArguments = [ "${email-sync}/bin/email-sync" ];
           StartInterval = 300;
           RunAtLoad = true;
           StandardOutPath = "${config.xdg.stateHome}/mbsync.log";

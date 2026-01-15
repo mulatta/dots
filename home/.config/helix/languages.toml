@@ -142,7 +142,14 @@ command = "prettier"
 
 [[language]]
 auto-format = true
-file-types = ["sh", "bash", { glob = ".*shrc" }, { glob = ".*profile" }, { glob = ".*_profile" }, { glob = ".*shenv" }]
+file-types = [
+  "sh",
+  "bash",
+  { glob = ".*shrc" },
+  { glob = ".*profile" },
+  { glob = ".*_profile" },
+  { glob = ".*shenv" },
+]
 language-servers = ["bash-language-server"]
 name = "bash"
 scope = "source.bash"

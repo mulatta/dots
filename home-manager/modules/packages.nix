@@ -3,17 +3,9 @@
   self,
   inputs,
   ...
-}: let
+}:
+let
   system = pkgs.stdenv.hostPlatform.system;
-
-  nextflow-lsp-jar = pkgs.fetchurl {
-    url = "https://github.com/nextflow-io/language-server/releases/download/v25.04.3/language-server-all.jar";
-    hash = "sha256-oHdWCsDZoCs0+mfOg+bRqaTayfsAJWzcifflNLvScJs=";
-  };
-
-  nextflow-lsp = pkgs.writeShellScriptBin "nextflow-lsp" ''
-    exec ${pkgs.jdk17}/bin/java -jar ${nextflow-lsp-jar} "$@"
-  '';
 
   sesh = pkgs.writeScriptBin "sesh" ''
     #! /usr/bin/env sh
@@ -31,8 +23,10 @@
       zellij attach -c "$SESSION_TITLE"
     fi
   '';
-in {
-  home.packages = with pkgs;
+in
+{
+  home.packages =
+    with pkgs;
     [
       # Nix tools
       nix-diff
@@ -64,11 +58,7 @@ in {
       zellij
       zjstatus
       zoxide
-      (
-        if stdenv.isDarwin
-        then ghostty-bin
-        else ghostty
-      )
+      (if stdenv.isDarwin then ghostty-bin else ghostty)
 
       # Git
       git

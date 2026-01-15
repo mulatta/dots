@@ -6,7 +6,7 @@
 }:
 lib.mkMerge [
   {
-    home.packages = [pkgs.atuin];
+    home.packages = [ pkgs.atuin ];
   }
 
   # Linux: systemd user timer + service
@@ -17,7 +17,7 @@ lib.mkMerge [
         OnUnitActiveSec = "1h";
         Persistent = true;
       };
-      Install.WantedBy = ["timers.target"];
+      Install.WantedBy = [ "timers.target" ];
     };
 
     systemd.user.services.atuin-sync = {
