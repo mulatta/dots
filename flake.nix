@@ -32,6 +32,7 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     zjstatus.url = "github:dj95/zjstatus";
+    zsh-helix-mode.url = "github:Multirious/zsh-helix-mode";
     # keep-sorted end
   };
 
