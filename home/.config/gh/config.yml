@@ -1,0 +1,8 @@
+version: "1"
+git_protocol: ssh
+editor: hx
+aliases:
+  clone: repo clone
+  V: repo view
+  v: repo view --web
+  ref: '!gh browse "$1" -c=$(git rev-parse HEAD) --no-browser | pbcopy'
