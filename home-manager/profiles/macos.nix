@@ -1,9 +1,8 @@
+# macOS profile - most configs managed by stow
 { ... }:
 {
   imports = [
-    ../modules/calendar
     ../modules/mail
-    ../modules/thunderbird.nix
     ../modules/vscode
   ];
 }

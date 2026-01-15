@@ -1,0 +1,16 @@
+[database]
+path=/Users/seungwon/mail
+
+[new]
+tags=new
+ignore=.mbsyncstate;.uidvalidity
+
+[search]
+exclude_tags=deleted;spam
+
+[maildir]
+synchronize_flags=true
+
+[user]
+name=seungwon
+primary_email=seungwon@mulatta.io
