@@ -13,7 +13,13 @@
 let
   previewEnv = buildEnv {
     name = "yazi-preview-tools";
-    paths = [ imagemagick ffmpegthumbnailer unar poppler glow ];
+    paths = [
+      imagemagick
+      ffmpegthumbnailer
+      unar
+      poppler
+      glow
+    ];
   };
 in
 writeShellScriptBin "yazi" ''
