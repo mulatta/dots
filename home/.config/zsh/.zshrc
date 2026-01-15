@@ -63,7 +63,12 @@ autoload -Uz y mk hmg _zellij_update_tabname
 [[ -d ~/.nix-profile/share/zsh/site-functions ]] && fpath=(~/.nix-profile/share/zsh/site-functions $fpath)
 
 autoload -Uz compinit
-compinit -d "$HOME/.cache/zcompdump" -C
+# Regenerate completion cache daily (faster startup, but fresh cache)
+if [[ -n ~/.cache/zcompdump(#qN.mh+24) ]]; then
+  compinit -d "$HOME/.cache/zcompdump"
+else
+  compinit -d "$HOME/.cache/zcompdump" -C
+fi
 
 # Completion styles
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # Case-insensitive
@@ -132,8 +137,12 @@ if [[ -f ~/.nix-profile/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-h
 fi
 
 # ===== Tool initializations =====
-# fzf
-command -v fzf &>/dev/null && eval "$(fzf --zsh)"
+# fzf key bindings (Ctrl-R, Ctrl-T, Alt-C) - but NOT completion (fzf-tab handles that)
+if command -v fzf &>/dev/null; then
+  eval "$(fzf --zsh)"
+  # Restore tab to use fzf-tab instead of fzf's completion
+  bindkey '^I' fzf-tab-complete 2>/dev/null || bindkey '^I' expand-or-complete
+fi
 
 # nix-your-shell
 command -v nix-your-shell &>/dev/null && eval "$(nix-your-shell zsh)"
@@ -147,13 +156,21 @@ if command -v starship &>/dev/null && [[ "$TERM" != "dumb" ]]; then
 fi
 
 # atuin history
-command -v atuin &>/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
+if command -v atuin &>/dev/null; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+  # Bind to helix-mode keymaps (atuin only binds emacs/viins/vicmd)
+  bindkey -M hxins '^R' atuin-search 2>/dev/null
+  bindkey -M hxnor '^R' atuin-search 2>/dev/null
+fi
 
 # direnv
 command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
 
-# jujutsu completion
-command -v jj &>/dev/null && eval "$(jj util completion zsh)"
+# jujutsu completion (dynamic - supports aliases)
+command -v jj &>/dev/null && {
+  source <(COMPLETE=zsh jj)
+  compdef j=jj
+}
 
 # ===== Zellij tab name auto-update =====
 if [[ -n "$ZELLIJ" ]]; then
