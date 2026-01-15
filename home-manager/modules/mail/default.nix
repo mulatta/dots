@@ -61,8 +61,9 @@ let
       if [ "$new_count" -gt 0 ]; then
         echo "Found $new_count new email(s) to notify"
 
-        # Get summary of new emails (up to 3 subjects)
-        summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject' | tr '\n' ' ')
+        # Get summary of new emails (up to 3 subjects), escape special chars
+        summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject // "No subject"' | head -3 | paste -sd ', ' -)
+        summary="''${summary:-New messages}"
 
     ''
     + (
@@ -72,7 +73,7 @@ let
             -title "New Mail ($new_count)" \
             -message "$summary" \
             -group "email-sync" \
-            -sound default
+            -sound default || true
         ''
       else
         ''
@@ -80,7 +81,7 @@ let
             -u normal \
             -i mail-unread \
             "New Mail ($new_count)" \
-            "$summary"
+            "$summary" || true
         ''
     )
     + ''

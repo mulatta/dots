@@ -1,7 +1,9 @@
-INBOX=tag:inbox
-Sent=tag:sent
-Archive=tag:archive
-Drafts=tag:draft
-Trash=tag:deleted
-Spam=tag:spam
+# Virtual folders for aerc with notmuch
+# Use folder: queries to avoid duplicate display
+INBOX=folder:mulatta/Inbox AND NOT tag:deleted
+Sent=folder:"mulatta/Sent Items"
+Drafts=folder:mulatta/Drafts
+Trash=folder:"mulatta/Deleted Items" OR tag:deleted
+Spam=folder:"mulatta/Junk Mail"
+Unread=tag:unread AND NOT tag:deleted
 All=*
