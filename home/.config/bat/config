@@ -8,4 +8,4 @@
 --map-syntax='~/.config/ghostty/config:Ghostty Config'
 --paging=auto
 --style=numbers,changes
---theme=Catppuccin Mocha
+--theme="Catppuccin Mocha"
