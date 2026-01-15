@@ -1,5 +1,6 @@
 {
   writeShellScriptBin,
+  symlinkJoin,
   helix,
   buildEnv,
   # LSPs
@@ -44,23 +45,37 @@ let
       typstyle
     ];
   };
+
+  hxWrapper = writeShellScriptBin "hx" ''
+    set -efu
+
+    export PATH=${lspEnv}/bin:${helix}/bin:$PATH
+
+    XDG_CONFIG_HOME=''${XDG_CONFIG_HOME:-$HOME/.config}
+    HELIX_CONFIG="$XDG_CONFIG_HOME/helix"
+
+    mkdir -p "$HELIX_CONFIG"
+
+    # Link config files if not exists (don't override user's stow config)
+    for f in config.toml languages.toml; do
+      if [[ ! -e "$HELIX_CONFIG/$f" ]]; then
+        ln -sfn "${helix-config}/$f" "$HELIX_CONFIG/$f"
+      fi
+    done
+
+    exec hx "$@"
+  '';
 in
-writeShellScriptBin "hx" ''
-  set -efu
-
-  export PATH=${lspEnv}/bin:${helix}/bin:$PATH
-
-  XDG_CONFIG_HOME=''${XDG_CONFIG_HOME:-$HOME/.config}
-  HELIX_CONFIG="$XDG_CONFIG_HOME/helix"
-
-  mkdir -p "$HELIX_CONFIG"
-
-  # Link config files if not exists (don't override user's stow config)
-  for f in config.toml languages.toml; do
-    if [[ ! -e "$HELIX_CONFIG/$f" ]]; then
-      ln -sfn "${helix-config}/$f" "$HELIX_CONFIG/$f"
-    fi
-  done
-
-  exec hx "$@"
-''
+symlinkJoin {
+  name = "hx";
+  paths = [
+    hxWrapper
+    # Include helix's share directory for zsh completions
+    "${helix}"
+  ];
+  # Only take bin from wrapper, share from helix
+  postBuild = ''
+    rm -rf $out/bin/hx
+    cp ${hxWrapper}/bin/hx $out/bin/hx
+  '';
+}
