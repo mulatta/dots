@@ -48,6 +48,8 @@
         ./checks/flake-module.nix
         ./formatter/flake-module.nix
         ./home-manager/flake-module.nix
+        ./home-manager/modules/helix/flake-module.nix
+        ./home-manager/modules/yazi/flake-module.nix
         ./overlays/flake-module.nix
         ./machines/flake-module.nix
         ./packages/flake-module.nix

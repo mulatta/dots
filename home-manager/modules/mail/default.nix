@@ -5,13 +5,11 @@
   config,
   lib,
   ...
-}:
-let
+}: let
   maildir = "${config.home.homeDirectory}/mail";
   email-sync = pkgs.writeShellApplication {
     name = "email-sync";
-    runtimeInputs =
-      with pkgs;
+    runtimeInputs = with pkgs;
       [
         isync
         notmuch
@@ -21,8 +19,8 @@ let
         jq
         rbw
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
-      ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
+      ++ lib.optionals pkgs.stdenv.isLinux [libnotify]
+      ++ lib.optionals pkgs.stdenv.isDarwin [terminal-notifier];
     text =
       ''
         set -euo pipefail
@@ -67,22 +65,21 @@ let
 
       ''
       + (
-        if pkgs.stdenv.isDarwin then
-          ''
-            terminal-notifier \
-              -title "New Mail ($new_count)" \
-              -message "$summary" \
-              -group "email-sync" \
-              -sound default
-          ''
-        else
-          ''
-            notify-send \
-              -u normal \
-              -i mail-unread \
-              "New Mail ($new_count)" \
-              "$summary"
-          ''
+        if pkgs.stdenv.isDarwin
+        then ''
+          terminal-notifier \
+            -title "New Mail ($new_count)" \
+            -message "$summary" \
+            -group "email-sync" \
+            -sound default
+        ''
+        else ''
+          notify-send \
+            -u normal \
+            -i mail-unread \
+            "New Mail ($new_count)" \
+            "$summary"
+        ''
       )
       + ''
           # Mark as notified to prevent duplicate notifications
@@ -115,10 +112,10 @@ let
       exit $?
     fi
   '';
-in
-{
+in {
   imports = [
     ./aerc.nix
+    ./thunderbird.nix
   ];
 
   config = lib.mkMerge [
@@ -149,7 +146,7 @@ in
           OnBootSec = "2m";
           OnUnitActiveSec = "5m";
         };
-        Install.WantedBy = [ "timers.target" ];
+        Install.WantedBy = ["timers.target"];
       };
     })
 
@@ -158,7 +155,7 @@ in
       launchd.agents.mbsync = {
         enable = true;
         config = {
-          ProgramArguments = [ "${email-sync}/bin/email-sync" ];
+          ProgramArguments = ["${email-sync}/bin/email-sync"];
           StartInterval = 300;
           RunAtLoad = true;
           StandardOutPath = "${config.xdg.stateHome}/mbsync.log";

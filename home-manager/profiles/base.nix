@@ -3,12 +3,14 @@
   lib,
   config,
   ...
-}:
-{
+}: {
   imports = [
     ../modules/packages.nix
-    ../modules/services.nix
     ../modules/fonts.nix
+    ../modules/pueue.nix
+    ../modules/atuin.nix
+    ../modules/helix
+    ../modules/yazi
   ];
 
   xdg.enable = true;
@@ -24,9 +26,15 @@
   home.username = lib.mkDefault "seungwon";
   home.stateVersion = "25.05";
   home.homeDirectory =
-    if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
+    if pkgs.stdenv.isDarwin
+    then "/Users/${config.home.username}"
+    else "/home/${config.home.username}";
 
   programs.home-manager.enable = true;
 
   nixpkgs.config.allowUnfree = true;
+
+  home.sessionVariables = {
+    NIKS3_SERVER_URL = "https://niks3.mulatta.io";
+  };
 }
