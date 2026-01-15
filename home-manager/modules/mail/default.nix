@@ -27,6 +27,21 @@ let
       ''
         set -euo pipefail
 
+        # Prevent concurrent runs with lock directory (atomic on all platforms)
+        LOCKDIR="$HOME/.local/state/email-sync.lock"
+        cleanup() { rmdir "$LOCKDIR" 2>/dev/null || true; }
+        trap cleanup EXIT
+        if ! mkdir "$LOCKDIR" 2>/dev/null; then
+          echo "Another email-sync is running, exiting."
+          exit 0
+        fi
+
+        # Check if rbw is unlocked (skip if not to avoid pinentry spam)
+        if ! rbw unlocked 2>/dev/null; then
+          echo "rbw vault is locked, skipping sync."
+          exit 0
+        fi
+
         echo "Syncing emails from IMAP servers..."
         mbsync -c "$HOME/.config/isyncrc" -a
 

@@ -59,6 +59,12 @@ in
       nix-direnv
       eza
       fish
+      zsh
+      zsh-autosuggestions
+      zsh-fast-syntax-highlighting
+      zsh-autopair
+      zsh-fzf-tab
+      zsh-completions
       fzf
       starship
       zellij
@@ -104,6 +110,7 @@ in
       glow
 
       # CLI utilities
+      stow
       delta
       dust
       fd
@@ -124,6 +131,11 @@ in
       sops
       rbw
 
+      # Calendar & Contacts
+      vdirsyncer
+      khal
+      khard
+
       # Radicle
       radicle-node
 
@@ -132,6 +144,7 @@ in
     ]
     ++ [
       # Custom packages
+      self.packages.${system}.hm
       self.packages.${system}.jmt
       self.packages.${system}.merge-when-green
       self.packages.${system}.gh-radicle
@@ -141,6 +154,7 @@ in
       # External flakes
       inputs.llm-agents.packages.${system}.claude-code
       inputs.niks3.packages.${system}.niks3
+      inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
     ]
     ++ lib.optionals (!stdenv.isDarwin) [ fontpreview ];
 
