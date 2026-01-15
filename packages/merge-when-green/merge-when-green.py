@@ -458,6 +458,12 @@ def rebase_all_branches(default_branch: str, upstream_remote: str) -> None:
     else:
         print_warning("Some branches may need manual rebase")
 
+    # Update local main bookmark to match upstream (resolves divergent state)
+    run(
+        ["jj", "bookmark", "set", default_branch, "-r", f"{default_branch}@{upstream_remote}", "-B"],
+        check=False,
+    )
+
 
 def sync_fork_main(default_branch: str, upstream_remote: str) -> None:
     """Sync default branch from upstream to origin (fork workflow only)."""
