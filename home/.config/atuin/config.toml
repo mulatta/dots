@@ -1,6 +1,3 @@
-auto_sync = true
+# Sync via system service instead of daemon
+auto_sync = false
 sync_address = "https://atuin.mulatta.io"
-
-[daemon]
-enabled = true
-socket_path = "/Users/seungwon/.local/share/atuin/daemon.sock"
