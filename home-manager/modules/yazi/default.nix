@@ -1,8 +1,12 @@
-{ pkgs, ... }:
 {
-  programs.yazi = {
-    enable = true;
-    plugins = import ./plugins.nix { inherit pkgs; };
-    shellWrapperName = "y";
-  };
+  pkgs,
+  lib,
+  self,
+  ...
+}: {
+  home.packages =
+    [
+      self.packages.${pkgs.stdenv.hostPlatform.system}.yazi
+    ]
+    ++ lib.optionals (!pkgs.stdenv.isDarwin) [pkgs.fontpreview];
 }
