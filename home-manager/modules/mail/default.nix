@@ -1,3 +1,5 @@
+# Mail module - config managed by stow (home/.config/)
+# This module only provides packages, scripts, and services
 {
   pkgs,
   config,
@@ -21,28 +23,62 @@ let
       ]
       ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
       ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
-    text = ''
-      set -euo pipefail
+    text =
+      ''
+        set -euo pipefail
 
-      echo "Syncing emails from IMAP servers..."
-      mbsync -c "$HOME/.config/isyncrc" -a
+        echo "Syncing emails from IMAP servers..."
+        mbsync -c "$HOME/.config/isyncrc" -a
 
-      if [ ! -d "${maildir}/.notmuch" ]; then
-        echo "Initializing notmuch database..."
+        if [ ! -d "${maildir}/.notmuch" ]; then
+          echo "Initializing notmuch database..."
+          notmuch new
+        fi
+
+        echo "Indexing new emails..."
         notmuch new
-      fi
 
-      echo "Indexing new emails..."
-      notmuch new
+        echo "Tagging emails with afew..."
+        NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
 
-      echo "Tagging emails with afew..."
-      NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
+        # Check for new mail and send notification (Mic92 style with notified tag)
+        new_query="date:7days.. AND tag:unread AND NOT tag:notified"
+        new_count=$(notmuch count "$new_query")
+        if [ "$new_count" -gt 0 ]; then
+          echo "Found $new_count new email(s) to notify"
 
-      echo "Email sync complete."
-    '';
+          # Get summary of new emails (up to 3 subjects)
+          summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject' | tr '\n' ' ')
+
+      ''
+      + (
+        if pkgs.stdenv.isDarwin then
+          ''
+            terminal-notifier \
+              -title "New Mail ($new_count)" \
+              -message "$summary" \
+              -group "email-sync" \
+              -sound default
+          ''
+        else
+          ''
+            notify-send \
+              -u normal \
+              -i mail-unread \
+              "New Mail ($new_count)" \
+              "$summary"
+          ''
+      )
+      + ''
+          # Mark as notified to prevent duplicate notifications
+          notmuch tag +notified -- "$new_query"
+        fi
+
+        echo "Email sync complete."
+      '';
   };
 
-  msmtp-with-sent = pkgs.writeShellScriptBin "msmtp" ''
+  msmtp-wrapper = pkgs.writeShellScriptBin "msmtp" ''
     tmpfile=$(mktemp)
     trap "rm -f $tmpfile" EXIT
 
@@ -68,51 +104,19 @@ in
 {
   imports = [
     ./aerc.nix
-    ./accounts.nix
   ];
 
   config = lib.mkMerge [
     {
       home.packages = [
         email-sync
+        msmtp-wrapper
+        pkgs.isync
+        pkgs.notmuch
+        pkgs.afew
         pkgs.rbw
         pkgs.gnupg
       ];
-
-      programs.mbsync.enable = true;
-
-      programs.msmtp = {
-        enable = true;
-        package = msmtp-with-sent;
-      };
-
-      programs.notmuch = {
-        enable = true;
-        new = {
-          tags = [ "new" ];
-          ignore = [
-            ".mbsyncstate"
-            ".uidvalidity"
-          ];
-        };
-        search.excludeTags = [
-          "deleted"
-          "spam"
-        ];
-        maildir.synchronizeFlags = true;
-      };
-
-      programs.afew = {
-        enable = true;
-        extraConfig = ''
-          [SpamFilter]
-          [KillThreadsFilter]
-          [ListMailsFilter]
-          [ArchiveSentMailsFilter]
-          [FolderNameFilter]
-          [InboxFilter]
-        '';
-      };
     }
 
     (lib.mkIf pkgs.stdenv.isLinux {
