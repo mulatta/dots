@@ -26,13 +26,6 @@ name = "bash"
 git = "https://github.com/tree-sitter/tree-sitter-bash"
 rev = "275effdfc0edce774acf7d481f9ea195c6c403cd"
 
-[[grammar]]
-name = "groovy"
-
-[grammar.source]
-git = "https://github.com/murtaza64/tree-sitter-groovy"
-rev = "1ca2e8a0fbb0993b3dba609bc5bff4f25b468bb3"
-
 [[language]]
 auto-format = true
 file-types = ["json"]
@@ -149,7 +142,7 @@ command = "prettier"
 
 [[language]]
 auto-format = true
-file-types = ["sh", "bash"]
+file-types = ["sh", "bash", { glob = ".*shrc" }, { glob = ".*profile" }, { glob = ".*_profile" }, { glob = ".*shenv" }]
 language-servers = ["bash-language-server"]
 name = "bash"
 scope = "source.bash"
@@ -159,33 +152,6 @@ shebangs = ["sh", "bash"]
 args = ["-i", "2", "-ci"]
 command = "shfmt"
 
-[[language]]
-auto-format = true
-comment-tokens = ["//"]
-file-types = ["nf"]
-grammar = "groovy"
-language-servers = ["nextflow-lsp"]
-name = "nextflow"
-roots = ["nextflow.config", "main.nf"]
-scope = "source.nextflow"
-
-[language.indent]
-tab-width = 4
-unit = "    "
-
-[[language]]
-auto-format = true
-comment-tokens = ["//"]
-file-types = ["config"]
-grammar = "groovy"
-language-servers = ["nextflow-lsp"]
-name = "nextflow-config"
-scope = "source.nextflow.config"
-
-[language.indent]
-tab-width = 4
-unit = "    "
-
 [language-server.bash-language-server]
 args = ["start"]
 command = "bash-language-server"
@@ -193,10 +159,6 @@ command = "bash-language-server"
 [language-server.marksman]
 args = ["server"]
 command = "marksman"
-
-[language-server.nextflow-lsp]
-args = []
-command = "nextflow-lsp"
 
 [language-server.nil]
 command = "nil"
