@@ -21,5 +21,6 @@ Far :mulatta-remote:
 Near :mulatta-local:
 Patterns * "!Shared Folders" "!Shared Folders/*"
 Remove None
+Sync All
 SyncState *
 
