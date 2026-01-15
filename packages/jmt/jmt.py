@@ -30,12 +30,14 @@ STDIN_ARGS = {
     "terraform": ["-"], # terraform fmt -
     "prettier": ["--stdin-filepath=$path"],
     "taplo": ["-"],     # taplo format -
+    "ruff": ["--stdin-filename=input.py"],  # ruff format/check needs filename for stdin
 }
 
 # Tools that need wrapper scripts (no stdin support, but do modify files)
 NEEDS_WRAPPER = {
     "deadnix",     # Requires file path, uses --edit
     "ruff-isort",  # ruff check --fix doesn't support stdin/stdout
+    "ruff-check",  # ruff check --fix modifies files in-place
 }
 
 
@@ -196,6 +198,7 @@ def get_inline_command(name: str, command: str, options: list[str], mode: str) -
         "statix": ".nix",
         "shellcheck": ".sh",
         "ruff-isort": ".py",
+        "ruff-check": ".py",
     }
     ext = ext_map.get(name, "")
 
