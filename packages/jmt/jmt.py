@@ -371,7 +371,7 @@ def write_jj_config(config: str, flake_root: Path) -> bool:
 
 def run_jj_fix(flake_root: Path, extra_args: list[str] | None = None) -> int:
     """Run jj fix with optional extra arguments."""
-    cmd = ["jj", "fix"] + (extra_args or [])
+    cmd = ["jj", "fix", "--include-unchanged-files"] + (extra_args or [])
     print(f"Running {' '.join(cmd)}...", file=sys.stderr)
     result = subprocess.run(cmd, cwd=flake_root)
     return result.returncode
