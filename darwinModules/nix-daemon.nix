@@ -1,9 +1,11 @@
-{ self, ... }:
+{ self, pkgs, ... }:
 {
   nixpkgs.overlays = [ self.overlays.default ];
 
   # this extends srvos's common settings
   nix = {
+    package = pkgs.nixVersions.latest;
+
     gc.automatic = true;
     gc.interval = {
       Hour = 3;
