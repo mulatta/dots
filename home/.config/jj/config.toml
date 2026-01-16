@@ -85,7 +85,7 @@ sign-on-push = true
 [signing]
 backend = "ssh"
 behavior = "force"
-key = "/Users/seungwon/.ssh/id_ed25519.pub"
+key = "/Users/seungwon/.ssh/id_ed25519"
 
 [signing.backends.ssh]
 allowed-signers = "/Users/seungwon/.ssh/allowed_signers"
