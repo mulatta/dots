@@ -338,17 +338,17 @@ def create_pr(bookmark: str, title: str | None = None) -> bool:
 
 
 def enable_auto_merge(bookmark: str) -> bool:
-    """Enable auto-merge with rebase strategy."""
-    print_info("Enabling auto-merge (rebase)...")
+    """Add auto-merge label to trigger workflow (Mic92/auto-merge style)."""
+    print_info("Adding auto-merge label...")
     head_ref = get_head_ref(bookmark)
     result = run(
-        ["gh", "pr", "merge", head_ref, "--auto", "--rebase", "--delete-branch"],
+        ["gh", "pr", "edit", head_ref, "--add-label", "auto-merge"],
         check=False,
     )
     if result.returncode != 0:
-        print_warning("Could not enable auto-merge")
+        print_warning("Could not add auto-merge label")
         return False
-    print_success("Auto-merge enabled")
+    print_success("Auto-merge label added")
     return True
 
 
