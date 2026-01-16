@@ -1,9 +1,9 @@
-{ ... }:
+{ inputs, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, system, ... }:
     let
-      jmt = pkgs.callPackage ./jmt { };
+      jmt = inputs.jmt.packages.${system}.default;
     in
     {
       packages = {
