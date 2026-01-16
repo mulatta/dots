@@ -14,6 +14,8 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
+    jmt.inputs.nixpkgs.follows = "nixpkgs";
+    jmt.url = "github:mulatta/jmt";
     llm-agents.url = "github:numtide/llm-agents.nix";
     niks3.inputs.nixpkgs.follows = "nixpkgs";
     niks3.url = "github:Mic92/niks3";
