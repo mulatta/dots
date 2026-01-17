@@ -101,7 +101,6 @@ in
       self.packages.${system}.jmt
       self.packages.${system}.merge-when-green
       self.packages.${system}.gh-radicle
-      self.packages.${system}.create-gh-app
       self.packages.${system}.rbw-pinentry
 
       # External flakes
