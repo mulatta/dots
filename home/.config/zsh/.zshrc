@@ -163,8 +163,13 @@ if command -v atuin &>/dev/null; then
   bindkey -M hxnor '^R' atuin-search 2>/dev/null
 fi
 
-# direnv
-command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
+# direnv (direnv-instant for faster cd performance)
+if command -v direnv-instant &>/dev/null; then
+  export DIRENV_INSTANT_MUX_DELAY=6
+  eval "$(direnv-instant hook zsh)"
+elif command -v direnv &>/dev/null; then
+  eval "$(direnv hook zsh)"
+fi
 
 # jujutsu completion (dynamic - supports aliases)
 command -v jj &>/dev/null && {
