@@ -8,6 +8,8 @@
     clan-core.inputs.systems.follows = "systems";
     clan-core.inputs.treefmt-nix.follows = "treefmt-nix";
     clan-core.url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
+    direnv-instant.inputs.nixpkgs.follows = "nixpkgs";
+    direnv-instant.url = "github:Mic92/direnv-instant";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
