@@ -3,42 +3,42 @@ status_path = "/Users/seungwon/.local/share/vdirsyncer/status"
 
 ### Pairs
 
-[pair calendar_nextcloud]
-a = "calendar_nextcloud_remote"
-b = "calendar_nextcloud_local"
+[pair calendar_stalwart]
+a = "calendar_stalwart_remote"
+b = "calendar_stalwart_local"
 collections = ["from a", "from b"]
 conflict_resolution = "a wins"
 metadata = ["color", "displayname"]
 
-[pair contacts_nextcloud]
-a = "contacts_nextcloud_remote"
-b = "contacts_nextcloud_local"
+[pair contacts_stalwart]
+a = "contacts_stalwart_remote"
+b = "contacts_stalwart_local"
 collections = ["from a", "from b"]
 conflict_resolution = "a wins"
 
 
 ### Local storages
 
-[storage calendar_nextcloud_local]
+[storage calendar_stalwart_local]
 fileext = ".ics"
-path = "/Users/seungwon/.local/share/calendars/nextcloud"
+path = "/Users/seungwon/.local/share/calendars/stalwart"
 type = "filesystem"
 
-[storage contacts_nextcloud_local]
+[storage contacts_stalwart_local]
 fileext = ".vcf"
-path = "/Users/seungwon/.local/share/contacts/nextcloud"
+path = "/Users/seungwon/.local/share/contacts/stalwart"
 type = "filesystem"
 
 ### Remote storages
 
-[storage calendar_nextcloud_remote]
-password.fetch = ["command", "rbw", "get", "nextcloud-app-pass"]
+[storage calendar_stalwart_remote]
+password.fetch = ["command", "rbw", "get", "mulatta.io"]
 type = "caldav"
-url = "https://cloud.mulatta.io/remote.php/dav/calendars/seungwon/"
+url = "https://mail.mulatta.io/dav/cal/seungwon/"
 username = "seungwon"
 
-[storage contacts_nextcloud_remote]
-password.fetch = ["command", "rbw", "get", "nextcloud-app-pass"]
+[storage contacts_stalwart_remote]
+password.fetch = ["command", "rbw", "get", "mulatta.io"]
 type = "carddav"
-url = "https://cloud.mulatta.io/remote.php/dav/addressbooks/users/seungwon/"
+url = "https://mail.mulatta.io/dav/card/seungwon/"
 username = "seungwon"

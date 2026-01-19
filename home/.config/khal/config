@@ -1,13 +1,13 @@
 [calendars]
-[[nextcloud]]
-path = /Users/seungwon/.local/share/calendars/nextcloud/*
+[[stalwart]]
+path = /Users/seungwon/.local/share/calendars/stalwart/*
 priority=10
 type=discover
 
 
 
 [default]
-default_calendar=personal
+default_calendar=default
 highlight_event_days=true
 
 [locale]
