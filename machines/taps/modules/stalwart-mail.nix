@@ -58,6 +58,7 @@ in
           implicit = false;
         };
 
+        # Whitelist home IP to bypass fail2ban/rate limiting
         allowed-ip."61.84.68.70" = "";
 
         listener = {
@@ -94,6 +95,12 @@ in
             protocol = "http";
             tls.implicit = false;
           };
+
+          managesieve = {
+            bind = [ "[::]:4190" ];
+            protocol = "managesieve";
+            tls.implicit = false;
+          };
         };
       };
 
@@ -119,17 +126,13 @@ in
         blob = "rocksdb";
         lookup = "rocksdb";
         directory = "kanidm";
+        # sieve storage uses data store by default
       };
 
       store.rocksdb = {
         type = "rocksdb";
         path = "/var/lib/stalwart-mail/data";
         compression = "lz4";
-      };
-
-      directory.internal = {
-        type = "internal";
-        store = "rocksdb";
       };
 
       # Kanidm LDAP directory
@@ -162,7 +165,7 @@ in
           name = "name";
           email = "mail";
           description = "displayname";
-          groups = "memberof";
+          # groups = "memberof";  # Disabled: causes unwanted Shared Folders
           # Workaround: Kanidm doesn't expose password via LDAP
           secret = "entryuuid";
           secret-changed = "entryuuid";
@@ -230,6 +233,36 @@ in
       spam-filter = {
         enable = true;
         resource = "file://${pkgs.stalwart-mail.passthru.spam-filter}/spam-filter.toml";
+      };
+
+      # Enable user sieve scripts (uploaded via ManageSieve)
+      sieve.untrusted = {
+        limits = {
+          script-size = 1048576;
+          string-length = 4096;
+          variable-name-length = 32;
+          variable-size = 4096;
+          nested-blocks = 15;
+          nested-tests = 15;
+          nested-foreverypart = 3;
+          nested-includes = 3;
+          match-variables = 30;
+          local-variables = 128;
+          header-size = 1024;
+          includes = 3;
+          received-headers = 10;
+          cpu = 5000;
+          redirects = 1;
+          outgoing-messages = 3;
+        };
+        disable-capabilities = [ ];
+        notification-uris = [ "mailto" ];
+        protected-headers = [
+          "Original-Subject"
+          "Original-From"
+          "Received"
+          "Auto-Submitted"
+        ];
       };
 
       webadmin = {

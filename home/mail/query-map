@@ -1,6 +1,9 @@
 # Virtual folders for aerc with notmuch
 # Use folder: queries to avoid duplicate display
 INBOX=folder:mulatta/Inbox AND NOT tag:deleted
+GitHub=folder:"mulatta/Inbox/GitHub" AND NOT tag:deleted
+Academic=folder:"mulatta/Inbox/Academic" AND NOT tag:deleted
+Server=folder:"mulatta/Inbox/Server" AND NOT tag:deleted
 Sent=folder:"mulatta/Sent Items"
 Drafts=folder:mulatta/Drafts
 Trash=folder:"mulatta/Deleted Items" OR tag:deleted

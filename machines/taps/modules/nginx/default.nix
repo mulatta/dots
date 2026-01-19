@@ -2,13 +2,13 @@
   imports = [
     ./atuin.nix
     ./immich.nix
+    ./mta-sts.nix
     ./n8n.nix
+    ./nextcloud.nix
     ./radicle.nix
-    ./vaultwarden.nix
     ./stalwart.nix
     ./step-ca.nix
     ./vaultwarden.nix
-    ./nextcloud.nix
   ];
 
   services.nginx = {

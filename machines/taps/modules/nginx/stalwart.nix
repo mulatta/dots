@@ -1,7 +1,6 @@
-{ pkgs, ... }:
+{ ... }:
 let
   domain = "mail.mulatta.io";
-  baseDomain = "mulatta.io";
 in
 {
   services.nginx.virtualHosts.${domain} = {
@@ -22,22 +21,5 @@ in
       '';
     };
 
-    locations."= /.well-known/mta-sts.txt".alias = pkgs.writeText "mta-sts.txt" ''
-      version: STSv1
-      mode: enforce
-      mx: ${domain}
-      max_age: 86400
-    '';
-  };
-
-  services.nginx.virtualHosts."mta-sts.${baseDomain}" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."= /.well-known/mta-sts.txt".alias = pkgs.writeText "mta-sts.txt" ''
-      version: STSv1
-      mode: enforce
-      mx: ${domain}
-      max_age: 86400
-    '';
   };
 }

@@ -17,7 +17,7 @@ in
       "networkmanager"
     ];
     hashedPasswordFile = config.clan.core.vars.generators.seungwon-password.files.password-hash.path;
-    shell = "/run/current-system/sw/bin/fish";
+    shell = "/run/current-system/sw/bin/zsh";
     openssh.authorizedKeys.keys = seungwonKey;
   };
 

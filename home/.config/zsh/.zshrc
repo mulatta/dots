@@ -6,8 +6,8 @@
 # Session variables (from nix-profile if available)
 [[ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]] && source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 
-# PATH setup
-export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+# PATH setup (NixOS: /run/wrappers/bin must come first for setuid binaries like sudo)
+export PATH="/run/wrappers/bin:$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
 # Environment variables
 export NH_FLAKE="$HOME/dots"
