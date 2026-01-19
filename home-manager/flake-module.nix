@@ -129,20 +129,14 @@
         '';
       };
 
-      legacyPackages.homeConfigurations =
-        let
-          profiles = {
-            base = mkHomeConfig { };
-          }
-          // lib.optionalAttrs (system == "aarch64-darwin") {
-            macos = mkHomeConfig { extraModules = [ ./profiles/macos.nix ]; };
-          }
-          // lib.optionalAttrs (system == "x86_64-linux" || system == "aarch64-linux") {
-            desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
-          };
-
-          filteredProfileMap = lib.filterAttrs (_host: p: profiles ? ${p}) profileMap;
-        in
-        profiles // lib.mapAttrs (_: p: profiles.${p}) filteredProfileMap;
+      legacyPackages.homeConfigurations = {
+        base = mkHomeConfig { };
+      }
+      // lib.optionalAttrs (system == "aarch64-darwin") {
+        macos = mkHomeConfig { extraModules = [ ./profiles/macos.nix ]; };
+      }
+      // lib.optionalAttrs (system == "x86_64-linux" || system == "aarch64-linux") {
+        desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
+      };
     };
 }
