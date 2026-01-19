@@ -113,6 +113,16 @@ resource "vultr_firewall_rule" "imaps" {
   notes             = "IMAPS"
 }
 
+resource "vultr_firewall_rule" "managesieve" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "4190"
+  notes             = "ManageSieve"
+}
+
 # Radicle P2P
 resource "vultr_firewall_rule" "radicle" {
   firewall_group_id = vultr_firewall_group.taps.id

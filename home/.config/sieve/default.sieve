@@ -5,7 +5,7 @@ if anyof (
     address :domain :is "from" "github.com",
     address :domain :is "from" "noreply.github.com"
 ) {
-    fileinto :create "GitHub";
+    fileinto :create "INBOX/GitHub";
     stop;
 }
 
@@ -62,7 +62,7 @@ if anyof (
     # Google Scholar alerts
     header :contains "from" "scholaralerts-noreply@google.com"
 ) {
-    fileinto :create "Academic";
+    fileinto :create "INBOX/Academic";
     stop;
 }
 
@@ -78,7 +78,7 @@ if anyof (
     header :contains "subject" "[cron]",
     header :contains "subject" "Cron"
 ) {
-    fileinto :create "Server";
+    fileinto :create "INBOX/Server";
     stop;
 }
 

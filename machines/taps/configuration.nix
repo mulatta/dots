@@ -15,7 +15,7 @@
     ../../nixosModules/users.nix
     ../../nixosModules/zerotier.nix
     ./modules/radicle.nix
-    ./modules/cloudflare-dns.nix
+    # DNS records managed by terraform/cloudflare/dns.tf
     ./modules/kanidm
     ./modules/coredns.nix
     ./modules/disko-vps.nix
