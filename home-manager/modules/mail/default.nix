@@ -4,9 +4,12 @@
   pkgs,
   config,
   lib,
+  self,
   ...
 }:
 let
+  system = pkgs.stdenv.hostPlatform.system;
+  rbw-pinentry = self.packages.${system}.rbw-pinentry;
   maildir = "${config.home.homeDirectory}/mail";
   email-sync = pkgs.writeShellApplication {
     name = "email-sync";
@@ -35,10 +38,13 @@ let
         exit 0
       fi
 
-      # Check if rbw is unlocked (skip if not to avoid pinentry spam)
+      # Try to unlock if locked (keychain will provide password automatically)
       if ! rbw unlocked 2>/dev/null; then
-        echo "rbw vault is locked, skipping sync."
-        exit 0
+        echo "rbw vault is locked, attempting unlock via keychain..."
+        if ! rbw unlock 2>/dev/null; then
+          echo "Failed to unlock rbw vault, skipping sync."
+          exit 0
+        fi
       fi
 
       echo "Syncing emails from IMAP servers..."
@@ -165,7 +171,10 @@ in
           RunAtLoad = true;
           StandardOutPath = "${config.xdg.stateHome}/mbsync.log";
           StandardErrorPath = "${config.xdg.stateHome}/mbsync.err";
-          EnvironmentVariables.HOME = config.home.homeDirectory;
+          EnvironmentVariables = {
+            HOME = config.home.homeDirectory;
+            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
+          };
         };
       };
     })
