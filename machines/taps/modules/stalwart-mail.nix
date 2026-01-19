@@ -165,7 +165,7 @@ in
           name = "name";
           email = "mail";
           description = "displayname";
-          groups = "memberof";
+          # groups = "memberof";  # Disabled: causes unwanted Shared Folders
           # Workaround: Kanidm doesn't expose password via LDAP
           secret = "entryuuid";
           secret-changed = "entryuuid";
