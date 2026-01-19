@@ -9,6 +9,7 @@ let
   ];
 in
 {
+  programs.zsh.enable = true;
   users.users.seungwon = {
     home = "/home/seungwon";
     isNormalUser = true;
