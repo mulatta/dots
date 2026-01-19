@@ -4,9 +4,13 @@
   pkgs,
   config,
   lib,
+  self,
   ...
 }:
 let
+  system = pkgs.stdenv.hostPlatform.system;
+  rbw-pinentry = self.packages.${system}.rbw-pinentry;
+
   # Python environment for calendar-notify
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
@@ -24,10 +28,13 @@ let
       rbw
     ];
     text = ''
-      # Check if rbw is unlocked (skip if not to avoid pinentry spam)
+      # Try to unlock if locked (keychain will provide password automatically)
       if ! rbw unlocked 2>/dev/null; then
-        echo "rbw vault is locked, skipping sync."
-        exit 0
+        echo "rbw vault is locked, attempting unlock via keychain..."
+        if ! rbw unlock 2>/dev/null; then
+          echo "Failed to unlock rbw vault, skipping sync."
+          exit 0
+        fi
       fi
 
       vdirsyncer discover || true
@@ -120,7 +127,10 @@ lib.mkMerge [
         RunAtLoad = true;
         StandardOutPath = "${config.xdg.stateHome}/calendar-sync.log";
         StandardErrorPath = "${config.xdg.stateHome}/calendar-sync.err";
-        EnvironmentVariables.HOME = config.home.homeDirectory;
+        EnvironmentVariables = {
+          HOME = config.home.homeDirectory;
+          PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
+        };
       };
     };
 
