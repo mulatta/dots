@@ -15,6 +15,9 @@ let
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${wgPrefix}:${maltSuffix}";
 
+  n8nDomain = "n8n.mulatta.io";
+
+  # Forward-auth hooks for oauth2-proxy header-based authentication
   hooksFile = pkgs.writeText "n8n-hooks.js" ''
     const { resolve } = require('path');
     const fs = require('fs');
@@ -42,6 +45,7 @@ let
                         if (req.cookies?.['n8n-auth']) return next()
                         if (!process.env.N8N_FORWARD_AUTH_HEADER) return next()
 
+                        // SECURITY: Only enable header-based auth for specific hostname
                         const allowedHost = process.env.N8N_SSO_HOSTNAME;
                         if (req.headers.host !== allowedHost) return next()
 
@@ -75,12 +79,39 @@ in
       GENERIC_TIMEZONE = "Asia/Seoul";
       N8N_VERSION_NOTIFICATIONS_ENABLED = "false";
       N8N_DIAGNOSTICS_ENABLED = "false";
-      N8N_EDITOR_BASE_URL = "https://n8n.mulatta.io";
-      WEBHOOK_URL = "https://n8n.mulatta.io";
+      N8N_EDITOR_BASE_URL = "https://${n8nDomain}";
+      WEBHOOK_URL = "https://${n8nDomain}";
+
+      # PostgreSQL database configuration
+      DB_TYPE = "postgresdb";
+      DB_POSTGRESDB_HOST = "/run/postgresql";
+      DB_POSTGRESDB_DATABASE = "n8n";
+      DB_POSTGRESDB_USER = "n8n";
+
+      # Executions pruning
+      EXECUTIONS_DATA_PRUNE = "true";
+      EXECUTIONS_DATA_MAX_AGE = "336"; # 2 weeks in hours
+
+      # Forward-auth hooks configuration
       EXTERNAL_HOOK_FILES = "${hooksFile}";
       N8N_FORWARD_AUTH_HEADER = "X-Auth-Request-Email";
-      N8N_SSO_HOSTNAME = "n8n.mulatta.io";
+      N8N_SSO_HOSTNAME = n8nDomain;
     };
+  };
+
+  # PostgreSQL database for n8n
+  services.postgresql.ensureDatabases = [ "n8n" ];
+  services.postgresql.ensureUsers = [
+    {
+      name = "n8n";
+      ensureDBOwnership = true;
+    }
+  ];
+
+  # Ensure n8n starts after PostgreSQL
+  systemd.services.n8n = {
+    after = [ "postgresql.service" ];
+    requires = [ "postgresql.service" ];
   };
 
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 5678 ];

@@ -12,7 +12,7 @@
     ../../nixosModules/radicle-mulatta.nix
     ./modules/immich.nix
     ./modules/network.nix
-    ./modules/n8n.nix
+    ./modules/n8n
     ./modules/nextcloud.nix
   ];
 
