@@ -63,15 +63,7 @@ in
       "opcache.interned_strings_buffer" = "16";
     };
 
-    # PIM apps: Calendar, Contacts, Tasks
-    extraAppsEnable = true;
-    extraApps = {
-      inherit (pkgs.nextcloud32Packages.apps)
-        calendar
-        contacts
-        tasks
-        ;
-    };
+    extraAppsEnable = false;
   };
 
   # Ensure correct ownership for ZFS dataset
