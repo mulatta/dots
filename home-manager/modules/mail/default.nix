@@ -119,6 +119,7 @@ in
 {
   imports = [
     ./aerc.nix
+    ./sieve.nix
     ./thunderbird.nix
   ];
 

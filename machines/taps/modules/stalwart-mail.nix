@@ -94,6 +94,12 @@ in
             protocol = "http";
             tls.implicit = false;
           };
+
+          managesieve = {
+            bind = [ "[::]:4190" ];
+            protocol = "managesieve";
+            tls.implicit = false;
+          };
         };
       };
 
@@ -119,6 +125,7 @@ in
         blob = "rocksdb";
         lookup = "rocksdb";
         directory = "kanidm";
+        sieve = "rocksdb";
       };
 
       store.rocksdb = {
