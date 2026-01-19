@@ -74,6 +74,15 @@ resource "cloudflare_dns_record" "n8n_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "n8n_api_a" {
+  zone_id = local.zone_id
+  name    = "n8n-api"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "cloud_a" {
   zone_id = local.zone_id
   name    = "cloud"
