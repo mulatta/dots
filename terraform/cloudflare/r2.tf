@@ -4,6 +4,33 @@ resource "cloudflare_r2_bucket" "cache" {
   location   = "APAC"
 }
 
+resource "cloudflare_r2_bucket" "backup" {
+  account_id = local.account_id
+  name       = "backup"
+  location   = "APAC"
+}
+
+# Lifecycle for backup bucket - delete old versions after 90 days
+resource "cloudflare_r2_bucket_lifecycle" "backup" {
+  account_id  = local.account_id
+  bucket_name = cloudflare_r2_bucket.backup.name
+  rules = [
+    {
+      id      = "abort-incomplete-multipart-uploads"
+      enabled = true
+      conditions = {
+        prefix = ""
+      }
+      abort_multipart_uploads_transition = {
+        condition = {
+          max_age = 86400 # 1 day
+          type    = "Age"
+        }
+      }
+    }
+  ]
+}
+
 # Abort incomplete multipart uploads after 1 day (minimum)
 resource "cloudflare_r2_bucket_lifecycle" "cache" {
   account_id  = local.account_id
