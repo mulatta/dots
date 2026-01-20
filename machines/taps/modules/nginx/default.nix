@@ -2,6 +2,7 @@
   imports = [
     ./atuin.nix
     ./immich.nix
+    ./linkwarden.nix
     ./mta-sts.nix
     ./n8n.nix
     ./nextcloud.nix
