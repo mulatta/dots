@@ -9,7 +9,8 @@
   clan.core.vars.generators.rustic = {
     files."password.txt" = {
       secret = true;
-      owner = "root";
+      owner = "rustic";
+      group = "rustic";
     };
 
     runtimeInputs = [ pkgs.openssl ];
