@@ -206,7 +206,13 @@ in
           # Confidential client - requires client_secret
           # Generate secret: kanidm system oauth2 show-basic-secret linkwarden
           public = false;
+          # Linkwarden (NextAuth.js) does not support PKCE
+          allowInsecureClientDisablePkce = true;
+          # NextAuth.js requires RS256, not ES256
+          enableLegacyCrypto = true;
           enableLocalhostRedirects = false;
+          # Use short username (seungwon) instead of SPN (seungwon@idm.mulatta.io)
+          preferShortUsername = true;
           scopeMaps.bookmark_users = [
             "openid"
             "email"

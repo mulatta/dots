@@ -88,7 +88,7 @@ in
     };
 
     environment = {
-      NEXTAUTH_URL = "https://${linkwardenDomain}";
+      NEXTAUTH_URL = "https://${linkwardenDomain}/api/v1/auth";
 
       # Use Authentik provider settings for Kanidm (standard OIDC)
       NEXT_PUBLIC_AUTHENTIK_ENABLED = "true";
