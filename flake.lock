@@ -47,11 +47,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768844207,
-        "narHash": "sha256-S6BEWZGWzLZyn17dJMYH0qwiWZTfNMnb31D+co4Crb8=",
-        "rev": "3d6eb436d9250ab9cd0918b9a9e3c46802035072",
+        "lastModified": 1768931441,
+        "narHash": "sha256-XWuk6/XDNqPUAKiIKlLaWLMX0xyw11D5UL4+KoLiVXA=",
+        "rev": "c1550aa8b4cb53abbf9ebe1849708aa0dae0ad70",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/3d6eb436d9250ab9cd0918b9a9e3c46802035072.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/c1550aa8b4cb53abbf9ebe1849708aa0dae0ad70.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -411,11 +411,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1766807290,
-        "narHash": "sha256-7Y9Miza3HG+B2TJCkm3XwbZw5mBNTpf9TVk1mMqdf30=",
-        "rev": "4eec65df50d796a8fd9c146a09b5007916ce376b",
+        "lastModified": 1768661221,
+        "narHash": "sha256-nWVh94hmJAh5iEs5gefyiNOIb0JwG80JmDkOvME+CqA=",
+        "rev": "3327b113f2ef698d380df83fbccefad7e83d7769",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.05pre917226.4eec65df50d7/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.05pre929242.3327b113f2ef/nixexprs.tar.xz"
       },
       "original": {
         "type": "tarball",
