@@ -130,6 +130,15 @@ resource "cloudflare_dns_record" "rad_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "links_a" {
+  zone_id = local.zone_id
+  name    = "links"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 # =============================================================================
 # Mail DNS Records (migrated from cloudflare-dns.nix)
 # =============================================================================

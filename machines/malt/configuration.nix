@@ -11,6 +11,7 @@
     ../../nixosModules/disko-zfs.nix
     ../../nixosModules/radicle-mulatta.nix
     ./modules/immich.nix
+    ./modules/linkwarden.nix
     ./modules/network.nix
     ./modules/n8n
     ./modules/nextcloud.nix
