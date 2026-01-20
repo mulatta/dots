@@ -15,6 +15,7 @@
     ./modules/network.nix
     ./modules/n8n
     ./modules/nextcloud.nix
+    ./modules/backup.nix
   ];
 
   clan.core.networking.targetHost = "root@malt.x";
