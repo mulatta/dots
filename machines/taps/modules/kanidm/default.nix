@@ -36,6 +36,12 @@ let
       url = "https://raw.githubusercontent.com/simple-icons/simple-icons/faa4f93283a90f0196f3d320968bd38972a27894/icons/n8n.svg";
       hash = "sha256-9aYGGIx4vxNP59ha49ExD29Le+r80dL73vKvAskiQKg=";
     };
+    # Linkwarden 2.8.0 - from official repo
+    linkwarden = pkgs.fetchurl {
+      name = "linkwarden.png";
+      url = "https://raw.githubusercontent.com/linkwarden/linkwarden/v2.8.0/assets/logo.png";
+      hash = "sha256-4lcQ7oRkBMAT8OYLzETxpSaFjBTUeo7V3XfZFDPdARQ=";
+    };
   };
 in
 {
@@ -96,6 +102,10 @@ in
         };
         # Automation users - can access n8n
         automation_users = {
+          members = [ "seungwon" ];
+        };
+        # Bookmark users - can access Linkwarden
+        bookmark_users = {
           members = [ "seungwon" ];
         };
         # Admin group
@@ -178,6 +188,26 @@ in
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.automation_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
+
+        # Linkwarden - bookmark manager (confidential client)
+        linkwarden = {
+          displayName = "Linkwarden";
+          imageFile = icons.linkwarden;
+          originUrl = [
+            "https://links.${baseDomain}"
+            "https://links.${baseDomain}/api/v1/auth/callback/authentik"
+          ];
+          originLanding = "https://links.${baseDomain}";
+          # Confidential client - requires client_secret
+          # Generate secret: kanidm system oauth2 show-basic-secret linkwarden
+          public = false;
+          enableLocalhostRedirects = false;
+          scopeMaps.bookmark_users = [
             "openid"
             "email"
             "profile"
