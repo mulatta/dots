@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   self,
   inputs,
   ...
@@ -109,4 +110,13 @@ in
       inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
       inputs.direnv-instant.packages.${system}.default
     ];
+
+  # macOS: symlink ~/Library/Application Support/rbw → ~/.config/rbw
+  # rbw uses macOS-native paths, but we want to manage config via ~/.config/rbw
+  home.activation.linkRbwConfig = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run rm -rf "$HOME/Library/Application Support/rbw"
+      run ln -sfn "$HOME/.config/rbw" "$HOME/Library/Application Support/rbw"
+    ''
+  );
 }

@@ -14,3 +14,5 @@ backend.tf
 
 __pycache__
 .pytest_test/
+home/.config/rbw/agent.*
+home/.config/rbw/device_id
