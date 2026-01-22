@@ -76,10 +76,25 @@ writeShellApplication {
     PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
       python3 -c "import sys; sys.argv = ['afew', '-tn']; import afew_filters; from afew.commands import main; main()" || true
 
+    # Apply retention policies (cleanup old notifications)
+    echo "Applying retention policies..."
+    XDG_CONFIG_HOME="$HOME/.config/afew-cleanup" \
+    PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
+      python3 -c "import sys; sys.argv = ['afew', '--tag', '--all']; import afew_filters; from afew.commands import main; main()" || true
+
     # Move emails to appropriate folders based on MailMover rules
     echo "Moving emails based on tags..."
     PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
       python3 -c "import sys; sys.argv = ['afew', '--move-mails', '--all']; import afew_filters; from afew.commands import main; main()" || true
+
+    # Delete old trash (older than 3 months)
+    old_trash=$(notmuch search --output=files 'tag:trash AND date:..3months')
+    if [ -n "$old_trash" ]; then
+      old_count=$(echo "$old_trash" | wc -l | tr -d ' ')
+      echo "Permanently deleting $old_count old trashed emails..."
+      echo "$old_trash" | xargs rm -f
+      notmuch new --quiet
+    fi
 
     # Resync after moving emails
     echo "Resyncing after moves..."

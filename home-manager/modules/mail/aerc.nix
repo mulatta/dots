@@ -1,9 +1,4 @@
-# aerc - config managed by stow (home/.config/aerc/)
-# This module only provides packages and helper scripts
-{
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 let
   open-in-thunderbird = pkgs.writeShellScriptBin "open-in-thunderbird" ''
     tmpfile=$(mktemp).eml
