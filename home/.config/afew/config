@@ -1,103 +1,23 @@
-# afew configuration for Inbox Zero workflow
-# See https://afew.readthedocs.io/
-
-# =============================================================================
-# Core Filters (order matters)
-# =============================================================================
+# afew configuration
+# Minimal setup: folder tagging + spam classification
+#
+# Flow: IMAP → Sieve (folders) → mbsync → notmuch → afew (spam only)
 
 [FolderNameFilter]
-# Tag based on folder names (set by Sieve)
-# Dev/ → +dev, Research/ → +research, etc.
 
 [KillThreadsFilter]
-# Kill threads that are already killed
 
 [ListMailsFilter]
-# Tag mailing list emails with list ID
 
 [ArchiveSentMailsFilter]
-# Archive sent mail, remove inbox tag
-
-# =============================================================================
-# Claude Spam Filter (custom - analyzes unknown senders)
-# =============================================================================
 
 [ClaudeSpamFilter]
 maildir_path = mulatta
 
-# =============================================================================
-# Rule-based Tagging
-# =============================================================================
-
-[Filter.1]
-message = Tag pull requests
-query = subject:"[PR]" OR subject:"Pull Request" OR subject:"pull request"
-tags = +pr
-
-[Filter.2]
-message = Tag CI/CD notifications
-query = subject:"Run failed" OR subject:"Run cancelled" OR subject:"Build failed" OR subject:"CI failed"
-tags = +ci;+urgent
-
-[Filter.3]
-message = Tag GitHub Actions
-query = from:notifications@github.com AND (subject:failed OR subject:cancelled)
-tags = +ci
-
-[Filter.4]
-message = Tag newsletters (List-Unsubscribe header)
-query = header:List-Unsubscribe AND NOT tag:dev AND NOT tag:research AND NOT tag:university AND NOT tag:finance
-tags = +newsletter
-
-[Filter.5]
-message = Tag receipts and payments
-query = subject:결제 OR subject:영수증 OR subject:receipt OR subject:"주문 확인" OR subject:"order confirm"
-tags = +receipt
-
-[Filter.6]
-message = Tag verification codes
-query = subject:"인증" OR subject:"verification" OR subject:"verify" OR subject:"magic link" OR subject:"OTP" OR subject:"확인 코드"
-tags = +verification
-
-[Filter.7]
-message = Tag calendar events
-query = from:calendar-notification@google.com OR subject:"invitation" OR subject:"초대"
-tags = +calendar
-
-[Filter.8]
-message = Tag Scholar alerts
-query = from:scholaralerts-noreply@google.com
-tags = +scholar;+automated
-
-[Filter.9]
-message = Tag automated emails
-query = from:noreply OR from:no-reply OR from:notification@ OR from:notifications@
-tags = +automated
-
-# =============================================================================
-# Inbox Filter
-# =============================================================================
-
 [InboxFilter]
-# Add inbox tag to new mail
-
-# =============================================================================
-# User Correction Filter (detect folder moves, update learning)
-# =============================================================================
-
-[UserCorrectionFilter]
-maildir_path = mulatta
-junk_folder = Junk Mail
-inbox_folder = INBOX
-
-# =============================================================================
-# MailMover - Move emails based on tags (runs last)
-# =============================================================================
 
 [MailMover]
-folders = mulatta mulatta/INBOX
+folders = mulatta/Inbox
 rename = True
 
-# Move spam to Junk Mail
-mulatta = 'tag:spam':'mulatta/Junk Mail'
-mulatta/INBOX = 'tag:spam':'mulatta/Junk Mail'
+mulatta/Inbox = 'tag:spam':'mulatta/Junk Mail'
