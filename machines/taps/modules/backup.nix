@@ -71,7 +71,7 @@
           set -euo pipefail
           systemctl stop stalwart-mail
           trap "systemctl start stalwart-mail" EXIT
-          tar -cf - -C /var/lib/stalwart-mail data
+          ${pkgs.gnutar}/bin/tar -cf - -C /var/lib/stalwart-mail data
         ''}";
         filename = "/stalwart/data.tar";
         useProfiles = [ "rustic" ];
