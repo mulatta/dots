@@ -12,7 +12,8 @@
 [ArchiveSentMailsFilter]
 
 [ClaudeSpamFilter]
-maildir_path = mulatta
+max_initial_messages = 250
+maildir_path = mulatta/Inbox
 
 [InboxFilter]
 
