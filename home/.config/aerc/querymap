@@ -1,59 +1,23 @@
 # Query map for aerc with notmuch
 # Maps folder names to notmuch queries
-# Inbox Zero workflow with Sieve folders + tag-based smart folders
 #
-# IMPORTANT: Entry order determines sidebar display order!
+# Flow: IMAP → Sieve (folders) → mbsync → notmuch → afew (spam)
 
-# =============================================================================
-# Main Sidebar (in display order)
-# =============================================================================
+# Folders
+INBOX=folder:mulatta/Inbox AND NOT tag:trash AND NOT tag:spam
+Dev=folder:mulatta/.Dev AND NOT tag:trash
+Research=folder:mulatta/.Research AND NOT tag:trash
+University=folder:mulatta/.University AND NOT tag:trash
+Finance=folder:mulatta/.Finance AND NOT tag:trash
+Social=folder:mulatta/.Social AND NOT tag:trash
+Notifications=folder:mulatta/.Notifications AND NOT tag:trash
 
-# Primary
-INBOX=folder:mulatta/INBOX AND NOT tag:trash AND NOT tag:spam
-
-# Smart Folders - Priority
+# Virtual
 Unread=tag:unread AND NOT tag:trash AND NOT tag:spam
-Urgent=tag:urgent AND NOT tag:trash
 
-# Smart Folders - Content
-Newsletter=tag:newsletter AND NOT tag:trash
-
-# Physical Folders (Sieve-managed)
-Dev=folder:mulatta/Dev AND NOT tag:trash
-Research=folder:mulatta/Research AND NOT tag:trash
-Finance=folder:mulatta/Finance AND NOT tag:trash
-University=folder:mulatta/University AND NOT tag:trash
-Social=folder:mulatta/Social AND NOT tag:trash
-Notifications=folder:mulatta/Notifications AND NOT tag:trash
-
-# System Folders
-Sent=folder:"mulatta/Sent Items" OR folder:mulatta/Sent
+# System
+Sent=folder:mulatta/"Sent Items" AND NOT tag:trash
 Drafts=folder:mulatta/Drafts
-Junk=folder:"mulatta/Junk Mail" OR tag:spam
-Trash=folder:"mulatta/Deleted Items" OR tag:trash
-
-# =============================================================================
-# Additional Virtual Folders (accessible via :cf <name>)
-# =============================================================================
-
-# Development
-PR=tag:pr AND NOT tag:trash
-CI/CD=tag:ci AND NOT tag:trash
-
-# Content types
-Receipt=tag:receipt AND NOT tag:trash
-Verification=tag:verification AND NOT tag:trash
-Calendar=tag:calendar AND NOT tag:trash
-Scholar=tag:scholar AND NOT tag:trash
-
-# Automated
-Automated=tag:automated AND NOT tag:trash AND NOT tag:spam
-
-# Spam classification (for review)
-Spam-High=tag:spam-high-confidence
-Spam-Medium=tag:spam-medium-confidence
-Spam-Low=tag:spam-low-confidence
-User-Corrected=(tag:user-spam OR tag:user-ham) AND NOT tag:trash
-
-# All mail
+Junk=folder:mulatta/"Junk Mail" OR tag:spam
+Trash=tag:trash
 All=* AND NOT tag:trash
