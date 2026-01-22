@@ -10,8 +10,8 @@ IMAPStore mulatta-remote
 Account mulatta
 
 MaildirStore mulatta-local
-Inbox /Users/seungwon/mail/mulatta/Inbox
-Path /Users/seungwon/mail/mulatta/
+Inbox /Users/seungwon/.local/share/mail/mulatta/Inbox
+Path /Users/seungwon/.local/share/mail/mulatta/
 SubFolders Verbatim
 
 Channel mulatta
