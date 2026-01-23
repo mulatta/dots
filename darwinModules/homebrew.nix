@@ -34,6 +34,7 @@
     "microsoft-excel"
     "microsoft-powerpoint"
     "microsoft-word"
+    "nextcloud"
     "onedrive"
     "raycast"
     "secretive"

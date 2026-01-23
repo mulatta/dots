@@ -14,6 +14,7 @@
       }
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
         systemctl-macos = pkgs.callPackage ./systemctl { };
+        nextcloud-client = pkgs.callPackage ./nextcloud-client { };
       };
     };
 }
