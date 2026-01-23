@@ -106,6 +106,7 @@ in
 
       # External flakes
       inputs.llm-agents.packages.${system}.claude-code
+      inputs.llm-agents.packages.${system}.gemini-cli
       inputs.niks3.packages.${system}.niks3
       inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
       inputs.direnv-instant.packages.${system}.default
