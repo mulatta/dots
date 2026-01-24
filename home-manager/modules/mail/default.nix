@@ -1,5 +1,3 @@
-# Mail module - config managed by stow (home/.config/)
-# This module only provides packages, scripts, and services
 {
   pkgs,
   config,
@@ -10,7 +8,13 @@
 let
   system = pkgs.stdenv.hostPlatform.system;
   rbw-pinentry = self.packages.${system}.rbw-pinentry;
+  sieve-sync = self.packages.${system}.sieve-sync;
+  claude-code = self.inputs.llm-agents.packages.${system}.claude-code;
   maildir = "${config.home.homeDirectory}/mail";
+  afewConfigDir = "${config.home.homeDirectory}/.config/afew";
+
+  aerc-empty-trash = self.packages.${system}.aerc-empty-trash;
+
   email-sync = pkgs.writeShellApplication {
     name = "email-sync";
     runtimeInputs =
@@ -23,14 +27,23 @@ let
         gnugrep
         jq
         rbw
+        w3m
+        pkgs.khard
+        claude-code
+        sieve-sync
       ]
       ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
       ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
     text = ''
       set -euo pipefail
 
+      # Set PYTHONPATH for afew custom filters (ClaudeSpamFilter)
+      export PYTHONPATH="${afewConfigDir}:''${PYTHONPATH:-}"
+      export NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config"
+
       # Prevent concurrent runs with lock directory (atomic on all platforms)
       LOCKDIR="$HOME/.local/state/email-sync.lock"
+      mkdir -p "$(dirname "$LOCKDIR")"
       cleanup() { rmdir "$LOCKDIR" 2>/dev/null || true; }
       trap cleanup EXIT
       if ! mkdir "$LOCKDIR" 2>/dev/null; then
@@ -58,11 +71,31 @@ let
       echo "Indexing new emails..."
       notmuch new
 
-      echo "Tagging emails with afew..."
-      NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config" PYTHONWARNINGS="ignore::UserWarning" afew -tn || true
+      echo "Tagging emails with afew (including Claude spam filter)..."
+      afew -tn 2>&1 || true
 
-      # Check for new mail and send notification (Mic92 style with notified tag)
-      new_query="date:7days.. AND tag:unread AND NOT tag:notified"
+      # Apply retention policies (cleanup old notifications)
+      echo "Applying retention policies..."
+      XDG_CONFIG_HOME="$HOME/.config/afew-cleanup" afew --tag --all 2>&1 || true
+
+      echo "Moving emails based on tags..."
+      afew --move-mails --all 2>&1 || true
+
+      # Delete old trash (older than 3 months)
+      old_trash=$(notmuch search --output=files 'tag:trash AND date:..3months' || true)
+      if [ -n "$old_trash" ]; then
+        old_count=$(echo "$old_trash" | wc -l | tr -d ' ')
+        echo "Permanently deleting $old_count old trashed emails..."
+        echo "$old_trash" | xargs rm -f
+        notmuch new --quiet
+      fi
+
+      # Resync after MailMover to push folder changes to server
+      echo "Resyncing after folder moves..."
+      mbsync -c "$HOME/.config/isyncrc" -a || true
+
+      # Check for new mail and send notification (exclude spam)
+      new_query="date:7days.. AND tag:unread AND NOT tag:notified AND NOT tag:spam AND NOT tag:trash"
       new_count=$(notmuch count "$new_query")
       if [ "$new_count" -gt 0 ]; then
         echo "Found $new_count new email(s) to notify"
@@ -133,12 +166,17 @@ in
     {
       home.packages = [
         email-sync
+        aerc-empty-trash
         msmtp-wrapper
+        sieve-sync
         pkgs.isync
         pkgs.notmuch
         pkgs.afew
         pkgs.rbw
         pkgs.gnupg
+        pkgs.w3m
+        pkgs.khard
+        claude-code
       ];
     }
 
@@ -148,6 +186,10 @@ in
         Service = {
           Type = "oneshot";
           ExecStart = "${email-sync}/bin/email-sync";
+          Environment = [
+            "PYTHONPATH=${afewConfigDir}"
+            "PATH=${claude-code}/bin:${pkgs.rbw}/bin:${sieve-sync}/bin:/usr/bin:/bin"
+          ];
         };
       };
 
@@ -173,7 +215,8 @@ in
           StandardErrorPath = "${config.xdg.stateHome}/mbsync.err";
           EnvironmentVariables = {
             HOME = config.home.homeDirectory;
-            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
+            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:${claude-code}/bin:${sieve-sync}/bin:/usr/bin:/bin";
+            PYTHONPATH = afewConfigDir;
           };
         };
       };

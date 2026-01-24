@@ -1,0 +1,23 @@
+# Query map for aerc with notmuch
+# Maps folder names to notmuch queries
+#
+# Flow: IMAP → Sieve (folders) → mbsync → notmuch → afew (spam)
+
+# Folders
+INBOX=folder:mulatta/Inbox AND NOT tag:trash AND NOT tag:spam
+Dev=folder:mulatta/.Dev AND NOT tag:trash
+Research=folder:mulatta/.Research AND NOT tag:trash
+University=folder:mulatta/.University AND NOT tag:trash
+Finance=folder:mulatta/.Finance AND NOT tag:trash
+Social=folder:mulatta/.Social AND NOT tag:trash
+Notifications=folder:mulatta/.Notifications AND NOT tag:trash
+
+# Virtual
+Unread=tag:unread AND NOT tag:trash AND NOT tag:spam
+
+# System
+Sent=folder:mulatta/"Sent Items" AND NOT tag:trash
+Drafts=folder:mulatta/Drafts
+Junk=folder:mulatta/"Junk Mail" OR tag:spam
+Trash=tag:trash
+All=* AND NOT tag:trash

@@ -245,11 +245,11 @@ in
           nested-blocks = 15;
           nested-tests = 15;
           nested-foreverypart = 3;
-          nested-includes = 3;
+          nested-includes = 10;
           match-variables = 30;
           local-variables = 128;
           header-size = 1024;
-          includes = 3;
+          includes = 10;
           received-headers = 10;
           cpu = 5000;
           redirects = 1;

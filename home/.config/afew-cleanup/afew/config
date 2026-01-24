@@ -1,0 +1,38 @@
+# afew cleanup configuration
+# Runs with: afew --tag --all (processes ALL messages, not just new)
+# Applies retention policies to auto-trash old notifications
+
+[Filter.1]
+message = Clean up old CI failures (2 days)
+query = tag:ci AND date:..2days AND NOT tag:trash
+tags = +trash
+
+[Filter.2]
+message = Clean up old verification codes (1 week)
+query = tag:verification AND date:..1week AND NOT tag:trash
+tags = +trash
+
+[Filter.3]
+message = Clean up old calendar reminders (2 days)
+query = tag:calendar-reminder AND date:..2days AND NOT tag:trash
+tags = +trash
+
+[Filter.4]
+message = Clean up old dev notifications (2 months)
+query = tag:dev-notification AND date:..2months AND NOT tag:trash
+tags = +trash
+
+[Filter.5]
+message = Clean up old social notifications (1 month)
+query = tag:social-notification AND date:..1month AND NOT tag:trash
+tags = +trash
+
+[Filter.6]
+message = Clean up old transactions (3 months)
+query = tag:transaction AND date:..3months AND NOT tag:trash
+tags = +trash
+
+[Filter.7]
+message = Clean up old newsletters (6 months)
+query = tag:newsletter AND date:..6months AND NOT tag:trash
+tags = +trash

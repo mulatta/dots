@@ -1,9 +1,24 @@
-# See https://afew.readthedocs.io/
+# afew configuration
+# Minimal setup: folder tagging + spam classification
+#
+# Flow: IMAP → Sieve (folders) → mbsync → notmuch → afew (spam only)
 
-[SpamFilter]
-[KillThreadsFilter]
-[ListMailsFilter]
-[ArchiveSentMailsFilter]
 [FolderNameFilter]
+
+[KillThreadsFilter]
+
+[ListMailsFilter]
+
+[ArchiveSentMailsFilter]
+
+[ClaudeSpamFilter]
+max_initial_messages = 250
+maildir_path = mulatta/Inbox
+
 [InboxFilter]
 
+[MailMover]
+folders = mulatta/Inbox
+rename = True
+
+mulatta/Inbox = 'tag:spam':'mulatta/Junk Mail'
