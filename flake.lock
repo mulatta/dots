@@ -75,11 +75,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769093776,
-        "narHash": "sha256-IN5DicyQy5Vk6QMZ2+Rfqc1CksNUDeq2pcQJE5pohOM=",
+        "lastModified": 1769130976,
+        "narHash": "sha256-UWFcn6xk1ks2IajzwpSoNkFNUC1+2up+J6la4654dEM=",
         "owner": "mulatta",
         "repo": "cognee-nix",
-        "rev": "c89ce01235257cbe614db3cf4076db3d7020495d",
+        "rev": "eb4ee2f206ad1a1cd787f3d9b7fea8d77e41cadc",
         "type": "github"
       },
       "original": {
