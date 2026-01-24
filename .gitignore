@@ -17,3 +17,6 @@ __pycache__
 home/.config/rbw/agent.*
 home/.config/rbw/device_id
 *.sieve
+
+CLAUDE.md
+CLAUDE.local.md
