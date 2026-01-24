@@ -1,0 +1,27 @@
+{
+  "includeCoAuthoredBy": false,
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bell-notify.py"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "ccstatusline",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "ast-grep@ast-grep-marketplace": true,
+    "frontend-design@claude-code-plugins": true,
+    "code-review@claude-code-plugins": true
+  },
+  "alwaysThinkingEnabled": true
+}

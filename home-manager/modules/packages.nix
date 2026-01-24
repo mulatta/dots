@@ -81,6 +81,7 @@ in
       procs
       ripgrep
       sd
+      ast-grep
       xcp
       yq-go
 
