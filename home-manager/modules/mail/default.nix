@@ -30,7 +30,6 @@ let
         w3m
         pkgs.khard
         claude-code
-        sieve-sync
       ]
       ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
       ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
@@ -188,7 +187,7 @@ in
           ExecStart = "${email-sync}/bin/email-sync";
           Environment = [
             "PYTHONPATH=${afewConfigDir}"
-            "PATH=${claude-code}/bin:${pkgs.rbw}/bin:${sieve-sync}/bin:/usr/bin:/bin"
+            "PATH=${claude-code}/bin:${pkgs.rbw}/bin:/usr/bin:/bin"
           ];
         };
       };
@@ -215,7 +214,7 @@ in
           StandardErrorPath = "${config.xdg.stateHome}/mbsync.err";
           EnvironmentVariables = {
             HOME = config.home.homeDirectory;
-            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:${claude-code}/bin:${sieve-sync}/bin:/usr/bin:/bin";
+            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:${claude-code}/bin:/usr/bin:/bin";
             PYTHONPATH = afewConfigDir;
           };
         };
