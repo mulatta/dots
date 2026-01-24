@@ -270,6 +270,11 @@ in
         ];
       };
 
+      jmap = {
+        email.auto-expunge = "30d";
+        account.purge.frequency = "0 3 *";
+      };
+
       webadmin = {
         enable = true;
         path = "/var/cache/stalwart-mail";
