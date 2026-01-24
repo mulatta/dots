@@ -10,15 +10,14 @@
     self.inputs.sops-nix.darwinModules.sops
     self.inputs.srvos.darwinModules.mixins-terminfo
     self.inputs.srvos.darwinModules.mixins-nix-experimental
-    ../../darwinModules/clan-zerotier.nix
     ../../darwinModules/desktop.nix
-    ../../darwinModules/dns-client.nix
     ../../darwinModules/docker.nix
     ../../darwinModules/homebrew.nix
     ../../darwinModules/linux-builder.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
     ../../darwinModules/sudo.nix
+    ../../darwinModules/wireguard.nix
     ../../darwinModules/zerotier.nix
   ];
 
