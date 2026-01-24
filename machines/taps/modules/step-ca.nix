@@ -80,6 +80,8 @@
     };
   };
 
+  systemd.services.step-ca.after = [ "postgresql.service" ];
+
   services.step-ca = {
     enable = true;
     intermediatePasswordFile = "/dev/null";
@@ -92,8 +94,8 @@
       dnsNames = [ "ca.x" ];
       logger.format = "text";
       db = {
-        type = "badger";
-        dataSource = "/var/lib/step-ca/db";
+        type = "postgresql";
+        dataSource = "postgresql:///step-ca?host=/run/postgresql";
       };
       authority = {
         provisioners = [
