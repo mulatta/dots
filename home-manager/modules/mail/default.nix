@@ -13,8 +13,6 @@ let
   maildir = "${config.home.homeDirectory}/mail";
   afewConfigDir = "${config.home.homeDirectory}/.config/afew";
 
-  aerc-empty-trash = self.packages.${system}.aerc-empty-trash;
-
   email-sync = pkgs.writeShellApplication {
     name = "email-sync";
     runtimeInputs =
@@ -165,7 +163,6 @@ in
     {
       home.packages = [
         email-sync
-        aerc-empty-trash
         msmtp-wrapper
         sieve-sync
         pkgs.isync
