@@ -17,6 +17,7 @@
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
     ../../darwinModules/sudo.nix
+    ../../darwinModules/wireguard.nix
     ../../darwinModules/zerotier.nix
   ];
 
