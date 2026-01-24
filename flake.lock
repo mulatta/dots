@@ -59,6 +59,35 @@
         "url": "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz"
       }
     },
+    "cognee-nix": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": [
+          "systems"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769093776,
+        "narHash": "sha256-IN5DicyQy5Vk6QMZ2+Rfqc1CksNUDeq2pcQJE5pohOM=",
+        "owner": "mulatta",
+        "repo": "cognee-nix",
+        "rev": "c89ce01235257cbe614db3cf4076db3d7020495d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "cognee-nix",
+        "type": "github"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1765739568,
@@ -555,6 +584,7 @@
     "root": {
       "inputs": {
         "clan-core": "clan-core",
+        "cognee-nix": "cognee-nix",
         "direnv-instant": "direnv-instant",
         "disko": "disko",
         "flake-parts": "flake-parts_2",

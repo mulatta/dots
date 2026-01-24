@@ -6,16 +6,17 @@
 }:
 {
   imports = [
-    self.inputs.srvos.darwinModules.common
     self.inputs.sops-nix.darwinModules.sops
-    self.inputs.srvos.darwinModules.mixins-terminfo
+    self.inputs.srvos.darwinModules.common
     self.inputs.srvos.darwinModules.mixins-nix-experimental
+    self.inputs.srvos.darwinModules.mixins-terminfo
     ../../darwinModules/desktop.nix
     ../../darwinModules/docker.nix
     ../../darwinModules/homebrew.nix
     ../../darwinModules/linux-builder.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
+    ../../darwinModules/ollama.nix
     ../../darwinModules/sudo.nix
     ../../darwinModules/wireguard.nix
     ../../darwinModules/zerotier.nix
@@ -31,6 +32,14 @@
   clan.core.networking.zerotier = {
     enable = true;
     controller.machineName = "taps";
+  };
+
+  services.ollama = {
+    enable = true;
+    loadModels = [ "bge-m3" ];
+    environmentVariables = {
+      OLLAMA_KEEP_ALIVE = "5m";
+    };
   };
 
   system.activationScripts.postActivation.text = ''
