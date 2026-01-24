@@ -1,19 +1,26 @@
-{ inputs, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    {
+      pkgs,
+      inputs',
+      ...
+    }:
     let
-      jmt = inputs.jmt.packages.${system}.default;
       sieve-sync = pkgs.callPackage ./sieve-sync { };
+      jmt = inputs'.jmt.packages.default;
     in
     {
       packages = {
-        inherit jmt sieve-sync;
+        inherit sieve-sync;
         merge-when-green = pkgs.callPackage ./merge-when-green { inherit jmt; };
+        claude-code = pkgs.callPackage ./claude-code {
+          claude-code = inputs'.llm-agents.packages.claude-code;
+        };
+        claude-md = pkgs.callPackage ./claude-md { };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
         gh-radicle = pkgs.callPackage ./gh-radicle { };
         email-sync = pkgs.callPackage ./email-sync {
-          claude-code = inputs.llm-agents.packages.${system}.claude-code;
+          claude-code = inputs'.llm-agents.packages.claude-code;
         };
       }
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
