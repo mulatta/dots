@@ -7,7 +7,7 @@
     clan-core.inputs.sops-nix.follows = "sops-nix";
     clan-core.inputs.systems.follows = "systems";
     clan-core.inputs.treefmt-nix.follows = "treefmt-nix";
-    clan-core.url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
+    clan-core.url = "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz";
     direnv-instant.inputs.nixpkgs.follows = "nixpkgs";
     direnv-instant.url = "github:Mic92/direnv-instant";
     disko.inputs.nixpkgs.follows = "nixpkgs";

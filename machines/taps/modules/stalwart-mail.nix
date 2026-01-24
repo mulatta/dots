@@ -121,18 +121,23 @@ in
       };
 
       storage = {
-        data = "rocksdb";
-        fts = "rocksdb";
-        blob = "rocksdb";
-        lookup = "rocksdb";
+        data = "postgresql";
+        fts = "postgresql";
+        blob = "postgresql";
+        lookup = "postgresql";
         directory = "kanidm";
-        # sieve storage uses data store by default
       };
 
-      store.rocksdb = {
-        type = "rocksdb";
-        path = "/var/lib/stalwart-mail/data";
-        compression = "lz4";
+      store.postgresql = {
+        type = "postgresql";
+        host = "/run/postgresql";
+        port = 5432;
+        database = "stalwart-mail";
+        user = "stalwart-mail";
+        password = "unused";
+        timeout = "15s";
+        tls.enable = false;
+        pool.max-connections = 10;
       };
 
       # Kanidm LDAP directory
@@ -294,6 +299,7 @@ in
 
   systemd.services.stalwart-mail = {
     after = [
+      "postgresql.service"
       "acme-${domain}.service"
       "acme-finished-${domain}.target"
       "kanidm.service"
@@ -305,6 +311,7 @@ in
     serviceConfig = {
       ProtectClock = true;
       ProtectKernelLogs = true;
+      RestrictAddressFamilies = [ "AF_UNIX" ];
     };
   };
 }
