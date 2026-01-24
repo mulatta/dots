@@ -172,7 +172,6 @@ in
         pkgs.gnupg
         pkgs.w3m
         pkgs.khard
-        claude-code
       ];
     }
 

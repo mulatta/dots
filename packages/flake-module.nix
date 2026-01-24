@@ -16,6 +16,7 @@
         claude-code = pkgs.callPackage ./claude-code {
           claude-code = inputs'.llm-agents.packages.claude-code;
         };
+        claude-md = pkgs.callPackage ./claude-md { };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
         gh-radicle = pkgs.callPackage ./gh-radicle { };
         email-sync = pkgs.callPackage ./email-sync {
