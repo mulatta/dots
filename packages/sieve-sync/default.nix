@@ -33,7 +33,7 @@ python3Packages.buildPythonApplication {
   '';
 
   meta = with lib; {
-    description = "Sieve synchronization tool with suggestion learning";
+    description = "Sieve synchronization tool";
     license = licenses.mit;
     mainProgram = "sieve-sync";
   };
