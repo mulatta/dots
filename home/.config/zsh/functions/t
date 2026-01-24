@@ -1,0 +1,15 @@
+# todoman wrapper with short subcommands
+function t() {
+  case "$1" in
+    n)  shift; command todo new "$@" ;;
+    l)  shift; command todo list "$@" ;;
+    d)  shift; command todo done "$@" ;;
+    e)  shift; command todo edit "$@" ;;
+    s)  shift; command todo show "$@" ;;
+    rm) shift; command todo delete "$@" ;;
+    mv) shift; command todo move "$@" ;;
+    cp) shift; command todo copy "$@" ;;
+    "") command todo list ;;
+    *)  command todo "$@" ;;
+  esac
+}

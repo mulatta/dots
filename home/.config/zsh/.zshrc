@@ -56,7 +56,7 @@ alias drr='direnv reload'
 
 # ===== Custom functions =====
 fpath=("$ZDOTDIR/functions" $fpath)
-autoload -Uz y mk hmg _zellij_update_tabname
+autoload -Uz y mk hmg t _zellij_update_tabname
 
 # ===== Completion (must be before fzf-tab) =====
 # Add zsh-completions to fpath
