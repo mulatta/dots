@@ -99,13 +99,13 @@ in
     ++ [
       # Custom packages
       self.packages.${system}.hm
-      self.packages.${system}.jmt
       self.packages.${system}.merge-when-green
       self.packages.${system}.gh-radicle
       self.packages.${system}.rbw-pinentry
 
       # External flakes
       inputs.niks3.packages.${system}.niks3
+      inputs.jmt.packages.${system}.jmt
       inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
       inputs.direnv-instant.packages.${system}.default
     ];
