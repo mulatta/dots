@@ -220,6 +220,12 @@ in
           };
         };
       };
+
+      # Kickstart launchd agents after activation (RunAtLoad unreliable on reload)
+      home.activation.kickstart-agents = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        /bin/launchctl kickstart "gui/$(id -u)/org.nix-community.home.mbsync" 2>/dev/null || true
+        /bin/launchctl kickstart "gui/$(id -u)/org.nix-community.home.calendar-sync" 2>/dev/null || true
+      '';
     })
   ];
 }
