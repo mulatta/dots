@@ -3,12 +3,13 @@
   writeShellApplication,
   claude-code,
 }:
-
 writeShellApplication {
   name = "claude";
   runtimeInputs = [
     claude-code
     pkgs.pueue
+    pkgs.uv
+    pkgs.bun
   ];
   text = ''
     set -euo pipefail
