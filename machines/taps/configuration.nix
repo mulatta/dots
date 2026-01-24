@@ -29,6 +29,7 @@
     ./modules/vaultwarden.nix
     ./modules/atuin.nix
     ./modules/backup.nix
+    ./modules/postgresql.nix
   ];
 
   clan.core.networking.targetHost = "root@64.176.225.253";
