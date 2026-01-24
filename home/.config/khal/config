@@ -1,21 +1,30 @@
 [calendars]
-[[stalwart]]
-path = /Users/seungwon/.local/share/calendars/stalwart/*
-priority=10
-type=discover
+[[Personal]]
+path = /Users/seungwon/.local/share/calendars/mulatta/Personal
+color = dark magenta
 
+[[Academic]]
+path = /Users/seungwon/.local/share/calendars/mulatta/Academic
+color = dark blue
 
+[[Research]]
+path = /Users/seungwon/.local/share/calendars/mulatta/Research
+color = dark green
+
+[[Dev]]
+path = /Users/seungwon/.local/share/calendars/mulatta/Dev
+color = dark cyan
 
 [default]
-default_calendar=default
-highlight_event_days=true
+default_calendar = Personal
+highlight_event_days = true
 
 [locale]
-dateformat=%Y-%m-%d
-datetimeformat=%Y-%m-%d %H:%M
-firstweekday=0
-longdateformat=%Y-%m-%d %a
-longdatetimeformat=%Y-%m-%d %H:%M %a
-timeformat=%H:%M
-unicode_symbols=true
-weeknumbers=off
+dateformat = %Y-%m-%d
+datetimeformat = %Y-%m-%d %H:%M
+firstweekday = 0
+longdateformat = %Y-%m-%d %a
+longdatetimeformat = %Y-%m-%d %H:%M %a
+timeformat = %H:%M
+unicode_symbols = true
+weeknumbers = off

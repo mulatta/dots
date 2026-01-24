@@ -3,41 +3,40 @@ status_path = "/Users/seungwon/.local/share/vdirsyncer/status"
 
 ### Pairs
 
-[pair calendar_stalwart]
-a = "calendar_stalwart_remote"
-b = "calendar_stalwart_local"
-collections = ["from a", "from b"]
+[pair calendar_mulatta]
+a = "calendar_mulatta_remote"
+b = "calendar_mulatta_local"
+collections = ["Personal", "Academic", "Research", "Dev"]
 conflict_resolution = "a wins"
 metadata = ["color", "displayname"]
 
-[pair contacts_stalwart]
-a = "contacts_stalwart_remote"
-b = "contacts_stalwart_local"
+[pair contacts_mulatta]
+a = "contacts_mulatta_remote"
+b = "contacts_mulatta_local"
 collections = ["from a", "from b"]
 conflict_resolution = "a wins"
 
-
 ### Local storages
 
-[storage calendar_stalwart_local]
+[storage calendar_mulatta_local]
 fileext = ".ics"
-path = "/Users/seungwon/.local/share/calendars/stalwart"
+path = "/Users/seungwon/.local/share/calendars/mulatta"
 type = "filesystem"
 
-[storage contacts_stalwart_local]
+[storage contacts_mulatta_local]
 fileext = ".vcf"
-path = "/Users/seungwon/.local/share/contacts/stalwart"
+path = "/Users/seungwon/.local/share/contacts/mulatta"
 type = "filesystem"
 
 ### Remote storages
 
-[storage calendar_stalwart_remote]
+[storage calendar_mulatta_remote]
 password.fetch = ["command", "rbw", "get", "mulatta.io"]
 type = "caldav"
 url = "https://mail.mulatta.io/dav/cal/seungwon/"
 username = "seungwon"
 
-[storage contacts_stalwart_remote]
+[storage contacts_mulatta_remote]
 password.fetch = ["command", "rbw", "get", "mulatta.io"]
 type = "carddav"
 url = "https://mail.mulatta.io/dav/card/seungwon/"
