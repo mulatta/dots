@@ -22,9 +22,7 @@
 
   # Service-specific dependencies (rclone env is set in rustic module)
   systemd.services = {
-    rustic-backup-sqlite-vaultwarden.after = [ "vaultwarden.service" ];
     rustic-backup-files-kanidm.after = [ "kanidm.service" ];
-    rustic-backup-command-stalwart.after = [ "stalwart-mail.service" ];
   };
 
   services.rustic = {
@@ -39,19 +37,10 @@
     };
 
     backups = {
-      # PostgreSQL backup (niks3 database) - weekly
+      # PostgreSQL backup (all databases) - every 6 hours
       postgres.niks3 = {
-        startAt = "Mon *-*-* 02:00:00";
-        prefix = "/postgres";
-        useProfiles = [ "rustic" ];
-      };
-
-      # Vaultwarden SQLite database - every 6 hours (critical)
-      sqlite.vaultwarden = {
         startAt = "*-*-* 00,06,12,18:00:00";
-        database = "/var/lib/vaultwarden/db.sqlite3";
-        backupName = "vaultwarden.sqlite3";
-        tempPath = "/var/lib/vaultwarden";
+        prefix = "/postgres";
         useProfiles = [ "rustic" ];
       };
 
@@ -59,21 +48,6 @@
       files.kanidm = {
         startAt = "*-*-* 02:00:00";
         sources = [ "/var/backup/kanidm" ];
-        useProfiles = [ "rustic" ];
-      };
-
-      # Stalwart Mail RocksDB data
-      # Stop service for consistent backup, then restart
-      commands.stalwart = {
-        startAt = "*-*-* 02:30:00";
-        command = "${pkgs.writeScript "stalwart-backup" ''
-          #!${pkgs.bash}/bin/bash
-          set -euo pipefail
-          systemctl stop stalwart-mail
-          trap "systemctl start stalwart-mail" EXIT
-          ${pkgs.gnutar}/bin/tar -cf - -C /var/lib/stalwart-mail data
-        ''}";
-        filename = "/stalwart/data.tar";
         useProfiles = [ "rustic" ];
       };
     };
