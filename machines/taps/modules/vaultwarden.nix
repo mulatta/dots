@@ -28,9 +28,10 @@
 
   services.vaultwarden = {
     enable = true;
-    dbBackend = "sqlite";
+    dbBackend = "postgresql";
     environmentFile = config.clan.core.vars.generators.vaultwarden.files.admin-token.path;
     config = {
+      DATABASE_URL = "postgresql:///vaultwarden?host=/run/postgresql";
       DOMAIN = "https://vaultwarden.mulatta.io";
       SIGNUPS_ALLOWED = false;
       INVITATIONS_ALLOWED = false;
