@@ -213,3 +213,8 @@ bindkey '^[[C' autosuggest-accept   # Right arrow
 bindkey '^E' autosuggest-accept     # Ctrl+E
 # Partial accept with Alt+Right (word)
 bindkey '^[^[[C' forward-word       # Alt+Right
+
+# Edit command line in $EDITOR (Alt+E)
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^[e' edit-command-line
