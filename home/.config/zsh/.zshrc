@@ -30,6 +30,12 @@ export NH_FLAKE="$HOME/dots"
 export EDITOR=hx
 export VISUAL=hx
 export ZDOTDIR="$HOME/.config/zsh"
+# Catppuccin Mocha theme for skim
+export SKIM_DEFAULT_OPTIONS="--height=40% --layout=reverse --bind='ctrl-j:down,ctrl-k:up' \
+  --color=bg+:#313244,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+# Include hidden directories for Alt+D (cd), Alt+F (file)
+export SKIM_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
+export SKIM_CTRL_T_COMMAND="fd --type f --hidden --follow --exclude .git"
 
 # ===== Aliases (fish abbreviations equivalent) =====
 alias ..='cd ..'
@@ -111,14 +117,19 @@ zstyle ':completion:*' cache-path "$HOME/.cache/zsh/compcache"
 # ===== Plugins (nix-managed) =====
 # Load order matters! fzf-tab -> autosuggestions -> autopair -> helix-mode -> syntax-highlighting
 
-# 1. fzf-tab (must be after compinit, before autosuggestions)
+# 1. fzf-tab with skim backend (must be after compinit, before autosuggestions)
 if [[ -f ~/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
   source ~/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh
-  # fzf-tab styles
-  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
-  zstyle ':fzf-tab:complete:*:*' fzf-preview 'bat --color=always --style=numbers --line-range=:100 $realpath 2>/dev/null || cat $realpath 2>/dev/null || eza -1 --color=always $realpath 2>/dev/null'
-  zstyle ':fzf-tab:*' fzf-flags --height=40% --layout=reverse --border
+  zstyle ':fzf-tab:*' fzf-command sk
+  # Only show fzf-tab when there are many completions (threshold: 4)
+  zstyle ':fzf-tab:*' fzf-min-height 4
+  # Disable group headers (-- values --, etc.)
+  zstyle ':fzf-tab:*' show-group none
+  # Simpler display without descriptions
+  zstyle ':fzf-tab:*' fzf-flags --height=40% --layout=reverse --no-info
   zstyle ':fzf-tab:*' switch-group '<' '>'
+  # Preview only for file paths
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
 fi
 
 # 2. zsh-autosuggestions
@@ -162,11 +173,14 @@ if [[ -f ~/.nix-profile/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-h
 fi
 
 # ===== Tool initializations =====
-# fzf key bindings (Ctrl-R, Ctrl-T, Alt-C) - but NOT completion (fzf-tab handles that)
-if command -v fzf &>/dev/null; then
-  eval "$(fzf --zsh)"
-  # Restore tab to use fzf-tab instead of fzf's completion
-  bindkey '^I' fzf-tab-complete 2>/dev/null || bindkey '^I' expand-or-complete
+# skim key bindings (Alt+D: cd, Alt+G: file)
+if command -v sk &>/dev/null; then
+  source ~/.nix-profile/share/skim/key-bindings.zsh 2>/dev/null
+  # Disable defaults (conflicts with zellij/atuin)
+  bindkey -r '^T' '^R' '\ec' 2>/dev/null
+  # Alt+D for directory cd, Alt+G for file selection
+  bindkey '\ed' skim-cd-widget 2>/dev/null
+  bindkey '\eg' skim-file-widget 2>/dev/null
 fi
 
 # nix-your-shell
@@ -203,15 +217,16 @@ command -v jj &>/dev/null && {
 # jj workspace management (lazyworktree-style)
 JJ_WORKSPACE_DIR="${JJ_WORKSPACE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/jj-workspaces}"
 
-# jt: select workspace and cd (default: "default" workspace)
+# jt: select workspace and cd
 jt() {
   jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
   # Get main repo root (workspace's .jj/repo points to main repo)
   local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
   local main_repo=${repo_link:+${repo_link%/.jj/repo}}
   [[ -z "$main_repo" ]] && main_repo=$(jj root)
-  local selected="${1:-$(jj workspace list -T 'name ++ "\n"' | sk --prompt="workspace> " --height=40% --reverse \
-    --bind='ctrl-j:down,ctrl-k:up')}"
+  local selected="${1:-$(jj workspace list --color=always | sk --ansi --prompt="workspace> " \
+    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
+    --preview-window=right:60% | awk '{print $1}' | tr -d ':')}"
   [[ -z "$selected" ]] && return 0
   local dir
   if [[ "$selected" == "default" ]]; then
@@ -242,8 +257,9 @@ jd() {
   local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
   local main_repo=${repo_link:+${repo_link%/.jj/repo}}
   [[ -z "$main_repo" ]] && main_repo=$(jj root)
-  local name="${1:-$(jj workspace list -T 'name ++ "\n"' | sk --prompt="delete workspace> " --height=40% --reverse \
-    --query='!default ' --bind='ctrl-j:down,ctrl-k:up')}"
+  local name="${1:-$(jj workspace list --color=always | sk --ansi --prompt="delete workspace> " \
+    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
+    --preview-window=right:60% --query='!default ' | awk '{print $1}' | tr -d ':')}"
   [[ -z "$name" || "$name" == "default" ]] && { echo "cannot delete default workspace" >&2; return 1; }
   local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
   jj workspace forget "$name" || return 1

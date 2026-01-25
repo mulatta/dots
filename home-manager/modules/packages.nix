@@ -54,7 +54,7 @@ in
       zsh-autopair
       zsh-fzf-tab
       zsh-completions
-      fzf
+      skim
       starship
       zellij
       zjstatus
