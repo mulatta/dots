@@ -1,0 +1,7 @@
+#!/bin/sh
+# Run afew to tag new messages based on filters
+# We only tag, not move, since email-sync handles folder organization
+afew --tag --new
+
+# Remove the 'new' tag from all messages
+notmuch tag -new -- tag:new

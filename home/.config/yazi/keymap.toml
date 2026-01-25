@@ -839,9 +839,14 @@ on = ["g", "d"]
 run = "cd ~/Downloads"
 
 [[mgr.keymap]]
-desc = "Goto ~/Developer"
-on = ["g", "D"]
-run = "cd ~/Developer"
+desc = "Goto ~/git"
+on = ["g", "r"]
+run = "cd ~/git"
+
+[[mgr.keymap]]
+desc = "Goto ~/.config"
+on = ["g", "."]
+run = "cd ~/.config"
 
 [[mgr.keymap]]
 desc = "Jump interactively"

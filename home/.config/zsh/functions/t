@@ -1,7 +1,14 @@
 # todoman wrapper with short subcommands
 function t() {
   case "$1" in
-    n)  shift; command todo new "$@" ;;
+    n)  shift
+        # Default start date to today unless -s is specified
+        if [[ ! " $* " =~ " -s " ]]; then
+          command todo new -s today "$@"
+        else
+          command todo new "$@"
+        fi
+        ;;
     l)  shift; command todo list "$@" ;;
     d)  shift; command todo done "$@" ;;
     e)  shift; command todo edit "$@" ;;
