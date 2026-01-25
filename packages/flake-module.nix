@@ -22,6 +22,8 @@
         email-sync = pkgs.callPackage ./email-sync {
           claude-code = inputs'.llm-agents.packages.claude-code;
         };
+        updater = pkgs.callPackage ./updater { };
+        radicle-desktop = pkgs'.callPackage ./radicle-desktop { };
       }
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
         systemctl-macos = pkgs.callPackage ./systemctl { };
