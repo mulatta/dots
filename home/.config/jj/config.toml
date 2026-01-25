@@ -1,5 +1,6 @@
 [aliases]
 a = ["abandon"]
+w = ["workspace", "list"]
 abs = ["absorb"]
 bd = ["bookmark", "delete"]
 bf = ["bookmark", "forget"]

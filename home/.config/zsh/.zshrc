@@ -7,7 +7,23 @@
 [[ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]] && source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 
 # PATH setup (NixOS: /run/wrappers/bin must come first for setuid binaries like sudo)
-export PATH="/run/wrappers/bin:$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH="/run/wrappers/bin:$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:$HOME/bin:$PATH"
+
+# XDG Base Directories (ensure consistency in devshells)
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+
+# XDG User Directories
+export XDG_DESKTOP_DIR="$HOME/Desktop"
+export XDG_DOCUMENTS_DIR="$HOME/Documents"
+export XDG_DOWNLOAD_DIR="$HOME/Downloads"
+export XDG_MUSIC_DIR="$HOME/Music"
+export XDG_PICTURES_DIR="$HOME/Pictures"
+export XDG_PUBLICSHARE_DIR="$HOME/Public"
+export XDG_TEMPLATES_DIR="$HOME/.Templates"
+export XDG_VIDEOS_DIR="$HOME/Videos"
 
 # Environment variables
 export NH_FLAKE="$HOME/dots"
@@ -172,18 +188,66 @@ if command -v atuin &>/dev/null; then
   bindkey -M hxnor '^R' atuin-search 2>/dev/null
 fi
 
-# direnv (direnv-instant for faster cd performance)
-if command -v direnv-instant &>/dev/null; then
+# Load direnv-instant integration for non-blocking prompt
+if [ -n "${commands[direnv-instant]}" ] && [ -n "${commands[direnv-instant]}" ]; then
   export DIRENV_INSTANT_MUX_DELAY=6
   eval "$(direnv-instant hook zsh)"
-elif command -v direnv &>/dev/null; then
-  eval "$(direnv hook zsh)"
 fi
 
 # jujutsu completion (dynamic - supports aliases)
 command -v jj &>/dev/null && {
   source <(COMPLETE=zsh jj)
   compdef j=jj
+}
+
+# jj workspace management (lazyworktree-style)
+JJ_WORKSPACE_DIR="${JJ_WORKSPACE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/jj-workspaces}"
+
+# jt: select workspace and cd (default: "default" workspace)
+jt() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  # Get main repo root (workspace's .jj/repo points to main repo)
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local selected="${1:-$(jj workspace list -T 'name ++ "\n"' | sk --prompt="workspace> " --height=40% --reverse \
+    --bind='ctrl-j:down,ctrl-k:up')}"
+  [[ -z "$selected" ]] && return 0
+  local dir
+  if [[ "$selected" == "default" ]]; then
+    dir=$main_repo
+  else
+    dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$selected"
+  fi
+  [[ -d "$dir" ]] && cd "$dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
+}
+
+# jn: create new workspace and cd
+jn() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  local name="${1:?usage: jn NAME [-r REV]}"
+  shift
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
+  mkdir -p "$ws_dir"
+  jj workspace add "$ws_dir" --name "$name" "$@" || return 1
+  cd "$ws_dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
+}
+
+# jd: delete workspace
+jd() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local name="${1:-$(jj workspace list -T 'name ++ "\n"' | sk --prompt="delete workspace> " --height=40% --reverse \
+    --query='!default ' --bind='ctrl-j:down,ctrl-k:up')}"
+  [[ -z "$name" || "$name" == "default" ]] && { echo "cannot delete default workspace" >&2; return 1; }
+  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
+  jj workspace forget "$name" || return 1
+  [[ -d "$ws_dir" ]] && rm -rf "$ws_dir" && echo "removed $ws_dir"
 }
 
 # ===== Zellij tab name auto-update =====
