@@ -1,0 +1,64 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan"
+      },
+      {
+        "id": "2",
+        "type": "separator"
+      },
+      {
+        "id": "3",
+        "type": "custom-command",
+        "commandPath": "basename \"$PWD\"",
+        "color": "blue",
+        "timeout": 500
+      },
+      {
+        "id": "4",
+        "type": "separator"
+      },
+      {
+        "id": "5",
+        "type": "custom-command",
+        "commandPath": "bm=$(jj log -r 'latest(ancestors(@) & bookmarks())' --no-graph -T 'bookmarks.join(\",\")' 2>/dev/null); commit=$(jj log -r @ --no-graph -T 'change_id.short(8)' 2>/dev/null); echo \"${bm:-None} | $commit\"",
+        "color": "magenta",
+        "timeout": 1000
+      }
+    ],
+    [
+      {
+        "id": "6",
+        "type": "context-length",
+        "color": "brightBlack"
+      },
+      {
+        "id": "7",
+        "type": "separator"
+      },
+      {
+        "id": "8",
+        "type": "session-cost",
+        "color": "green"
+      }
+    ],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [""],
+    "separatorInvertBackground": [false],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false
+  }
+}
