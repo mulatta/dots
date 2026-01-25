@@ -54,6 +54,15 @@ alias dra='direnv allow'
 alias drb='direnv block'
 alias drr='direnv reload'
 
+# khal calendar wrapper (cal with no args → khal calendar, otherwise pass through)
+function cal() {
+  if [[ $# -eq 0 ]]; then
+    command khal calendar
+  else
+    command khal "$@"
+  fi
+}
+
 # ===== Custom functions =====
 fpath=("$ZDOTDIR/functions" $fpath)
 autoload -Uz y mk hmg t _zellij_update_tabname
