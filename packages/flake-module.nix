@@ -1,13 +1,19 @@
+{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
       inputs',
+      system,
       ...
     }:
     let
       sieve-sync = pkgs.callPackage ./sieve-sync { };
       jmt = inputs'.jmt.packages.default;
+      pkgs' = import pkgs.path {
+        inherit system;
+        overlays = [ inputs.rust-overlay.overlays.default ];
+      };
     in
     {
       packages = {
