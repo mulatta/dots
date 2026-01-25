@@ -21,8 +21,7 @@
   "enabledPlugins": {
     "ast-grep@ast-grep-marketplace": true,
     "frontend-design@claude-code-plugins": true,
-    "code-review@claude-code-plugins": true,
-    "claude-mem@thedotmack": true
+    "code-review@claude-code-plugins": true
   },
   "alwaysThinkingEnabled": true
 }
