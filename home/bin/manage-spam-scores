@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+# Manage spam scores database for afew ClaudeSpamFilter
+
+import sys
+import os
+
+# Add both afew config and afew_filters directories to Python path
+afew_dir = os.path.expanduser("~/.config/afew")
+sys.path.insert(0, afew_dir)
+sys.path.insert(0, os.path.join(afew_dir, "afew_filters"))
+
+from afew_filters.manage_spam_scores import main
+
+if __name__ == "__main__":
+    main()
