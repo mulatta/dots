@@ -54,7 +54,7 @@ in
       zsh-autopair
       zsh-fzf-tab
       zsh-completions
-      fzf
+      skim
       starship
       zellij
       zjstatus
@@ -69,6 +69,7 @@ in
       jjui
 
       # CLI utilities
+      gum
       stow
       delta
       dust
@@ -84,6 +85,8 @@ in
       ast-grep
       xcp
       yq-go
+      uutils-coreutils-noprefix
+      gnugrep
 
       # Security
       age
