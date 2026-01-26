@@ -29,10 +29,12 @@
       HostName 10.100.0.2
       Port 10022
       ProxyJump eta
+      IdentityAgent none
 
     Host eta
       HostName jump.sjanglab.org
       Port 10022
       IdentityFile ${config.sops.secrets.psi-builder.path}
+      IdentityAgent none
   '';
 }

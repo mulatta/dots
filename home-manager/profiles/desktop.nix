@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  self,
+  system,
+  ...
+}:
 {
   dconf.enable = true;
 
@@ -7,10 +12,14 @@
     ../modules/mail
   ];
 
-  home.packages = with pkgs; [
-    bitwarden-desktop
-    mpv
-    yt-dlp
-    graphicsmagick
-  ];
+  home.packages =
+    (with pkgs; [
+      bitwarden-desktop
+      mpv
+      yt-dlp
+      graphicsmagick
+    ])
+    ++ [
+      self.packages.${system}.radicle-desktop
+    ];
 }

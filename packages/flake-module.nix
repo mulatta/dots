@@ -1,13 +1,19 @@
+{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
       inputs',
+      system,
       ...
     }:
     let
       sieve-sync = pkgs.callPackage ./sieve-sync { };
       jmt = inputs'.jmt.packages.default;
+      pkgs' = import pkgs.path {
+        inherit system;
+        overlays = [ inputs.rust-overlay.overlays.default ];
+      };
     in
     {
       packages = {
@@ -22,6 +28,8 @@
         email-sync = pkgs.callPackage ./email-sync {
           claude-code = inputs'.llm-agents.packages.claude-code;
         };
+        updater = pkgs.callPackage ./updater { };
+        radicle-desktop = pkgs'.callPackage ./radicle-desktop { };
       }
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
         systemctl-macos = pkgs.callPackage ./systemctl { };
