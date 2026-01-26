@@ -155,12 +155,15 @@ if [[ -f ~/.nix-profile/share/zsh-helix-mode/zsh-helix-mode.plugin.zsh ]]; then
   source ~/.nix-profile/share/zsh-helix-mode/zsh-helix-mode.plugin.zsh
 
   # Autosuggestions widget mapping for helix-mode
-  if (( $+functions[autosuggest-accept] )); then
+  if (( $+widgets[autosuggest-accept] )); then
     ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
+      zhm_accept
+      zhm_accept_or_insert_newline
+      zhm_prompt_accept
       zhm_history_prev
       zhm_history_next
-      zhm_history_search_backward
-      zhm_history_search_forward
+      zhm_move_up_or_history_prev
+      zhm_move_down_or_history_next
     )
   fi
 fi
