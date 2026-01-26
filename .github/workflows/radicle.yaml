@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 jobs:
   mirror:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment: radicle
     permissions:
       contents: write
