@@ -16,6 +16,7 @@ scroll-lines = 2
 text-width = 512
 true-color = true
 undercurl = false
+clipboard-provider = "termcode"
 
 [editor.cursor-shape]
 insert = "bar"
