@@ -342,7 +342,7 @@ def enable_auto_merge(bookmark: str) -> bool:
     print_info("Enabling auto-merge...")
     head_ref = get_head_ref(bookmark)
     result = run(
-        ["gh", "pr", "merge", head_ref, "--auto", "--rebase"],
+        ["gh", "pr", "merge", head_ref, "--auto", "--merge"],
         check=False,
     )
     if result.returncode != 0:
