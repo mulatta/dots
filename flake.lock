@@ -607,11 +607,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769119248,
-        "narHash": "sha256-ejJxsUW1KlUobNvweU0cCx224dvAb1jQUfGLrYeSNM8=",
+        "lastModified": 1769445529,
+        "narHash": "sha256-YoScForDogfm3y1iDAHwv/eL3TCYpoSKQri1hY76Izw=",
         "owner": "tobi",
         "repo": "qmd",
-        "rev": "88f78314bb22bd23e68bf4d16a447323c2a29b0f",
+        "rev": "ba7391832dd6458aa1c027ab9402533ed56b5dd5",
         "type": "github"
       },
       "original": {
