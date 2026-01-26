@@ -86,8 +86,54 @@ function cal() {
 }
 
 # ===== Custom functions =====
-fpath=("$ZDOTDIR/functions" $fpath)
-autoload -Uz y mk hmg t _zellij_update_tabname
+# yazi wrapper with cwd sync
+y() {
+  local tmp=$(mktemp -t "yazi-cwd.XXXXX")
+  command yazi "$@" --cwd-file="$tmp"
+  local cwd
+  if cwd=$(< "$tmp") && [[ -n "$cwd" && "$cwd" != "$PWD" && -d "$cwd" ]]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
+
+# mkdir + cd
+mk() {
+  [[ $# -eq 0 ]] && { echo "Usage: mk <directory_name>"; return 1; }
+  mkdir -p "$1" && cd "$1"
+}
+
+# home-manager generation switcher with fzf
+hmg() {
+  local current_gen=$(home-manager generations | head -n 1 | awk '{print $7}')
+  home-manager generations | awk '{print $7}' | tac | \
+    fzf --preview "nvd --color=always diff $current_gen {}" | \
+    xargs -I{} bash {}/activate
+}
+
+# todoman wrapper with short subcommands
+t() {
+  case "$1" in
+    n)  shift
+        if [[ ! " $* " =~ " -s " ]]; then
+          command todo new -s today "$@"
+        else
+          command todo new "$@"
+        fi
+        ;;
+    l)  shift; command todo list "$@" ;;
+    d)  shift; command todo done "$@" ;;
+    e)  shift; command todo edit "$@" ;;
+    s)  shift; command todo show "$@" ;;
+    c)  shift; command todo cancel "$@" ;;
+    rm) shift; command todo delete "$@" ;;
+    mv) shift; command todo move "$@" ;;
+    cp) shift; command todo copy "$@" ;;
+    fl) shift; command todo flush "$@" ;;
+    "") command todo list ;;
+    *)  command todo "$@" ;;
+  esac
+}
 
 # ===== Completion (must be before fzf-tab) =====
 # Add zsh-completions to fpath
@@ -270,6 +316,26 @@ jd() {
 }
 
 # ===== Zellij tab name auto-update =====
+_zellij_update_tabname() {
+  [[ -z "$ZELLIJ" ]] && return
+  local current_dir="$PWD" tab_name
+  if [[ "$current_dir" == "$HOME" ]]; then
+    tab_name="~"
+  else
+    tab_name="${current_dir##*/}"
+  fi
+  # Check if in a git repo
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    local git_root
+    git_root=$(git rev-parse --show-superproject-working-tree 2>/dev/null)
+    [[ -z "$git_root" ]] && git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [[ -n "$git_root" && "${git_root:l}" != "${current_dir:l}" ]]; then
+      tab_name="${git_root##*/}/${current_dir##*/}"
+    fi
+  fi
+  nohup zellij action rename-tab "$tab_name" &>/dev/null
+}
+
 if [[ -n "$ZELLIJ" ]]; then
   chpwd_functions+=(_zellij_update_tabname)
   _zellij_update_tabname  # Initial call

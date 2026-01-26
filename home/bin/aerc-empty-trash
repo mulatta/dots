@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
+# Empty trash: permanently delete messages tagged with 'trash'
 set -euo pipefail
 
 export NOTMUCH_CONFIG="${NOTMUCH_CONFIG:-$HOME/.config/notmuch/default/config}"
 
 count=$(notmuch count tag:trash)
 if [ "$count" -eq 0 ]; then
-  echo "Trash is empty."
   exit 0
 fi
 
-echo "Permanently deleting $count trashed messages..."
 notmuch search --output=files tag:trash | xargs rm -f
 notmuch new --quiet
-echo "Done. $count messages permanently deleted."
