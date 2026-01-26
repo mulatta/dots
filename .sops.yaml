@@ -37,3 +37,9 @@ creation_rules:
       - age:
           - *seungwon
           - *rhesus
+  # Remote builder SSH keys
+  - path_regex: sops/builders/.*/secret
+    key_groups:
+      - age:
+          - *seungwon
+          - *rhesus

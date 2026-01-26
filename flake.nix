@@ -32,7 +32,7 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
+    nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&rev=70801e06d9730c4f1704fbd3bbf5b8e11c03a2a7";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.inputs.nixpkgs.follows = "nixpkgs";
     srvos.url = "github:nix-community/srvos";
