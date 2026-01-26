@@ -125,9 +125,11 @@ t() {
     d)  shift; command todo done "$@" ;;
     e)  shift; command todo edit "$@" ;;
     s)  shift; command todo show "$@" ;;
+    c)  shift; command todo cancel "$@" ;;
     rm) shift; command todo delete "$@" ;;
     mv) shift; command todo move "$@" ;;
     cp) shift; command todo copy "$@" ;;
+    fl) shift; command todo flush "$@" ;;
     "") command todo list ;;
     *)  command todo "$@" ;;
   esac
