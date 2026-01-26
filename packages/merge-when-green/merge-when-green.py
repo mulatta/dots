@@ -443,11 +443,13 @@ def wait_for_merge(bookmark: str) -> bool:
 def rebase_all_branches(default_branch: str, upstream_remote: str) -> None:
     """Rebase all local mutable branches onto new default branch."""
     print_header("Rebasing all branches...")
-    run(["jj", "git", "fetch", "--all-remotes"])
+    # Use --ignore-working-copy to avoid concurrent checkout issues
+    run(["jj", "git", "fetch", "--all-remotes", "--ignore-working-copy"])
 
     result = run(
         [
             "jj", "rebase",
+            "--ignore-working-copy",
             "-s", f"roots({default_branch}@{upstream_remote}..) & mutable()",
             "-d", f"{default_branch}@{upstream_remote}",
         ],
@@ -460,9 +462,13 @@ def rebase_all_branches(default_branch: str, upstream_remote: str) -> None:
 
     # Update local main bookmark to match upstream (resolves divergent state)
     run(
-        ["jj", "bookmark", "set", default_branch, "-r", f"{default_branch}@{upstream_remote}", "-B"],
+        ["jj", "bookmark", "set", default_branch, "-r", f"{default_branch}@{upstream_remote}", "-B",
+         "--ignore-working-copy"],
         check=False,
     )
+
+    # Sync working copy after all operations
+    run(["jj", "workspace", "update-stale"], check=False)
 
 
 def sync_fork_main(default_branch: str, upstream_remote: str) -> None:
