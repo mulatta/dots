@@ -9,6 +9,7 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/disko-zfs.nix
+    ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/radicle-mulatta.nix
     ./modules/cognee.nix
     ./modules/immich.nix
