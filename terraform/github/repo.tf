@@ -22,6 +22,11 @@ resource "github_branch_protection" "main" {
 
   allows_force_pushes = false
   allows_deletions    = false
+
+  required_status_checks {
+    strict   = false
+    contexts = ["buildbot/nix-eval"]
+  }
 }
 
 resource "github_actions_secret" "app_id" {
