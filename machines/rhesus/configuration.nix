@@ -14,6 +14,7 @@
     ../../darwinModules/docker.nix
     ../../darwinModules/homebrew.nix
     ../../darwinModules/linux-builder.nix
+    ../../darwinModules/remote-builder.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
     ../../darwinModules/ollama.nix
