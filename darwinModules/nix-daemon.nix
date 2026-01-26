@@ -18,6 +18,11 @@
       keep-outputs = true;
       keep-derivations = true;
 
+      substituters = [
+        "https://cache.nixos.org"
+        "https://nix-community.cachix.org"
+        "https://cache.mulatta.io"
+      ];
       trusted-substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
