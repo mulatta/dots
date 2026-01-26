@@ -156,7 +156,6 @@ in
   imports = [
     ./aerc.nix
     ./sieve.nix
-    ./thunderbird.nix
   ];
 
   config = lib.mkMerge [
