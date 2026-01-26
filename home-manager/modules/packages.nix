@@ -80,13 +80,13 @@ in
       ntfy-sh
       ouch
       procs
-      ripgrep
       sd
-      ast-grep
       xcp
       yq-go
       uutils-coreutils-noprefix
       gnugrep
+      ripgrep
+      ast-grep
 
       # Security
       age
