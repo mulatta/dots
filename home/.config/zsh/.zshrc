@@ -37,7 +37,7 @@ export SKIM_DEFAULT_OPTIONS="--height=40% --layout=reverse --bind='ctrl-j:down,c
 export SKIM_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
 export SKIM_CTRL_T_COMMAND="fd --type f --hidden --follow --exclude .git"
 
-# ===== Aliases (fish abbreviations equivalent) =====
+# ===== Aliases =====
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -76,16 +76,9 @@ alias dra='direnv allow'
 alias drb='direnv block'
 alias drr='direnv reload'
 
-# khal calendar wrapper (cal with no args → khal calendar, otherwise pass through)
-function cal() {
-  if [[ $# -eq 0 ]]; then
-    command khal calendar
-  else
-    command khal "$@"
-  fi
-}
-
 # ===== Custom functions =====
+
+## File/Directory utilities
 # yazi wrapper with cwd sync
 y() {
   local tmp=$(mktemp -t "yazi-cwd.XXXXX")
@@ -103,6 +96,22 @@ mk() {
   mkdir -p "$1" && cd "$1"
 }
 
+# cd to git/jj repo root
+reporoot() {
+  cd "$(git rev-parse --show-toplevel)"
+}
+
+# resolve symlink to real path
+real-which() {
+  readlink -f "$(command which "$@")"
+}
+
+## Home Manager
+# home-manager wrapper
+hm() {
+  nix run "$HOME/dots#hm" -- "$@"
+}
+
 # home-manager generation switcher with fzf
 hmg() {
   local current_gen=$(home-manager generations | head -n 1 | awk '{print $7}')
@@ -111,6 +120,54 @@ hmg() {
     xargs -I{} bash {}/activate
 }
 
+## Nix utilities
+# get store path of a package
+nix-pkg-path() {
+  if [[ $# != 1 ]]; then
+    echo "USAGE: nix-pkg-path <package>" >&2
+    return 1
+  fi
+  nix-shell -p "$1" --run 'echo $buildInputs'
+}
+
+# extract package source to current directory (writable)
+nix-unpack() {
+  if [[ $# != 1 ]]; then
+    echo "USAGE: nix-unpack <package>" >&2
+    return 1
+  fi
+  local pkg=$1
+  nix-shell \
+    -E "with import <nixpkgs> {}; mkShell { buildInputs = [ (srcOnly pkgs.$pkg) ]; }" \
+    --run "cp -r \$buildInputs $pkg; chmod -R +w $pkg"
+}
+
+# build a single .nix file with callPackage
+nix-call-package() {
+  if [[ $# -lt 1 ]]; then
+    echo "USAGE: nix-call-package <file.nix> [args...]" >&2
+    return 1
+  fi
+  local file=$1
+  shift
+  nix-build -E "with import <nixpkgs> {}; pkgs.callPackage $file {}" "$@"
+}
+
+# update nixpkgs package version
+nix-update() {
+  if [[ -f $HOME/git/nix-update/flake.nix ]]; then
+    nix run $HOME/git/nix-update#nix-update -- "$@"
+  else
+    nix run nixpkgs#nix-update -- "$@"
+  fi
+}
+
+# parallel nix builder
+nix-fast-build() {
+  nix run github:mic92/nix-fast-build -- "$@"
+}
+
+## Todoman
 # todoman wrapper with short subcommands
 t() {
   case "$1" in
@@ -133,6 +190,68 @@ t() {
     "") command todo list ;;
     *)  command todo "$@" ;;
   esac
+}
+
+## Calendar
+# khal calendar wrapper (cal with no args → khal calendar, otherwise pass through)
+cal() {
+  if [[ $# -eq 0 ]]; then
+    command khal calendar
+  else
+    command khal "$@"
+  fi
+}
+
+## Jujutsu workspaces
+JJ_WORKSPACE_DIR="${JJ_WORKSPACE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/jj-workspaces}"
+
+# jt: select workspace and cd
+jt() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  # Get main repo root (workspace's .jj/repo points to main repo)
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local selected="${1:-$(jj workspace list --color=always | sk --ansi --prompt="workspace> " \
+    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
+    --preview-window=right:60% | awk '{print $1}' | tr -d ':')}"
+  [[ -z "$selected" ]] && return 0
+  local dir
+  if [[ "$selected" == "default" ]]; then
+    dir=$main_repo
+  else
+    dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$selected"
+  fi
+  [[ -d "$dir" ]] && cd "$dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
+}
+
+# jn: create new workspace and cd
+jn() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  local name="${1:?usage: jn NAME [-r REV]}"
+  shift
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
+  mkdir -p "$ws_dir"
+  jj workspace add "$ws_dir" --name "$name" "$@" || return 1
+  cd "$ws_dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
+}
+
+# jd: delete workspace
+jd() {
+  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
+  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
+  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
+  [[ -z "$main_repo" ]] && main_repo=$(jj root)
+  local name="${1:-$(jj workspace list --color=always | sk --ansi --prompt="delete workspace> " \
+    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
+    --preview-window=right:60% --query='!default ' | awk '{print $1}' | tr -d ':')}"
+  [[ -z "$name" || "$name" == "default" ]] && { echo "cannot delete default workspace" >&2; return 1; }
+  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
+  jj workspace forget "$name" || return 1
+  [[ -d "$ws_dir" ]] && rm -rf "$ws_dir" && echo "removed $ws_dir"
 }
 
 # ===== Completion (must be before fzf-tab) =====
@@ -252,7 +371,7 @@ if command -v atuin &>/dev/null; then
 fi
 
 # Load direnv-instant integration for non-blocking prompt
-if [ -n "${commands[direnv-instant]}" ] && [ -n "${commands[direnv-instant]}" ]; then
+if [[ -n "${commands[direnv-instant]}" ]]; then
   export DIRENV_INSTANT_MUX_DELAY=6
   eval "$(direnv-instant hook zsh)"
 fi
@@ -261,58 +380,6 @@ fi
 command -v jj &>/dev/null && {
   source <(COMPLETE=zsh jj)
   compdef j=jj
-}
-
-# jj workspace management (lazyworktree-style)
-JJ_WORKSPACE_DIR="${JJ_WORKSPACE_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/jj-workspaces}"
-
-# jt: select workspace and cd
-jt() {
-  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
-  # Get main repo root (workspace's .jj/repo points to main repo)
-  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
-  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
-  [[ -z "$main_repo" ]] && main_repo=$(jj root)
-  local selected="${1:-$(jj workspace list --color=always | sk --ansi --prompt="workspace> " \
-    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
-    --preview-window=right:60% | awk '{print $1}' | tr -d ':')}"
-  [[ -z "$selected" ]] && return 0
-  local dir
-  if [[ "$selected" == "default" ]]; then
-    dir=$main_repo
-  else
-    dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$selected"
-  fi
-  [[ -d "$dir" ]] && cd "$dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
-}
-
-# jn: create new workspace and cd
-jn() {
-  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
-  local name="${1:?usage: jn NAME [-r REV]}"
-  shift
-  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
-  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
-  [[ -z "$main_repo" ]] && main_repo=$(jj root)
-  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
-  mkdir -p "$ws_dir"
-  jj workspace add "$ws_dir" --name "$name" "$@" || return 1
-  cd "$ws_dir" && [[ -f .envrc ]] && direnv allow 2>/dev/null
-}
-
-# jd: delete workspace
-jd() {
-  jj root &>/dev/null || { echo "not in jj repo" >&2; return 1; }
-  local repo_link=$(cat "$(jj root)/.jj/repo" 2>/dev/null)
-  local main_repo=${repo_link:+${repo_link%/.jj/repo}}
-  [[ -z "$main_repo" ]] && main_repo=$(jj root)
-  local name="${1:-$(jj workspace list --color=always | sk --ansi --prompt="delete workspace> " \
-    --preview='ws=$(echo {} | awk "{print \$1}" | tr -d ":"); jj log -r "trunk()..$ws@" --limit 10 --color=always 2>/dev/null || echo "no commits"' \
-    --preview-window=right:60% --query='!default ' | awk '{print $1}' | tr -d ':')}"
-  [[ -z "$name" || "$name" == "default" ]] && { echo "cannot delete default workspace" >&2; return 1; }
-  local ws_dir="$JJ_WORKSPACE_DIR/${main_repo:t}/$name"
-  jj workspace forget "$name" || return 1
-  [[ -d "$ws_dir" ]] && rm -rf "$ws_dir" && echo "removed $ws_dir"
 }
 
 # ===== Zellij tab name auto-update =====
