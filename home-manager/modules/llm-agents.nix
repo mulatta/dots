@@ -14,8 +14,5 @@
     ++ (with self.packages.${system}; [
       claude-code
       claude-md
-    ])
-    ++ (with inputs.qmd.packages.${system}; [
-      qmd
     ]);
 }

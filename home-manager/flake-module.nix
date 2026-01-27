@@ -45,6 +45,7 @@
               pkgs.findutils
               pkgs.hostname
               pkgs.stow
+              pkgs.nixVersions.latest
               inputs.home-manager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager
             ]
           }
@@ -77,11 +78,12 @@
           set -euo pipefail
           export PATH=${
             lib.makeBinPath [
+              pkgs.gitMinimal
               pkgs.coreutils
               pkgs.findutils
-              pkgs.gitMinimal
-              pkgs.stow
-              pkgs.nix
+              pkgs.jq
+              pkgs.unixtools.hostname
+              pkgs.nixVersions.latest
             ]
           }
           if [[ ! -d "$HOME/dots" ]]; then
