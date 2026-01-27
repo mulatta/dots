@@ -10,6 +10,7 @@
   imports = [
     ../modules/calendar
     ../modules/mail
+    ../modules/keyboard
   ];
 
   home.packages =
