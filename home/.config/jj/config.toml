@@ -88,10 +88,10 @@ sign-on-push = true
 [signing]
 backend = "ssh"
 behavior = "force"
-key = "/Users/seungwon/.ssh/id_ed25519"
+key = "~/.ssh/id_ed25519"
 
 [signing.backends.ssh]
-allowed-signers = "/Users/seungwon/.ssh/allowed_signers"
+allowed-signers = "~/.ssh/allowed_signers"
 program = "ssh-keygen"
 
 [template-aliases]

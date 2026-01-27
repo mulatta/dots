@@ -60,15 +60,12 @@
 
   environment.systemPackages = [
     self.packages.${pkgs.stdenv.hostPlatform.system}.systemctl-macos
-    self.packages.${pkgs.stdenv.hostPlatform.system}.nextcloud-client
     pkgs.nixos-rebuild
     pkgs.python3
-    pkgs.uv
     pkgs.tree
     pkgs.curl
     pkgs.wget
     pkgs.nodejs_24
-    pkgs.parallel
   ];
 
   system.stateVersion = 6;
