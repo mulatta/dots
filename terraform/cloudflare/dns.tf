@@ -171,6 +171,41 @@ resource "cloudflare_dns_record" "dmarc" {
   ttl     = 300
 }
 
+# =============================================================================
+# Resend DNS Records (outbound relay)
+# =============================================================================
+
+# Resend DKIM
+resource "cloudflare_dns_record" "resend_dkim" {
+  zone_id = local.zone_id
+  name    = "resend._domainkey"
+  type    = "TXT"
+  content = "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZhMdIzvq/fPFBHZ+Cn7uJij3gNXbBKulXcMm6n2OhA3iGuNJbjAAqDUiB5TxktsOrGNLE66sszpSZsC/JBbtLnMuMpHDnf6QwomDnj1ngwQnivJB6CF5vphgHWb2qRKkbNTNKITwuEWR6LPePATHJ3oFzxQIU3gGeu4261HqpHwIDAQAB"
+  ttl     = 300
+  comment = "Resend DKIM verification"
+}
+
+# Resend return-path MX (for bounce handling)
+resource "cloudflare_dns_record" "resend_send_mx" {
+  zone_id  = local.zone_id
+  name     = "send"
+  type     = "MX"
+  content  = "feedback-smtp.ap-northeast-1.amazonses.com"
+  priority = 10
+  ttl      = 300
+  comment  = "Resend bounce handling"
+}
+
+# Resend return-path SPF
+resource "cloudflare_dns_record" "resend_send_spf" {
+  zone_id = local.zone_id
+  name    = "send"
+  type    = "TXT"
+  content = "v=spf1 include:amazonses.com ~all"
+  ttl     = 300
+  comment = "Resend SPF for return-path"
+}
+
 # MTA-STS record
 resource "cloudflare_dns_record" "mta_sts_txt" {
   zone_id = local.zone_id
