@@ -3,26 +3,18 @@ on:
   push:
     branches:
       - main
-  schedule:
-    # Run daily at 3 AM UTC to sync any Radicle contributions
-    - cron: '0 3 * * *'
   workflow_dispatch:
 jobs:
-  mirror:
-    runs-on: ubuntu-slim
+  sync:
+    runs-on: ubuntu-latest
     environment: radicle
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      - id: mirror
-        uses: Mic92/radicle-sync@main
-        with:
-          radicle-identity-alias: "${{ secrets.RADICLE_IDENTITY_ALIAS }}"
-          radicle-identity-passphrase: "${{ secrets.RADICLE_IDENTITY_PASSPHRASE }}"
-          radicle-identity-private-key: "${{ secrets.RADICLE_IDENTITY_PRIVATE_KEY }}"
-          radicle-identity-public-key: "${{ secrets.RADICLE_IDENTITY_PUBLIC_KEY }}"
-          radicle-project-name: "${{ secrets.RADICLE_PROJECT_NAME }}"
-          radicle-repository-id: "${{ secrets.RADICLE_REPOSITORY_ID }}"
-          preferred-seeds: "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776"
-          pr-labels: "auto-merge"
+      - name: Sync to Radicle
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.RADICLE_SYNC_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H rad.mulatta.io >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -o StrictHostKeyChecking=accept-new radicle-sync@rad.mulatta.io

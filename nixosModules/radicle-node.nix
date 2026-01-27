@@ -1,5 +1,3 @@
-# Base Radicle node configuration
-# Provides common settings for all radicle nodes
 {
   config,
   lib,
