@@ -425,10 +425,13 @@ setopt EXTENDED_HISTORY
 
 # ===== Keybindings =====
 # Autosuggestions: accept with Right arrow or Ctrl+E
-bindkey '^[[C' autosuggest-accept   # Right arrow
+# Both normal mode (^[[C) and application mode (^[OC) sequences
+bindkey '^[[C' autosuggest-accept   # Right arrow (normal mode)
+bindkey '^[OC' autosuggest-accept   # Right arrow (application mode)
 bindkey '^E' autosuggest-accept     # Ctrl+E
 # Partial accept with Alt+Right (word)
-bindkey '^[^[[C' forward-word       # Alt+Right
+bindkey '^[^[[C' forward-word       # Alt+Right (normal mode)
+bindkey '^[O3C' forward-word        # Alt+Right (application mode, some terminals)
 
 # Edit command line in $EDITOR (Alt+E)
 autoload -Uz edit-command-line
