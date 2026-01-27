@@ -64,7 +64,7 @@
 
           if [[ "''${1:-}" == "switch" ]] && [[ -d "$HOME/dots/home" ]]; then
             echo "==> Stowing dotfiles..."
-            stow -d "$HOME/dots" -t "$HOME" --restow home
+            stow -d "$HOME/dots" -t "$HOME" --restow --no-folding home
           fi
 
           echo "==> Running home-manager with profile: $profile"
@@ -95,7 +95,7 @@
           fi
 
           echo "==> Stowing dotfiles..."
-          stow -d "$HOME/dots" -t "$HOME" --restow home
+          stow -d "$HOME/dots" -t "$HOME" --restow --no-folding home
 
           echo "==> Activating home-manager..."
           nix run "$HOME/dots#hm" -- switch
