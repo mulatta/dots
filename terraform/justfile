@@ -31,23 +31,15 @@ expire *args:
         fi
         jq -n --arg ok "$ok" --arg exp "$exp" '{provider:"vultr", status:$ok, expires:$exp}'
     }
-    fetch_aws() {
-        local r=$(aws sts get-caller-identity 2>&1) || true
-        if echo "$r" | jq -e '.Account' &>/dev/null; then
-            jq -n '{provider:"aws", status:"active", expires:"rotate"}'
-        else
-            jq -n '{provider:"aws", status:"error", expires:"-"}'
-        fi
-    }
+    
 
     results=()
     case "$provider" in
         cloudflare|cf) results+=("$(fetch_cf)") ;;
         github|gh)     results+=("$(fetch_gh)") ;;
         vultr|vt)      results+=("$(fetch_vt)") ;;
-        aws)           results+=("$(fetch_aws)") ;;
-        "")            results+=("$(fetch_cf)" "$(fetch_gh)" "$(fetch_vt)" "$(fetch_aws)") ;;
-        *) echo "Unknown: $provider. Use: cloudflare|github|vultr|aws" >&2; exit 1 ;;
+        "")            results+=("$(fetch_cf)" "$(fetch_gh)" "$(fetch_vt)") ;;
+        *) echo "Unknown: $provider. Use: cloudflare|github|vultr" >&2; exit 1 ;;
     esac
 
     if $json_out; then
@@ -88,28 +80,14 @@ billing *args:
         local r=$({{scripts_dir}}/run get/vultr.hurl)
         echo "$r" | jq '{provider:"vultr", balance:"$\(.response.account.balance)", pending:"$\(.response.account.pending_charges)", note:"-"}'
     }
-    fetch_aws() {
-        local start=$(date -u +%Y-%m-01)
-        local end=$(date -u +%Y-%m-%d)
-        local r=$(aws ce get-cost-and-usage \
-            --time-period Start="$start",End="$end" \
-            --granularity MONTHLY \
-            --metrics UnblendedCost 2>&1) || true
-        if echo "$r" | jq -e '.ResultsByTime' &>/dev/null; then
-            local cost=$(echo "$r" | jq -r '.ResultsByTime[0].Total.UnblendedCost.Amount // "0"')
-            jq -n --arg cost "\$${cost}" '{provider:"aws", balance:"-", pending:$cost, note:"MTD"}'
-        else
-            jq -n '{provider:"aws", balance:"-", pending:"-", note:"no permission"}'
-        fi
-    }
+    
 
     results=()
     case "$provider" in
         cloudflare|cf) results+=("$(fetch_cf)") ;;
         vultr|vt)      results+=("$(fetch_vt)") ;;
-        aws)           results+=("$(fetch_aws)") ;;
-        "")            results+=("$(fetch_vt)" "$(fetch_aws)" "$(fetch_cf)") ;;
-        *) echo "Unknown: $provider. Use: cloudflare|vultr|aws" >&2; exit 1 ;;
+        "")            results+=("$(fetch_vt)" "$(fetch_cf)") ;;
+        *) echo "Unknown: $provider. Use: cloudflare|vultr" >&2; exit 1 ;;
     esac
 
     if $json_out; then
@@ -118,7 +96,7 @@ billing *args:
         printf '%s\n' "${results[@]}" | jq -s '.' | jtbl -f
     fi
 
-# Show token refresh instructions (cloudflare|github|vultr|aws)
+# Show token refresh instructions (cloudflare|github|vultr)
 refresh provider:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -126,6 +104,5 @@ refresh provider:
         cloudflare|cf) glow "{{scripts_dir}}/docs/cloudflare.md" ;;
         github|gh)     glow "{{scripts_dir}}/docs/github.md" ;;
         vultr|vt)      glow "{{scripts_dir}}/docs/vultr.md" ;;
-        aws)           glow "{{scripts_dir}}/docs/aws.md" ;;
-        *) echo "Unknown: {{provider}}. Use: cloudflare|github|vultr|aws" >&2; exit 1 ;;
+        *) echo "Unknown: {{provider}}. Use: cloudflare|github|vultr" >&2; exit 1 ;;
     esac
