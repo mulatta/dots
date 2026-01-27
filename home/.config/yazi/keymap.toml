@@ -834,13 +834,8 @@ on = ["g", "c"]
 run = "cd ~/dots"
 
 [[mgr.keymap]]
-desc = "Goto ~/Downloads"
-on = ["g", "d"]
-run = "cd ~/Downloads"
-
-[[mgr.keymap]]
 desc = "Goto ~/git"
-on = ["g", "r"]
+on = ["g", "d"]
 run = "cd ~/git"
 
 [[mgr.keymap]]

@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     let
       yazi-plugins =
         let
@@ -32,8 +32,22 @@
     {
       packages.yazi-plugins = yazi-plugins;
 
+      # Preview tools for HM installation
+      legacyPackages.yazi-preview-tools = pkgs.buildEnv {
+        name = "yazi-preview-tools";
+        paths = with pkgs; [
+          imagemagick
+          ffmpegthumbnailer
+          unar
+          poppler
+          glow
+        ];
+      };
+
+      # Standalone yazi for `nix run` (separate from HM)
       packages.yazi = pkgs.callPackage ./yazi-standalone.nix {
         inherit yazi-plugins;
+        inherit (config.legacyPackages) yazi-preview-tools;
         yazi = pkgs.yazi;
       };
     };
