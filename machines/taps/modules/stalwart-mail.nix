@@ -10,26 +10,17 @@ let
 in
 {
   clan.core.vars.generators = {
-    aws-ses-smtp = {
-      files."username" = {
+    resend = {
+      files."api-key" = {
         secret = true;
         owner = "stalwart-mail";
       };
-      files."password" = {
-        secret = true;
-        owner = "stalwart-mail";
-      };
-      prompts.username = {
-        description = "AWS SES SMTP username (from terraform output ses_smtp_username)";
-        type = "hidden";
-      };
-      prompts.password = {
-        description = "AWS SES SMTP password (from terraform output ses_smtp_password)";
+      prompts."api-key" = {
+        description = "Resend API key (re_...)";
         type = "hidden";
       };
       script = ''
-        cp "$prompts/username" "$out/username"
-        cp "$prompts/password" "$out/password"
+        cp "$prompts/api-key" "$out/api-key"
       '';
     };
 
@@ -210,28 +201,28 @@ in
           "if" = "is_local_domain('', rcpt_domain)";
           "then" = "'local'";
         }
-        { "else" = "'ses'"; }
+        { "else" = "'resend'"; }
       ];
 
       queue.route.local = {
         type = "local";
       };
 
-      queue.route.ses = {
+      queue.route.resend = {
         type = "relay";
-        address = "email-smtp.us-east-1.amazonaws.com";
-        port = 587;
+        address = "smtp.resend.com";
+        port = 465;
         protocol = "smtp";
 
         tls = {
-          implicit = false;
+          implicit = true;
           allow-invalid-certs = false;
         };
 
         auth = {
           enable = true;
-          username = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."username".path}}%";
-          secret = "%{file:${config.clan.core.vars.generators.aws-ses-smtp.files."password".path}}%";
+          username = "'resend'";
+          secret = "%{file:${config.clan.core.vars.generators.resend.files."api-key".path}}%";
         };
       };
 
