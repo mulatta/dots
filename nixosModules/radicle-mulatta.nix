@@ -1,6 +1,3 @@
-# Personal Radicle configuration for mulatta
-# Repositories, DIDs, and nodes for personal infrastructure
-{ ... }:
 {
   imports = [ ./radicle-node.nix ];
 
