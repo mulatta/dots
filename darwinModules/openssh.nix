@@ -1,5 +1,5 @@
 let
-  sshCaPubKey = ../vars/per-machine/taps/openssh/ssh.id_ed25519.pub/value;
+  sshCaPubKey = ../vars/shared/openssh-ca/id_ed25519.pub/value;
 in
 {
   programs.ssh.knownHosts.ssh-ca = {
