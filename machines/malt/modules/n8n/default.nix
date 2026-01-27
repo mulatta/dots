@@ -92,6 +92,9 @@ in
       EXECUTIONS_DATA_PRUNE = "true";
       EXECUTIONS_DATA_MAX_AGE = "336"; # 2 weeks in hours
 
+      # Enable Execute Command node (disabled by default since n8n 2.0)
+      NODES_EXCLUDE = "[]";
+
       # Forward-auth hooks configuration
       EXTERNAL_HOOK_FILES = "${hooksFile}";
       N8N_FORWARD_AUTH_HEADER = "X-Auth-Request-Email";
