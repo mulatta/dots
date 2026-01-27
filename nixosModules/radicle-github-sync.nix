@@ -120,7 +120,9 @@ in
     };
 
     systemd.tmpfiles.rules = [
-      "d /var/lib/radicle-sync 0750 radicle radicle -"
+      # Home dir for radicle-sync user (SSH login)
+      "d /var/lib/radicle-sync 0755 radicle-sync radicle-sync -"
+      # Work directory for daemon (runs as radicle)
       "d /var/lib/radicle-sync/repos 0750 radicle radicle -"
     ];
 

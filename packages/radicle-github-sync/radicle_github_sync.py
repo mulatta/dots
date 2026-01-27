@@ -49,12 +49,7 @@ class SyncRequest:
 
 def send_request(repo_id: str, github_url: str, branch: str) -> int:
     """Send a sync request to the daemon via Unix socket."""
-    # Verify Radicle repo exists
-    radicle_storage = RADICLE_STORAGE / repo_id
-    if not radicle_storage.is_dir():
-        print(f"Repository {repo_id} not found in Radicle storage", file=sys.stderr)
-        return 1
-
+    # Note: Storage check moved to daemon (radicle user has access)
     request = SyncRequest(repo_id=repo_id, github_url=github_url, branch=branch)
 
     try:

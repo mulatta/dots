@@ -16,9 +16,9 @@
 
     settings.node.externalAddresses = [ "64.176.225.253:8776" ];
 
-    # SSH-based GitHub sync endpoint
+    # SSH-based GitHub sync endpoint (disabled - needs testing)
     githubSync = {
-      enable = true;
+      enable = false;
       repos = [
         {
           name = "mulatta-dots";
