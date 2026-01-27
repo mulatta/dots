@@ -102,7 +102,6 @@ in
     ]
     ++ [
       # Custom packages
-      self.packages.${system}.hm
       self.packages.${system}.merge-when-green
       self.packages.${system}.gh-radicle
       self.packages.${system}.rbw-pinentry
