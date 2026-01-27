@@ -186,14 +186,14 @@ in
         auth = {
           mechanisms = [
             {
-              "if" = "listener != 'smtp'";
-              "then" = "'[plain, login]'";
+              "if" = "local_port != 25";
+              "then" = "[plain, login]";
             }
             { "else" = false; }
           ];
           directory = [
             {
-              "if" = "listener != 'smtp'";
+              "if" = "local_port != 25";
               "then" = "'kanidm'";
             }
             { "else" = false; }
