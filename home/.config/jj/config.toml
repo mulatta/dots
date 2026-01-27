@@ -68,7 +68,6 @@ sig = [
 sp = ["split"]
 sq = ["squash"]
 ss = ["show", "--summary"]
-st = ["status"]
 stack = ["log", "-r", "stack()"]
 swap = ["rebase", "-r", "@-", "-A", "@"]
 
