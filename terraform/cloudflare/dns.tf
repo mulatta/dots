@@ -153,7 +153,7 @@ resource "cloudflare_dns_record" "mx" {
   ttl      = 300
 }
 
-# SPF record - allows mail server and AWS SES
+# SPF record - allows mail server and Resend (via AWS SES)
 resource "cloudflare_dns_record" "spf" {
   zone_id = local.zone_id
   name    = "@"
