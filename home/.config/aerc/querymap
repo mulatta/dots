@@ -16,8 +16,8 @@ Notifications=folder:mulatta/.Notifications AND NOT tag:trash
 Unread=tag:unread AND NOT tag:trash AND NOT tag:spam
 
 # System
-Sent=folder:mulatta/"Sent Items" AND NOT tag:trash
-Drafts=folder:mulatta/Drafts
-Junk=folder:mulatta/"Junk Mail" OR tag:spam
+Sent=folder:"mulatta/Sent Items" AND NOT tag:trash
+Drafts=tag:draft
+Junk=folder:"mulatta/Junk Mail" OR tag:spam
 Trash=tag:trash
 All=* AND NOT tag:trash
