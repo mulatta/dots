@@ -221,7 +221,7 @@ in
 
         auth = {
           enable = true;
-          username = "'resend'";
+          username = "resend";
           secret = "%{file:${config.clan.core.vars.generators.resend.files."api-key".path}}%";
         };
       };
