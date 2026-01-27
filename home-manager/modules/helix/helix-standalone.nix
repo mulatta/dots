@@ -2,68 +2,25 @@
   writeShellScriptBin,
   symlinkJoin,
   helix,
-  buildEnv,
-  # LSPs
-  bash-language-server,
-  marksman,
-  nil,
-  nixd,
-  pyright,
-  ruff,
-  rust-analyzer,
-  taplo,
-  tinymist,
-  yaml-language-server,
-  vscode-langservers-extracted,
-  # Formatters
-  alejandra,
-  nodePackages,
-  shfmt,
-  typstyle,
+  helix-lsp-tools,
   helix-config ? ../../../home/.config/helix,
 }:
 let
-  lspEnv = buildEnv {
-    name = "helix-lsp-tools";
-    paths = [
-      # LSPs
-      bash-language-server
-      marksman
-      nil
-      nixd
-      pyright
-      ruff
-      rust-analyzer
-      taplo
-      tinymist
-      yaml-language-server
-      vscode-langservers-extracted
-      # Formatters
-      alejandra
-      nodePackages.prettier
-      shfmt
-      typstyle
-    ];
-  };
-
   hxWrapper = writeShellScriptBin "hx" ''
     set -efu
 
-    export PATH=${lspEnv}/bin:${helix}/bin:$PATH
+    export PATH=${helix-lsp-tools}/bin:${helix}/bin:$PATH
 
-    XDG_CONFIG_HOME=''${XDG_CONFIG_HOME:-$HOME/.config}
-    HELIX_CONFIG="$XDG_CONFIG_HOME/helix"
+    # Use separate config directory for standalone (like Mic92 nvim)
+    HELIX_STANDALONE="$HOME/.config/helix-standalone"
 
-    mkdir -p "$HELIX_CONFIG"
+    # Clean and copy config (fresh every run)
+    rm -rf "$HELIX_STANDALONE"
+    mkdir -p "$HELIX_STANDALONE"
+    cp -arfT '${helix-config}'/ "$HELIX_STANDALONE"
+    chmod -R u+w "$HELIX_STANDALONE"
 
-    # Link config files if not exists (don't override user's stow config)
-    for f in config.toml languages.toml; do
-      if [[ ! -e "$HELIX_CONFIG/$f" ]]; then
-        ln -sfn "${helix-config}/$f" "$HELIX_CONFIG/$f"
-      fi
-    done
-
-    exec hx "$@"
+    exec hx --config "$HELIX_STANDALONE/config.toml" "$@"
   '';
 in
 symlinkJoin {
