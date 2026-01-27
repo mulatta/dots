@@ -49,61 +49,45 @@
         stow
         inputs.home-manager.packages.${system}.home-manager
       ];
-    in
-    {
-      apps.hm = {
-        type = "app";
-        program = lib.getExe config.packages.hm;
+
+      profileMapBash = lib.concatStringsSep "\n" (
+        lib.mapAttrsToList (host: profile: ''profiles["${host}"]="${profile}"'') profileMap
+      );
+
+      hmScript = pkgs.writeShellApplication {
+        name = "hm";
+        inherit runtimeInputs;
+        text = ''
+          set -euo pipefail
+
+          DOTFILES_DIR="${dotfilesDir}"
+
+          # Determine profile based on hostname
+          declare -A profiles
+          ${profileMapBash}
+
+          HOSTNAME=$(hostname -s)
+          PROFILE="''${profiles[$HOSTNAME]:-base}"
+
+          # Handle 'profile' subcommand
+          if [[ "''${1:-}" == "profile" ]]; then
+            echo "$PROFILE"
+            exit 0
+          fi
+
+          # Stow dotfiles before home-manager switch
+          if [[ "''${1:-}" == "switch" ]] && [[ -d "$DOTFILES_DIR/home" ]]; then
+            echo "==> Stowing dotfiles..."
+            stow -d "$DOTFILES_DIR" -t "$HOME" --restow home
+          fi
+
+          # Run home-manager with determined profile
+          echo "==> Running home-manager with profile: $PROFILE"
+          home-manager --flake "$DOTFILES_DIR#$PROFILE" "$@"
+        '';
       };
 
-      apps.bootstrap = {
-        type = "app";
-        program = lib.getExe config.packages.bootstrap;
-      };
-
-      apps.default = config.apps.bootstrap;
-
-      # Expose hm script as package for installation in profile
-      packages.hm =
-        let
-          profileMapBash = lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (host: profile: ''profiles["${host}"]="${profile}"'') profileMap
-          );
-        in
-        pkgs.writeShellApplication {
-          name = "hm";
-          inherit runtimeInputs;
-          text = ''
-            set -euo pipefail
-
-            DOTFILES_DIR="${dotfilesDir}"
-
-            # Determine profile based on hostname
-            declare -A profiles
-            ${profileMapBash}
-
-            HOSTNAME=$(hostname -s)
-            PROFILE="''${profiles[$HOSTNAME]:-base}"
-
-            # Handle 'profile' subcommand
-            if [[ "''${1:-}" == "profile" ]]; then
-              echo "$PROFILE"
-              exit 0
-            fi
-
-            # Stow dotfiles before home-manager switch
-            if [[ "''${1:-}" == "switch" ]] && [[ -d "$DOTFILES_DIR/home" ]]; then
-              echo "==> Stowing dotfiles..."
-              stow -d "$DOTFILES_DIR" -t "$HOME" --restow home
-            fi
-
-            # Run home-manager with determined profile
-            echo "==> Running home-manager with profile: $PROFILE"
-            home-manager --flake "$DOTFILES_DIR#$PROFILE" "$@"
-          '';
-        };
-
-      packages.bootstrap = pkgs.writeShellApplication {
+      bootstrapScript = pkgs.writeShellApplication {
         name = "bootstrap-dotfiles";
         runtimeInputs = runtimeInputs ++ [ pkgs.git ];
         text = ''
@@ -128,6 +112,19 @@
           echo "==> Done! You may need to restart your shell."
         '';
       };
+    in
+    {
+      apps.hm = {
+        type = "app";
+        program = lib.getExe hmScript;
+      };
+
+      apps.bootstrap = {
+        type = "app";
+        program = lib.getExe bootstrapScript;
+      };
+
+      apps.default = config.apps.bootstrap;
 
       legacyPackages.homeConfigurations = {
         base = mkHomeConfig { };
