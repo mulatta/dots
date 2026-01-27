@@ -36,7 +36,7 @@
 
       profileMap = {
         "rhesus" = "macos";
-        "psi" = "base";
+        "psi" = "research";
         "malt" = "base";
       };
 
@@ -134,6 +134,7 @@
       }
       // lib.optionalAttrs (system == "x86_64-linux" || system == "aarch64-linux") {
         desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
+        research = mkHomeConfig { extraModules = [ ./profiles/research.nix ]; };
       };
     };
 }
