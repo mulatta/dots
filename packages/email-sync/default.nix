@@ -109,6 +109,8 @@ writeShellApplication {
       # Get summary of new emails (up to 3 subjects)
       summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject // "No subject"' | head -3 | paste -sd ', ' -)
       summary="''${summary:-New messages}"
+      # Prevent dash-starting subjects from being interpreted as CLI options
+      [[ "$summary" == -* ]] && summary=" $summary"
   ''
   + (
     if stdenv.isDarwin then
