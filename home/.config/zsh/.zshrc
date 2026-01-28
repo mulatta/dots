@@ -38,6 +38,9 @@ export SKIM_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
 export SKIM_CTRL_T_COMMAND="fd --type f --hidden --follow --exclude .git"
 
 # ===== Aliases =====
+# macOS: use GNU tar for cross-platform compatible archives (no ._* files, no SCHILY.* headers)
+[[ "$OSTYPE" == darwin* ]] && alias tar='gtar'
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
