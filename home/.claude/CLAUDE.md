@@ -68,8 +68,35 @@
 
 ## Search (investigation phase)
 
+### Text & Structure Search
 - Local search first: rg, fd, ast-grep → reference ~/git (nixpkgs, linux, etc.)
 - `gh search code "keyword lang:nix"` for library/API usage examples
+
+### Semantic Search (ck)
+- When keywords (rg) fail, use ck MCP tools: `semantic_search`, `hybrid_search`, `regex_search`
+- Prefer MCP over CLI for seamless integration
+
+**CLI fallback:**
+- Semantic: `ck --sem "error handling" src/`
+- Hybrid: `ck --hybrid "timeout" src/`
+- grep compatible: `ck -n -R "TODO" .`
+
+**Indexing (manual):**
+- `ck --index .` or `ck --index --model nomic-v1.5 .` (8K context for large functions)
+
+### Document Search (qmd)
+- **Purpose**: Markdown docs, notes, meeting transcripts (NOT code)
+- **ck vs qmd**: ck=code, qmd=documents
+- MCP tools: `search` (BM25), `vsearch` (semantic), `query` (hybrid, best quality)
+- Document retrieval: `get`, `multi_get` (glob patterns supported)
+
+| Situation | Tool |
+|-----------|------|
+| Exact keywords known | `search` |
+| Conceptual/meaning-based | `vsearch` |
+| Important searches | `query` |
+
+### Knowledge & Architecture
 - Use DeepWiki for understanding principles/architecture
 
 ## CRITICAL: Secrets Management
