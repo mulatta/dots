@@ -104,6 +104,11 @@ reporoot() {
   cd "$(git rev-parse --show-toplevel)"
 }
 
+# rebase all working copy under origin
+rebase() {
+  jj git fetch --remote origin && jj rebase -s "roots(mutable())" -d "trunk()"
+}
+
 # resolve symlink to real path
 real-which() {
   readlink -f "$(command which "$@")"
