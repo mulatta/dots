@@ -112,11 +112,11 @@ hm() {
   nix run "$HOME/dots#hm" -- "$@"
 }
 
-# home-manager generation switcher with fzf
+# home-manager generation switcher with skim
 hmg() {
   local current_gen=$(home-manager generations | head -n 1 | awk '{print $7}')
   home-manager generations | awk '{print $7}' | tac | \
-    fzf --preview "nvd --color=always diff $current_gen {}" | \
+    sk --preview "nvd --color=always diff $current_gen {}" | \
     xargs -I{} bash {}/activate
 }
 

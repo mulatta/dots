@@ -8,22 +8,6 @@
 let
   system = pkgs.stdenv.hostPlatform.system;
 
-  sesh = pkgs.writeScriptBin "sesh" ''
-    #! /usr/bin/env sh
-    ZOXIDE_RESULT=$(zoxide query --interactive)
-    if [[ -z "$ZOXIDE_RESULT" ]]; then
-      exit 0
-    fi
-    SESSION_TITLE=$(echo "$ZOXIDE_RESULT" | sed 's#.*/##')
-    SESSION_LIST=$(zellij list-sessions -n | awk '{print $1}')
-    if echo "$SESSION_LIST" | grep -q "^$SESSION_TITLE$"; then
-      zellij attach "$SESSION_TITLE"
-    else
-      echo "Creating new session $SESSION_TITLE and CD $ZOXIDE_RESULT"
-      cd $ZOXIDE_RESULT
-      zellij attach -c "$SESSION_TITLE"
-    fi
-  '';
 in
 {
   home.packages =
@@ -96,9 +80,6 @@ in
 
       # Radicle
       radicle-node
-
-      # Scripts
-      sesh
     ]
     ++ [
       # Custom packages
