@@ -167,6 +167,14 @@ nix-fast-build() {
   nix run github:mic92/nix-fast-build -- "$@"
 }
 
+nixify() {
+  if [[ -n "$1" ]]; then
+    nix flake init -t "github:mulatta/flake-templates#$1"
+  else
+    nix flake init -t github:mulatta/flake-templates
+  fi
+}
+
 ## Todoman
 # todoman wrapper with short subcommands
 t() {
