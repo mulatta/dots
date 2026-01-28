@@ -73,6 +73,7 @@
 
 [url "git@github.com:"]
 	insteadOf = "https://github.com/"
+	insteadOf = "github:"
 
 [user]
 	email = "67085791+mulatta@users.noreply.github.com"
