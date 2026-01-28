@@ -71,6 +71,7 @@ in
       gnugrep
       ripgrep
       ast-grep
+      gnutar
 
       # Security
       age
