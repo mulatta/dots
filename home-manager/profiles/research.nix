@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   imports = [
+    ./gpu-support.nix
     ../modules/llm-agents.nix
   ];
 
