@@ -18,7 +18,7 @@
       overlays = [
         inputs.llm-agents.overlays.default # expose llm-agents packages
         self.overlays.default # existing overlays
-        self.overlays.llm-agents-cuda # GPU override for ck, qmd
+        self.overlays.llm-agents-cuda # GPU override for qmd
       ];
     }
   );
