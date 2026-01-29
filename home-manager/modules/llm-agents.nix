@@ -10,6 +10,7 @@
       gemini-cli
       ccstatusline
       ck
+      qmd
     ])
     ++ (with self.packages.${system}; [
       claude-code
