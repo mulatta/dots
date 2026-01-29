@@ -6,11 +6,10 @@
 }:
 {
   imports = [
-    ../modules/packages.nix
-    ../modules/fonts.nix
-    ../modules/pueue.nix
     ../modules/atuin.nix
+    ../modules/fonts.nix
     ../modules/helix
+    ../modules/packages.nix
     ../modules/yazi
   ];
 

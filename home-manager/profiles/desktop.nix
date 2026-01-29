@@ -9,8 +9,8 @@
 
   imports = [
     ../modules/calendar
-    ../modules/mail
     ../modules/keyboard
+    ../modules/mail
   ];
 
   home.packages =

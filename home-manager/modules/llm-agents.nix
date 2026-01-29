@@ -8,22 +8,21 @@
 let
   # Use overlay version if available (from gpu-support.nix), otherwise fallback to inputs
   llmAgentsPkgs = pkgs.llm-agents or inputs.llm-agents.packages.${system};
+  myPkgs = self.packages.${system};
+  skillzPkgs = inputs.skillz.packages.${system};
 in
 {
   home.file.".claude/skills".source = "${inputs.skillz}/skills";
 
-  home.packages =
-    (with llmAgentsPkgs; [
-      gemini-cli
-      ccstatusline
-      ck
-      qmd
-    ])
-    ++ (with self.packages.${system}; [
-      claude-code
-      claude-md
-    ])
-    ++ [
-      inputs.skillz.packages.${system}.collect-github-reviews
-    ];
+  home.packages = [
+    llmAgentsPkgs
+    llmAgentsPkgs.gemini-cli
+    llmAgentsPkgs.ccstatusline
+    llmAgentsPkgs.ck
+    llmAgentsPkgs.qmd
+    myPkgs.claude-code
+    myPkgs.claude-md
+    skillzPkgs.${system}.collect-github-reviews
+    pkgs.pueue
+  ];
 }
