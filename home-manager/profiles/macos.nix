@@ -6,10 +6,10 @@
 }:
 {
   imports = [
-    ../modules/mail
     ../modules/calendar
     ../modules/keyboard
     ../modules/llm-agents.nix
+    ../modules/mail
   ];
 
   home.packages = [
