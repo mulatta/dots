@@ -10,6 +10,8 @@ let
   llmAgentsPkgs = pkgs.llm-agents or inputs.llm-agents.packages.${system};
 in
 {
+  home.file.".claude/skills".source = "${inputs.skillz}/skills";
+
   home.packages =
     (with llmAgentsPkgs; [
       gemini-cli
@@ -20,5 +22,8 @@ in
     ++ (with self.packages.${system}; [
       claude-code
       claude-md
-    ]);
+    ])
+    ++ [
+      inputs.skillz.packages.${system}.collect-github-reviews
+    ];
 }

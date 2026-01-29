@@ -35,6 +35,7 @@
     nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&rev=70801e06d9730c4f1704fbd3bbf5b8e11c03a2a7";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    skillz.url = "path:/home/seungwon/git/skillz";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.inputs.nixpkgs.follows = "nixpkgs";
     srvos.url = "github:nix-community/srvos";
