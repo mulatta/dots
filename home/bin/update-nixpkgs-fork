@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Sync mulatta/nixpkgs fork with upstream and update dots flake
+
+set -euo pipefail
+
+cd "$HOME/git/nixpkgs"
+
+echo "==> Fetching remotes..."
+jj git fetch --all-remotes
+
+# Use main@origin as source of truth (handles corrupted local state)
+main_change=$(jj log -r 'main@origin' --no-graph -T 'change_id.short()')
+
+echo "==> Rebasing main onto nixpkgs-unstable..."
+jj rebase -b "$main_change" -d nixpkgs-unstable@upstream --ignore-immutable
+
+echo "==> Pushing main to origin..."
+jj bookmark set main -r "$main_change" -B --ignore-immutable
+jj git push -b main
+
+echo "==> Updating dots flake..."
+cd "$HOME/dots"
+jj new main -m "flake.lock: update nixpkgs"
+nix flake update nixpkgs
+
+echo "==> Running merge-when-green..."
+merge-when-green
+
+echo "==> Done!"
