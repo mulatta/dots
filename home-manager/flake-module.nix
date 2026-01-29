@@ -51,7 +51,7 @@
           }
           declare -A profiles=(
             ["rhesus"]="macos"
-            ["psi"]="research"
+            ["psi"]="psi"
             ["malt"]="base"
           )
           host=$(hostname -s)
@@ -120,7 +120,7 @@
           )
           {
             desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
-            research = mkHomeConfig { extraModules = [ ./profiles/research.nix ]; };
+            psi = mkHomeConfig { extraModules = [ ./profiles/psi.nix ]; };
           };
     };
 }
