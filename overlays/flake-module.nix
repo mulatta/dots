@@ -24,7 +24,6 @@
     # Requires: llm-agents.overlays.default applied first, cudaSupport=true in nixpkgs config
     llm-agents-cuda = final: prev: {
       llm-agents = prev.llm-agents // {
-        ck = prev.llm-agents.ck.override { onnxruntime = final.onnxruntime; };
         qmd = prev.llm-agents.qmd.override {
           cudaSupport = true;
           cudaPackages = final.cudaPackages;
