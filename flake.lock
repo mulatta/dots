@@ -300,11 +300,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1768549720,
-        "narHash": "sha256-vAlLOMLB0lvhk/FVzK+D5/1hH8BjBPyaV8i3reSya7g=",
+        "lastModified": 1769665656,
+        "narHash": "sha256-Bj5cjh2gO5whh6Wc7xaFapnN0HoM0kmL1TEV+yyZ3Gs=",
         "owner": "mulatta",
         "repo": "jmt",
-        "rev": "ad58e9537d62c6f54b7c10f520e3bf0254ee9603",
+        "rev": "5864174341a29785aaf7bb18749b8fe3cd818054",
         "type": "github"
       },
       "original": {
