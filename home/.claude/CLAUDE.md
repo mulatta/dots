@@ -47,6 +47,39 @@
 ## Nix Development
 
 - **Always use flake-parts** for flake structure (perSystem, systems, imports)
+
+### flake-parts Base Template
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+  };
+
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      perSystem = { pkgs, ... }: {
+        packages.default = pkgs.hello;
+        devShells.default = pkgs.mkShell { packages = [ ]; };
+      };
+    };
+}
+```
+
+### Language-specific Builders
+
+| Marker File | Language | Input | Builder |
+|-------------|----------|-------|---------|
+| `Cargo.toml` | Rust | `crane` | `craneLib.buildPackage` |
+| `pyproject.toml` | Python | `poetry2nix` | `mkPoetryApplication` |
+| `go.mod` | Go | (nixpkgs) | `buildGoModule` |
+| `package.json` | Node | `dream2nix` | `dream2nix.lib.makeFlakeOutputs` |
+| `CMakeLists.txt` | C/C++ | (nixpkgs) | `stdenv.mkDerivation` + cmake |
+
+### Build Debugging
+
 - Inspect failed builds with `nix log /nix/store/xxx | grep <keyword>`
 - New files in flakes: `jj file track <path>` or verify snapshot with `jj status` before building
 - Prefer `nix eval` over `nix flake show` (faster)
