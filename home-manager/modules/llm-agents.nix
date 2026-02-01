@@ -15,14 +15,13 @@ in
   home.file.".claude/skills".source = "${inputs.skillz}/skills";
 
   home.packages = [
-    llmAgentsPkgs
     llmAgentsPkgs.gemini-cli
     llmAgentsPkgs.ccstatusline
     llmAgentsPkgs.ck
     llmAgentsPkgs.qmd
+    skillzPkgs.collect-github-reviews
     myPkgs.claude-code
     myPkgs.claude-md
-    skillzPkgs.${system}.collect-github-reviews
     pkgs.pueue
   ];
 }
