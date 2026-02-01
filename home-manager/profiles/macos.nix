@@ -15,7 +15,7 @@
   home.packages = [
     self.packages.${system}.nextcloud-client
     self.packages.${system}.radicle-desktop
-    pkgs.tailsacle
+    pkgs.tailscale
     pkgs.basalt
   ];
 }
