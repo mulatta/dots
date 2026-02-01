@@ -51,6 +51,7 @@
     "Goodnotes" = 1444383602;
     "KakaoTalk" = 869223134;
     "Perplexity" = 6714467650;
+    "Tailscale" = 1475387142;
     "WireGuard" = 1451685025;
     "Xcode" = 497799835;
   };
