@@ -16,5 +16,6 @@
     self.packages.${system}.nextcloud-client
     self.packages.${system}.radicle-desktop
     pkgs.tailsacle
+    pkgs.basalt
   ];
 }
