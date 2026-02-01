@@ -704,14 +704,17 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1769666058,
-        "narHash": "sha256-7ERhLXtHgC0MUkGPvtJ1916ti/L/M3QKe7erB6DegHs=",
-        "path": "/home/seungwon/git/skillz",
-        "type": "path"
+        "lastModified": 1769951751,
+        "narHash": "sha256-Vc2w6X1vofgoVb0NdRVqunJsSKeUG/A/uPWlcKwAd5A=",
+        "owner": "mulatta",
+        "repo": "skillz",
+        "rev": "cdd47034bdad8a4c38002a70f914ebb745c23443",
+        "type": "github"
       },
       "original": {
-        "path": "/home/seungwon/git/skillz",
-        "type": "path"
+        "owner": "mulatta",
+        "repo": "skillz",
+        "type": "github"
       }
     },
     "sops-nix": {
