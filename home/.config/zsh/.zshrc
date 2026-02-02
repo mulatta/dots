@@ -104,9 +104,10 @@ reporoot() {
   cd "$(git rev-parse --show-toplevel)"
 }
 
-# rebase all working copy under origin
+# rebase all working copy under remote (default: origin)
 rebase() {
-  jj git fetch --remote origin && jj rebase -s "roots(mutable())" -d "trunk()"
+  local remote="${1:-origin}"
+  jj git fetch --remote "$remote" && jj rebase -s "roots(mutable())" -d "trunk()"
 }
 
 # resolve symlink to real path
