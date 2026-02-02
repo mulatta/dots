@@ -1,0 +1,44 @@
+{
+  "profiles": [
+    {
+      "name": "Default",
+      "selected": true,
+      "complex_modifications": {
+        "rules": [
+          {
+            "description": "Caps Lock: tap → Ctrl+Space, hold → Caps Lock",
+            "manipulators": [
+              {
+                "type": "basic",
+                "from": { "key_code": "caps_lock" },
+                "to_if_alone": [
+                  { "key_code": "spacebar", "modifiers": ["left_control"] }
+                ],
+                "to_if_held_down": [{ "key_code": "caps_lock" }]
+              }
+            ]
+          },
+          {
+            "description": "Globe/lang1 → Ctrl+Space (Gureum toggle)",
+            "manipulators": [
+              {
+                "type": "basic",
+                "from": { "apple_vendor_keyboard_key_code": "language" },
+                "to": [
+                  { "key_code": "spacebar", "modifiers": ["left_control"] }
+                ]
+              },
+              {
+                "type": "basic",
+                "from": { "key_code": "lang1" },
+                "to": [
+                  { "key_code": "spacebar", "modifiers": ["left_control"] }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
