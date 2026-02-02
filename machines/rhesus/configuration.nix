@@ -13,6 +13,7 @@
     ../../darwinModules/desktop.nix
     ../../darwinModules/docker.nix
     ../../darwinModules/homebrew.nix
+    ../../darwinModules/karabiner.nix
     ../../darwinModules/linux-builder.nix
     ../../darwinModules/remote-builder.nix
     ../../darwinModules/nix-daemon.nix
