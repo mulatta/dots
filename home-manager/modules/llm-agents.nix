@@ -20,6 +20,7 @@ in
     llmAgentsPkgs.ck
     llmAgentsPkgs.qmd
     skillzPkgs.style-review
+    skillzPkgs.context7-cli
     myPkgs.claude-code
     myPkgs.claude-md
     pkgs.pueue
