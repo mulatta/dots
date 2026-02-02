@@ -19,7 +19,7 @@ in
     llmAgentsPkgs.ccstatusline
     llmAgentsPkgs.ck
     llmAgentsPkgs.qmd
-    skillzPkgs.collect-github-reviews
+    skillzPkgs.style-review
     myPkgs.claude-code
     myPkgs.claude-md
     pkgs.pueue

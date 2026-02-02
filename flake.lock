@@ -704,11 +704,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1769998470,
-        "narHash": "sha256-AgqQZOc/L+3F0h5GGz4HzJMvyqbKmTMyPhfyKPJ3jac=",
+        "lastModified": 1770047405,
+        "narHash": "sha256-iuP1spTU+qy/IMGKBbpAV0jIRBwZVgzjXMHlXSP9ZBM=",
         "owner": "mulatta",
         "repo": "skillz",
-        "rev": "b819a77683a2e6ab711b2eeb2aeb985317ad3d07",
+        "rev": "bb739d4286cc8bdf6cd9fa2ed32277c01831556a",
         "type": "github"
       },
       "original": {
