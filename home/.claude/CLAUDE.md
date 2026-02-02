@@ -42,7 +42,7 @@
   pueue add -- 'command args'
   pueue wait <id> && pueue log <id>
   ```
-- Applies to: nix build, nix flake check, cargo build/test, colmena apply, merge-when-green
+- Applies to: nix build, nix flake check, cargo build/test, merge-when-green
 
 ## Nix Development
 
@@ -70,13 +70,13 @@
 
 ### Language-specific Builders
 
-| Marker File | Language | Input | Builder |
-|-------------|----------|-------|---------|
-| `Cargo.toml` | Rust | `crane` | `craneLib.buildPackage` |
-| `pyproject.toml` | Python | `poetry2nix` | `mkPoetryApplication` |
-| `go.mod` | Go | (nixpkgs) | `buildGoModule` |
-| `package.json` | Node | `dream2nix` | `dream2nix.lib.makeFlakeOutputs` |
-| `CMakeLists.txt` | C/C++ | (nixpkgs) | `stdenv.mkDerivation` + cmake |
+| Marker File      | Language | Input        | Builder                          |
+| ---------------- | -------- | ------------ | -------------------------------- |
+| `Cargo.toml`     | Rust     | `crane`      | `craneLib.buildPackage`          |
+| `pyproject.toml` | Python   | `poetry2nix` | `mkPoetryApplication`            |
+| `go.mod`         | Go       | (nixpkgs)    | `buildGoModule`                  |
+| `package.json`   | Node     | `dream2nix`  | `dream2nix.lib.makeFlakeOutputs` |
+| `CMakeLists.txt` | C/C++    | (nixpkgs)    | `stdenv.mkDerivation` + cmake    |
 
 ### Build Debugging
 
