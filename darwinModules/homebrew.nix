@@ -27,6 +27,7 @@
     "claude"
     "cleanshot"
     "devonthink"
+    "gureumkim"
     "hancom-word"
     "hazel"
     "hookmark"
