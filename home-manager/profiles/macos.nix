@@ -15,6 +15,7 @@
   home.packages = [
     self.packages.${system}.nextcloud-client
     self.packages.${system}.radicle-desktop
+    self.packages.${system}.rbw-pinentry
     pkgs.tailscale
     pkgs.basalt
   ];
