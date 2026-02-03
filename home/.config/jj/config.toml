@@ -86,7 +86,7 @@ sign-on-push = true
 "open()" = "stack() & draft()"
 "ready()" = "heads(stack()) & draft() & ~wip()"
 "stack()" = "trunk()..@"
-"trunk()" = "latest(present(master@rad) | present(main@origin) | present(master@origin) | root())"
+"trunk()" = "latest(present(master@rad) | present(master@upstream) | present(main@upstream) | present(main@origin) | present(master@origin) | root())"
 "unpushed()" = "remote_bookmarks()..@"
 "wip()" = "description(glob:\"wip:*\") | description(glob:\"WIP:*\")"
 
