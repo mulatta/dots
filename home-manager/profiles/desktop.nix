@@ -22,5 +22,6 @@
     ])
     ++ [
       self.packages.${system}.radicle-desktop
+      self.packages.${system}.rbw-pinentry
     ];
 }

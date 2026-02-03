@@ -7,7 +7,6 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  rbw-pinentry = self.packages.${system}.rbw-pinentry;
   sieve-sync = self.packages.${system}.sieve-sync;
   claude-code = self.inputs.llm-agents.packages.${system}.claude-code;
   maildir = "${config.home.homeDirectory}/mail";
@@ -46,15 +45,6 @@ let
       if ! mkdir "$LOCKDIR" 2>/dev/null; then
         echo "Another email-sync is running, exiting."
         exit 0
-      fi
-
-      # Try to unlock if locked (keychain will provide password automatically)
-      if ! rbw unlocked 2>/dev/null; then
-        echo "rbw vault is locked, attempting unlock via keychain..."
-        if ! rbw unlock 2>/dev/null; then
-          echo "Failed to unlock rbw vault, skipping sync."
-          exit 0
-        fi
       fi
 
       echo "Syncing emails from IMAP servers..."
@@ -209,8 +199,6 @@ in
           StandardErrorPath = "${config.xdg.stateHome}/mbsync.err";
           EnvironmentVariables = {
             HOME = config.home.homeDirectory;
-            PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:${claude-code}/bin:/usr/bin:/bin";
-            PYTHONPATH = afewConfigDir;
           };
         };
       };

@@ -8,5 +8,6 @@
   home.packages = with pkgs; [
     uv
     pixi
+    pinentry-curses
   ];
 }
