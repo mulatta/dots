@@ -93,9 +93,9 @@ layout {
     default_tab_template {
         pane size=2 borderless=true {
             plugin location="file:~/.nix-profile/bin/zjstatus.wasm" {
-                format_left   "{mode}#[bg=#181926] {tabs}"
+                format_left   "{mode}#[bg=default] {tabs}"
                     format_center ""
-                    format_right  "{command_notify}{swap_layout}#[bg=#181926,fg=#494d64] #[bg=#181926,fg=#494d64]{session}"
+                    format_right  "{swap_layout}#[bg=default,fg=#494d64] #[bg=default,fg=#494d64]{session}"
                     format_space  ""
                     format_hide_on_overlength "true"
                     format_precedence "crl"
@@ -107,50 +107,66 @@ layout {
 
                     hide_frame_for_single_pane "true"
 
-                    mode_normal        "#[bg=#a6da95,fg=#181926,bold] NORMAL#[bg=#181926,fg=#a6da95]"
-                    mode_locked        "#[bg=#6e738d,fg=#181926,bold] LOCKED #[bg=#181926,fg=#6e738d]"
-                    mode_resize        "#[bg=#8aadf4,fg=#181926,bold] RESIZE#[bg=#181926,fg=#8aadf4]"
-                    mode_pane          "#[bg=#8aadf4,fg=#181926,bold] PANE#[bg=#181926,fg=#8aadf4]"
-                    mode_tab           "#[bg=#8aadf4,fg=#181926,bold] TAB#[bg=#181926,fg=#8aadf4]"
-                    mode_scroll        "#[bg=#8aadf4,fg=#181926,bold] SCROLL#[bg=#181926,fg=#8aadf4]"
-                    mode_enter_search  "#[bg=#8aadf4,fg=#181926,bold] ENT-SEARCH#[bg=#181926,fg=#8aadf4]"
-                    mode_search        "#[bg=#8aadf4,fg=#181926,bold] SEARCHARCH#[bg=#181926,fg=#8aadf4]"
-                    mode_rename_tab    "#[bg=#8aadf4,fg=#181926,bold] RENAME-TAB#[bg=#181926,fg=#8aadf4]"
-                    mode_rename_pane   "#[bg=#8aadf4,fg=#181926,bold] RENAME-PANE#[bg=#181926,fg=#8aadf4]"
-                    mode_session       "#[bg=#8aadf4,fg=#181926,bold] SESSION#[bg=#181926,fg=#8aadf4]"
-                    mode_move          "#[bg=#8aadf4,fg=#181926,bold] MOVE#[bg=#181926,fg=#8aadf4]"
-                    mode_prompt        "#[bg=#8aadf4,fg=#181926,bold] PROMPT#[bg=#181926,fg=#8aadf4]"
-                    mode_tmux          "#[bg=#f5a97f,fg=#181926,bold] TMUX#[bg=#181926,fg=#f5a97f]"
+                    mode_normal        "#[bg=#a6da95,fg=#181926,bold] NORMAL#[bg=default,fg=#a6da95]"
+                    mode_locked        "#[bg=#6e738d,fg=#181926,bold] LOCKED #[bg=default,fg=#6e738d]"
+                    mode_resize        "#[bg=#8aadf4,fg=#181926,bold] RESIZE#[bg=default,fg=#8aadf4]"
+                    mode_pane          "#[bg=#8aadf4,fg=#181926,bold] PANE#[bg=default,fg=#8aadf4]"
+                    mode_tab           "#[bg=#8aadf4,fg=#181926,bold] TAB#[bg=default,fg=#8aadf4]"
+                    mode_scroll        "#[bg=#8aadf4,fg=#181926,bold] SCROLL#[bg=default,fg=#8aadf4]"
+                    mode_enter_search  "#[bg=#8aadf4,fg=#181926,bold] ENT-SEARCH#[bg=default,fg=#8aadf4]"
+                    mode_search        "#[bg=#8aadf4,fg=#181926,bold] SEARCHARCH#[bg=default,fg=#8aadf4]"
+                    mode_rename_tab    "#[bg=#8aadf4,fg=#181926,bold] RENAME-TAB#[bg=default,fg=#8aadf4]"
+                    mode_rename_pane   "#[bg=#8aadf4,fg=#181926,bold] RENAME-PANE#[bg=default,fg=#8aadf4]"
+                    mode_session       "#[bg=#8aadf4,fg=#181926,bold] SESSION#[bg=default,fg=#8aadf4]"
+                    mode_move          "#[bg=#8aadf4,fg=#181926,bold] MOVE#[bg=default,fg=#8aadf4]"
+                    mode_prompt        "#[bg=#8aadf4,fg=#181926,bold] PROMPT#[bg=default,fg=#8aadf4]"
+                    mode_tmux          "#[bg=#f5a97f,fg=#181926,bold] TMUX#[bg=default,fg=#f5a97f]"
 
                     // formatting for inactive tabs
-                    tab_normal              "#[bg=#181926,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{floating_indicator}#[bg=#181926,fg=#363a4f,bold]"
-                    tab_normal_fullscreen   "#[bg=#181926,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{fullscreen_indicator}#[bg=#181926,fg=#363a4f,bold]"
-                    tab_normal_sync         "#[bg=#181926,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{sync_indicator}#[bg=#181926,fg=#363a4f,bold]"
+                    tab_normal              "#[bg=default,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{floating_indicator}#[bg=default,fg=#363a4f,bold]"
+                    tab_normal_fullscreen   "#[bg=default,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{fullscreen_indicator}#[bg=default,fg=#363a4f,bold]"
+                    tab_normal_sync         "#[bg=default,fg=#8bd5ca]#[bg=#8bd5ca,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#8bd5ca,bold] {name}{sync_indicator}#[bg=default,fg=#363a4f,bold]"
 
                     // formatting for the current active tab
-                    tab_active              "#[bg=#181926,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{floating_indicator}#[bg=#181926,fg=#363a4f,bold]"
-                    tab_active_fullscreen   "#[bg=#181926,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{fullscreen_indicator}#[bg=#181926,fg=#363a4f,bold]"
-                    tab_active_sync         "#[bg=#181926,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{sync_indicator}#[bg=#181926,fg=#363a4f,bold]"
+                    tab_active              "#[bg=default,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{floating_indicator}#[bg=default,fg=#363a4f,bold]"
+                    tab_active_fullscreen   "#[bg=default,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{fullscreen_indicator}#[bg=default,fg=#363a4f,bold]"
+                    tab_active_sync         "#[bg=default,fg=#eed49f]#[bg=#eed49f,fg=#1e2030,bold]{index} #[bg=#363a4f,fg=#eed49f,bold] {name}{sync_indicator}#[bg=default,fg=#363a4f,bold]"
 
                     // separator between the tabs
-                    tab_separator           "#[bg=#181926] "
+                    tab_separator           "#[bg=default] "
 
                     // indicators
                     tab_sync_indicator       " "
                     tab_fullscreen_indicator " 󰊓"
                     tab_floating_indicator   " 󰹙"
 
-                    // notifications (email + ntfy unread counts)
-                    command_notify_command "zjstatus-notify"
-                    command_notify_format "#[fg=#f5a97f,bold]{stdout}"
-                    command_notify_interval "10"
-                    command_notify_rendermode "static"
-
-                    datetime        "#[fg=#6C7086,bold] {format} "
-                    datetime_format "%m/%d %H:%M"
-                    datetime_timezone "Asia/Seoul"
                 }
         }
         children
+        pane size=1 borderless=true {
+            plugin location="file:~/.nix-profile/bin/zjstatus.wasm" {
+                format_left   "{command_notify}"
+                format_center ""
+                format_right  "{command_weather}  {datetime}"
+                format_space  ""
+
+                border_enabled  "false"
+                hide_frame_for_single_pane "false"
+
+                command_notify_command "bash -c 'PATH=$HOME/bin:$HOME/.nix-profile/bin:$PATH zjstatus-notify'"
+                command_notify_format "{stdout}"
+                command_notify_interval "10"
+                command_notify_rendermode "dynamic"
+
+                command_weather_command  "bash -c 'PATH=$HOME/bin:$HOME/.nix-profile/bin:$PATH zjstatus-weather'"
+                command_weather_format  "#[fg=#6C7086,bold]{stdout}"
+                command_weather_interval "900"
+                command_weather_rendermode "static"
+
+                datetime          "#[fg=#6C7086,bold]{format}"
+                datetime_format   "%m/%d %H:%M"
+                datetime_timezone "Asia/Seoul"
+            }
+        }
     }
 }

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# zjstatus widget: weather from wttr.in with file-based cache
+set -euo pipefail
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zjstatus/weather"
+mkdir -p "$(dirname "$CACHE")"
+
+if [ -f "$CACHE" ] && [ -z "$(find "$CACHE" -mmin +30 2>/dev/null)" ]; then
+  raw=$(cat "$CACHE" 2>/dev/null || echo "")
+else
+  raw=$(curl -s --max-time 5 "wttr.in/Seoul?format=%c|%t" 2>/dev/null || echo "")
+  if [ -n "$raw" ]; then
+    echo "$raw" > "$CACHE"
+  else
+    raw=$(cat "$CACHE" 2>/dev/null || echo "")
+  fi
+fi
+
+if [ -n "$raw" ]; then
+  icon=$(echo "$raw" | cut -d'|' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  temp=$(echo "$raw" | cut -d'|' -f2 | tr -d '+ ' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  [ -n "$temp" ] && echo -n "${icon} ${temp}"
+fi
