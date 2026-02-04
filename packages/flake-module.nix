@@ -28,6 +28,7 @@
         email-sync = pkgs.callPackage ./email-sync {
           claude-code = inputs'.llm-agents.packages.claude-code;
         };
+        ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
         updater = pkgs.callPackage ./updater { };
         radicle-desktop = pkgs'.callPackage ./radicle-desktop { };
       }

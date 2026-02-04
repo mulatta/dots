@@ -11,6 +11,7 @@
     ../modules/llm-agents.nix
     ../modules/mail
     ../modules/zen.nix
+    ../modules/ntfy.nix
   ];
 
   home.packages =
