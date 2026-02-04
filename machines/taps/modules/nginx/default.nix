@@ -4,6 +4,7 @@
     ./immich.nix
     ./linkwarden.nix
     ./mta-sts.nix
+    ./ntfy.nix
     ./n8n.nix
     ./nextcloud.nix
     ./radicle.nix
