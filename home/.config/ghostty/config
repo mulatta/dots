@@ -1,5 +1,6 @@
 alpha-blending = linear
 auto-update-channel = tip
+bell-features = system,attention,title
 background-blur = true
 background-opacity = 0.900000
 clipboard-paste-protection = false
