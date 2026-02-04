@@ -29,6 +29,7 @@
     ./modules/vaultwarden.nix
     ./modules/atuin.nix
     ./modules/backup.nix
+    ./modules/ntfy.nix
     ./modules/postgresql.nix
   ];
 
