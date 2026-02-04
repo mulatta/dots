@@ -2,7 +2,7 @@ default-host: https://ntfy.mulatta.io
 subscribe:
   - topic: claude
     command: |
-      STATE_DIR="$HOME/.local/state/ntfy"
+      STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"
       mkdir -p "$STATE_DIR"
       count=$(cat "$STATE_DIR/claude" 2>/dev/null || echo 0)
       echo $(( count + 1 )) > "$STATE_DIR/claude"
@@ -12,4 +12,10 @@ subscribe:
           -message "${NTFY_MESSAGE:-New notification}" \
           -group "ntfy-claude" \
           -sound default || true
+      elif command -v notify-send &>/dev/null; then
+        notify-send \
+          -u normal \
+          -i dialog-information \
+          "${NTFY_TITLE:-claude}" \
+          "${NTFY_MESSAGE:-New notification}" || true
       fi

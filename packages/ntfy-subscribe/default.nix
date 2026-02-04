@@ -5,6 +5,7 @@
   coreutils,
   ntfy-sh,
   rbw,
+  libnotify,
   terminal-notifier,
 }:
 writeShellApplication {
@@ -15,10 +16,11 @@ writeShellApplication {
     ntfy-sh
     rbw
   ]
-  ++ lib.optionals stdenv.isDarwin [ terminal-notifier ];
+  ++ lib.optionals stdenv.isDarwin [ terminal-notifier ]
+  ++ lib.optionals stdenv.isLinux [ libnotify ];
 
   text = ''
-    STATE_DIR="$HOME/.local/state/ntfy"
+    STATE_DIR="''${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"
     mkdir -p "$STATE_DIR"
 
     # Unlock rbw if needed
@@ -35,6 +37,7 @@ writeShellApplication {
     # Each message increments the unread counter and sends a native notification
     exec ntfy subscribe \
       -u "seungwon:$PASSWORD" \
+      --config "$HOME/.config/ntfy/client.yml" \
       --from-config
   '';
 }
