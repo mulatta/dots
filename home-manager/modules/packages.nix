@@ -7,13 +7,13 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-
 in
 {
   home.packages =
     with pkgs;
     [
       # Nix tools
+      nh
       nix-diff
       nix-output-monitor
       nix-prefetch
@@ -22,62 +22,62 @@ in
       nixpkgs-review
       nurl
       nvd
-      nh
 
       # Shell & terminal
       bat
-      bat-extras.batman
       bat-extras.batgrep
+      bat-extras.batman
       btop
       direnv
-      nix-direnv
       eza
-      zsh
-      zsh-autosuggestions
-      zsh-fast-syntax-highlighting
-      zsh-autopair
-      zsh-fzf-tab
-      zsh-completions
+      nix-direnv
       skim
       starship
       zellij
       zjstatus
       zoxide
+      zsh
+      zsh-autopair
+      zsh-autosuggestions
+      zsh-completions
+      zsh-fast-syntax-highlighting
+      zsh-fzf-tab
       (if stdenv.isDarwin then ghostty-bin else ghostty)
 
       # Git
+      gh
       git
       git-lfs
-      gh
-      jujutsu
       jjui
+      jujutsu
 
       # CLI utilities
-      gum
-      stow
+      ast-grep
       delta
       dust
       fd
+      gnugrep
+      gnutar
       grex
+      gum
       hyperfine
       jq
       ntfy-sh
       ouch
       procs
+      ripgrep
       sd
+      sqlit-tui
+      stow
+      uutils-coreutils-noprefix
       xcp
       yq-go
-      uutils-coreutils-noprefix
-      gnugrep
-      ripgrep
-      ast-grep
-      gnutar
 
       # Security
       age
       age-plugin-yubikey
-      sops
       rbw
+      sops
 
       # Radicle
       radicle-node
