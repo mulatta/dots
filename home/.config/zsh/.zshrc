@@ -184,6 +184,12 @@ nixify() {
   fi
 }
 
+uvfy() {
+  local template="uv"
+  [[ "$1" == "pure" ]] && template="uv2nix"
+  nix flake init -t "github:mulatta/flake-templates#$template" && uv init && direnv allow
+}
+
 ## Todoman
 # todoman wrapper with short subcommands
 t() {
