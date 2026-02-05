@@ -83,15 +83,16 @@ alias drr='direnv reload'
 # ===== Custom functions =====
 
 ## Notifications
-# Clear ntfy unread count for a topic (or all)
+# Clear ntfy unread markers for a topic (or all)
 ntfy-clear() {
   local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"
   if [ -z "$1" ] || [ "$1" = "--all" ]; then
-    rm -f "$state_dir"/*
+    find "$state_dir" -mindepth 2 -type f -delete
   else
-    echo 0 > "$state_dir/$1"
+    rm -f "$state_dir/$1"/*
   fi
 }
+alias nr='ntfy-read'
 
 ## ntfy with rbw auth (inject -u after subcommand)
 ntfy() { command ntfy "$1" -u "seungwon:$(rbw get ntfy-password)" --config ~/.config/ntfy/client.yml "${@:2}"; }
