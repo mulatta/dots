@@ -36,7 +36,7 @@ in
     };
   };
 
-  services.stalwart-mail = {
+  services.stalwart = {
     enable = true;
     openFirewall = true;
 
