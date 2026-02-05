@@ -66,7 +66,6 @@
     pkgs.tree
     pkgs.curl
     pkgs.wget
-    pkgs.nodejs_24
   ];
 
   system.stateVersion = 6;
