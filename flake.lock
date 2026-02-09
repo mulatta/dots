@@ -629,6 +629,32 @@
         "type": "github"
       }
     },
+    "rag": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770695540,
+        "narHash": "sha256-fV57m5ERBqkt0KrHKOFELUQp7vz7C2g5c5oTk0g6VG4=",
+        "owner": "mulatta",
+        "repo": "rag.nix",
+        "rev": "d89c11e54aa9861a9ec791d79fa21b7aea34ee33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "rag.nix",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "clan-core": "clan-core",
@@ -645,6 +671,7 @@
         "nixos-facter-modules": "nixos-facter-modules_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
+        "rag": "rag",
         "rust-overlay": "rust-overlay",
         "skillz": "skillz",
         "sops-nix": "sops-nix",
