@@ -34,6 +34,9 @@
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
         systemctl-macos = pkgs.callPackage ./systemctl { };
         nextcloud-client = pkgs.callPackage ./nextcloud-client { };
+      }
+      // pkgs.lib.optionalAttrs (system == "aarch64-darwin") {
+        meetily = pkgs.callPackage ./meetily { };
       };
     };
 }
