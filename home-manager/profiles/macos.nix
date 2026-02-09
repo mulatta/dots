@@ -12,11 +12,16 @@
     ../modules/mail
   ];
 
-  home.packages = [
-    self.packages.${system}.nextcloud-client
-    self.packages.${system}.radicle-desktop
-    self.packages.${system}.rbw-pinentry
-    pkgs.tailscale
-    pkgs.basalt
-  ];
+  home.packages =
+    let
+      myPkgs = self.packages.${system};
+    in
+    [
+      myPkgs.nextcloud-client
+      myPkgs.radicle-desktop
+      myPkgs.rbw-pinentry
+      myPkgs.meetily
+      pkgs.tailscale
+      pkgs.basalt
+    ];
 }
