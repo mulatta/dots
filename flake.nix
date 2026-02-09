@@ -33,6 +33,10 @@
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
+    rag.inputs.flake-parts.follows = "flake-parts";
+    rag.inputs.nixpkgs.follows = "nixpkgs";
+    rag.inputs.treefmt-nix.follows = "treefmt-nix";
+    rag.url = "github:mulatta/rag.nix";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     rust-overlay.url = "github:oxalica/rust-overlay";
     skillz.url = "github:mulatta/skillz";

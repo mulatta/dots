@@ -20,14 +20,31 @@
       });
     };
 
-    # GPU support overlay for llm-agents packages
-    # Requires: llm-agents.overlays.default applied first, cudaSupport=true in nixpkgs config
+    llm-agents = _final: prev: {
+      inherit (inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system})
+        gemini-cli
+        ccstatusline
+        ck
+        qmd
+        ;
+    };
+
+    rag = _final: prev: {
+      inherit (inputs.rag.packages.${prev.stdenv.hostPlatform.system}) pqa crwl;
+    };
+
+    skillz = _final: prev: {
+      inherit (inputs.skillz.packages.${prev.stdenv.hostPlatform.system})
+        style-review
+        context7-cli
+        ;
+    };
+
+    # Requires: llm-agents overlay applied first, cudaSupport=true in nixpkgs config
     llm-agents-cuda = final: prev: {
-      llm-agents = prev.llm-agents // {
-        qmd = prev.llm-agents.qmd.override {
-          cudaSupport = true;
-          cudaPackages = final.cudaPackages;
-        };
+      qmd = prev.qmd.override {
+        cudaSupport = true;
+        cudaPackages = final.cudaPackages;
       };
     };
   };
@@ -39,6 +56,9 @@
         inherit system;
         overlays = [
           inputs.self.overlays.default
+          inputs.self.overlays.llm-agents
+          inputs.self.overlays.rag
+          inputs.self.overlays.skillz
         ];
       };
     };

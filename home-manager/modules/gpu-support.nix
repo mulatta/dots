@@ -16,9 +16,11 @@
         cudaSupport = true;
       };
       overlays = [
-        inputs.llm-agents.overlays.default # expose llm-agents packages
-        self.overlays.default # existing overlays
-        self.overlays.llm-agents-cuda # GPU override for ck, qmd
+        self.overlays.default
+        self.overlays.llm-agents
+        self.overlays.rag
+        self.overlays.skillz
+        self.overlays.llm-agents-cuda # CUDA override for qmd
       ];
     }
   );
