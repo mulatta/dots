@@ -22,16 +22,10 @@ let
   secretPath = config.clan.core.vars.generators.wireguard-keys-wireguard.files.privatekey.path;
 
   wgQuickWrapper = pkgs.writeShellScript "wg-quick-wireguard-start" ''
-    for i in $(seq 1 60); do
-      if [ -f "${secretPath}" ]; then
-        ${pkgs.wireguard-tools}/bin/wg-quick down wireguard 2>/dev/null || true
-        ${pkgs.wireguard-tools}/bin/wg-quick up wireguard
-        exec sleep 2147483647
-      fi
-      sleep 1
-    done
-    echo "Timed out waiting for wireguard private key at ${secretPath}"
-    exit 1
+    /bin/wait4path "${secretPath}"
+    ${pkgs.wireguard-tools}/bin/wg-quick down wireguard 2>/dev/null || true
+    ${pkgs.wireguard-tools}/bin/wg-quick up wireguard || exit 1
+    exec sleep 2147483647
   '';
 in
 {
@@ -44,7 +38,7 @@ in
   # mkForce needed because clan-core wireguard darwinModule may set this
   networking.wg-quick.interfaces.wireguard.autostart = lib.mkForce false;
 
-  # Custom launchd daemon: waits for sops secret before starting wg-quick
+  # Custom launchd daemon: wait4path blocks until sops secret exists, then starts wg-quick
   launchd.daemons.wg-quick-wireguard.serviceConfig = {
     ProgramArguments = [ "${wgQuickWrapper}" ];
     EnvironmentVariables.PATH = lib.concatStringsSep ":" [
@@ -59,7 +53,7 @@ in
       "/sbin"
     ];
     RunAtLoad = true;
-    KeepAlive.PathState.${secretPath} = true;
+    KeepAlive.SuccessfulExit = false;
     StandardOutPath = "/var/log/wg-quick-wireguard.log";
     StandardErrorPath = "/var/log/wg-quick-wireguard.log";
   };
