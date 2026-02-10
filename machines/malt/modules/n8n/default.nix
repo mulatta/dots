@@ -115,6 +115,8 @@ in
   systemd.services.n8n = {
     after = [ "postgresql.service" ];
     requires = [ "postgresql.service" ];
+    # Task runner needs `node` in PATH to spawn child process
+    path = [ pkgs.nodejs ];
   };
 
   networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 5678 ];
