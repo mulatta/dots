@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Sync qmd collections: sparse-clone missing repos, register via CLI, update + embed
+
+set -euo pipefail
+
+# Collection definitions: name|repo|sparse-dir
+remote_collections=(
+  "nix-doc|https://github.com/NixOS/nix|doc"
+  "nixpkgs-doc|https://github.com/NixOS/nixpkgs|doc"
+  "nix-darwin-doc|https://github.com/LnL7/nix-darwin|doc"
+  "ragflow-doc|https://github.com/infiniflow/ragflow|docs"
+  "crawl4ai|https://github.com/unclecode/crawl4ai|docs"
+)
+
+# Parallel sparse clone for missing repos
+pids=()
+for entry in "${remote_collections[@]}"; do
+  IFS='|' read -r name repo sparse <<< "$entry"
+  clone_dir="$HOME/docs/$name"
+
+  if [[ ! -d "$clone_dir" ]]; then
+    echo "cloning $repo → $clone_dir (sparse: $sparse/)"
+    (git clone --sparse --filter=blob:none --depth=1 "$repo" "$clone_dir" && \
+      git -C "$clone_dir" sparse-checkout set "$sparse/") &
+    pids+=($!)
+  fi
+done
+
+failed=0
+for pid in "${pids[@]}"; do wait "$pid" || ((failed++)); done
+((failed)) && echo "warning: $failed clone(s) failed" >&2
+
+# Pull existing repos in parallel
+pids=()
+for entry in "${remote_collections[@]}"; do
+  IFS='|' read -r name repo sparse <<< "$entry"
+  clone_dir="$HOME/docs/$name"
+  if [[ -d "$clone_dir" ]]; then
+    git -C "$clone_dir" pull --quiet &
+    pids+=($!)
+  fi
+done
+for pid in "${pids[@]}"; do wait "$pid"; done
+
+# Register all collections via CLI (idempotent)
+for entry in "${remote_collections[@]}"; do
+  IFS='|' read -r name repo sparse <<< "$entry"
+  qmd collection add "$HOME/docs/$name/$sparse" --name "$name" --mask "**/*.md"
+done
+
+echo "embedding..."
+qmd embed
