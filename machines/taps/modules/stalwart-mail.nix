@@ -291,9 +291,9 @@ in
   users.users.stalwart-mail.extraGroups = [ "nginx" ];
 
   # Reload stalwart when certs are renewed
-  security.acme.certs.${domain}.reloadServices = [ "stalwart-mail.service" ];
+  security.acme.certs.${domain}.reloadServices = [ "stalwart.service" ];
 
-  systemd.services.stalwart-mail = {
+  systemd.services.stalwart = {
     after = [
       "postgresql.service"
       "acme-${domain}.service"
