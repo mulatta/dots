@@ -663,11 +663,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770695540,
-        "narHash": "sha256-fV57m5ERBqkt0KrHKOFELUQp7vz7C2g5c5oTk0g6VG4=",
+        "lastModified": 1770737650,
+        "narHash": "sha256-3bWqDwqiMjp5UlXfqCboz6iu3+SAsJ0t61CTH5kI6WU=",
         "owner": "mulatta",
         "repo": "rag.nix",
-        "rev": "d89c11e54aa9861a9ec791d79fa21b7aea34ee33",
+        "rev": "5dc440e3a0001db8036dc4789c6e5f44f529c7b4",
         "type": "github"
       },
       "original": {
