@@ -11,6 +11,7 @@
     ../modules/calendar
     ../modules/keyboard
     ../modules/mail
+    ../modules/zen.nix
   ];
 
   home.packages =

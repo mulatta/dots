@@ -19,11 +19,12 @@
         }:
         inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs = {
+            inherit self system;
+            inputs = self.inputs;
+          };
           modules = [
             {
-              _module.args.self = self;
-              _module.args.inputs = self.inputs;
-              _module.args.system = system;
               imports = extraModules ++ [
                 ./profiles/base.nix
                 inputs.sops-nix.homeManagerModules.sops
