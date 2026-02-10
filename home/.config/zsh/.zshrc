@@ -177,6 +177,16 @@ nix-fast-build() {
 }
 
 nixify() {
+  if [[ ! -e shell.nix ]] && [[ ! -e default.nix ]]; then
+    nix flake new -t github:mulatta/flake-templates#nix-shell .
+  elif [[ ! -e .envrc ]]; then
+    echo "use nix" > .envrc
+  fi
+  direnv allow
+  ${EDITOR:-vim} default.nix
+}
+
+flakify() {
   if [[ -n "$1" ]]; then
     nix flake init -t "github:mulatta/flake-templates#$1"
   else
