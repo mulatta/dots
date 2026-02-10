@@ -308,6 +308,27 @@
         "type": "github"
       }
     },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "zen-browser",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769872935,
+        "narHash": "sha256-07HMIGQ/WJeAQJooA7Kkg1SDKxhAiV6eodvOwTX6WKI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "f4ad5068ee8e89e4a7c2e963e10dd35cd77b37b7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "jmt": {
       "inputs": {
         "flake-parts": "flake-parts_3",
@@ -678,6 +699,7 @@
         "srvos": "srvos",
         "systems": "systems_2",
         "treefmt-nix": "treefmt-nix_6",
+        "zen-browser": "zen-browser",
         "zjstatus": "zjstatus",
         "zsh-helix-mode": "zsh-helix-mode"
       }
@@ -948,6 +970,27 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "zen-browser": {
+      "inputs": {
+        "home-manager": "home-manager_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770707140,
+        "narHash": "sha256-3ZRA2+o5p1+FKWx988WbwB1SQ2Mz5aL95zxhL5iD+O0=",
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
+        "rev": "db14437f8667f7f09784e2a4e73c105bdc1c7023",
+        "type": "github"
+      },
+      "original": {
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
         "type": "github"
       }
     },
