@@ -46,16 +46,16 @@ let
 in
 {
   services.kanidm = {
-    enableServer = true;
-    enableClient = true;
+    server.enable = true;
+    client.enable = true;
     package = pkgs.kanidm_1_8;
 
     # Client settings for CLI tools (used by stalwart token script)
-    clientSettings = {
+    client.settings = {
       uri = "https://${domain}";
     };
 
-    serverSettings = {
+    server.settings = {
       inherit domain;
       origin = "https://${domain}";
       bindaddress = "${bindAddress}:${toString port}";
