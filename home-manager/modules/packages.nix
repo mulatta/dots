@@ -46,6 +46,7 @@ in
 
       # Git
       gh
+      gh-dash
       git
       git-lfs
       jjui
