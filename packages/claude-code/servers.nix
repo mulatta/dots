@@ -92,5 +92,14 @@ in
       command = "${pkgs.qmd}/bin/qmd";
       args = [ "mcp" ];
     };
+
+    zotero = {
+      command = uvx;
+      args = [
+        "--from"
+        "pyzotero[mcp]"
+        "pyzotero-mcp"
+      ];
+    };
   };
 }
