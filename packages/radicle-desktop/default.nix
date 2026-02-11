@@ -4,8 +4,7 @@
   fetchgit,
   fetchNpmDeps,
   fetchFromGitHub,
-  rust-bin,
-  makeRustPlatform,
+  rustPlatform,
   cargo-tauri,
   nodejs,
   npmHooks,
@@ -35,12 +34,6 @@ let
     url = "https://seed.radicle.xyz/z4D5UCArafTzTQpDZNQRuqswh3ury.git";
     rev = srcs.rev;
     hash = srcs.srcHash;
-  };
-
-  rustToolchain = rust-bin.fromRustupToolchainFile (src + "/rust-toolchain");
-  rustPlatform = makeRustPlatform {
-    cargo = rustToolchain;
-    rustc = rustToolchain;
   };
 in
 rustPlatform.buildRustPackage {
@@ -98,7 +91,7 @@ rustPlatform.buildRustPackage {
     description = "Radicle desktop app";
     homepage = "https://radicle.xyz";
     license = lib.licenses.gpl3Only;
-    platforms = lib.platforms.linux ++ lib.platforms.darwin;
+    platforms = lib.platforms.unix;
     mainProgram = "radicle-desktop";
   };
 }

@@ -59,13 +59,13 @@
 
   users.users.seungwon.home = "/Users/seungwon";
 
-  environment.systemPackages = [
-    self.packages.${pkgs.stdenv.hostPlatform.system}.systemctl-macos
-    pkgs.nixos-rebuild
-    pkgs.python3
-    pkgs.tree
-    pkgs.curl
-    pkgs.wget
+  environment.systemPackages = with pkgs; [
+    curl
+    nixos-rebuild
+    python3
+    systemctl-macos
+    tree
+    wget
   ];
 
   system.stateVersion = 6;

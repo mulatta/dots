@@ -17,14 +17,14 @@
   home.packages =
     (with pkgs; [
       bitwarden-desktop
+      graphicsmagick
       mpv
       yt-dlp
-      graphicsmagick
       zotero
     ])
     ++ [
+      self.packages.${system}.instagram-cli
       self.packages.${system}.radicle-desktop
       self.packages.${system}.rbw-pinentry
-      self.packages.${system}.instagram-cli
     ];
 }

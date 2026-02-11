@@ -1,24 +1,28 @@
 {
-  self,
   inputs,
   pkgs,
-  system,
   ...
 }:
+let
+  system = pkgs.stdenv.hostPlatform.system;
+in
 {
   home.file.".claude/skills".source = "${inputs.skillz}/skills";
 
-  home.packages = [
-    pkgs.gemini-cli
-    pkgs.ccstatusline
-    pkgs.ck
-    pkgs.qmd
-    pkgs.crwl
-    pkgs.pqa
-    pkgs.style-review
-    pkgs.context7-cli
-    self.packages.${system}.claude-code
-    self.packages.${system}.claude-md
-    pkgs.pueue
-  ];
+  home.packages =
+    (with pkgs; [
+      claude-code # custom wrapper (dots overlay)
+      claude-md # dots overlay
+      pueue
+      qmd # dots overlay (for CUDA override chain)
+    ])
+    ++ [
+      inputs.llm-agents.packages.${system}.ccstatusline
+      inputs.llm-agents.packages.${system}.ck
+      inputs.llm-agents.packages.${system}.gemini-cli
+      inputs.rag.packages.${system}.crwl
+      inputs.rag.packages.${system}.pqa
+      inputs.skillz.packages.${system}.context7-cli
+      inputs.skillz.packages.${system}.style-review
+    ];
 }

@@ -40,6 +40,7 @@ writeShellApplication {
     ISYNC_CONFIG="''${ISYNC_CONFIG:-$HOME/.config/isyncrc}"
 
     export NOTMUCH_CONFIG
+    export PYTHONPATH="$HOME/.config/afew"
 
     # Prevent concurrent runs with lock directory (atomic on all platforms)
     LOCKDIR="$HOME/.local/state/email-sync.lock"
@@ -73,19 +74,15 @@ writeShellApplication {
     notmuch new
 
     echo "Tagging emails with afew (including Claude spam filter)..."
-    PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
-      python3 -c "import sys; sys.argv = ['afew', '-tn']; import afew_filters; from afew.commands import main; main()" || true
+    afew -tn 2>&1 || true
 
     # Apply retention policies (cleanup old notifications)
     echo "Applying retention policies..."
-    XDG_CONFIG_HOME="$HOME/.config/afew-cleanup" \
-    PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
-      python3 -c "import sys; sys.argv = ['afew', '--tag', '--all']; import afew_filters; from afew.commands import main; main()" || true
+    XDG_CONFIG_HOME="$HOME/.config/afew-cleanup" afew --tag --all 2>&1 || true
 
     # Move emails to appropriate folders based on MailMover rules
     echo "Moving emails based on tags..."
-    PYTHONPATH="$HOME/.config/afew:$PYTHONPATH" PYTHONWARNINGS="ignore::UserWarning" \
-      python3 -c "import sys; sys.argv = ['afew', '--move-mails', '--all']; import afew_filters; from afew.commands import main; main()" || true
+    afew --move-mails --all 2>&1 || true
 
     # Delete old trash (older than 3 months)
     old_trash=$(notmuch search --output=files 'tag:trash AND date:..3months')

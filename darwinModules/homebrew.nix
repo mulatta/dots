@@ -40,7 +40,6 @@
     "raycast"
     "secretive"
     "slack"
-    "zen"
     "zerotier-one"
     "zoom"
     # keep-sorted end

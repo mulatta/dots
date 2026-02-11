@@ -2,122 +2,10 @@
   pkgs,
   config,
   lib,
-  self,
   ...
 }:
 let
-  system = pkgs.stdenv.hostPlatform.system;
-  sieve-sync = self.packages.${system}.sieve-sync;
-  claude-code = self.inputs.llm-agents.packages.${system}.claude-code;
   maildir = "${config.home.homeDirectory}/mail";
-  afewConfigDir = "${config.home.homeDirectory}/.config/afew";
-
-  email-sync = pkgs.writeShellApplication {
-    name = "email-sync";
-    runtimeInputs =
-      with pkgs;
-      [
-        isync
-        notmuch
-        afew
-        uutils-coreutils-noprefix
-        gnugrep
-        jq
-        rbw
-        w3m
-        pkgs.khard
-        claude-code
-      ]
-      ++ lib.optionals pkgs.stdenv.isLinux [ libnotify ]
-      ++ lib.optionals pkgs.stdenv.isDarwin [ terminal-notifier ];
-    text = ''
-      set -euo pipefail
-
-      # Set PYTHONPATH for afew custom filters (ClaudeSpamFilter)
-      export PYTHONPATH="${afewConfigDir}:''${PYTHONPATH:-}"
-      export NOTMUCH_CONFIG="$HOME/.config/notmuch/default/config"
-
-      # Prevent concurrent runs with lock directory (atomic on all platforms)
-      LOCKDIR="$HOME/.local/state/email-sync.lock"
-      mkdir -p "$(dirname "$LOCKDIR")"
-      cleanup() { rmdir "$LOCKDIR" 2>/dev/null || true; }
-      trap cleanup EXIT
-      if ! mkdir "$LOCKDIR" 2>/dev/null; then
-        echo "Another email-sync is running, exiting."
-        exit 0
-      fi
-
-      echo "Syncing emails from IMAP servers..."
-      mbsync -c "$HOME/.config/isyncrc" -a
-
-      if [ ! -d "${maildir}/.notmuch" ]; then
-        echo "Initializing notmuch database..."
-        notmuch new
-      fi
-
-      echo "Indexing new emails..."
-      notmuch new
-
-      echo "Tagging emails with afew (including Claude spam filter)..."
-      afew -tn 2>&1 || true
-
-      # Apply retention policies (cleanup old notifications)
-      echo "Applying retention policies..."
-      XDG_CONFIG_HOME="$HOME/.config/afew-cleanup" afew --tag --all 2>&1 || true
-
-      echo "Moving emails based on tags..."
-      afew --move-mails --all 2>&1 || true
-
-      # Delete old trash (older than 3 months)
-      old_trash=$(notmuch search --output=files 'tag:trash AND date:..3months' || true)
-      if [ -n "$old_trash" ]; then
-        old_count=$(echo "$old_trash" | wc -l | tr -d ' ')
-        echo "Permanently deleting $old_count old trashed emails..."
-        echo "$old_trash" | xargs rm -f
-        notmuch new --quiet
-      fi
-
-      # Resync after MailMover to push folder changes to server
-      echo "Resyncing after folder moves..."
-      mbsync -c "$HOME/.config/isyncrc" -a || true
-
-      # Check for new mail and send notification (exclude spam)
-      new_query="date:7days.. AND tag:unread AND NOT tag:notified AND NOT tag:spam AND NOT tag:trash"
-      new_count=$(notmuch count "$new_query")
-      if [ "$new_count" -gt 0 ]; then
-        echo "Found $new_count new email(s) to notify"
-
-        # Get summary of new emails (up to 3 subjects), escape special chars
-        summary=$(notmuch search --format=json --limit=3 "$new_query" | jq -r '.[].subject // "No subject"' | head -3 | paste -sd ', ' -)
-        summary="''${summary:-New messages}"
-
-    ''
-    + (
-      if pkgs.stdenv.isDarwin then
-        ''
-          terminal-notifier \
-            -title "New Mail ($new_count)" \
-            -message "$summary" \
-            -group "email-sync" \
-            -sound default || true
-        ''
-      else
-        ''
-          notify-send \
-            -u normal \
-            -i mail-unread \
-            "New Mail ($new_count)" \
-            "$summary" || true
-        ''
-    )
-    + ''
-        # Mark as notified to prevent duplicate notifications
-        notmuch tag +notified -- "$new_query"
-      fi
-
-      echo "Email sync complete."
-    '';
-  };
 
   msmtp-wrapper = pkgs.writeShellScriptBin "msmtp" ''
     tmpfile=$(mktemp)
@@ -151,17 +39,19 @@ in
   config = lib.mkMerge [
     {
       home.packages = [
-        email-sync
         msmtp-wrapper
+      ]
+      ++ (with pkgs; [
+        afew
+        email-sync
+        gnupg
+        isync
+        khard
+        notmuch
+        rbw
         sieve-sync
-        pkgs.isync
-        pkgs.notmuch
-        pkgs.afew
-        pkgs.rbw
-        pkgs.gnupg
-        pkgs.w3m
-        pkgs.khard
-      ];
+        w3m
+      ]);
     }
 
     (lib.mkIf pkgs.stdenv.isLinux {
@@ -169,11 +59,7 @@ in
         Unit.Description = "Mailbox synchronization";
         Service = {
           Type = "oneshot";
-          ExecStart = "${email-sync}/bin/email-sync";
-          Environment = [
-            "PYTHONPATH=${afewConfigDir}"
-            "PATH=${claude-code}/bin:${pkgs.rbw}/bin:/usr/bin:/bin"
-          ];
+          ExecStart = "${pkgs.email-sync}/bin/email-sync";
         };
       };
 
@@ -192,7 +78,7 @@ in
       launchd.agents.mbsync = {
         enable = true;
         config = {
-          ProgramArguments = [ "${email-sync}/bin/email-sync" ];
+          ProgramArguments = [ "${pkgs.email-sync}/bin/email-sync" ];
           StartInterval = 300;
           RunAtLoad = true;
           StandardOutPath = "${config.xdg.stateHome}/mbsync.log";

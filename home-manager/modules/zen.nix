@@ -1,8 +1,30 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }:
+let
+  system = pkgs.stdenv.hostPlatform.system;
+
+  # macOS: the upstream wrapper uses `open -na` which (1) doesn't pass
+  # MOZ_LEGACY_PROFILES to the app and (2) forces a new instance with -n.
+  # Shadow the CLI commands with hiPrio wrappers using `launchctl setenv` + `open -a`.
+  original = inputs.zen-browser.packages.${system}.twilight;
+
+  zenCli = pkgs.writeShellApplication {
+    name = "zen";
+    text = ''
+      /bin/launchctl setenv MOZ_LEGACY_PROFILES 1 2>/dev/null
+      STABLE_PATH="$HOME/Applications/Home Manager Apps/Zen Browser (Twilight).app"
+      if [[ -e "$STABLE_PATH" ]]; then
+        exec /usr/bin/open -a "$STABLE_PATH" --args "$@"
+      else
+        exec /usr/bin/open -a "${original}/Applications/Zen Browser (Twilight).app" --args "$@"
+      fi
+    '';
+  };
+in
 {
   imports = [
     inputs.zen-browser.homeModules.twilight
@@ -10,8 +32,8 @@
 
   programs.zen-browser = {
     enable = true;
-
     policies = {
+      LegacyProfiles = true;
       DisableAppUpdate = true;
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
@@ -154,6 +176,11 @@
       };
     };
   };
+
+  # macOS: shadow upstream CLI wrappers that use broken `open -na`
+  home.packages = lib.mkIf pkgs.stdenv.isDarwin [
+    (lib.hiPrio zenCli)
+  ];
 
   # macOS: zen-browser wrapper doesn't set up native messaging hosts,
   # so register the manifest manually where Firefox-based browsers look for it

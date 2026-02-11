@@ -1,7 +1,7 @@
 {
+  pkgs,
   self,
   system,
-  pkgs,
   ...
 }:
 {

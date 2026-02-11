@@ -1,6 +1,8 @@
 { self, pkgs, ... }:
 {
-  nixpkgs.overlays = [ self.overlays.default ];
+  nixpkgs.overlays = [
+    self.overlays.dots
+  ];
 
   # this extends srvos's common settings
   nix = {

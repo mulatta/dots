@@ -1,13 +1,9 @@
 {
   pkgs,
   lib,
-  self,
   inputs,
   ...
 }:
-let
-  system = pkgs.stdenv.hostPlatform.system;
-in
 {
   home.packages =
     with pkgs;
@@ -34,7 +30,6 @@ in
       skim
       starship
       zellij
-      zjstatus
       zoxide
       zsh
       zsh-autopair
@@ -82,18 +77,24 @@ in
 
       # Radicle
       radicle-node
-    ]
-    ++ [
-      # Custom packages
-      self.packages.${system}.merge-when-green
-      self.packages.${system}.gh-radicle
 
-      # External flakes
-      inputs.niks3.packages.${system}.niks3
-      inputs.jmt.packages.${system}.jmt
-      inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
-      inputs.direnv-instant.packages.${system}.default
-    ];
+      # Custom packages
+      merge-when-green
+      gh-radicle
+    ]
+    ++ (
+      let
+        system = pkgs.stdenv.hostPlatform.system;
+      in
+      [
+        # External flakes
+        inputs.niks3.packages.${system}.niks3
+        inputs.jmt.packages.${system}.jmt
+        inputs.zjstatus.packages.${system}.default
+        inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
+        inputs.direnv-instant.packages.${system}.default
+      ]
+    );
 
   # macOS: symlink ~/Library/Application Support/rbw → ~/.config/rbw
   # rbw uses macOS-native paths, but we want to manage config via ~/.config/rbw
