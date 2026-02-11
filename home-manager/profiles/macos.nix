@@ -23,6 +23,7 @@
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry
       myPkgs.meetily
+      myPkgs.instagram-cli
       pkgs.mpv
       pkgs.yt-dlp
       pkgs.tailscale
