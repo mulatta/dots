@@ -44,7 +44,9 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [ self.overlays.default ];
+  nixpkgs.overlays = [
+    self.overlays.dots
+  ];
 
   boot.loader.grub = {
     enable = true;
@@ -55,9 +57,9 @@
   networking.useDHCP = lib.mkDefault true;
 
   environment.systemPackages = with pkgs; [
-    vim
-    git
     btop
+    git
+    vim
   ];
 
   programs.fish.enable = true;

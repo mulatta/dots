@@ -1,44 +1,33 @@
-{ inputs, ... }:
+{ ... }:
 {
   perSystem =
     {
       pkgs,
-      inputs',
+      lib,
       system,
       ...
     }:
-    let
-      sieve-sync = pkgs.callPackage ./sieve-sync { };
-      jmt = inputs'.jmt.packages.default;
-      pkgs' = import pkgs.path {
-        inherit system;
-        overlays = [ inputs.rust-overlay.overlays.default ];
-      };
-    in
     {
       packages = {
-        inherit sieve-sync;
-        merge-when-green = pkgs.callPackage ./merge-when-green { inherit jmt; };
-        claude-code = pkgs.callPackage ./claude-code {
-          claude-code = inputs'.llm-agents.packages.claude-code;
-        };
-        claude-md = pkgs.callPackage ./claude-md { };
-        rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
-        gh-radicle = pkgs.callPackage ./gh-radicle { };
-        email-sync = pkgs.callPackage ./email-sync {
-          claude-code = inputs'.llm-agents.packages.claude-code;
-        };
-        ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
-        updater = pkgs.callPackage ./updater { };
-        instagram-cli = pkgs.callPackage ./instagram-cli { };
-        radicle-desktop = pkgs'.callPackage ./radicle-desktop { };
+        inherit (pkgs)
+          sieve-sync
+          merge-when-green
+          claude-code
+          claude-md
+          rbw-pinentry
+          gh-radicle
+          email-sync
+          ntfy-subscribe
+          updater
+          instagram-cli
+          radicle-desktop
+          ;
       }
-      // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
-        systemctl-macos = pkgs.callPackage ./systemctl { };
-        nextcloud-client = pkgs.callPackage ./nextcloud-client { };
+      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        inherit (pkgs) systemctl-macos nextcloud-client;
       }
-      // pkgs.lib.optionalAttrs (system == "aarch64-darwin") {
-        meetily = pkgs.callPackage ./meetily { };
+      // lib.optionalAttrs (system == "aarch64-darwin") {
+        inherit (pkgs) meetily;
       };
     };
 }

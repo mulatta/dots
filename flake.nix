@@ -37,8 +37,6 @@
     rag.inputs.nixpkgs.follows = "nixpkgs";
     rag.inputs.treefmt-nix.follows = "treefmt-nix";
     rag.url = "github:mulatta/rag.nix";
-    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
-    rust-overlay.url = "github:oxalica/rust-overlay";
     skillz.url = "github:mulatta/skillz";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.inputs.nixpkgs.follows = "nixpkgs";

@@ -4,13 +4,9 @@
   pkgs,
   config,
   lib,
-  self,
   ...
 }:
 let
-  system = pkgs.stdenv.hostPlatform.system;
-  rbw-pinentry = self.packages.${system}.rbw-pinentry;
-
   # Python environment for calendar-notify
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
@@ -58,11 +54,13 @@ lib.mkMerge [
     home.packages = [
       calendar-sync
       calendar-notify
-      pkgs.khal
-      pkgs.khard
-      pkgs.vdirsyncer
-      pkgs.todoman
-    ];
+    ]
+    ++ (with pkgs; [
+      khal
+      khard
+      todoman
+      vdirsyncer
+    ]);
 
     # Create calendar/contacts directories
     home.activation.createPimDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -129,7 +127,7 @@ lib.mkMerge [
         StandardErrorPath = "${config.xdg.stateHome}/calendar-sync.err";
         EnvironmentVariables = {
           HOME = config.home.homeDirectory;
-          PATH = "${rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
+          PATH = "${pkgs.rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
         };
       };
     };

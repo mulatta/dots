@@ -3,10 +3,11 @@
   lib,
   writeShellApplication,
   claude-code,
+  ck,
 }:
 let
   mcpConfigJson = pkgs.writeText "mcp-servers.json" (
-    builtins.toJSON (import ./servers.nix { inherit pkgs lib; })
+    builtins.toJSON (import ./servers.nix { inherit pkgs lib ck; })
   );
 in
 writeShellApplication {

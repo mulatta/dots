@@ -1,5 +1,5 @@
 # GPU support profile
-# Overrides pkgs with cudaSupport=true and applies llm-agents-cuda overlay
+# Overrides pkgs with cudaSupport=true and applies llm-agents-cuda overlay for qmd
 {
   lib,
   self,
@@ -16,11 +16,8 @@
         cudaSupport = true;
       };
       overlays = [
-        self.overlays.default
-        self.overlays.llm-agents
-        self.overlays.rag
-        self.overlays.skillz
-        self.overlays.llm-agents-cuda # CUDA override for qmd
+        self.overlays.dots
+        self.overlays.llm-agents-cuda # overrides pkgs.qmd with CUDA support
       ];
     }
   );

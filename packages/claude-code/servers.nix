@@ -4,6 +4,7 @@
 {
   pkgs,
   lib,
+  ck,
 }:
 let
   uvx = "${pkgs.uv}/bin/uvx";
@@ -67,7 +68,7 @@ in
     };
 
     ck-search = {
-      command = "${pkgs.ck}/bin/ck";
+      command = "${ck}/bin/ck";
       args = [ "--serve" ];
     };
 
