@@ -101,5 +101,15 @@ in
         "pyzotero-mcp"
       ];
     };
+
+    semanticscholar = {
+      command = uvx;
+      args = [
+        "--from"
+        "semanticscholar[mcp] @ git+https://github.com/mulatta/semanticscholar.git"
+        "semanticscholar-mcp"
+      ];
+      secrets.S2_API_KEY = "semantic-scholar-api";
+    };
   };
 }
