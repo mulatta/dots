@@ -12,7 +12,7 @@ in
 {
   nix = {
     gc.automatic = mkDefault true;
-    gc.dates = mkDefault "monthly";
+    gc.dates = mkDefault "weekly";
     gc.options = mkDefault "--delete-older-than 14d";
     gc.randomizedDelaySec = "1h";
 
