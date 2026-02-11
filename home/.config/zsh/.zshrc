@@ -67,6 +67,7 @@ alias zjac='zellij attach -c'
 alias zjda='zellij da'
 alias zjka='zellij ka'
 alias zjls='zellij ls'
+alias mwg='merge-when-green'
 
 # eza aliases
 alias eza='eza --icons always --git --group-directories-first --header --color=always --long --no-filesize --no-time --no-user --no-permissions'
