@@ -113,15 +113,9 @@
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") {
         macos = mkHomeConfig { extraModules = [ ./profiles/macos.nix ]; };
       }
-      //
-        lib.optionalAttrs
-          (
-            pkgs.stdenv.hostPlatform.system == "x86_64-linux"
-            || pkgs.stdenv.hostPlatform.system == "aarch64-linux"
-          )
-          {
-            desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
-            psi = mkHomeConfig { extraModules = [ ./profiles/psi.nix ]; };
-          };
+      // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
+        desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
+        psi = mkHomeConfig { extraModules = [ ./profiles/psi.nix ]; };
+      };
     };
 }
