@@ -90,7 +90,10 @@ in
       groups = {
         # Mail users - can access Stalwart Mail
         mail_users = {
-          members = [ "seungwon" ];
+          members = [
+            "seungwon"
+            "n8n_notify"
+          ];
         };
         # Photo users - can access Immich
         photo_users = {
@@ -119,6 +122,10 @@ in
         seungwon = {
           displayName = "Seungwon";
           mailAddresses = [ "seungwon@${baseDomain}" ];
+        };
+        n8n_notify = {
+          displayName = "n8n notify";
+          mailAddresses = [ "n8n@${baseDomain}" ];
         };
       };
 
@@ -301,5 +308,4 @@ in
       User = "root";
     };
   };
-
 }
