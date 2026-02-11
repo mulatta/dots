@@ -6,3 +6,4 @@ aliases:
   V: repo view
   v: repo view --web
   ref: '!gh browse "$1" -c=$(git rev-parse HEAD) --no-browser | pbcopy'
+  fork: repo fork
