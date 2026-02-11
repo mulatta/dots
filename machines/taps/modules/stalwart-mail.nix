@@ -228,7 +228,7 @@ in
 
       spam-filter = {
         enable = true;
-        resource = "file://${pkgs.stalwart-mail.passthru.spam-filter}/spam-filter.toml";
+        resource = "file://${pkgs.stalwart.passthru.spam-filter}/spam-filter.toml";
       };
 
       # Enable user sieve scripts (uploaded via ManageSieve)
@@ -269,7 +269,7 @@ in
       webadmin = {
         enable = true;
         path = "/var/cache/stalwart-mail";
-        resource = "file://${pkgs.stalwart-mail.passthru.webadmin}/webadmin.zip";
+        resource = "file://${pkgs.stalwart.passthru.webadmin}/webadmin.zip";
       };
 
       tracing.stdout = {
