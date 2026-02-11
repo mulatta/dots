@@ -20,6 +20,7 @@
       mpv
       yt-dlp
       graphicsmagick
+      zotero
     ])
     ++ [
       self.packages.${system}.radicle-desktop
