@@ -24,5 +24,6 @@
     ++ [
       self.packages.${system}.radicle-desktop
       self.packages.${system}.rbw-pinentry
+      self.packages.${system}.instagram-cli
     ];
 }

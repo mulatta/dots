@@ -30,6 +30,7 @@
         };
         ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
         updater = pkgs.callPackage ./updater { };
+        instagram-cli = pkgs.callPackage ./instagram-cli { };
         radicle-desktop = pkgs'.callPackage ./radicle-desktop { };
       }
       // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
