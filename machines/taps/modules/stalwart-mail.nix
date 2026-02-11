@@ -128,7 +128,7 @@ in
         password = "unused";
         timeout = "15s";
         tls.enable = false;
-        pool.max-connections = 10;
+        pool.max-connections = 3;
       };
 
       # Kanidm LDAP directory
