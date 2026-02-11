@@ -14,6 +14,7 @@
     ./i18n.nix
     ./minimal-docs.nix
     ./nftables.nix
+    ./journald.nix
     ./nix-daemon.nix
     ./thermald.nix
     ./users.nix
