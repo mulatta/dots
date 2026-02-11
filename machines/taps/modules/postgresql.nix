@@ -1,6 +1,10 @@
 {
   services.postgresql = {
     enable = true;
+    settings = {
+      shared_buffers = "64MB";
+      effective_cache_size = "1GB";
+    };
     ensureDatabases = [
       "stalwart-mail"
       "vaultwarden"
