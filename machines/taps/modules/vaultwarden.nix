@@ -40,6 +40,8 @@
       ROCKET_PORT = 8222;
       IP_HEADER = "X-Forwarded-For";
       LOG_LEVEL = "warn";
+      DATABASE_MAX_CONNS = 3;
+      DATABASE_MIN_CONNS = 1;
     };
   };
 }
