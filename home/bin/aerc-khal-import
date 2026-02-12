@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Import a single .ics MIME part from aerc to khal
+# Usage in aerc [view]: :pipe aerc-khal-import [calendar]
+# Default calendar: Academic
+
+set -euo pipefail
+
+calendar="${1:-Academic}"
+
+tmpfile=$(mktemp /tmp/khal-import-XXXXXX.ics)
+trap 'rm -f "$tmpfile"' EXIT
+
+cat > "$tmpfile"
+
+if ! grep -q 'BEGIN:VCALENDAR' "$tmpfile"; then
+  echo "Error: not a valid ICS file" >&2
+  exit 1
+fi
+
+khal import -a "$calendar" --batch "$tmpfile"
