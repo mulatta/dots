@@ -15,6 +15,7 @@ writeShellApplication {
   runtimeInputs = [
     claude-code
     pkgs.pueue
+    pkgs.nodejs_24
   ];
   text = ''
     # Set shell to bash for Claude Code
