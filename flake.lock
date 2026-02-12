@@ -556,10 +556,10 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1770604714,
-        "narHash": "sha256-kO/pHZyqFbMnYvfSx+2OMqkth1hTmI7vHRtSErCreZM=",
+        "lastModified": 1770906827,
+        "narHash": "sha256-B/FPhlX7V3ZL80n7IdgVmDXgKJcknuC0hflse1yJzFs=",
         "ref": "main",
-        "rev": "7379cc9fdfe7bb263c1cfb3e79480e9bb8305d4e",
+        "rev": "2ac28aee79980878715b12c98a154503defef4a9",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/mulatta/nixpkgs"
