@@ -1,0 +1,7 @@
+# Enable watchman filesystem monitor for large repositories
+# Avoids full working copy scan on every jj command (~1s → ~50ms for nixpkgs)
+
+[[--scope]]
+--when.repositories = ["~/git/nixpkgs", "~/git/stacks.nix"]
+[--scope.fsmonitor]
+backend = "watchman"

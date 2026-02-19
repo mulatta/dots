@@ -46,6 +46,7 @@
       git-lfs
       jjui
       jujutsu
+      watchman # filesystem monitor for jj on large repos (nixpkgs)
 
       # CLI utilities
       ast-grep
