@@ -32,7 +32,10 @@ in
     script = ''
       # Generate exactly 32 hex characters (16 bytes of entropy, 32-byte string)
       COOKIE_SECRET=$(openssl rand -hex 16)
-      echo "OAUTH2_PROXY_COOKIE_SECRET=$COOKIE_SECRET" > "$out/env"
+      cat > "$out/env" <<EOF
+      OAUTH2_PROXY_COOKIE_SECRET=$COOKIE_SECRET
+      OAUTH2_PROXY_CLIENT_SECRET=unused-public-client
+      EOF
     '';
   };
 
@@ -40,7 +43,6 @@ in
     enable = true;
     provider = "oidc";
     clientID = "n8n";
-    clientSecret = "unused-public-client";
     keyFile = config.clan.core.vars.generators.oauth2-proxy.files."env".path;
 
     cookie = {
