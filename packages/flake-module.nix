@@ -21,6 +21,7 @@
           updater
           instagram-cli
           radicle-desktop
+          skim
           ;
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {

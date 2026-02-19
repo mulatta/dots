@@ -13,10 +13,13 @@
     cognee-nix.inputs.systems.follows = "systems";
     cognee-nix.inputs.treefmt-nix.follows = "treefmt-nix";
     cognee-nix.url = "github:mulatta/cognee-nix";
+    crane.url = "github:ipetkov/crane";
     direnv-instant.inputs.nixpkgs.follows = "nixpkgs";
     direnv-instant.url = "github:Mic92/direnv-instant";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
+    fenix.inputs.nixpkgs.follows = "nixpkgs";
+    fenix.url = "github:nix-community/fenix";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";

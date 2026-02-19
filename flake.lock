@@ -90,6 +90,21 @@
     },
     "crane": {
       "locked": {
+        "lastModified": 1771438068,
+        "narHash": "sha256-nGBbXvEZVe/egCPVPFcu89RFtd8Rf6J+4RFoVCFec0A=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "b5090e53e9d68c523a4bb9ad42b4737ee6747597",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "crane_2": {
+      "locked": {
         "lastModified": 1765739568,
         "narHash": "sha256-gQYx35Of4UDKUjAYvmxjUEh/DdszYeTtT6MDin4loGE=",
         "owner": "ipetkov",
@@ -169,6 +184,27 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "fenix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src"
+      },
+      "locked": {
+        "lastModified": 1771398736,
+        "narHash": "sha256-pjV3C7VJHN0o2SvE3O6xiwraLt7bnlWIF3o7Q0BC1jk=",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "0f608091816de13d92e1f4058b501028b782dddd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "fenix",
         "type": "github"
       }
     },
@@ -680,8 +716,10 @@
       "inputs": {
         "clan-core": "clan-core",
         "cognee-nix": "cognee-nix",
+        "crane": "crane",
         "direnv-instant": "direnv-instant",
         "disko": "disko",
+        "fenix": "fenix",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "jmt": "jmt",
@@ -701,6 +739,23 @@
         "zen-browser": "zen-browser",
         "zjstatus": "zjstatus",
         "zsh-helix-mode": "zsh-helix-mode"
+      }
+    },
+    "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771353660,
+        "narHash": "sha256-yp1y55kXgaa08g/gR3CNiUdkg1JRjPYfkKtEIRNE6S8=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "09f2d468eda25a5f06ae70046357c70ae5cd77c7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
       }
     },
     "rust-overlay": {
@@ -975,7 +1030,7 @@
     },
     "zjstatus": {
       "inputs": {
-        "crane": "crane",
+        "crane": "crane_2",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs_6",
         "rust-overlay": "rust-overlay"
