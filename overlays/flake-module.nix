@@ -24,13 +24,14 @@
           ];
         });
 
-        # TODO: remove after nixpkgs#489305 is merged
-        skim = prev.skim.overrideAttrs (old: {
-          checkFlags = (old.checkFlags or [ ]) ++ [
-            "--skip"
-            "listen_"
-          ];
-        });
+        # Custom build with nightly Rust for frizbee (portable-simd)
+        skim = prev.callPackage ../packages/skim {
+          craneLib =
+            let
+              toolchain = inputs.fenix.packages.${system}.latest.toolchain;
+            in
+            (inputs.crane.mkLib prev).overrideToolchain toolchain;
+        };
 
         # Custom packages
         sieve-sync = prev.callPackage ../packages/sieve-sync { };
