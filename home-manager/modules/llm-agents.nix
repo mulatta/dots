@@ -23,6 +23,8 @@ in
       inputs.rag.packages.${system}.crwl
       inputs.rag.packages.${system}.pqa
       inputs.skillz.packages.${system}.context7-cli
+      inputs.skillz.packages.${system}.crwl-cli
+      inputs.skillz.packages.${system}.pareto-decide
       inputs.skillz.packages.${system}.style-review
     ];
 }
