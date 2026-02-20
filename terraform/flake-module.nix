@@ -15,7 +15,6 @@
           pkgs.yq-go
           pkgs.just
           pkgs.vultr-cli
-          pkgs.wrangler
           pkgs.jtbl
           pkgs.glow
           config.packages.terraform
