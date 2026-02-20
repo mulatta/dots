@@ -43,7 +43,7 @@ resource "cloudflare_r2_bucket_lifecycle" "cache" {
     }
     abort_multipart_uploads_transition = {
       condition = {
-        max_age = 21600 # 1 day in seconds
+        max_age = 86400 # 1 day in seconds
         type    = "Age"
       }
     }

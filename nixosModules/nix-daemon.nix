@@ -79,8 +79,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = [
-        # Delete automatic gcroots older than 30 days
-        "${pkgs.findutils}/bin/find /nix/var/nix/gcroots/auto /nix/var/nix/gcroots/per-user -type l -mtime +30 -delete"
+        # Delete automatic gcroots older than 14 days (aligned with nix gc and niks3 gc)
+        "${pkgs.findutils}/bin/find /nix/var/nix/gcroots/auto /nix/var/nix/gcroots/per-user -type l -mtime +14 -delete"
         # Delete stale temproots (created by nix-collect-garbage)
         "${pkgs.findutils}/bin/find /nix/var/nix/temproots -type f -mtime +10 -delete"
         # Delete broken symlinks

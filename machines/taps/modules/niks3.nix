@@ -77,7 +77,7 @@
 
     gc = {
       enable = true;
-      olderThan = "720h";
+      olderThan = "336h"; # 14 days — aligned with local nix gc policy
       schedule = "daily";
     };
 
