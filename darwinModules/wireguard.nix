@@ -24,8 +24,8 @@ let
   wgQuickWrapper = pkgs.writeShellScript "wg-quick-wireguard-start" ''
     /bin/wait4path "${secretPath}"
     ${pkgs.wireguard-tools}/bin/wg-quick down wireguard 2>/dev/null || true
-    ${pkgs.wireguard-tools}/bin/wg-quick up wireguard || exit 1
-    exec sleep 2147483647
+    # wireguard-go runs as a separate daemon; no need to keep this process alive
+    ${pkgs.wireguard-tools}/bin/wg-quick up wireguard
   '';
 in
 {
@@ -40,7 +40,11 @@ in
 
   # Custom launchd daemon: wait4path blocks until sops secret exists, then starts wg-quick
   launchd.daemons.wg-quick-wireguard.serviceConfig = {
-    ProgramArguments = [ "${wgQuickWrapper}" ];
+    ProgramArguments = [
+      "/bin/sh"
+      "-c"
+      "/bin/wait4path /nix/store && exec ${wgQuickWrapper}"
+    ];
     EnvironmentVariables.PATH = lib.concatStringsSep ":" [
       "${pkgs.wireguard-tools}/bin"
       "${pkgs.wireguard-go}/bin"
@@ -53,7 +57,8 @@ in
       "/sbin"
     ];
     RunAtLoad = true;
-    KeepAlive.SuccessfulExit = false;
+    # wg-quick forks wireguard-go as a daemon; let it survive after wrapper exits
+    AbandonProcessGroup = true;
     StandardOutPath = "/var/log/wg-quick-wireguard.log";
     StandardErrorPath = "/var/log/wg-quick-wireguard.log";
   };
