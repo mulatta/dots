@@ -42,11 +42,19 @@ for entry in "${remote_collections[@]}"; do
 done
 for pid in "${pids[@]}"; do wait "$pid"; done
 
-# Register all collections via CLI (idempotent)
+# Register only new collections (skip already registered ones)
+existing=$(qmd collection list 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | awk '/\(qmd:\/\// {print $1}')
 for entry in "${remote_collections[@]}"; do
   IFS='|' read -r name repo sparse <<< "$entry"
-  qmd collection add "$HOME/docs/$name/$sparse" --name "$name" --mask "**/*.md"
+  if echo "$existing" | grep -qxF "$name"; then
+    echo "  $name: already registered, skipping"
+  else
+    qmd collection add "$HOME/docs/$name/$sparse" --name "$name" --mask "**/*.md"
+  fi
 done
+
+# Re-index all collections (picks up git pull changes)
+qmd update
 
 echo "embedding..."
 qmd embed
