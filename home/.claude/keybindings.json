@@ -1,0 +1,19 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
+  "bindings": [
+    {
+      "context": "Chat",
+      "bindings": {
+        "ctrl+e": "chat:externalEditor",
+        "ctrl+g": null
+      }
+    },
+    {
+      "context": "Task",
+      "bindings": {
+        "ctrl+m": "task:background",
+        "ctrl+b": null
+      }
+    }
+  ]
+}
