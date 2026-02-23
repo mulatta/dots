@@ -70,7 +70,7 @@ def git_get_changes(flake_root: Path) -> str:
 
 
 def get_current_version(pkg: Package) -> str | None:
-    """Get current version from srcs.json if it exists."""
+    """Get current version from srcs.json or default.nix."""
     srcs_file = pkg.path / "srcs.json"
     if srcs_file.exists():
         try:
@@ -78,6 +78,16 @@ def get_current_version(pkg: Package) -> str | None:
             return data.get("version")
         except json.JSONDecodeError:
             pass
+
+    # Fallback: parse version from default.nix
+    nix_file = pkg.path / "default.nix"
+    if nix_file.exists():
+        import re
+
+        match = re.search(r'version = "([^"]+)";', nix_file.read_text())
+        if match:
+            return match.group(1)
+
     return None
 
 
