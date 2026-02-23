@@ -40,7 +40,11 @@ let
         command = if hasSecrets then "${wrapWithSecrets name cfg}" else cfg.command;
         args = if hasSecrets then [ ] else cfg.args or [ ];
       in
-      { inherit command args; } // lib.optionalAttrs (cfg ? env) { inherit (cfg) env; };
+      {
+        inherit command args;
+      }
+      // lib.optionalAttrs (cfg ? env) { inherit (cfg) env; }
+      // lib.optionalAttrs (cfg ? skipSchemaValidation) { inherit (cfg) skipSchemaValidation; };
 in
 {
   mcpServers = lib.mapAttrs toMcpServer {
@@ -111,6 +115,17 @@ in
         "semanticscholar-mcp"
       ];
       secrets.S2_API_KEY = "semantic-scholar-api";
+    };
+
+    browser-use = {
+      command = uvx;
+      args = [
+        "--from"
+        "browser-use[cli]"
+        "browser-use"
+        "--mcp"
+      ];
+      skipSchemaValidation = true;
     };
   };
 }
