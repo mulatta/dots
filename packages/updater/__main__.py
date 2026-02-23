@@ -28,14 +28,6 @@ class Package:
     extra_args: list[str] | None = None
 
 
-@dataclass
-class UpdateResult:
-    package: Package
-    success: bool
-    changed: bool
-    old_version: str | None = None
-    new_version: str | None = None
-
 
 def get_flake_root() -> Path:
     """Discover the flake root via git rev-parse.
@@ -62,11 +54,6 @@ def git_has_changes(flake_root: Path) -> bool:
     result = run_cmd(["git", "status", "--porcelain"], cwd=flake_root, check=False)
     return bool(result.stdout.strip())
 
-
-def git_get_changes(flake_root: Path) -> str:
-    """Get list of changed files."""
-    result = run_cmd(["git", "status", "--porcelain"], cwd=flake_root, check=False)
-    return result.stdout.strip()
 
 
 def get_current_version(pkg: Package) -> str | None:
@@ -187,33 +174,17 @@ def run_custom_update(pkg: Package, dry_run: bool = False) -> bool:
 
 def update_package(
     pkg: Package, flake_root: Path, dry_run: bool = False
-) -> UpdateResult:
-    """Update a single package and return the result."""
+) -> bool:
+    """Update a single package in place. Returns True on success."""
     print(f"\nUpdating {pkg.name} (method: {pkg.method})...")
 
-    old_version = get_current_version(pkg)
-
-    # Check for existing changes before update
-    had_changes_before = git_has_changes(flake_root)
-
     if pkg.method == "nix-update":
-        success = run_nix_update(pkg, flake_root, dry_run)
+        return run_nix_update(pkg, flake_root, dry_run)
     elif pkg.method == "custom":
-        success = run_custom_update(pkg, dry_run)
+        return run_custom_update(pkg, dry_run)
     else:
         print(f"  Error: Unknown method: {pkg.method}")
-        success = False
-
-    new_version = get_current_version(pkg)
-    changed = not had_changes_before and git_has_changes(flake_root)
-
-    return UpdateResult(
-        package=pkg,
-        success=success,
-        changed=changed,
-        old_version=old_version,
-        new_version=new_version,
-    )
+        return False
 
 
 def create_pr_for_package(
@@ -415,8 +386,7 @@ def main() -> int:
                 failure_count += 1
         else:
             # Normal mode: update in place
-            result = update_package(pkg, flake_root, args.dry_run)
-            if result.success:
+            if update_package(pkg, flake_root, args.dry_run):
                 success_count += 1
             else:
                 failure_count += 1
