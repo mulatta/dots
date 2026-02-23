@@ -306,6 +306,16 @@ def _run_update_and_create_pr(
     # Commit and push
     run_cmd(["git", "add", "-A"], cwd=worktree_path)
     commit_msg = f"{pkg.name}: {old_ver} -> {new_ver}"
+
+    # Ensure git identity is configured (worktrees may not inherit CI config)
+    for key, val in [
+        ("user.name", "github-actions[bot]"),
+        ("user.email", "41898282+github-actions[bot]@users.noreply.github.com"),
+    ]:
+        check = run_cmd(["git", "config", key], cwd=worktree_path, check=False)
+        if check.returncode != 0:
+            run_cmd(["git", "config", key, val], cwd=worktree_path)
+
     run_cmd(["git", "commit", "-m", commit_msg], cwd=worktree_path)
 
     push_result = run_cmd(
