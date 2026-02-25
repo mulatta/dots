@@ -21,8 +21,8 @@ writeShellApplication {
     # Set shell to bash for Claude Code
     export SHELL=${pkgs.bashInteractive}/bin/bash
 
-    # Add ~/.local/bin to PATH for user scripts
-    export PATH="$HOME/.local/bin:$PATH"
+    # Add ~/bin to PATH for user scripts (stowed from dots/home/bin)
+    export PATH="$HOME/bin:$PATH"
 
     # Start pueued daemon if not already running
     if ! pueue status &>/dev/null; then
