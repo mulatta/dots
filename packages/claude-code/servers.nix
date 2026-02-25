@@ -121,11 +121,10 @@ in
       command = uvx;
       args = [
         "--from"
-        "browser-use[cli]"
+        "browser-use[cli]==0.11.9"
         "browser-use"
         "--mcp"
       ];
-      skipSchemaValidation = true;
     };
   };
 }

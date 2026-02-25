@@ -1,5 +1,14 @@
 {
   "includeCoAuthoredBy": false,
+  "disabledMcpjsonServers": [
+    "docling",
+    "pubmedmcp",
+    "perplexity",
+    "n8n-mcp",
+    "zotero",
+    "semanticscholar",
+    "browser-use"
+  ],
   "hooks": {
     "Notification": [
       {
@@ -23,17 +32,14 @@
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "rust-skills@rust-skills": true
+    "rust-skills@rust-skills": true,
+    "hugging-face-cli@huggingface-skills": true,
+    "hugging-face-datasets@huggingface-skills": true,
+    "hugging-face-evaluation@huggingface-skills": true,
+    "hugging-face-trackio@huggingface-skills": true,
+    "hugging-face-model-trainer@huggingface-skills": true,
+    "hugging-face-jobs@huggingface-skills": true
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "disabledMcpjsonServers": [
-    "docling",
-    "pubmedmcp",
-    "perplexity",
-    "n8n-mcp",
-    "zotero",
-    "semanticscholar",
-    "browser-use"
-  ]
+  "skipDangerousModePermissionPrompt": true
 }
