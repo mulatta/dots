@@ -69,6 +69,7 @@
       uutils-coreutils-noprefix
       xcp
       yq-go
+      hexyl
 
       # Security
       age
