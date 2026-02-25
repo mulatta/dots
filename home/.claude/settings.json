@@ -26,5 +26,14 @@
     "rust-skills@rust-skills": true
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "disabledMcpjsonServers": [
+    "docling",
+    "pubmedmcp",
+    "perplexity",
+    "n8n-mcp",
+    "zotero",
+    "semanticscholar",
+    "browser-use"
+  ]
 }
