@@ -25,7 +25,7 @@
           ;
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
-        inherit (pkgs) systemctl-macos nextcloud-client;
+        inherit (pkgs) systemctl-macos;
       }
       // lib.optionalAttrs (system == "aarch64-darwin") {
         inherit (pkgs) meetily;

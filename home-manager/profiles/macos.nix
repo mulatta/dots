@@ -19,7 +19,6 @@
       myPkgs = self.packages.${system};
     in
     [
-      myPkgs.nextcloud-client
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry
       myPkgs.meetily
