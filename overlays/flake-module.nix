@@ -127,7 +127,6 @@
           '';
         });
         systemctl-macos = prev.callPackage ../packages/systemctl { };
-        nextcloud-client = prev.callPackage ../packages/nextcloud-client { };
       }
       // prev.lib.optionalAttrs (system == "aarch64-darwin") {
         meetily = prev.callPackage ../packages/meetily { };
