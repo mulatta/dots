@@ -115,6 +115,17 @@
         };
       }
       // prev.lib.optionalAttrs prev.stdenv.isDarwin {
+        # TODO: ntfy-sh 2.17.0 missing Darwin in serve_unix.go build tags
+        # upstream ntfy bug: //go:build excludes darwin. Remove when fixed.
+        # ref: https://github.com/NixOS/nixpkgs/issues/493775
+        ntfy-sh = prev.ntfy-sh.overrideAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace cmd/serve_unix.go \
+              --replace-fail \
+                '//go:build linux || dragonfly || freebsd || netbsd || openbsd' \
+                '//go:build linux || dragonfly || freebsd || netbsd || openbsd || darwin'
+          '';
+        });
         systemctl-macos = prev.callPackage ../packages/systemctl { };
         nextcloud-client = prev.callPackage ../packages/nextcloud-client { };
       }
