@@ -27,6 +27,6 @@
       pkgs.yt-dlp
       pkgs.tailscale
       pkgs.basalt
-      pkgs.zotero
+      # pkgs.zotero
     ];
 }
