@@ -7,11 +7,11 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "meetily";
-  version = "0.2.1";
+  version = "0.3.0";
 
   src = fetchurl {
     url = "https://github.com/Zackriya-Solutions/meeting-minutes/releases/download/v${version}/meetily_${version}_aarch64.dmg";
-    hash = "sha256-IIHUNOyIYPyFfeC4Q4d6yIpOK71/OY4nVTqLAuvLH/E=";
+    hash = "sha256-hPF1FkGHRZlxJeFOhFWi/cTYe63VGAayTzNwWZMjxS8=";
   };
 
   nativeBuildInputs = [ undmg ];
