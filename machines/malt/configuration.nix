@@ -11,7 +11,7 @@
     ../../nixosModules/disko-zfs.nix
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/radicle-mulatta.nix
-    ./modules/cognee.nix
+    # ./modules/cognee.nix
     ./modules/immich.nix
     ./modules/linkwarden.nix
     ./modules/network.nix
