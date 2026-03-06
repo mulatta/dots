@@ -1,0 +1,11 @@
+{
+  "lastChangelogVersion": "99.99.99",
+  "followUpMode": "all",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-6",
+  "defaultThinkingLevel": "off",
+  "skills": ["~/.claude/skills"],
+  "compaction": {
+    "enabled": true
+  }
+}
