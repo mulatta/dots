@@ -20,6 +20,12 @@ in
       inputs.llm-agents.packages.${system}.ccstatusline
       inputs.llm-agents.packages.${system}.ck
       inputs.llm-agents.packages.${system}.gemini-cli
+      inputs.llm-agents.packages.${system}.workmux
+      inputs.llm-agents.packages.${system}.tuicr
+      (pkgs.writeShellScriptBin "pi" ''
+        ${pkgs.pueue}/bin/pueued -d 2>/dev/null || true
+        exec ${inputs.llm-agents.packages.${system}.pi}/bin/pi "$@"
+      '')
       inputs.rag.packages.${system}.crwl
       inputs.rag.packages.${system}.pqa
       inputs.skillz.packages.${system}.context7-cli
