@@ -1,15 +1,8 @@
 {
   pkgs,
-  lib,
   writeShellApplication,
   claude-code,
-  ck,
 }:
-let
-  mcpConfigJson = pkgs.writeText "mcp-servers.json" (
-    builtins.toJSON (import ./servers.nix { inherit pkgs lib ck; })
-  );
-in
 writeShellApplication {
   name = "claude";
   runtimeInputs = [
@@ -22,7 +15,7 @@ writeShellApplication {
     export SHELL=${pkgs.bashInteractive}/bin/bash
 
     # Add ~/bin to PATH for user scripts (stowed from dots/home/bin)
-    export PATH="$HOME/bin:$PATH"
+    export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
     # Start pueued daemon if not already running
     if ! pueue status &>/dev/null; then
@@ -30,7 +23,6 @@ writeShellApplication {
       pueued -d
     fi
 
-    # Run claude with MCP config
-    exec claude --mcp-config ${mcpConfigJson} "$@"
+    exec claude  "$@"
   '';
 }
