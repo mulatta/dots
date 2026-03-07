@@ -33,6 +33,25 @@
             (inputs.crane.mkLib prev).overrideToolchain toolchain;
         };
 
+        # TODO: remove when zellij >= 0.44 lands in nixpkgs (needs list-tabs for workmux)
+        zellij =
+          let
+            src = prev.fetchFromGitHub {
+              owner = "zellij-org";
+              repo = "zellij";
+              rev = "92b2f608772a537e5c029db6a1c03913903cedb1";
+              hash = "sha256-aTs6qheJqmVDLURBQDul12wqiTv52HF9mLdz+rmtrfM=";
+            };
+          in
+          prev.zellij.overrideAttrs {
+            version = "0.44.0";
+            inherit src;
+            cargoDeps = prev.rustPlatform.fetchCargoVendor {
+              inherit src;
+              hash = "sha256-acthRCaDWLT1qgWmO9Ufkr48aISyIiUMof9T6noTLQQ=";
+            };
+          };
+
         # Custom packages
         sieve-sync = prev.callPackage ../packages/sieve-sync { };
         merge-when-green = prev.callPackage ../packages/merge-when-green {
