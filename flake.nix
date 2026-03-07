@@ -36,6 +36,8 @@
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
+    pi-agent-extensions.flake = false;
+    pi-agent-extensions.url = "github:rytswd/pi-agent-extensions";
     rag.inputs.flake-parts.follows = "flake-parts";
     rag.inputs.nixpkgs.follows = "nixpkgs";
     rag.inputs.treefmt-nix.follows = "treefmt-nix";

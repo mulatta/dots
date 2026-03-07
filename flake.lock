@@ -785,6 +785,22 @@
         "type": "github"
       }
     },
+    "pi-agent-extensions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772349340,
+        "narHash": "sha256-WfL29tRXXRjFZY8/IbuypYrtmx0Bj757vuL2py0nuBY=",
+        "owner": "rytswd",
+        "repo": "pi-agent-extensions",
+        "rev": "62d75ddac5c00155f34a2d94c105dfa932d4f9c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rytswd",
+        "repo": "pi-agent-extensions",
+        "type": "github"
+      }
+    },
     "process-compose": {
       "locked": {
         "lastModified": 1767863885,
@@ -844,6 +860,7 @@
         "nixos-facter-modules": "nixos-facter-modules_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
+        "pi-agent-extensions": "pi-agent-extensions",
         "rag": "rag",
         "skillz": "skillz",
         "sops-nix": "sops-nix",

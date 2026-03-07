@@ -5,9 +5,13 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  pi-ext = inputs.pi-agent-extensions;
 in
 {
   home.file.".claude/skills".source = "${inputs.skillz}/skills";
+  home.file.".pi/agent/extensions/direnv.ts".source = "${pi-ext}/direnv/index.ts";
+  home.file.".pi/agent/extensions/questionnaire.ts".source = "${pi-ext}/questionnaire/index.ts";
+  home.file.".pi/agent/extensions/slow-mode.ts".source = "${pi-ext}/slow-mode/index.ts";
 
   home.packages =
     (with pkgs; [
