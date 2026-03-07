@@ -1,4 +1,8 @@
-{ inputs, lib, ... }:
+{
+  inputs,
+  lib,
+  ...
+}:
 {
   flake.overlays = {
     dots =
@@ -59,7 +63,6 @@
         };
         claude-code = prev.callPackage ../packages/claude-code {
           claude-code = inputs.llm-agents.packages.${system}.claude-code;
-          ck = inputs.llm-agents.packages.${system}.ck;
         };
         claude-md = prev.callPackage ../packages/claude-md { };
         rbw-pinentry = prev.callPackage ../packages/rbw-pinentry { };
