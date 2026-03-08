@@ -6,13 +6,13 @@
   runtimeShell,
 }:
 let
-  version = "3.6.2";
+  version = "3.7.0";
 
   src = fetchFromGitHub {
     owner = "skim-rs";
     repo = "skim";
     tag = "v${version}";
-    hash = "sha256-f3WCOED4glzi3m7TVRgFZe51180yPPOIXlO+g5STxi0=";
+    hash = "sha256-aHwW0AW+k7yfmllx/9rE0CymyxPtjxEs2hazmVp+M2U=";
   };
 
   commonArgs = {
