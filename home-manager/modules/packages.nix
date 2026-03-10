@@ -98,6 +98,16 @@
       ]
     );
 
+  # rbw config: use nix store absolute path for pinentry
+  # so rbw-agent can find it regardless of PATH (works on both Linux and macOS)
+  xdg.configFile."rbw/config.json".text = builtins.toJSON {
+    email = "seungwon@mulatta.io";
+    base_url = "https://vaultwarden.mulatta.io";
+    lock_timeout = 3600;
+    sync_interval = 3600;
+    pinentry = "${pkgs.rbw-pinentry}/bin/rbw-pinentry";
+  };
+
   # macOS: symlink ~/Library/Application Support/rbw → ~/.config/rbw
   # rbw uses macOS-native paths, but we want to manage config via ~/.config/rbw
   home.activation.linkRbwConfig = lib.mkIf pkgs.stdenv.isDarwin (
