@@ -1,8 +1,4 @@
-{
-  pkgs,
-  self,
-  ...
-}:
+{ ... }:
 {
   # dock
   system.defaults.dock = {
@@ -22,11 +18,8 @@
       "/System/Applications/System Settings.app"
       "/Applications/Claude.app"
       "/Applications/Slack.app"
-      "${
-        self.inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.twilight
-      }/Applications/Zen Browser (Twilight).app"
-      "${pkgs.obsidian}/Applications/Obsidian.app"
-      "${pkgs.ghostty-bin}/Applications/Ghostty.app"
+      # zen-browser, obsidian, ghostty are managed by home-manager
+      # — keeping them here causes duplicate Dock icons
       "/Applications/KakaoTalk.app"
     ];
   };
