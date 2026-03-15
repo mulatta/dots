@@ -35,6 +35,7 @@ in
       inputs.skillz.packages.${system}.context7-cli
       inputs.skillz.packages.${system}.crwl-cli
       inputs.skillz.packages.${system}.pareto-decide
+      inputs.skillz.packages.${system}.pexpect-cli
       inputs.skillz.packages.${system}.style-review
     ];
 }
