@@ -1,0 +1,14 @@
+# afew configuration
+# Minimal setup: folder tagging
+#
+# Flow: IMAP → Sieve (folders) → mbsync → notmuch → afew
+
+[FolderNameFilter]
+
+[KillThreadsFilter]
+
+[ListMailsFilter]
+
+[ArchiveSentMailsFilter]
+
+[InboxFilter]

@@ -1,0 +1,26 @@
+IMAPAccount mulatta
+CertificateFile /etc/ssl/cert.pem
+Host mail.mulatta.io
+PassCmd "rbw get 'mulatta.io'"
+Port 993
+TLSType IMAPS
+User seungwon
+
+IMAPStore mulatta-remote
+Account mulatta
+
+MaildirStore mulatta-local
+Inbox /Users/seungwon/.local/share/mail/mulatta/Inbox
+Path /Users/seungwon/.local/share/mail/mulatta/
+SubFolders Verbatim
+
+Channel mulatta
+Create Both
+Expunge Both
+Far :mulatta-remote:
+Near :mulatta-local:
+Patterns * "!Shared" "!Shared/*" "!sent"
+Remove None
+Sync All
+SyncState *
+

@@ -1,0 +1,8 @@
+{
+  "name": "quarkdown-puppeteer",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}

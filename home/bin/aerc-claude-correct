@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Correct email content using Claude while preserving email encoding
+# Use --draft flag to save as draft instead of outputting to stdout
+
+set -euo pipefail
+
+SAVE_AS_DRAFT=false
+if [[ "${1:-}" == "--draft" ]]; then
+    SAVE_AS_DRAFT=true
+fi
+
+if ! command -v claude &> /dev/null; then
+    echo "Error: claude command not found" >&2
+    exit 1
+fi
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+cat > "$TMPDIR/email.raw"
+
+if ! command -v mshow &> /dev/null; then
+    echo "Error: mshow (from mblaze) not found" >&2
+    cat "$TMPDIR/email.raw"
+    exit 1
+fi
+
+# Extract headers (everything before first empty line)
+sed '/^$/q' "$TMPDIR/email.raw" > "$TMPDIR/headers"
+
+content_type=$(grep -i "^Content-Type:" "$TMPDIR/headers" | head -1 || echo "")
+
+if echo "$content_type" | grep -qi "multipart"; then
+    echo "Error: Multipart emails not yet supported" >&2
+    cat "$TMPDIR/email.raw"
+    exit 1
+fi
+
+# Extract body (everything after first empty line)
+sed '1,/^$/d' "$TMPDIR/email.raw" > "$TMPDIR/body.raw"
+
+encoding=$(grep -i "^Content-Transfer-Encoding:" "$TMPDIR/headers" | head -1 | cut -d: -f2 | tr -d ' \r' || echo "")
+
+# Decode body based on encoding
+case "$encoding" in
+    "quoted-printable")
+        perl -pe 's/=([0-9A-Fa-f]{2})/chr(hex($1))/eg; s/=\r?\n//g' < "$TMPDIR/body.raw" > "$TMPDIR/body.decoded"
+        ;;
+    "base64")
+        base64 -d < "$TMPDIR/body.raw" > "$TMPDIR/body.decoded" 2>/dev/null || cp "$TMPDIR/body.raw" "$TMPDIR/body.decoded"
+        ;;
+    *)
+        cp "$TMPDIR/body.raw" "$TMPDIR/body.decoded"
+        ;;
+esac
+
+prompt="Correct grammar and spelling errors. Output ONLY the corrected text - no explanations, no preamble, just the raw corrected content."
+
+if ! claude "$prompt" < "$TMPDIR/body.decoded" > "$TMPDIR/body.corrected" 2>&1; then
+    echo "Error: Claude correction failed" >&2
+    cat "$TMPDIR/email.raw"
+    exit 1
+fi
+
+{
+    cat "$TMPDIR/headers"
+    echo ""
+    case "$encoding" in
+        "quoted-printable")
+            perl -pe 's/([^\x20-\x7E])/sprintf("=%02X", ord($1))/eg' < "$TMPDIR/body.corrected"
+            ;;
+        "base64")
+            base64 < "$TMPDIR/body.corrected"
+            ;;
+        *)
+            cat "$TMPDIR/body.corrected"
+            ;;
+    esac
+} > "$TMPDIR/final.eml"
+
+if [[ "$SAVE_AS_DRAFT" == "true" ]]; then
+    if command -v aerc-save-draft &> /dev/null; then
+        cat "$TMPDIR/final.eml" | aerc-save-draft >&2
+        echo "Corrected email saved as draft" >&2
+        cat "$TMPDIR/final.eml"
+    else
+        echo "Error: aerc-save-draft not found" >&2
+        cat "$TMPDIR/final.eml"
+        exit 1
+    fi
+else
+    cat "$TMPDIR/final.eml"
+fi

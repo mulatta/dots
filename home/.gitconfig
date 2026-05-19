@@ -1,0 +1,145 @@
+[alias]
+	backport = "cherry-pick -x"
+	br = "branch"
+	checkout-pr = "!pr() { git fetch origin pull/$1/head:pr-$1; git checkout pr-$1; }; pr"
+	co = "checkout"
+	cob = "checkout -b"
+	comma = "commit --amend"
+	df = "diff"
+	file = "show --name-only --format=''"
+	force-push = "push --force-with-lease"
+	l = "log --all --graph --decorate --oneline --date-order"
+	lg = "log --all --graph --decorate --oneline --date-order"
+	ls = "!f() { { trunk=$(git trunk 2>/dev/null) && git diff --name-only --diff-filter=d \"$trunk..HEAD\"; git diff --name-only --diff-filter=d; git diff --name-only --cached --diff-filter=d; git ls-files --others --exclude-standard; } | sort -u; }; f"
+	lt = "!f() { trunk=$(git trunk) || exit; git log --reverse --date-order '--pretty=format:%C(auto)%h %s%C(auto)%d' \"$trunk..${1:-HEAD}\"; }; f"
+	patch = "push rad HEAD:refs/patches"
+	pick-pr = "!am() { git fetch origin pull/$1/head:pr-$1; git cherry-pick HEAD..pr-$1; }; am"
+	publish = "!git pull && git push"
+	recommit = "!git commit -eF $(git rev-parse --git-dir)/COMMIT_EDITMSG"
+	reset-pr = "reset --hard FETCH_HEAD"
+	s = "show"
+	st = "status"
+	sw = "switch"
+	trunk = "!f() { for ref in upstream/main upstream/master origin/main origin/master main master; do if git rev-parse --verify --quiet \"$ref\" >/dev/null; then echo \"$ref\"; return; fi; done; git rev-list --max-parents=0 HEAD | tail -1; }; f"
+	uncommit = "reset --soft HEAD^"
+	update = "!git pull && git submodule update --init --recursive"
+
+[am]
+	threeWay = true
+
+[branch]
+	autoSetupMerge = "always"
+	autoSetupRebase = "always"
+	sort = "committerdate"
+
+[color]
+	branch = "auto"
+	diff = "auto"
+	status = "auto"
+	ui = true
+
+[commit]
+	verbose = true
+
+[core]
+	attributesfile = ~/.gitattributes
+	autocrlf = "input"
+	compression = -1
+	editor = "hx"
+	excludesfile = ~/.gitignore
+	pager = "delta"
+	precomposeunicode = true
+	whitespace = "trailing-space,space-before-tab"
+
+[credential "https://gist.github.com"]
+	helper = "!gh auth git-credential"
+
+[credential "https://github.com"]
+	helper = "!gh auth git-credential"
+
+[delta]
+	dark = true
+	line-numbers = true
+	navigate = true
+	syntax-theme = "tokyonight_night"
+
+[diff]
+	algorithm = "histogram"
+	colorMoved = "default"
+	compactionHeuristic = true
+	noprefix = true
+	renames = true
+
+[filter "lfs"]
+	clean = "git-lfs clean -- %f"
+	process = "git-lfs filter-process"
+	required = true
+	smudge = "git-lfs smudge -- %f"
+
+[gpg]
+	format = "ssh"
+
+[gpg "ssh"]
+	program = "ssh-keygen"
+
+[format]
+	signoff = true
+
+[init]
+	defaultBranch = "main"
+
+[interactive]
+	diffFilter = "delta --color-only"
+
+[log]
+	date = "iso"
+
+[merge]
+	conflictStyle = "zdiff3"
+
+[merge "mergiraf"]
+	driver = "mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L"
+	name = "mergiraf"
+
+[pull]
+	autostash = true
+	rebase = true
+	twohead = "ort"
+
+[push]
+	autoSetupRemote = true
+	default = "current"
+	recurseSubmodules = "on-demand"
+
+[rebase]
+	autoSquash = true
+	autoStash = true
+	stat = true
+	updateRefs = true
+
+[rerere]
+	autoUpdate = true
+	enabled = true
+
+[sendemail "mulatta"]
+	envelopeSender = "auto"
+	from = "seungwon <seungwon@mulatta.io>"
+	sendmailCmd = "msmtp"
+
+[tag]
+	gpgSign = true
+
+[url "git@github.com:"]
+	insteadOf = "https://github.com/"
+	insteadOf = "github:"
+
+[user]
+	email = "67085791+mulatta@users.noreply.github.com"
+	name = "mulatta"
+	signingKey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkKJdIzvxlWcry+brNiCGLBNkxrMxFDyo1anE4xRNkL seungwon@rhesus
+
+[submodule]
+	fetchJobs = 0
+
+[include]
+	path = ~/.gitconfig.local

@@ -1,0 +1,333 @@
+[[grammar]]
+name = "python"
+
+[grammar.source]
+git = "https://github.com/tree-sitter/tree-sitter-python"
+rev = "4bfdd9033a2225cc95032ce77066b7aeca9e2efc"
+
+[[grammar]]
+name = "json"
+
+[grammar.source]
+git = "https://github.com/tree-sitter/tree-sitter-json"
+rev = "73076754005a460947cafe8e03a8cf5fa4fa2938"
+
+[[grammar]]
+name = "yaml"
+
+[grammar.source]
+git = "https://github.com/tree-sitter/tree-sitter-yaml"
+rev = "0e36bed171768908f331ff7dff9d956bae016efb"
+
+[[grammar]]
+name = "bash"
+
+[grammar.source]
+git = "https://github.com/tree-sitter/tree-sitter-bash"
+rev = "275effdfc0edce774acf7d481f9ea195c6c403cd"
+
+[[language]]
+auto-format = true
+file-types = ["json"]
+injection-regex = "json"
+language-servers = ["vscode-json-language-server"]
+name = "json"
+scope = "source.json"
+
+[language.formatter]
+args = ["--parser", "json"]
+command = "prettier"
+
+[[language]]
+auto-format = true
+file-types = ["jsonc"]
+injection-regex = "jsonc"
+language-servers = ["vscode-json-language-server"]
+name = "jsonc"
+scope = "source.json"
+
+[language.formatter]
+args = ["--parser", "jsonc"]
+command = "prettier"
+
+[[language]]
+auto-format = true
+file-types = ["py", "pyi"]
+injection-regex = "python"
+language-servers = ["ruff", "pyright"]
+name = "python"
+roots = [
+  "pyproject.toml",
+  "setup.py",
+  "setup.cfg",
+  "Poetry.lock",
+  "requirements.txt",
+  "Pipfile",
+  ".python-version",
+]
+scope = "source.python"
+shebangs = ["python", "python3"]
+
+[language.formatter]
+args = [
+  "-c",
+  "ruff check --quiet --fix --select I --unsafe-fixes --stdin-filename file.py - | ruff format --stdin-filename file.py -",
+]
+command = "sh"
+
+[[language]]
+auto-format = true
+file-types = ["rs"]
+language-servers = ["rust-analyzer"]
+name = "rust"
+roots = ["Cargo.toml", "Cargo.lock"]
+scope = "source.rust"
+
+[language.formatter]
+args = ["--config", "skip_children=true", "--edition", "2024"]
+command = "rustfmt"
+
+[[language]]
+auto-format = true
+file-types = ["nix"]
+language-servers = ["nixd", "nil"]
+name = "nix"
+roots = ["flake.nix", "shell.nix", "default.nix"]
+scope = "source.nix"
+
+[language.formatter]
+args = []
+command = "nixfmt"
+
+[[language]]
+auto-format = true
+file-types = ["toml"]
+language-servers = ["taplo"]
+name = "toml"
+scope = "source.toml"
+
+[language.formatter]
+args = ["format", "-"]
+command = "taplo"
+
+[[language]]
+auto-format = true
+file-types = ["md", "markdown"]
+language-servers = ["marksman", "harper-ls"]
+name = "markdown"
+scope = "text.markdown"
+comment-tokens = ["-", "+", "*", "- [ ]", ">"]
+soft-wrap.enable = true
+soft-wrap.wrap-at-text-width = true
+text-width = 80
+
+[language.formatter]
+args = ["--parser", "markdown"]
+command = "prettier"
+
+[[language]]
+auto-format = true
+file-types = ["typ"]
+language-servers = ["tinymist"]
+name = "typst"
+scope = "source.typst"
+
+[language.formatter]
+args = ["-l", "50", "-t", "4"]
+command = "typstyle"
+
+[[language]]
+auto-format = true
+file-types = ["yml", "yaml"]
+language-servers = ["yaml-language-server"]
+name = "yaml"
+scope = "source.yaml"
+
+[language.formatter]
+args = ["-"]
+command = "yamlfmt"
+
+[[language]]
+auto-format = true
+file-types = [
+  "sh",
+  "bash",
+  { glob = ".*shrc" },
+  { glob = ".*profile" },
+  { glob = ".*_profile" },
+  { glob = ".*shenv" },
+]
+language-servers = ["bash-language-server"]
+name = "bash"
+scope = "source.bash"
+shebangs = ["sh", "bash"]
+
+[language.formatter]
+args = ["-i", "2", "-s"]
+command = "shfmt"
+
+[language-server.bash-language-server]
+args = ["start"]
+command = "bash-language-server"
+
+[language-server.marksman]
+args = ["server"]
+command = "marksman"
+
+[language-server.nil]
+command = "nil"
+
+[language-server.nil.config.formatting]
+command = ["nixfmt"]
+
+[language-server.nixd]
+command = "nixd"
+
+[language-server.nixd.config.nixpkgs]
+expr = "import <nixpkgs> { }"
+
+[language-server.nixd.config.options.home_manager]
+expr = "import <home-manager/modules> { }"
+
+[language-server.nixd.config.options.nixos]
+expr = "import <nixpkgs/nixos> { }"
+
+[language-server.pyright]
+args = ["--stdio"]
+command = "pyright-langserver"
+
+[language-server.pyright.config.python.analysis]
+autoSearchPaths = true
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+
+[language-server.ruff]
+args = ["server"]
+command = "ruff"
+
+[language-server.ruff.config.settings]
+lineLength = 88
+
+[language-server.ruff.config.settings.format]
+preview = true
+
+[language-server.ruff.config.settings.lint]
+ignore = ["E501"]
+select = ["E4", "E7", "F", "W", "I", "N"]
+
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[language-server.rust-analyzer.config.check]
+command = "clippy"
+
+[language-server.rust-analyzer.config.inlayHints]
+maxLength = 25
+renderColons = true
+
+[language-server.rust-analyzer.config.inlayHints.bindingModeHints]
+enable = false
+
+[language-server.rust-analyzer.config.inlayHints.chainingHints]
+enable = true
+
+[language-server.rust-analyzer.config.inlayHints.closingBraceHints]
+enable = true
+minLines = 25
+
+[language-server.rust-analyzer.config.inlayHints.closureReturnTypeHints]
+enable = "never"
+
+[language-server.rust-analyzer.config.inlayHints.lifetimeElisionHints]
+enable = "never"
+useParameterNames = false
+
+[language-server.rust-analyzer.config.inlayHints.parameterHints]
+enable = true
+
+[language-server.rust-analyzer.config.inlayHints.reborrowHints]
+enable = "never"
+
+[language-server.rust-analyzer.config.inlayHints.typeHints]
+enable = true
+hideClosureInitialization = false
+hideNamedConstructor = false
+
+[language-server.taplo]
+args = ["lsp", "stdio"]
+command = "taplo"
+
+[language-server.tinymist]
+command = "tinymist"
+
+[language-server.vscode-json-language-server]
+args = ["--stdio"]
+command = "vscode-json-language-server"
+
+[language-server.vscode-json-language-server.config]
+provideFormatter = false
+
+[language-server.vscode-json-language-server.config.json.format]
+enable = true
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["package.json"]
+url = "https://json.schemastore.org/package.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["tsconfig.json", "tsconfig.*.json"]
+url = "https://json.schemastore.org/tsconfig.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = [".prettierrc", ".prettierrc.json"]
+url = "https://json.schemastore.org/prettierrc.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = [".eslintrc", ".eslintrc.json"]
+url = "https://json.schemastore.org/eslintrc.json"
+
+[[language-server.vscode-json-language-server.config.json.schemas]]
+fileMatch = ["composer.json"]
+url = "https://json.schemastore.org/composer.json"
+
+[language-server.vscode-json-language-server.config.json.validate]
+enable = true
+
+[language-server.yaml-language-server]
+args = ["--stdio"]
+command = "yaml-language-server"
+
+[language-server.yaml-language-server.config.yaml]
+keyOrdering = false
+validate = true
+
+[language-server.yaml-language-server.config.yaml.format]
+enable = true
+
+[language-server.yaml-language-server.config.yaml.schemaStore]
+enable = true
+url = "https://www.schemastore.org/api/json/catalog.json"
+
+# Quarkdown — markdown highlight via inherits, no harper (false positives on .function syntax)
+[[language]]
+name = "quarkdown"
+scope = "text.markdown"
+file-types = ["qd"]
+language-servers = ["quarkdown-lsp", "marksman"]
+auto-format = false
+grammar = "markdown"
+comment-tokens = ["-", "+", "*", "- [ ]", ">"]
+soft-wrap.enable = true
+soft-wrap.wrap-at-text-width = true
+text-width = 80
+
+[language-server.harper-ls]
+command = "harper-ls"
+args = ["--stdio"]
+
+[language-server.harper-ls.config.harper-ls]
+diagnosticSeverity = "hint"
+
+[language-server.quarkdown-lsp]
+command = "quarkdown"
+args = ["language-server"]

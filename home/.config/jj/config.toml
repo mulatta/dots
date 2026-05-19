@@ -1,0 +1,130 @@
+[aliases]
+a = ["abandon"]
+abs = ["absorb"]
+bd = ["bookmark", "delete"]
+bf = ["bookmark", "forget"]
+bl = ["bookmark", "list"]
+bla = ["bookmark", "list", "-a"]
+bm = ["bookmark", "move"]
+br = ["bookmark", "rename"]
+bs = ["bookmark", "set"]
+bt = ["bookmark", "track"]
+c = ["commit"]
+cm = ["commit", "-m"]
+consume = ["squash", "--from", "@-", "--into", "@"]
+d = ["describe"]
+df = ["diff"]
+dfc = ["diff", "--color-words"]
+dfg = ["diff", "--git"]
+dfn = ["diff", "--name-only"]
+dfs = ["diff", "--stat"]
+dm = ["describe", "-m"]
+e = ["edit"]
+eject = ["squash", "--from", "@", "--into", "@-"]
+el = ["evolog"]
+examine = ["log", "-r", "@", "-p", "--git"]
+fa = ["file", "annotate"]
+fc = ["file", "chmod"]
+fl = ["file", "list"]
+fresh = ["new", "trunk()"]
+fs = ["file", "show"]
+fx = ["fix"]
+gcl = ["git", "clone"]
+gf = ["git", "fetch"]
+gp = ["git", "push"]
+gpb = ["git", "push", "--bookmark"]
+gpc = ["git", "push", "--change"]
+gpd = ["git", "push", "--deleted"]
+init = ["git", "init", "--colocate"]
+gra = ["git", "remote", "add"]
+grl = ["git", "remote", "list"]
+grm = ["git", "remote", "remove"]
+grn = ["git", "remote", "rename"]
+grs = ["git", "remote", "set-url"]
+l = ["log", "-r", "stack()", "--reversed"]
+j = ["log", "-r", "jj_git_junk()"]
+jc = ["abandon", "jj_git_junk()"]
+la = ["log", "-r", "all()"]
+lr = ["log", "-r"]
+ls = ["log", "--summary", "-r", "@"]
+n = ["new"]
+na = ["new", "-A"]
+nb = ["new", "-B"]
+nn = ["new", "--no-edit"]
+nna = ["new", "--no-edit", "-A"]
+nnb = ["new", "--no-edit", "-B"]
+nx = ["next"]
+ol = ["op", "log"]
+open = ["log", "-r", "open()"]
+pr = ["prev"]
+# Rebase every mutable root. Useful for repo-wide cleanup, dangerous in
+# colocated repos with unrelated draft stacks.
+ram = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
+# Safer default: rebase only the current stack.
+restack = ["rebase", "-s", "roots(stack())", "-d", "trunk()"]
+rb = ["rebase"]
+rbd = ["rebase", "-d"]
+rbr = ["rebase", "-r"]
+rbs = ["rebase", "-s"]
+rom = ["rebase", "-d", "trunk()"]
+rs = ["resolve"]
+rsl = ["resolve", "--list"]
+rsr = ["resolve", "-r"]
+s = ["show"]
+sandwich = ["rebase", "-r", "@", "-d", "trunk()"]
+sg = ["show", "--git"]
+sig = [
+  "log",
+  "--template",
+  "change_id.short() ++ \" \" ++ format_signature_status(signature) ++ \" \" ++ description.first_line() ++ \"\\n\"",
+]
+sp = ["split"]
+sq = ["squash"]
+ss = ["show", "--summary"]
+stack = ["log", "-r", "stack()"]
+swap = ["rebase", "-r", "@-", "-A", "@"]
+tug = [
+  "bookmark",
+  "move",
+  "--from",
+  "closest_bookmark(@)",
+  "--to",
+  "closest_pushable(@)",
+]
+w = ["workspace", "list"]
+
+[git]
+sign-on-push = false
+write-change-id-header = false
+
+[revset-aliases]
+"closest_bookmark(to)" = "heads(::to & bookmarks())"
+"closest_pushable(to)" = "heads(::to & mutable() & ~description(exact:\"\") & (~empty() | merges()))"
+"draft()" = "mutable() ~ ::remote_bookmarks()"
+"immutable_heads()" = "present(trunk()) | tags() | (untracked_remote_bookmarks() ~ untracked_remote_bookmarks(remote='rad') ~ untracked_remote_bookmarks(regex:'^patch(es)/', remote='rad'))"
+"jj_git_junk()" = "heads(mutable() & description(exact:\"\")) ~ (empty() | @ | bookmarks() | remote_bookmarks())"
+"mine()" = "author(exact:\"67085791+mulatta@users.noreply.github.com\")"
+"open()" = "stack() & draft()"
+"ready()" = "heads(stack()) & draft() & ~wip()"
+"stack()" = "trunk()..@"
+"trunk()" = "latest(present(master@rad) | present(main@rad) | present(master@upstream) | present(main@upstream) | present(main@origin) | present(master@origin) | root())"
+"unpushed()" = "remote_bookmarks()..@"
+"wip()" = "description(glob:\"wip:*\") | description(glob:\"WIP:*\")"
+
+[template-aliases]
+"format_short_id(id)" = "id.shortest(8)"
+"format_short_signature(signature)" = "signature.name()"
+"format_signature_status(sig)" = "if(sig, sig.status(), \"unsigned\")"
+"format_timestamp(timestamp)" = "timestamp.ago()"
+
+[templates]
+draft_commit_description = "concat(\n  builtin_draft_commit_description,\n  \"\\nJJ: ignore-rest\\n\",\n  diff.git(),\n)\n"
+file_annotate = "commit_id.short() ++ \" (\" ++\nauthor.name() ++ \" \" ++\nauthor.timestamp().ago() ++\n\") \"\n"
+
+[ui]
+default-command = ["log", "-r", "trunk() | stack()", "--reversed"]
+pager = "less -FRX"
+
+[user]
+email = "67085791+mulatta@users.noreply.github.com"
+name = "mulatta"

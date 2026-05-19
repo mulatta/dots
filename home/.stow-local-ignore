@@ -1,0 +1,22 @@
+# GNU Stow's built-in ignore list, with .gitignore removed so home/.gitignore
+# can be linked into ~/.gitignore.
+RCS
+.+,v
+
+CVS
+\.\#.+       # CVS conflict files / emacs lock files
+\.cvsignore
+
+\.svn
+_darcs
+\.hg
+
+\.git
+\.gitmodules
+
+.+~          # emacs backup files
+\#.*\#       # emacs autosave files
+
+^/README.*
+^/LICENSE.*
+^/COPYING

@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Sync the mulatta/nixpkgs fork with upstream and update dots' nixpkgs input.
+
+set -euo pipefail
+
+nixpkgs_dir=${NIXPKGS_FORK_DIR:-"$HOME/git/nixpkgs"}
+dots_dir=${DOTS_DIR:-"$HOME/dots"}
+fork_url=${NIXPKGS_FORK_URL:-"git@github.com:mulatta/nixpkgs"}
+upstream_url=${NIXPKGS_UPSTREAM_URL:-"https://github.com/NixOS/nixpkgs.git"}
+fork_branch=${NIXPKGS_FORK_BRANCH:-main}
+upstream_branch=${NIXPKGS_UPSTREAM_BRANCH:-nixpkgs-unstable}
+
+run() {
+  printf '+ %q' "$@"
+  printf '\n'
+  "$@"
+}
+
+ensure_remote() {
+  local name=$1
+  local url=$2
+
+  if git remote get-url "$name" >/dev/null 2>&1; then
+    run git remote set-url "$name" "$url"
+  else
+    run git remote add "$name" "$url"
+  fi
+}
+
+require_clean_worktree() {
+  if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+    echo "error: $PWD has uncommitted changes" >&2
+    git status --short >&2
+    exit 1
+  fi
+}
+
+checkout_fork_branch() {
+  # The nixpkgs checkout is large and is often used only as a flake source.
+  # Recreate a valid HEAD from remote refs instead of trusting local branch
+  # metadata; this recovers from a broken HEAD such as refs/heads/.invalid.
+  run git symbolic-ref HEAD "refs/heads/$fork_branch"
+  if git show-ref --verify --quiet "refs/remotes/origin/$fork_branch"; then
+    run git update-ref "refs/heads/$fork_branch" "refs/remotes/origin/$fork_branch"
+  else
+    run git update-ref "refs/heads/$fork_branch" "refs/remotes/upstream/$upstream_branch"
+  fi
+  run git reset --hard "refs/heads/$fork_branch"
+  run git clean -fdx
+}
+
+if [ ! -d "$nixpkgs_dir/.git" ]; then
+  mkdir -p "$(dirname "$nixpkgs_dir")"
+  run git clone "$fork_url" "$nixpkgs_dir"
+fi
+
+cd "$nixpkgs_dir"
+
+echo "==> Syncing nixpkgs fork with upstream/$upstream_branch..."
+ensure_remote origin "$fork_url"
+ensure_remote upstream "$upstream_url"
+run git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
+run git fetch --prune upstream "+refs/heads/$upstream_branch:refs/remotes/upstream/$upstream_branch"
+checkout_fork_branch
+run git rebase "refs/remotes/upstream/$upstream_branch"
+run git push --force-with-lease origin "HEAD:refs/heads/$fork_branch"
+
+echo "==> Updating dots flake nixpkgs input..."
+cd "$dots_dir"
+require_clean_worktree
+run git fetch origin main
+run git switch main
+run git pull --ff-only origin main
+
+before=$(nix flake metadata --json | jq -r '.locks.nodes.root.inputs.nixpkgs as $node | .locks.nodes[$node].locked.rev')
+run nix flake update nixpkgs
+after=$(nix flake metadata --json | jq -r '.locks.nodes.root.inputs.nixpkgs as $node | .locks.nodes[$node].locked.rev')
+
+if [ "$before" = "$after" ]; then
+  echo "==> nixpkgs already up to date: $after"
+  exit 0
+fi
+
+run git add flake.lock
+run git commit -m "flake: update nixpkgs" -m "Update nixpkgs after syncing the mulatta fork with upstream $upstream_branch."
+
+echo "==> Running merge-when-green..."
+run merge-when-green
+
+echo "==> Done!"

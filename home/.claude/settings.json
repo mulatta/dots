@@ -1,0 +1,91 @@
+{
+  "includeCoAuthoredBy": false,
+  "disabledMcpjsonServers": [
+    "docling",
+    "pubmedmcp",
+    "perplexity",
+    "n8n-mcp",
+    "zotero",
+    "semanticscholar",
+    "browser-use"
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bell-notify.py"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "ccstatusline",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "ast-grep@ast-grep-marketplace": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "rust-skills@rust-skills": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "engineering-advanced-skills@claude-code-skills": true,
+    "biorxiv@life-sciences": true,
+    "pubmed@life-sciences": true,
+    "chembl@life-sciences": true,
+    "clinical-trials@life-sciences": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-code-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-code"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "life-sciences": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/life-sciences"
+      }
+    },
+    "rust-skills": {
+      "source": {
+        "source": "github",
+        "repo": "actionbook/rust-skills"
+      }
+    },
+    "ast-grep-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "ast-grep/agent-skill"
+      }
+    },
+    "huggingface-skills": {
+      "source": {
+        "source": "github",
+        "repo": "huggingface/skills"
+      }
+    },
+    "dagster": {
+      "source": {
+        "source": "github",
+        "repo": "dagster-io/skills"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark-daltonized",
+  "agentPushNotifEnabled": true
+}

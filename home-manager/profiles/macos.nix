@@ -1,0 +1,63 @@
+{
+  pkgs,
+  lib,
+  self,
+  system,
+  ...
+}:
+{
+  imports = [
+    ../modules/calendar
+    ../modules/keyboard
+    ../modules/llm-agents.nix
+    ../modules/mail
+    ../modules/nostr-chat.nix
+    ../modules/ntfy.nix
+    ../modules/paneru.nix
+    ../modules/tmux-open-file.nix
+    ../modules/zen.nix
+  ];
+
+  home.packages =
+    let
+      myPkgs = self.packages.${system};
+    in
+    [
+      myPkgs.chartdb
+      myPkgs.dbml-cli
+      myPkgs.instagram-cli
+      myPkgs.radicle-desktop
+      myPkgs.rbw-pinentry
+      (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
+      pkgs.basalt
+      pkgs.czkawka-full
+      pkgs.google-chrome
+      pkgs.mpv
+      pkgs.nitrous
+      pkgs.obsidian
+      pkgs.tailscale
+      pkgs.typora
+      pkgs.zeroclaw
+      pkgs.zotero
+    ];
+
+  services.nostr-chat = {
+    enable = true;
+    peerPubkey = lib.strings.trim (
+      builtins.readFile "${self}/vars/per-machine/malt/opencrow/nostr-public-key/value"
+    );
+    relays = [
+      "wss://relay.mulatta.io"
+      "wss://relay.primal.net"
+      "wss://nos.lol"
+    ];
+    blossom = "https://blossom.mulatta.io";
+    displayName = "Noa";
+    secretCommand = "rbw get nostr-identity";
+  };
+
+  programs.rbw.settings = {
+    pinentry = lib.mkForce self.packages.${system}.rbw-pinentry;
+    lock_timeout = lib.mkForce 3600;
+  };
+}

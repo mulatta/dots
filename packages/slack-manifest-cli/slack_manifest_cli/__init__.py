@@ -1,0 +1,1 @@
+"""Slack manifest CLI package."""

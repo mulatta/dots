@@ -1,0 +1,4 @@
+{
+  "base_url": "https://tasks.mulatta.io",
+  "api_key_command": "rbw get vikunja-api-token"
+}

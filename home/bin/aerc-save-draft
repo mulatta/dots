@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Save aerc draft to maildir and reindex with notmuch
+
+set -euo pipefail
+
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+
+cat > "$tmpfile"
+
+# Generate unique filename for maildir (D=Draft, S=Seen)
+timestamp=$(date +%s.%N)
+hostname=$(hostname)
+pid=$$
+random=$RANDOM
+filename="${timestamp%%.*}.${pid}_${random}.${hostname}:2,DS"
+
+# Ensure Drafts directory exists
+drafts_dir="${HOME}/.local/share/mail/mulatta/Drafts"
+mkdir -p "$drafts_dir/cur" "$drafts_dir/new" "$drafts_dir/tmp"
+
+cp "$tmpfile" "$drafts_dir/cur/$filename"
+
+notmuch new --quiet >/dev/null 2>&1 || true
+
+echo "Draft saved successfully"

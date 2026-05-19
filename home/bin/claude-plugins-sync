@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Sync Claude Code marketplaces and plugins declaratively.
+# Idempotent: safe to run repeatedly.
+set -euo pipefail
+
+# --- Marketplaces (github owner/repo) ---
+marketplaces=(
+  anthropics/claude-code
+  anthropics/claude-plugins-official
+  anthropics/life-sciences
+  actionbook/rust-skills
+  ast-grep/agent-skill
+  dagster-io/skills
+  huggingface/skills
+)
+
+# --- Plugins (plugin@marketplace) ---
+plugins=(
+  # dev
+  rust-skills@rust-skills
+  ast-grep@ast-grep-marketplace
+  code-review@claude-plugins-official
+  frontend-design@claude-plugins-official
+  rust-analyzer-lsp@claude-plugins-official
+  pyright-lsp@claude-plugins-official
+  dagster-expert@dagster-skills
+  # science
+  biorxiv@life-sciences
+  pubmed@life-sciences
+  chembl@life-sciences
+  clinical-trials@life-sciences
+)
+
+echo "=== Claude Code plugins sync ==="
+
+echo "Registering marketplaces..."
+for mp in "${marketplaces[@]}"; do
+  if claude plugin marketplace add "$mp" 2>/dev/null; then
+    echo "  + $mp"
+  else
+    echo "  ~ $mp (already registered or failed)"
+  fi
+done
+
+echo "Installing plugins..."
+failed=0
+for plugin in "${plugins[@]}"; do
+  if claude plugin install "$plugin" 2>/dev/null; then
+    echo "  ✓ $plugin"
+  else
+    echo "  ✗ $plugin"
+    ((failed++)) || true
+  fi
+done
+
+echo "Done. ($failed failures)"

@@ -1,0 +1,8 @@
+{
+  "name": "dbml-cli-wrapper",
+  "version": "8.0.0",
+  "private": true,
+  "dependencies": {
+    "@dbml/cli": "8.0.0"
+  }
+}

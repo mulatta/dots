@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Open a URL or local file in the user's browser/handler.
+# Bypasses macOS LaunchServices to avoid stale /nix/store bundle resolution.
+# Resolves command via PATH; honors $BROWSER override.
+
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "usage: $(basename "$0") <url-or-file>..." >&2
+  exit 2
+fi
+
+case "$(uname -s)" in
+  Darwin)
+    exec "${BROWSER:-zen-beta}" "$@"
+    ;;
+  Linux)
+    exec "${BROWSER:-xdg-open}" "$@"
+    ;;
+  *)
+    echo "unsupported platform: $(uname -s)" >&2
+    exit 1
+    ;;
+esac

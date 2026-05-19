@@ -1,0 +1,564 @@
+/* Miniflux custom stylesheet: Catppuccin Latte/Macchiato plus reader tuning. */
+
+/* Web fonts:
+   - Pretendard for body/headings: consistent Latin + Hangul rendering across
+     macOS, iOS, Windows, Android, Linux. The dynamic-subset variant ships only
+     glyphs the page renders.
+   - D2 Coding for code blocks: Naver's monospace font with Hangul coverage,
+     used for inline code and pre blocks. */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import url('https://cdn.jsdelivr.net/gh/wan2land/d2coding/d2coding-subset.css');
+
+:root {
+  --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'D2Coding', 'D2 Coding', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  color-scheme: light;
+  --ctp-rosewater: #dc8a78;
+  --ctp-flamingo: #dd7878;
+  --ctp-pink: #ea76cb;
+  --ctp-mauve: #8839ef;
+  --ctp-red: #d20f39;
+  --ctp-maroon: #e64553;
+  --ctp-peach: #fe640b;
+  --ctp-yellow: #df8e1d;
+  --ctp-green: #40a02b;
+  --ctp-teal: #179299;
+  --ctp-sky: #04a5e5;
+  --ctp-sapphire: #209fb5;
+  --ctp-blue: #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-text: #4c4f69;
+  --ctp-subtext1: #5c5f77;
+  --ctp-subtext0: #6c6f85;
+  --ctp-overlay2: #7c7f93;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-surface2: #acb0be;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface0: #ccd0da;
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+
+  --body-color: var(--ctp-text);
+  --body-background: var(--ctp-base);
+  --link-color: var(--ctp-blue);
+  --link-focus-color: var(--ctp-mauve);
+  --link-hover-color: var(--ctp-sapphire);
+  --link-visited-color: var(--ctp-mauve);
+  --header-list-border-color: var(--ctp-surface0);
+  --header-link-color: var(--ctp-text);
+  --header-active-link-color: var(--ctp-blue);
+  --header-background: color-mix(in srgb, var(--ctp-base) 88%, transparent);
+  --page-header-title-color: var(--ctp-text);
+  --entry-header-border-color: var(--ctp-surface0);
+  --entry-header-title-link-color: var(--ctp-text);
+  --entry-content-color: var(--ctp-text);
+  --entry-content-code-color: var(--ctp-maroon);
+  --entry-content-code-background: var(--ctp-mantle);
+  --entry-content-quote-color: var(--ctp-subtext1);
+  --entry-content-quote-border-color: var(--ctp-blue);
+  --entry-content-table-border-color: var(--ctp-surface1);
+  --entry-content-table-th-background: var(--ctp-mantle);
+  --entry-content-table-tr-hover-background: var(--ctp-crust);
+  --entry-content-hr-border-color: var(--ctp-surface0);
+  --button-primary-color: var(--ctp-base);
+  --button-primary-background: var(--ctp-blue);
+  --button-primary-border-color: var(--ctp-blue);
+  --button-secondary-color: var(--ctp-text);
+  --button-secondary-background: var(--ctp-mantle);
+  --button-secondary-border-color: var(--ctp-surface1);
+  --input-background: var(--ctp-base);
+  --input-border-color: var(--ctp-surface1);
+  --input-color: var(--ctp-text);
+  --table-border-color: var(--ctp-surface1);
+  --table-th-background: var(--ctp-mantle);
+  --table-tr-hover-background: var(--ctp-crust);
+  --category-color: var(--ctp-subtext1);
+  --category-background-color: var(--ctp-mantle);
+  --category-border-color: var(--ctp-surface1);
+  --item-border-color: var(--ctp-surface0);
+  --item-status-read-title-link-color: var(--ctp-subtext0);
+  --item-meta-focus-color: var(--ctp-mauve);
+  --current-item-border-color: var(--ctp-blue);
+  --alert-color: var(--ctp-red);
+  --alert-background-color: color-mix(in srgb, var(--ctp-red) 10%, var(--ctp-base));
+  --alert-border-color: color-mix(in srgb, var(--ctp-red) 45%, var(--ctp-surface1));
+  --toast-color: var(--ctp-base);
+  --toast-background-color: var(--ctp-text);
+  --miniflux-reader-width: 78ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ctp-rosewater: #f4dbd6;
+    --ctp-flamingo: #f0c6c6;
+    --ctp-pink: #f5bde6;
+    --ctp-mauve: #c6a0f6;
+    --ctp-red: #ed8796;
+    --ctp-maroon: #ee99a0;
+    --ctp-peach: #f5a97f;
+    --ctp-yellow: #eed49f;
+    --ctp-green: #a6da95;
+    --ctp-teal: #8bd5ca;
+    --ctp-sky: #91d7e3;
+    --ctp-sapphire: #7dc4e4;
+    --ctp-blue: #8aadf4;
+    --ctp-lavender: #b7bdf8;
+    --ctp-text: #cad3f5;
+    --ctp-subtext1: #b8c0e0;
+    --ctp-subtext0: #a5adcb;
+    --ctp-overlay2: #939ab7;
+    --ctp-overlay1: #8087a2;
+    --ctp-overlay0: #6e738d;
+    --ctp-surface2: #5b6078;
+    --ctp-surface1: #494d64;
+    --ctp-surface0: #363a4f;
+    --ctp-base: #24273a;
+    --ctp-mantle: #1e2030;
+    --ctp-crust: #181926;
+
+    --body-color: var(--ctp-text);
+    --body-background: var(--ctp-base);
+    --link-color: var(--ctp-blue);
+    --link-focus-color: var(--ctp-mauve);
+    --link-hover-color: var(--ctp-sapphire);
+    --link-visited-color: var(--ctp-mauve);
+    --header-list-border-color: var(--ctp-surface0);
+    --header-link-color: var(--ctp-text);
+    --header-active-link-color: var(--ctp-blue);
+    --header-background: color-mix(in srgb, var(--ctp-base) 88%, transparent);
+    --entry-content-code-background: var(--ctp-mantle);
+    --entry-content-quote-color: var(--ctp-subtext1);
+    --entry-content-table-th-background: var(--ctp-mantle);
+    --entry-content-table-tr-hover-background: var(--ctp-surface0);
+    --button-primary-color: var(--ctp-crust);
+    --button-secondary-background: var(--ctp-mantle);
+    --input-background: var(--ctp-mantle);
+    --table-th-background: var(--ctp-mantle);
+    --table-tr-hover-background: var(--ctp-surface0);
+    --category-background-color: var(--ctp-mantle);
+    --alert-background-color: color-mix(in srgb, var(--ctp-red) 14%, var(--ctp-base));
+    --toast-color: var(--ctp-crust);
+    --toast-background-color: var(--ctp-text);
+  }
+}
+
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--body-background);
+  color: var(--body-color);
+}
+
+body > header {
+  backdrop-filter: blur(12px);
+  background: var(--header-background);
+  border-bottom: 1px solid var(--ctp-surface0);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+main {
+  max-width: min(100% - 2rem, 1120px);
+}
+
+.entry-header,
+.entry-content,
+.entry-enclosures,
+.pagination-entry-top,
+.pagination-entry-bottom {
+  max-width: var(--miniflux-reader-width);
+  margin-inline: auto;
+}
+
+.entry-header h1 {
+  font-size: clamp(1.8rem, 2vw + 1rem, 3rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.entry-header h1 a {
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+}
+
+.entry-meta,
+.entry-tags,
+.entry-external-link,
+.entry-date {
+  color: var(--ctp-subtext0);
+}
+
+.entry-actions ul {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.entry-actions li {
+  margin: 0;
+}
+
+.entry-actions a,
+.entry-actions button,
+.page-button,
+button.page-button,
+a.page-link {
+  border-radius: 999px;
+}
+
+body,
+.entry-content {
+  font-family: var(--font-sans);
+}
+
+.entry-content {
+  font-size: clamp(1.05rem, 0.35vw + 1rem, 1.22rem);
+  line-height: 1.72;
+  overflow-wrap: break-word;
+}
+
+.entry-content > :first-child {
+  margin-top: 0;
+}
+
+.entry-content p,
+.entry-content li,
+.entry-content blockquote,
+.entry-content dd {
+  max-width: var(--miniflux-reader-width);
+}
+
+.entry-content a {
+  text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
+  text-decoration-thickness: 0.07em;
+  text-underline-offset: 0.18em;
+}
+
+.entry-content a:hover,
+.entry-content a:focus {
+  text-decoration-color: currentColor;
+}
+
+.entry-content > a.bold.ud,
+.entry-content > p > a.bold.ud {
+  display: inline;
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4,
+.entry-content h5,
+.entry-content h6 {
+  color: var(--ctp-text);
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-block: 1.7em 0.65em;
+}
+
+.entry-content img,
+.entry-content video,
+.entry-content iframe {
+  border-radius: 12px;
+  display: block;
+  height: auto;
+  margin-inline: auto;
+  max-width: 100%;
+}
+
+.entry-content a > img[height],
+.entry-content a > img[alt='CI' i],
+.entry-content a > img[alt='discord' i],
+.entry-content a > img[alt='downloads' i],
+.entry-content a > img[alt='license' i],
+.entry-content a > img[alt='links' i],
+.entry-content a > img[alt='pypi' i],
+.entry-content a > img[alt='python' i],
+.entry-content a > img[alt='release' i],
+.entry-content a > img[alt='rust' i],
+.entry-content a > img[alt='stars' i],
+.entry-content a > img[alt*='badge' i],
+.entry-content a > img[alt*='button' i],
+.entry-content a > img[src*='shields.io'],
+.entry-content a > picture > img[height],
+.entry-content a > picture > img[alt*='badge' i],
+.entry-content a > picture > img[alt*='button' i],
+.entry-content a > picture > img[src*='shields.io'] {
+  border-radius: 0;
+  display: inline-block;
+  margin-inline: 0;
+  max-height: 2em;
+  vertical-align: middle;
+  width: auto;
+}
+
+.entry-content blockquote {
+  background: color-mix(in srgb, var(--ctp-blue) 6%, transparent);
+  border-inline-start: 0.24rem solid var(--ctp-blue);
+  border-radius: 0 12px 12px 0;
+  color: var(--entry-content-quote-color);
+  margin-inline: 0;
+  padding: 0.75rem 1rem;
+}
+
+.entry-content :not(pre) > code,
+.entry-content kbd,
+.entry-content samp,
+.entry-content pre,
+.entry-content pre code {
+  font-family: var(--font-mono);
+}
+
+.entry-content :not(pre) > code,
+.entry-content kbd,
+.entry-content samp {
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 0.35rem;
+  font-size: 0.88em;
+  padding: 0.08em 0.32em;
+}
+
+.entry-content pre {
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--ctp-crust) 22%, transparent);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  padding: 1rem;
+  position: relative;
+}
+
+.entry-content pre code {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0;
+}
+
+.entry-content pre code.hljs {
+  color: var(--ctp-text);
+  display: block;
+  overflow-x: auto;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--ctp-overlay1);
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: var(--ctp-mauve);
+}
+
+.hljs-built_in,
+.hljs-doctag,
+.hljs-section,
+.hljs-title,
+.hljs-title.function_ {
+  color: var(--ctp-blue);
+}
+
+.hljs-attribute,
+.hljs-name,
+.hljs-title.class_,
+.hljs-type {
+  color: var(--ctp-yellow);
+}
+
+.hljs-addition,
+.hljs-bullet,
+.hljs-regexp,
+.hljs-string,
+.hljs-symbol {
+  color: var(--ctp-green);
+}
+
+.hljs-attr,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-template-variable,
+.hljs-variable {
+  color: var(--ctp-peach);
+}
+
+.hljs-deletion {
+  color: var(--ctp-red);
+}
+
+.entry-content table {
+  -webkit-overflow-scrolling: touch;
+  border-collapse: separate;
+  border-radius: 12px;
+  border-spacing: 0;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  width: max-content;
+}
+
+.entry-content.github-readme table.github-readme-layout-table,
+.entry-content .github-readme table.github-readme-layout-table {
+  border-radius: 0;
+  display: block;
+  max-width: var(--miniflux-reader-width);
+  overflow: visible;
+  width: 100%;
+}
+
+.entry-content.github-readme table.github-readme-layout-table tbody,
+.entry-content .github-readme table.github-readme-layout-table tbody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.entry-content.github-readme table.github-readme-layout-table tr,
+.entry-content .github-readme table.github-readme-layout-table tr {
+  display: contents;
+}
+
+.entry-content.github-readme table.github-readme-layout-table td,
+.entry-content .github-readme table.github-readme-layout-table td {
+  border: 0;
+  display: block;
+  padding: 0;
+}
+
+.entry-content th,
+.entry-content td {
+  border-color: var(--ctp-surface1);
+}
+
+.entry-content mark {
+  background: color-mix(in srgb, var(--ctp-yellow) 45%, transparent);
+  color: var(--ctp-text);
+}
+
+.miniflux-reading-progress {
+  background: var(--ctp-blue);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ctp-blue) 72%, transparent);
+  height: 3px;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 120ms linear;
+  width: 100%;
+  z-index: 9999;
+}
+
+/* Match Miniflux's built-in page-button layout (inline svg + .icon-label) so
+   our injected toolbar buttons share the same baseline as Mark as unread /
+   Star / Share / Download. Code-copy lives in a different context (absolute
+   inside <pre>) and keeps its own flex layout below. */
+.miniflux-copy-markdown svg,
+.miniflux-external-link svg {
+  height: 1em;
+  vertical-align: middle;
+  width: 1em;
+}
+
+.miniflux-code-copy {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+/* The entry title link already exposes the article URL, so the long URL text
+   that Miniflux renders inside `.entry-meta` is redundant. Hide it; the JS
+   companion promotes a matching button into the action toolbar instead. */
+.entry-external-link {
+  display: none;
+}
+
+.miniflux-code-copy {
+  background: color-mix(in srgb, var(--ctp-mantle) 82%, transparent);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: 999px;
+  color: var(--ctp-text);
+  cursor: pointer;
+  font: 600 0.75rem/1 var(--font-sans);
+  opacity: 0;
+  padding: 0.42rem 0.58rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.entry-content pre:hover .miniflux-code-copy,
+.entry-content pre:focus-within .miniflux-code-copy,
+.miniflux-code-copy:focus {
+  opacity: 1;
+}
+
+.miniflux-code-copy:hover,
+.miniflux-code-copy:focus {
+  background: var(--ctp-surface0);
+  border-color: var(--ctp-blue);
+}
+
+.miniflux-copy-markdown svg,
+.miniflux-code-copy svg {
+  flex: none;
+  height: 1em;
+  width: 1em;
+}
+
+.github-trending-list-description,
+.github-trending-entry-description {
+  color: var(--ctp-subtext0);
+  line-height: 1.4;
+  margin: 0.25rem 0 0;
+}
+
+.github-trending-list-description {
+  font-size: 0.92rem;
+  max-width: 80ch;
+}
+
+.github-trending-entry-description {
+  font-size: clamp(1rem, 0.25vw + 0.95rem, 1.15rem);
+}
+
+@media (max-width: 720px) {
+  main {
+    max-width: min(100% - 1rem, 1120px);
+  }
+
+  .entry-content {
+    font-size: 1.03rem;
+    line-height: 1.68;
+  }
+
+  .entry-content pre {
+    border-radius: 10px;
+    margin-inline: -0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .miniflux-reading-progress,
+  .miniflux-code-copy {
+    transition: none;
+  }
+}

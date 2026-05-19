@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# sievectl: ManageSieve client wrapper for mail.mulatta.io
+#
+# Server is the source of truth. Local files in ~/.local/share/sieve/
+# are working copies — pull, edit, push back.
+#
+# Requires: sieve-connect, rbw (in PATH via home-manager).
+
+set -euo pipefail
+
+SERVER="mail.mulatta.io"
+PORT="4190"
+USER="seungwon"
+SIEVE_DIR="$HOME/.local/share/sieve"
+CATEGORIES=(dev research university finance social notifications)
+ALL_SCRIPTS=("${CATEGORIES[@]}" default)
+
+usage() {
+  cat <<EOF
+Usage: sievectl <command> [args]
+
+Commands:
+  list                  List remote scripts (active marked)
+  pull [<name>]         Download script(s) to $SIEVE_DIR
+  push [<name>]         Upload script(s); activates 'default' after upload
+  check [<name>]        Server-side syntax check (no upload)
+  edit <name>           Interactive download/edit/upload via \$EDITOR
+
+Without <name>, pull/push/check operates on: ${ALL_SCRIPTS[*]}
+EOF
+}
+
+require_password() {
+  if ! rbw unlocked >/dev/null 2>&1; then
+    echo "rbw vault locked — run: rbw unlock" >&2
+    exit 1
+  fi
+  PASSWORD="$(rbw get mulatta.io --field password 2>/dev/null ||
+    rbw get mail.mulatta.io 2>/dev/null ||
+    true)"
+  if [[ -z "${PASSWORD:-}" ]]; then
+    echo "Could not retrieve password from rbw" >&2
+    exit 1
+  fi
+}
+
+# Invoke sieve-connect with creds via stdin (--passwordfd 0).
+# printf %s avoids trailing newline that here-string adds.
+sc() {
+  printf '%s' "$PASSWORD" | sieve-connect \
+    --server "$SERVER" --port "$PORT" \
+    --user "$USER" --passwordfd 0 \
+    "$@"
+}
+
+cmd_list() {
+  require_password
+  sc --list
+}
+
+cmd_pull() {
+  require_password
+  mkdir -p "$SIEVE_DIR"
+  local names=("$@")
+  [[ ${#names[@]} -eq 0 ]] && names=("${ALL_SCRIPTS[@]}")
+  for name in "${names[@]}"; do
+    local path="$SIEVE_DIR/$name.sieve"
+    echo "  pull $name -> $path"
+    sc --remotesieve "$name" --localsieve "$path" --download
+  done
+}
+
+cmd_push() {
+  require_password
+  local names=("$@")
+  [[ ${#names[@]} -eq 0 ]] && names=("${ALL_SCRIPTS[@]}")
+  local activate_default=0
+  for name in "${names[@]}"; do
+    local path="$SIEVE_DIR/$name.sieve"
+    if [[ ! -f "$path" ]]; then
+      echo "  skip $name (no $path)"
+      continue
+    fi
+    echo "  push $name <- $path"
+    sc --remotesieve "$name" --localsieve "$path" --upload
+    [[ "$name" == "default" ]] && activate_default=1
+  done
+  if ((activate_default)); then
+    echo "  activate default"
+    sc --remotesieve default --activate
+  fi
+}
+
+cmd_check() {
+  require_password
+  local names=("$@")
+  [[ ${#names[@]} -eq 0 ]] && names=("${ALL_SCRIPTS[@]}")
+  local failed=0
+  for name in "${names[@]}"; do
+    local path="$SIEVE_DIR/$name.sieve"
+    if [[ ! -f "$path" ]]; then
+      echo "  skip $name (no $path)"
+      continue
+    fi
+    # --checkscript is silent on success; print explicit OK/FAIL marker.
+    if sc --remotesieve "$name" --localsieve "$path" --checkscript; then
+      echo "  ok    $name"
+    else
+      echo "  FAIL  $name"
+      failed=1
+    fi
+  done
+  return $failed
+}
+
+cmd_edit() {
+  require_password
+  local name="${1:?Usage: sievectl edit <name>}"
+  sc --remotesieve "$name" --edit
+}
+
+main() {
+  [[ $# -eq 0 ]] && {
+    usage
+    exit 1
+  }
+  local cmd="$1"
+  shift
+  case "$cmd" in
+    list) cmd_list "$@" ;;
+    pull) cmd_pull "$@" ;;
+    push) cmd_push "$@" ;;
+    check) cmd_check "$@" ;;
+    edit) cmd_edit "$@" ;;
+    -h | --help) usage ;;
+    *)
+      echo "Unknown command: $cmd" >&2
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,14 @@
+{
+  "lastChangelogVersion": "99.99.99",
+  "followUpMode": "all",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
+  "defaultThinkingLevel": "high",
+  "skills": [
+    "~/.claude/skills"
+  ],
+  "compaction": {
+    "enabled": true
+  },
+  "hideThinkingBlock": true
+}

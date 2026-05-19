@@ -1,0 +1,162 @@
+diff --git a/lib/__tests__/jmap-calendar-tasks.test.ts b/lib/__tests__/jmap-calendar-tasks.test.ts
+new file mode 100644
+index 0000000..43af50d
+--- /dev/null
++++ b/lib/__tests__/jmap-calendar-tasks.test.ts
+@@ -0,0 +1,90 @@
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { JMAPClient } from '../jmap/client';
++
++function mockFetchResponse(status: number, body?: unknown): Response {
++  return new Response(body ? JSON.stringify(body) : null, {
++    status,
++    headers: { 'Content-Type': 'application/json' },
++  });
++}
++
++describe('JMAP calendar tasks', () => {
++  let fetchSpy: ReturnType<typeof vi.spyOn>;
++
++  beforeEach(() => {
++    fetchSpy = vi.spyOn(globalThis, 'fetch');
++  });
++
++  afterEach(() => {
++    fetchSpy.mockRestore();
++  });
++
++  it('normalizes uppercase cancelled progress from CalDAV-created tasks', async () => {
++    fetchSpy.mockResolvedValueOnce(mockFetchResponse(200, {
++      capabilities: {
++        'urn:ietf:params:jmap:core': {},
++        'urn:ietf:params:jmap:calendars': {},
++      },
++      accounts: { b: { name: 'test', isPersonal: true, accountCapabilities: {} } },
++      primaryAccounts: {
++        'urn:ietf:params:jmap:mail': 'b',
++        'urn:ietf:params:jmap:calendars': 'b',
++      },
++      apiUrl: 'https://mail.example.com/jmap/',
++      downloadUrl: 'https://mail.example.com/jmap/download/{accountId}/{blobId}/{name}',
++    }));
++
++    const client = new JMAPClient('https://mail.example.com', 'user@example.com', 'password');
++    await client.connect();
++    fetchSpy.mockReset();
++
++    fetchSpy
++      .mockResolvedValueOnce(mockFetchResponse(200, {
++        methodResponses: [
++          ['error', { type: 'unsupportedFilter', description: 'types' }, '0'],
++          ['error', { type: 'invalidResultReference' }, '1'],
++        ],
++      }))
++      .mockResolvedValueOnce(mockFetchResponse(200, {
++        methodResponses: [[
++          'CalendarEvent/get',
++          {
++            list: [{
++              id: 'ek',
++              '@type': 'Task',
++              uid: 'cancelled-task@example.com',
++              calendarIds: { f: true },
++              title: 'cancelled task',
++              description: '',
++              due: '2026-05-01T00:00:00',
++              start: null,
++              duration: null,
++              timeZone: null,
++              showWithoutTime: false,
++              progress: 'CANCELLED',
++              progressUpdated: null,
++              priority: 5,
++              privacy: 'public',
++              keywords: null,
++              categories: null,
++              color: null,
++              created: null,
++              updated: '2026-05-06T00:00:00Z',
++              recurrenceRules: null,
++              alerts: null,
++              relatedTo: null,
++            }],
++            notFound: [],
++          },
++          '0',
++        ]],
++      }));
++
++    const tasks = await client.getCalendarTasks();
++
++    expect(tasks).toHaveLength(1);
++    expect(tasks[0].progress).toBe('cancelled');
++
++    client.disconnect();
++  });
++});
+diff --git a/lib/jmap/client.ts b/lib/jmap/client.ts
+index 45d83f2..dd56035 100644
+--- a/lib/jmap/client.ts
++++ b/lib/jmap/client.ts
+@@ -192,6 +192,31 @@ const CALENDAR_TASK_PROPERTIES = [
+   'percentComplete',  // Task-only per RFC 8984 §5.2.4 - used in detection heuristic
+ ] as const;
+ 
++const TASK_PROGRESS_NORMALIZATION: Record<string, CalendarTask['progress']> = {
++  'needs-action': 'needs-action',
++  'needs_action': 'needs-action',
++  'in-process': 'in-process',
++  'in_process': 'in-process',
++  completed: 'completed',
++  cancelled: 'cancelled',
++  canceled: 'cancelled',
++};
++
++function normalizeCalendarTask(task: CalendarTask): CalendarTask {
++  const progress = task.progress as unknown;
++  if (typeof progress !== 'string') {
++    return { ...task, '@type': 'Task' as const };
++  }
++
++  const normalizedProgress = TASK_PROGRESS_NORMALIZATION[progress.toLowerCase()];
++
++  return {
++    ...task,
++    '@type': 'Task' as const,
++    ...(normalizedProgress ? { progress: normalizedProgress } : {}),
++  };
++}
++
+ /**
+  * Stalwart's calcard crate uses singular property names ("recurrenceRule")
+  * instead of the RFC 8984 plural forms ("recurrenceRules").
+@@ -4323,10 +4348,7 @@ export class JMAPClient implements IJMAPClient {
+           });
+         });
+ 
+-        const results = list.map((task) => ({
+-          ...task,
+-          '@type': 'Task' as const,
+-        }));
++        const results = list.map((task) => normalizeCalendarTask(task));
+         debug.log('tasks', 'CalendarTask/fetch complete,', results.length, 'tasks');
+         debug.groupEnd();
+         return results;
+@@ -4408,7 +4430,7 @@ export class JMAPClient implements IJMAPClient {
+         }
+       }
+ 
+-      tasks.push({ ...obj, '@type': 'Task' as const } as CalendarTask);
++      tasks.push(normalizeCalendarTask({ ...obj, '@type': 'Task' as const } as CalendarTask));
+     });
+ 
+     debug.log('tasks', 'CalendarTask/fallback detected', tasks.length, 'tasks');
+@@ -4479,7 +4501,7 @@ export class JMAPClient implements IJMAPClient {
+       const notFound = getResponse.methodResponses[0][1].notFound || [];
+       debug.log('calendar', 'CalendarTask/create get response', { found: list.length, notFound });
+       if (list[0]) {
+-        const created = { ...list[0], '@type': 'Task' as const } as CalendarTask;
++        const created = normalizeCalendarTask({ ...list[0], '@type': 'Task' as const } as CalendarTask);
+         debug.log('tasks', 'CalendarTask/create final task object', {
+           id: created.id,
+           uid: created.uid,

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "miniflux-sync"
+version = "0.1.0"
+description = "Idempotent sync of Miniflux assets and feeds from a JSON manifest"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+dependencies = ["miniflux", "psycopg"]
+
+[project.scripts]
+miniflux-sync = "miniflux_sync.cli:main"
+
+[tool.ruff]
+target-version = "py313"

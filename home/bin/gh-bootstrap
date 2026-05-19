@@ -1,0 +1,566 @@
+#!/usr/bin/env bash
+# gh-bootstrap — One-shot GitHub repo setup for Nix flake projects.
+#
+# Configures: repository creation, merge strategy, branch rulesets with buildbot
+# CI, flake-updater + auto-merge workflows, labels, and GitHub App secrets.
+#
+# Usage:
+#   gh-bootstrap                        # current repo or $USER/$(basename $PWD)
+#   gh-bootstrap owner/repo             # specific repo
+#   gh-bootstrap owner/repo main dev    # specific protected branches
+#
+# Credential sources, in order:
+#   FLAKE_UPDATER_APP_ID + FLAKE_UPDATER_APP_PRIVATE_KEY
+#   APP_ID + APP_PRIVATE_KEY
+#   GH_BOOTSTRAP_CLAN_APP_ID_VAR + GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR
+#     format: machine:service/file
+#   rbw entries:
+#     dots-flake-updater-app-id password
+#     dots-flake-updater-private-key notes
+
+set -euo pipefail
+
+usage() {
+  sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+repo_from_url() {
+  local url="$1"
+  local repo
+
+  case "$url" in
+    git@github.com:*) repo="${url#git@github.com:}" ;;
+    ssh://git@github.com/*) repo="${url#ssh://git@github.com/}" ;;
+    https://github.com/*) repo="${url#https://github.com/}" ;;
+    git://github.com/*) repo="${url#git://github.com/}" ;;
+    *) return 1 ;;
+  esac
+
+  repo="${repo%.git}"
+  repo="${repo%/}"
+  [[ "$repo" == */* ]] || return 1
+  printf '%s\n' "$repo"
+}
+
+script_dir() {
+  local script_path="${BASH_SOURCE[0]}"
+  local resolved
+
+  if resolved=$(readlink -f "$script_path" 2>/dev/null); then
+    script_path="$resolved"
+  fi
+
+  cd -- "$(dirname -- "$script_path")" >/dev/null 2>&1
+  pwd -P
+}
+
+find_template_dir() {
+  local dir
+  local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+  local data_dirs="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+  local -a candidates=(
+    "${GH_BOOTSTRAP_TEMPLATE_DIR:-}"
+    "$(script_dir)/../.local/share/gh-bootstrap"
+    "$data_home/gh-bootstrap"
+    "$PWD/home/.local/share/gh-bootstrap"
+  )
+
+  local data_dir
+  local -a data_dir_candidates
+  IFS=: read -r -a data_dir_candidates <<< "$data_dirs"
+  for data_dir in "${data_dir_candidates[@]}"; do
+    [[ -n "$data_dir" ]] || continue
+    candidates+=("$data_dir/gh-bootstrap")
+  done
+
+  for dir in "${candidates[@]}"; do
+    [[ -n "$dir" && -d "$dir" ]] || continue
+    printf '%s\n' "$dir"
+    return 0
+  done
+
+  return 1
+}
+
+infer_repo() {
+  local origin_url
+  local repo
+  local top
+
+  if repo=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null); then
+    printf '%s\n' "$repo"
+    return 0
+  fi
+
+  if origin_url=$(git config --get remote.origin.url 2>/dev/null) \
+    && repo=$(repo_from_url "$origin_url"); then
+    printf '%s\n' "$repo"
+    return 0
+  fi
+
+  top=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  printf '%s/%s\n' "$USER_LOGIN" "$(basename "$top")"
+}
+
+repo_exists() {
+  gh api "repos/$REPO" --silent >/dev/null 2>&1
+}
+
+git_has_commits() {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    && git rev-parse --verify HEAD >/dev/null 2>&1
+}
+
+origin_matches_repo_or_absent() {
+  local origin_url
+  local origin_repo
+
+  if ! origin_url=$(git remote get-url origin 2>/dev/null); then
+    return 0
+  fi
+
+  origin_repo=$(repo_from_url "$origin_url" 2>/dev/null || true)
+  [[ "$origin_repo" == "$REPO" ]]
+}
+
+ensure_origin() {
+  local origin_url
+  local origin_repo
+  local ssh_url
+
+  ssh_url=$(gh repo view "$REPO" --json sshUrl -q .sshUrl)
+
+  if origin_url=$(git remote get-url origin 2>/dev/null); then
+    origin_repo=$(repo_from_url "$origin_url" 2>/dev/null || true)
+    if [[ "$origin_repo" == "$REPO" ]]; then
+      return 0
+    fi
+
+    echo "    local origin points to $origin_url; not changing it"
+    return 1
+  fi
+
+  git remote add origin "$ssh_url"
+  echo "    origin: added $ssh_url"
+}
+
+push_bootstrap_branches() {
+  local branch
+  local current_branch
+  local pushed_current=false
+
+  git_has_commits || return 0
+  ensure_origin || return 0
+
+  current_branch=$(git branch --show-current 2>/dev/null || true)
+
+  for branch in "${BRANCHES[@]}"; do
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
+      git push -u origin "$branch"
+      [[ "$branch" == "$current_branch" ]] && pushed_current=true
+    fi
+  done
+
+  if [[ -n "$current_branch" && "$pushed_current" == false ]]; then
+    git push -u origin "$current_branch"
+  elif [[ -z "$current_branch" ]]; then
+    git push origin HEAD
+  fi
+}
+
+repo_visibility_flag() {
+  case "${GH_BOOTSTRAP_VISIBILITY:-public}" in
+    private) printf '%s\n' "--private" ;;
+    public) printf '%s\n' "--public" ;;
+    internal) printf '%s\n' "--internal" ;;
+    *) die "GH_BOOTSTRAP_VISIBILITY must be private, public, or internal" ;;
+  esac
+}
+
+ensure_repo() {
+  local visibility_flag
+
+  if repo_exists; then
+    echo "    exists"
+    return 0
+  fi
+
+  visibility_flag=$(repo_visibility_flag)
+  echo "    creating ($visibility_flag)..."
+
+  if git_has_commits && origin_matches_repo_or_absent; then
+    gh repo create "$REPO" "$visibility_flag"
+    push_bootstrap_branches
+  else
+    gh repo create "$REPO" "$visibility_flag" --add-readme
+    echo "    initialized with README; local git history was not pushed"
+  fi
+}
+
+read_clan_var() {
+  local spec="$1"
+  local machine="${spec%%:*}"
+  local var_id="${spec#*:}"
+
+  [[ -n "$machine" && -n "$var_id" && "$machine" != "$var_id" ]] || return 1
+  clan vars get --flake . "$machine" "$var_id" 2>/dev/null
+}
+
+load_app_credentials() {
+  APP_ID_VALUE="${FLAKE_UPDATER_APP_ID:-${APP_ID:-}}"
+  APP_PRIVATE_KEY_VALUE="${FLAKE_UPDATER_APP_PRIVATE_KEY:-${APP_PRIVATE_KEY:-}}"
+
+  if [[ -n "$APP_ID_VALUE" || -n "$APP_PRIVATE_KEY_VALUE" ]]; then
+    [[ -n "$APP_ID_VALUE" && -n "$APP_PRIVATE_KEY_VALUE" ]] \
+      || die "set both App ID and private key env vars"
+    CREDENTIAL_SOURCE="env"
+    return 0
+  fi
+
+  if [[ -n "${GH_BOOTSTRAP_CLAN_APP_ID_VAR:-}" \
+    || -n "${GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR:-}" ]]; then
+    [[ -n "${GH_BOOTSTRAP_CLAN_APP_ID_VAR:-}" \
+      && -n "${GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR:-}" ]] \
+      || die "set both GH_BOOTSTRAP_CLAN_APP_ID_VAR and GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR"
+    APP_ID_VALUE=$(read_clan_var "$GH_BOOTSTRAP_CLAN_APP_ID_VAR") \
+      || die "could not read clan var $GH_BOOTSTRAP_CLAN_APP_ID_VAR"
+    APP_PRIVATE_KEY_VALUE=$(read_clan_var "$GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR") \
+      || die "could not read clan var $GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR"
+    CREDENTIAL_SOURCE="clan vars"
+    return 0
+  fi
+
+  local id_entry="${GH_BOOTSTRAP_RBW_APP_ID_ENTRY:-dots-flake-updater-app-id}"
+  local key_entry="${GH_BOOTSTRAP_RBW_APP_KEY_ENTRY:-dots-flake-updater-private-key}"
+
+  if command -v rbw >/dev/null 2>&1; then
+    if ! rbw unlocked 2>/dev/null; then
+      die "rbw is locked. Run: rbw unlock"
+    fi
+
+    if APP_ID_VALUE=$(rbw get --field password "$id_entry" 2>/dev/null) \
+      && APP_PRIVATE_KEY_VALUE=$(rbw get --field notes "$key_entry" 2>/dev/null); then
+      CREDENTIAL_SOURCE="rbw ($id_entry, $key_entry)"
+      return 0
+    fi
+  fi
+
+  cat >&2 <<EOF
+error: missing flake-updater GitHub App credentials
+
+Supported sources:
+  env:
+    FLAKE_UPDATER_APP_ID
+    FLAKE_UPDATER_APP_PRIVATE_KEY
+  rbw:
+    $id_entry field=password
+    $key_entry field=notes
+  clan vars:
+    GH_BOOTSTRAP_CLAN_APP_ID_VAR=machine:service/file
+    GH_BOOTSTRAP_CLAN_APP_PRIVATE_KEY_VAR=machine:service/file
+
+Create or rotate the App, then store its App ID and private key in one of the
+sources above. Helper:
+  create-gh-app flake-updater --username '${REPO%%/*}' --repository '${REPO#*/}' \
+    --permission contents write --permission pull_requests write
+EOF
+  exit 1
+}
+
+base64_file() {
+  local file="$1"
+
+  if base64 --help 2>&1 | grep -q -- '-w'; then
+    base64 -w0 "$file"
+  else
+    base64 <"$file" | tr -d '\n'
+  fi
+}
+
+b64url() {
+  openssl base64 -e -A | tr '+/' '-_' | tr -d '='
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+TEMPLATE_DIR=$(find_template_dir) || die "could not find gh-bootstrap templates"
+
+USER_ID=$(gh api user --jq '.id')
+USER_LOGIN=$(gh api user --jq '.login')
+
+if [[ $# -gt 0 ]]; then
+  REPO="$1"
+  shift
+else
+  REPO=$(infer_repo)
+fi
+
+if [[ "$REPO" != */* ]]; then
+  REPO="$USER_LOGIN/$REPO"
+fi
+
+BRANCHES=("$@")
+if [[ ${#BRANCHES[@]} -eq 0 ]]; then
+  BRANCHES=(main staging)
+fi
+
+OWNER="${REPO%%/*}"
+NAME="${REPO#*/}"
+
+if [[ -z "$OWNER" || -z "$NAME" || "$OWNER" == "$NAME" ]]; then
+  die "repo must be owner/name"
+fi
+
+echo "repo:      $REPO"
+echo "branches:  ${BRANCHES[*]}"
+echo "bypass:    $USER_LOGIN (id: $USER_ID)"
+echo "templates: $TEMPLATE_DIR"
+echo
+
+# ---------------------------------------------------------------------------
+# 1. Repository
+# ---------------------------------------------------------------------------
+echo "==> [1/7] Repository..."
+ensure_repo
+
+# ---------------------------------------------------------------------------
+# 2. Repo settings
+# ---------------------------------------------------------------------------
+echo "==> [2/7] Repo merge settings..."
+gh api "repos/$REPO" --method PATCH --silent \
+  --field allow_squash_merge=true \
+  --field allow_merge_commit=true \
+  --field allow_rebase_merge=true \
+  --field squash_merge_commit_title=PR_TITLE \
+  --field squash_merge_commit_message=PR_BODY \
+  --field delete_branch_on_merge=true \
+  --field allow_auto_merge=true
+echo "    done"
+
+# ---------------------------------------------------------------------------
+# 3. Topics — add build-with-buildbot (preserve existing)
+# ---------------------------------------------------------------------------
+echo "==> [3/7] Topics (build-with-buildbot)..."
+EXISTING_TOPICS=$(gh api "repos/$REPO/topics" --jq '.names | join(",")')
+if echo "$EXISTING_TOPICS" | grep -q "build-with-buildbot"; then
+  echo "    already present"
+else
+  ALL_TOPICS="$EXISTING_TOPICS,build-with-buildbot"
+  TOPIC_JSON=$(echo "$ALL_TOPICS" | tr ',' '\n' | grep -v '^$' | jq -R . | jq -s '{"names": .}')
+  echo "$TOPIC_JSON" | gh api "repos/$REPO/topics" --method PUT --silent --input -
+  echo "    added"
+fi
+
+# ---------------------------------------------------------------------------
+# 4. Branch rulesets (with buildbot/nix-eval required check)
+# ---------------------------------------------------------------------------
+echo "==> [4/7] Branch rulesets..."
+
+REMOTE_BRANCHES=$(gh api "repos/$REPO/branches" --jq '.[].name' 2>/dev/null || true)
+
+for BRANCH in "${BRANCHES[@]}"; do
+  RULESET_NAME="${BRANCH}-protection"
+
+  if ! echo "$REMOTE_BRANCHES" | grep -qx "$BRANCH"; then
+    echo "    $RULESET_NAME: branch not found, skipping"
+    continue
+  fi
+
+  PAYLOAD=$(cat <<EOF
+{
+  "name": "$RULESET_NAME",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": { "include": ["refs/heads/$BRANCH"], "exclude": [] }
+  },
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
+        "required_review_thread_resolution": false
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "required_status_checks": [
+          { "context": "buildbot/nix-eval" }
+        ]
+      }
+    },
+    { "type": "deletion" },
+    { "type": "non_fast_forward" }
+  ],
+  "bypass_actors": [
+    {
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "always"
+    }
+  ]
+}
+EOF
+  )
+
+  RULESETS_JSON=$(mktemp)
+  if ! gh api "repos/$REPO/rulesets" >"$RULESETS_JSON"; then
+    ERROR_MESSAGE=$(jq -r '.message // empty' <"$RULESETS_JSON" 2>/dev/null || true)
+    rm -f "$RULESETS_JSON"
+    die "could not list rulesets for $REPO${ERROR_MESSAGE:+: $ERROR_MESSAGE}"
+  fi
+
+  EXISTING_ID=$(jq -r --arg name "$RULESET_NAME" '.[] | select(.name == $name) | .id' <"$RULESETS_JSON")
+  rm -f "$RULESETS_JSON"
+
+  if [[ -n "$EXISTING_ID" && ! "$EXISTING_ID" =~ ^[0-9]+$ ]]; then
+    die "invalid ruleset id for $RULESET_NAME: $EXISTING_ID"
+  fi
+
+  if [[ -n "$EXISTING_ID" ]]; then
+    echo "$PAYLOAD" | gh api "repos/$REPO/rulesets/$EXISTING_ID" --method PUT --silent --input -
+    echo "    $RULESET_NAME: updated (id: $EXISTING_ID)"
+  else
+    echo "$PAYLOAD" | gh api "repos/$REPO/rulesets" --method POST --silent --input -
+    echo "    $RULESET_NAME: created"
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# 5. Labels
+# ---------------------------------------------------------------------------
+echo "==> [5/7] Labels..."
+if gh label list --repo "$REPO" --json name --jq '.[].name' | grep -qx "auto-merge"; then
+  echo "    auto-merge: already exists"
+else
+  gh label create "auto-merge" --repo "$REPO" \
+    --description "Auto-merge this PR" --color "7D7C02" 2>/dev/null
+  echo "    auto-merge: created"
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Secrets — deploy credentials, then health-check via App API
+# ---------------------------------------------------------------------------
+echo "==> [6/7] Secrets..."
+load_app_credentials
+SECRETS=$(gh secret list --repo "$REPO" --json name --jq '.[].name' 2>/dev/null || true)
+
+deploy_secret() {
+  local name="$1"
+  local value="$2"
+  local action="created"
+
+  if echo "$SECRETS" | grep -qx "$name"; then
+    action="updated"
+  fi
+
+  printf '%s' "$value" | gh secret set "$name" --repo "$REPO" >/dev/null
+  echo "    $name: $action from $CREDENTIAL_SOURCE"
+}
+
+deploy_secret "APP_ID" "$APP_ID_VALUE"
+deploy_secret "APP_PRIVATE_KEY" "$APP_PRIVATE_KEY_VALUE"
+
+# Health check: generate an installation token to verify the App works.
+echo "    health check..."
+NOW=$(date +%s)
+IAT=$((NOW - 60))
+EXP=$((NOW + 300))
+HEADER=$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)
+PAYLOAD=$(printf '{"iat":%d,"exp":%d,"iss":"%s"}' "$IAT" "$EXP" "$APP_ID_VALUE" | b64url)
+SIGNATURE=$(printf '%s.%s' "$HEADER" "$PAYLOAD" \
+  | openssl dgst -sha256 -sign <(printf '%s' "$APP_PRIVATE_KEY_VALUE") -binary \
+  | b64url)
+JWT="${HEADER}.${PAYLOAD}.${SIGNATURE}"
+
+INSTALL_JSON=$(curl -sf -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/$REPO/installation" || true)
+INSTALL_ID=$(printf '%s' "$INSTALL_JSON" | jq -r '.id // empty')
+
+if [[ -z "$INSTALL_ID" ]]; then
+  echo "    FAIL: App is not installed on $REPO"
+  echo ""
+  echo "    Install the App, then add $REPO to the installation's repository access."
+  echo "    User App settings: https://github.com/settings/apps"
+  echo "    Org App settings:  https://github.com/organizations/$OWNER/settings/apps"
+  exit 1
+fi
+
+TOKEN_STATUS=$(curl -sf -o /dev/null -w '%{http_code}' \
+  -X POST -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/app/installations/$INSTALL_ID/access_tokens" || true)
+
+if [[ "$TOKEN_STATUS" == "201" ]]; then
+  echo "    ok (installation: $INSTALL_ID)"
+else
+  echo "    FAIL: could not create access token (HTTP $TOKEN_STATUS)"
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# 7. Deploy workflows via GitHub Contents API
+# ---------------------------------------------------------------------------
+echo "==> [7/7] Workflows..."
+
+deploy_workflow() {
+  local file="$1"
+  local basename
+  local remote_path
+  local content
+  local existing_sha
+  local payload
+
+  basename=$(basename "$file")
+  remote_path=".github/workflows/$basename"
+  content=$(base64_file "$file")
+
+  existing_sha=$(gh api "repos/$REPO/contents/$remote_path" --jq '.sha' 2>/dev/null || true)
+
+  if [[ -n "$existing_sha" ]]; then
+    payload=$(jq -n \
+      --arg message "ci: update $basename" \
+      --arg content "$content" \
+      --arg sha "$existing_sha" \
+      '{"message": $message, "content": $content, "sha": $sha}')
+    echo "$payload" | gh api "repos/$REPO/contents/$remote_path" --method PUT --silent --input -
+    echo "    $basename: updated"
+  else
+    payload=$(jq -n \
+      --arg message "ci: add $basename" \
+      --arg content "$content" \
+      '{"message": $message, "content": $content}')
+    echo "$payload" | gh api "repos/$REPO/contents/$remote_path" --method PUT --silent --input -
+    echo "    $basename: created"
+  fi
+}
+
+shopt -s nullglob
+WORKFLOW_TEMPLATES=("$TEMPLATE_DIR"/*.yml "$TEMPLATE_DIR"/*.yaml)
+shopt -u nullglob
+
+if [[ ${#WORKFLOW_TEMPLATES[@]} -eq 0 ]]; then
+  die "no workflow templates found in $TEMPLATE_DIR"
+fi
+
+for TMPL in "${WORKFLOW_TEMPLATES[@]}"; do
+  deploy_workflow "$TMPL"
+done
+
+echo ""
+echo "done. Verify at:"
+echo "  Rules:     https://github.com/$REPO/rules"
+echo "  Workflows: https://github.com/$REPO/actions"
+echo "  Topics:    https://github.com/$REPO"

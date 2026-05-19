@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# TUI for reading ntfy messages with skim
+# Usage: ntfy-read [-u|--unread] [-s|--since DURATION] [topic]
+#   -u, --unread          Show only unread messages
+#   -s, --since DURATION  How far back to fetch (default: 24h)
+#   topic                 Filter to specific topic (default: all subscribed topics)
+set -euo pipefail
+
+# Parse arguments
+unread_only=false
+since="24h"
+filter_topic=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -u|--unread) unread_only=true; shift ;;
+    -s|--since) since="$2"; shift 2 ;;
+    -*) echo "Unknown option: $1" >&2; exit 1 ;;
+    *) filter_topic="$1"; shift ;;
+  esac
+done
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"
+NTFY_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ntfy/client.yml"
+
+mkdir -p "$STATE_DIR"
+
+# Migrate old state format (flat file with IDs) to per-ID files
+for f in "$STATE_DIR"/*; do
+  [[ -f "$f" ]] || continue
+  topic=$(basename "$f")
+  mkdir -p "$STATE_DIR/${topic}.new"
+  while IFS= read -r id; do
+    [[ -n "$id" ]] && touch "$STATE_DIR/${topic}.new/$id"
+  done < "$f"
+  rm -f "$f"
+  mv "$STATE_DIR/${topic}.new" "$STATE_DIR/$topic"
+done
+
+# Auth via rbw
+NTFY_AUTH="seungwon:$(rbw get ntfy-password)"
+
+# Get subscribed topics from client.yml
+if [[ -n "$filter_topic" ]]; then
+  topics=("$filter_topic")
+else
+  mapfile -t topics < <(grep -E '^\s+-\s+topic:' "$NTFY_CONFIG" | sed 's/.*topic:\s*//' | tr -d ' ')
+fi
+
+[[ ${#topics[@]} -eq 0 ]] && { echo "No topics configured"; exit 0; }
+
+msg_file=$(mktemp)
+trap 'rm -f "$msg_file"' EXIT
+
+# Fetch messages from all topics
+all_messages=""
+for topic in "${topics[@]}"; do
+  mkdir -p "$STATE_DIR/$topic"
+  messages=$(ntfy subscribe --poll --since "$since" -u "$NTFY_AUTH" --config "$NTFY_CONFIG" "$topic" 2>/dev/null || echo "")
+  if [[ -n "$messages" ]]; then
+    messages=$(echo "$messages" | jq -c --arg topic "$topic" '. + {_topic: $topic}')
+    all_messages+="$messages"$'\n'
+  fi
+done
+
+[[ -z "$all_messages" ]] && { echo "No messages"; exit 0; }
+echo "$all_messages" > "$msg_file"
+
+# Collect fetched message IDs for stale cleanup
+declare -A fetched_ids
+while IFS=$'\t' read -r topic id; do
+  fetched_ids["${topic}:${id}"]=1
+done < <(echo "$all_messages" | jq -rs '[.[] | select(.event == "message")] | .[] | [._topic, .id] | @tsv')
+
+# Remove stale unread markers (IDs no longer on server)
+for topic in "${topics[@]}"; do
+  [[ -d "$STATE_DIR/$topic" ]] || continue
+  for id_file in "$STATE_DIR/$topic"/*; do
+    [[ -f "$id_file" ]] || continue
+    id=$(basename "$id_file")
+    if [[ ! -v "fetched_ids[${topic}:${id}]" ]]; then
+      rm -f "$id_file"
+    fi
+  done
+done
+
+# Build unread set from per-ID files
+declare -A unread_map
+for topic in "${topics[@]}"; do
+  [[ -d "$STATE_DIR/$topic" ]] || continue
+  for id_file in "$STATE_DIR/$topic"/*; do
+    [[ -f "$id_file" ]] || continue
+    id=$(basename "$id_file")
+    unread_map["${topic}:${id}"]=1
+  done
+done
+
+# Format for skim: marker<TAB>key<TAB>topic<TAB>time<TAB>title<TAB>message
+formatted=$(echo "$all_messages" | jq -rs '
+  [.[] | select(.event == "message")] |
+  sort_by(.time) |
+  .[] |
+  [._topic, .id, (.time | strftime("%m/%d %H:%M")), (.title // "-"), (.message // "" | gsub("\n"; " ") | .[0:80])] | @tsv
+' | while IFS=$'\t' read -r topic id time title msg; do
+  key="${topic}:${id}"
+  if [[ -v "unread_map[$key]" ]]; then
+    printf '●\t%s\t%s\t%s\t%s\t%s\n' "$key" "$topic" "$time" "$title" "$msg"
+  elif [[ "$unread_only" == "false" ]]; then
+    printf '○\t%s\t%s\t%s\t%s\t%s\n' "$key" "$topic" "$time" "$title" "$msg"
+  fi
+done | sort -t$'\t' -k1,1r -k4,4)
+
+[[ -z "$formatted" ]] && { echo "No messages to display"; exit 0; }
+
+# skim: ENTER=toggle read/unread, CTRL-A=select all
+selected=$(echo "$formatted" | sk --multi \
+  --height=80% \
+  --bind="tab:toggle+down" \
+  --bind="ctrl-a:select-all" \
+  --ansi \
+  --delimiter='\t' \
+  --with-nth='1,3,4,5,6' \
+  --preview="topic=\$(echo {2} | cut -d: -f1); id=\$(echo {2} | cut -d: -f2); jq -r --arg t \"\$topic\" --arg i \"\$id\" 'select(._topic == \$t and .id == \$i) | \"Topic: \" + ._topic + \"\nTitle: \" + (.title // \"(none)\") + \"\nTime:  \" + (.time | strftime(\"%Y-%m-%d %H:%M:%S\")) + (if .tags then \"\nTags:  \" + (.tags | join(\", \")) else \"\" end) + \"\n\n\" + .message + (if .actions then \"\n\n--- Actions ---\n\" + ([.actions[] | .label + \": \" + .url] | join(\"\n\")) else \"\" end)' < \"$msg_file\"" \
+  --preview-window=down:40%:wrap \
+  --header='● unread ○ read | TAB:select CTRL-A:all ENTER:toggle' \
+  || echo "")
+
+[[ -z "$selected" ]] && exit 0
+
+# Toggle: ● → read (rm), ○ → unread (touch)
+changed=0
+while IFS=$'\t' read -r marker key _rest; do
+  topic="${key%%:*}"
+  id="${key#*:}"
+
+  if [[ "$marker" == "●" ]]; then
+    rm -f "$STATE_DIR/$topic/$id"
+    changed=$((changed + 1))
+  else
+    touch "$STATE_DIR/$topic/$id"
+    changed=$((changed + 1))
+  fi
+done <<< "$selected"
+
+echo "Toggled $changed message(s)"

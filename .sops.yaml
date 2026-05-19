@@ -1,0 +1,17 @@
+keys:
+  # User identity (dedicated age key, file at ~/.config/sops/age/keys.txt
+  # on rhesus).
+  - &rhesus age1730f3cxdyh56zw8xcvlmpa7u2x7353wu4u0e58kyx24rsefgp98sxehm6s
+creation_rules:
+  # Terraform deploy-time secrets (opentofu CLI on user laptop).
+  - path_regex: terraform/secrets\.yaml
+    key_groups:
+      - age:
+          - *rhesus
+  # Bootstrap age private keys for NixOS machines.
+  # Decrypted on the user laptop and pushed to /var/lib/sops-nix/key.txt
+  # during deploy. Machines never read these directly.
+  - path_regex: sops/secrets/.*/secret
+    key_groups:
+      - age:
+          - *rhesus

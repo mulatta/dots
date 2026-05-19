@@ -1,0 +1,34 @@
+[calendars]
+[[personal]]
+path = ~/.local/share/calendars/personal/
+color = dark magenta
+
+[[academic]]
+path = ~/.local/share/calendars/academic/
+color = dark blue
+
+[[research]]
+path = ~/.local/share/calendars/research/
+color = dark green
+
+[[dev]]
+path = ~/.local/share/calendars/dev/
+color = dark cyan
+
+[default]
+default_calendar = personal
+highlight_event_days = true
+
+[view]
+agenda_event_format = {calendar-color}{cancelled}{start-end-time-style} {title}{repeat-symbol}{alarm-symbol}{reset}
+event_format = {calendar-color}{cancelled}{start}-{end} {title}{repeat-symbol}{alarm-symbol}{reset}
+
+[locale]
+dateformat = %Y-%m-%d
+datetimeformat = %Y-%m-%d %H:%M
+firstweekday = 0
+longdateformat = %Y-%m-%d %a
+longdatetimeformat = %Y-%m-%d %H:%M %a
+timeformat = %H:%M
+unicode_symbols = true
+weeknumbers = off

@@ -1,0 +1,115 @@
+diff --git a/internal/api/entry_handlers.go b/internal/api/entry_handlers.go
+index 63ff7e6..0cb09b5 100644
+--- a/internal/api/entry_handlers.go
++++ b/internal/api/entry_handlers.go
+@@ -228 +228,2 @@ func (h *handler) toggleStarredHandler(w http.ResponseWriter, r *http.Request) {
+-	if err := h.store.ToggleStarred(request.UserID(r), entryID); err != nil {
++	userID := request.UserID(r)
++	if err := h.store.ToggleStarred(userID, entryID); err != nil {
+@@ -232,0 +234,19 @@ func (h *handler) toggleStarredHandler(w http.ResponseWriter, r *http.Request) {
++	builder := h.store.NewEntryQueryBuilder(userID)
++	builder.WithEntryID(entryID)
++
++	entry, err := builder.GetEntry()
++	if err != nil {
++		response.JSONServerError(w, r, err)
++		return
++	}
++
++	if entry != nil && entry.Starred {
++		settings, err := h.store.Integration(userID)
++		if err != nil {
++			response.JSONServerError(w, r, err)
++			return
++		}
++
++		go integration.SendStarredEntryWebhook(entry, settings)
++	}
++
+diff --git a/internal/integration/integration.go b/internal/integration/integration.go
+index 5606aab..3e574ed 100644
+--- a/internal/integration/integration.go
++++ b/internal/integration/integration.go
+@@ -39,0 +40,32 @@ import (
++// SendStarredEntryWebhook sends starred entries to the configured webhook only.
++func SendStarredEntryWebhook(entry *model.Entry, userIntegrations *model.Integration) {
++	if !userIntegrations.WebhookEnabled {
++		return
++	}
++
++	var webhookURL string
++	if entry.Feed != nil && entry.Feed.WebhookURL != "" {
++		webhookURL = entry.Feed.WebhookURL
++	} else {
++		webhookURL = userIntegrations.WebhookURL
++	}
++
++	slog.Debug("Sending starred entry to Webhook",
++		slog.Int64("user_id", userIntegrations.UserID),
++		slog.Int64("entry_id", entry.ID),
++		slog.String("entry_url", entry.URL),
++		slog.String("webhook_url", webhookURL),
++	)
++
++	webhookClient := webhook.NewClient(webhookURL, userIntegrations.WebhookSecret)
++	if err := webhookClient.SendStarEntryWebhookEvent(entry); err != nil {
++		slog.Error("Unable to send starred entry to Webhook",
++			slog.Int64("user_id", userIntegrations.UserID),
++			slog.Int64("entry_id", entry.ID),
++			slog.String("entry_url", entry.URL),
++			slog.String("webhook_url", webhookURL),
++			slog.Any("error", err),
++		)
++	}
++}
++
+diff --git a/internal/integration/webhook/webhook.go b/internal/integration/webhook/webhook.go
+index 87afc2e..044d255 100644
+--- a/internal/integration/webhook/webhook.go
++++ b/internal/integration/webhook/webhook.go
+@@ -25,0 +26 @@ const (
++	StarEntryEventType  = "star_entry"
+@@ -38,2 +39,10 @@ func (c *Client) SendSaveEntryWebhookEvent(entry *model.Entry) error {
+-	return c.makeRequest(SaveEntryEventType, &WebhookSaveEntryEvent{
+-		EventType: SaveEntryEventType,
++	return c.sendEntryWebhookEvent(SaveEntryEventType, entry)
++}
++
++func (c *Client) SendStarEntryWebhookEvent(entry *model.Entry) error {
++	return c.sendEntryWebhookEvent(StarEntryEventType, entry)
++}
++
++func (c *Client) sendEntryWebhookEvent(eventType string, entry *model.Entry) error {
++	return c.makeRequest(eventType, &WebhookSaveEntryEvent{
++		EventType: eventType,
+diff --git a/internal/ui/entry_toggle_starred.go b/internal/ui/entry_toggle_starred.go
+index af1a72e..98632c9 100644
+--- a/internal/ui/entry_toggle_starred.go
++++ b/internal/ui/entry_toggle_starred.go
+@@ -10,0 +11 @@ import (
++	"miniflux.app/v2/internal/integration"
+@@ -15 +16,3 @@ func (h *handler) toggleStarred(w http.ResponseWriter, r *http.Request) {
+-	if err := h.store.ToggleStarred(request.UserID(r), entryID); err != nil {
++	userID := request.UserID(r)
++
++	if err := h.store.ToggleStarred(userID, entryID); err != nil {
+@@ -19,0 +23,19 @@ func (h *handler) toggleStarred(w http.ResponseWriter, r *http.Request) {
++	builder := h.store.NewEntryQueryBuilder(userID)
++	builder.WithEntryID(entryID)
++
++	entry, err := builder.GetEntry()
++	if err != nil {
++		response.JSONServerError(w, r, err)
++		return
++	}
++
++	if entry != nil && entry.Starred {
++		settings, err := h.store.Integration(userID)
++		if err != nil {
++			response.JSONServerError(w, r, err)
++			return
++		}
++
++		go integration.SendStarredEntryWebhook(entry, settings)
++	}
++

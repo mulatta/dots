@@ -1,0 +1,45 @@
+[general]
+status_path = "~/.local/share/vdirsyncer/status"
+
+### Pairs
+
+[pair calendar_stalwart]
+a = "calendar_stalwart_remote"
+b = "calendar_stalwart_local"
+collections = [["personal", "Personal", "personal"], ["academic", "Academic", "academic"], ["research", "Research", "research"], ["dev", "Dev", "dev"]]
+metadata = ["color", "displayname"]
+
+[pair contacts_stalwart]
+a = "contacts_stalwart_remote"
+b = "contacts_stalwart_local"
+collections = ["contacts"]
+
+### Local storages
+
+[storage calendar_stalwart_local]
+fileext = ".ics"
+path = "~/.local/share/calendars/"
+post_hook = "vdirsyncer-post-hook"
+pre_deletion_hook = "vdirsyncer-pre-deletion-hook"
+type = "filesystem"
+
+[storage contacts_stalwart_local]
+fileext = ".vcf"
+path = "~/.local/share/contacts/"
+post_hook = "vdirsyncer-post-hook"
+pre_deletion_hook = "vdirsyncer-pre-deletion-hook"
+type = "filesystem"
+
+### Remote storages
+
+[storage calendar_stalwart_remote]
+password.fetch = ["command", "rbw", "get", "mulatta.io", "--field", "password"]
+type = "caldav"
+url = "https://stalwart.mulatta.io/dav/cal/seungwon/"
+username = "seungwon"
+
+[storage contacts_stalwart_remote]
+password.fetch = ["command", "rbw", "get", "mulatta.io", "--field", "password"]
+type = "carddav"
+url = "https://stalwart.mulatta.io/dav/card/seungwon/"
+username = "seungwon"

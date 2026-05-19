@@ -1,0 +1,53 @@
+diff --git a/internal/template/functions.go b/internal/template/functions.go
+index 59e9cf8..b8e7b44 100644
+--- a/internal/template/functions.go
++++ b/internal/template/functions.go
+@@ -178,7 +178,7 @@ func csp(user *model.User, nonce string) string {
+ 		"require-trusted-types-for": "'script'",
+ 		"script-src":                "'nonce-" + nonce + "' 'strict-dynamic'",
+ 		"style-src":                 "'nonce-" + nonce + "'",
+-		"trusted-types":             "html url",
++		"trusted-types":             "html url miniflux-highlight",
+ 		"connect-src":               "'self'",
+ 	}
+ 
+diff --git a/internal/template/functions_test.go b/internal/template/functions_test.go
+index d14921b..129d564 100644
+--- a/internal/template/functions_test.go
++++ b/internal/template/functions_test.go
+@@ -252,7 +252,7 @@ func TestCSPExternalFont(t *testing.T) {
+ 		`'strict-dynamic';`,
+ 		`font-src test.com;`,
+ 		`require-trusted-types-for 'script';`,
+-		`trusted-types html url;`,
++		`trusted-types html url miniflux-highlight;`,
+ 		`manifest-src 'self';`,
+ 	}
+ 	got := csp(&model.User{ExternalFontHosts: "test.com"}, "1234")
+@@ -274,7 +274,7 @@ func TestCSPNoUser(t *testing.T) {
+ 		`script-src 'nonce-1234'`,
+ 		`'strict-dynamic';`,
+ 		`require-trusted-types-for 'script';`,
+-		`trusted-types html url;`,
++		`trusted-types html url miniflux-highlight;`,
+ 		`manifest-src 'self';`,
+ 	}
+ 	got := csp(nil, "1234")
+@@ -296,7 +296,7 @@ func TestCSPCustomJSExternalFont(t *testing.T) {
+ 		`script-src 'nonce-1234'`,
+ 		`'strict-dynamic';`,
+ 		`require-trusted-types-for 'script';`,
+-		`trusted-types html url;`,
++		`trusted-types html url miniflux-highlight;`,
+ 		`manifest-src 'self';`,
+ 	}
+ 	got := csp(&model.User{ExternalFontHosts: "test.com", CustomJS: "alert(1)"}, "1234")
+@@ -318,7 +318,7 @@ func TestCSPExternalFontStylesheet(t *testing.T) {
+ 		`script-src 'nonce-1234'`,
+ 		`'strict-dynamic';`,
+ 		`require-trusted-types-for 'script';`,
+-		`trusted-types html url;`,
++		`trusted-types html url miniflux-highlight;`,
+ 		`manifest-src 'self';`,
+ 	}
+ 	got := csp(&model.User{ExternalFontHosts: "test.com", Stylesheet: "a {color: red;}"}, "1234")

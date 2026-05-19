@@ -1,0 +1,95 @@
+diff --git a/app/[locale]/page.tsx b/app/[locale]/page.tsx
+index d4c9031..407a97a 100644
+--- a/app/[locale]/page.tsx
++++ b/app/[locale]/page.tsx
+@@ -759,7 +759,6 @@ export default function Home() {
+-  // System-notification click handler. The push SW navigates the user back
+-  // here with `?email=<id>` (specific email it built the toast from) or
+-  // `?openLatestUnread=1` (generic "New mail" toast — happens when the
+-  // preview API failed). We resolve those params once after the inbox has
+-  // finished loading and open the right message, then strip the params so a
+-  // refresh doesn't re-open it.
+-  const notificationParamHandledRef = useRef(false);
++  // Deep-link and system-notification click handler. The URL may include
++  // `?email=<id>` (a stable link to a message, also used by notification
++  // toasts) or `?openLatestUnread=1` (generic "New mail" toast — happens
++  // when the preview API failed). We resolve those params once after mail data
++  // is ready; generated `?email=` URLs from normal in-app selection are ignored.
++  const initialMailParamHandledRef = useRef(false);
+@@ -767 +766 @@ export default function Home() {
+-    if (notificationParamHandledRef.current) return;
++    if (initialMailParamHandledRef.current) return;
+@@ -771,4 +770,7 @@ export default function Home() {
+-    const params = new URLSearchParams(window.location.search);
+-    const emailIdParam = params.get('email');
+-    const openLatestUnread = params.get('openLatestUnread') === '1';
+-    if (!emailIdParam && !openLatestUnread) return;
++    const url = new URL(window.location.href);
++    const emailIdParam = url.searchParams.get('email');
++    const openLatestUnread = url.searchParams.get('openLatestUnread') === '1';
++    if (!emailIdParam && !openLatestUnread) {
++      initialMailParamHandledRef.current = true;
++      return;
++    }
+@@ -780,2 +782,6 @@ export default function Home() {
+-    notificationParamHandledRef.current = true;
+-    window.history.replaceState({}, '', window.location.pathname);
++    initialMailParamHandledRef.current = true;
++
++    if (openLatestUnread) {
++      url.searchParams.delete('openLatestUnread');
++      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
++    }
+@@ -783,0 +790 @@ export default function Home() {
++      setActiveView("viewer");
+@@ -791,0 +799 @@ export default function Home() {
++      setActiveView("viewer");
+@@ -794 +802 @@ export default function Home() {
+-  }, [isAuthenticated, client, mailboxes.length, emails, fetchEmailContent, selectEmail, setLoadingEmail]);
++  }, [isAuthenticated, client, mailboxes.length, emails, fetchEmailContent, selectEmail, setActiveView, setLoadingEmail]);
+diff --git a/hooks/use-browser-navigation.ts b/hooks/use-browser-navigation.ts
+index 56358fe..f9f14f9 100644
+--- a/hooks/use-browser-navigation.ts
++++ b/hooks/use-browser-navigation.ts
+@@ -45,0 +46,13 @@ function readStoredState(): StoredNavState | undefined {
++function buildNavigationUrl(snapshot: NavSnapshot, preserveInitialEmailParam: boolean): string {
++  const url = new URL(window.location.href);
++
++  if (snapshot.emailId) {
++    url.searchParams.set("email", snapshot.emailId);
++    url.searchParams.delete("openLatestUnread");
++  } else if (!(preserveInitialEmailParam && url.searchParams.has("email"))) {
++    url.searchParams.delete("email");
++  }
++
++  return `${url.pathname}${url.search}${url.hash}`;
++}
++
+@@ -56,2 +69,3 @@ function readStoredState(): StoredNavState | undefined {
+- * The URL is left untouched so Next.js routes (e.g. /calendar, /settings)
+- * continue to behave normally.
++ * The selected email is mirrored into the `?email=` query parameter so users
++ * can copy links to individual messages. Other Next.js routes (e.g. /calendar,
++ * /settings) continue to behave normally.
+@@ -141,0 +156 @@ export function useBrowserNavigation({
++    const isInitialized = initializedRef.current;
+@@ -143,0 +159 @@ export function useBrowserNavigation({
++    const url = buildNavigationUrl(snapshot, !isInitialized);
+@@ -173,0 +190 @@ export function useBrowserNavigation({
++          buildNavigationUrl(listSnapshot, false),
+@@ -176 +193 @@ export function useBrowserNavigation({
+-        window.history.pushState(newState, "");
++        window.history.pushState(newState, "", url);
+@@ -180 +197 @@ export function useBrowserNavigation({
+-        window.history.replaceState(newState, "");
++        window.history.replaceState(newState, "", url);
+@@ -183 +200,8 @@ export function useBrowserNavigation({
+-      window.history.pushState(newState, "");
++      if (snapshot.emailId && existing && !existing.emailId) {
++        window.history.replaceState(
++          window.history.state,
++          "",
++          buildNavigationUrl({ ...snapshot, emailId: null }, false),
++        );
++      }
++      window.history.pushState(newState, "", url);

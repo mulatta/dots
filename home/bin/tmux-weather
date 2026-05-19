@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Weather widget for tmux/zjstatus status bars.
+#
+# Fetches "<icon>|<temp>" from wttr.in with a 30-minute file cache. The
+# previous incarnation (zjstatus-weather) cached *any* upstream response,
+# so a transient wttr.in error message ("weather data source not
+# available") would stick to the bar for the entire cache window. This
+# version validates that the response actually contains the '|' separator
+# we asked for; anything else is treated as a fetch failure and not
+# cached. Empty output collapses the widget pill on the consumer side.
+set -euo pipefail
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-weather/seoul"
+LOCATION="${TMUX_WEATHER_LOCATION:-Seoul}"
+mkdir -p "$(dirname "$CACHE")"
+
+fetch() {
+  curl -s --max-time 5 "wttr.in/${LOCATION}?format=%c|%t" 2>/dev/null || true
+}
+
+is_valid() {
+  # wttr.in's success format is "<icon>|<+temp>". Any error response
+  # (HTML, plain text apology, etc.) won't contain the '|' separator,
+  # so we use that as a cheap sanity check.
+  [[ "$1" == *"|"* ]]
+}
+
+# Use cache if fresh (<30 min) AND it actually held a valid response.
+if [ -f "$CACHE" ] && [ -z "$(find "$CACHE" -mmin +30 2>/dev/null)" ]; then
+  raw=$(cat "$CACHE" 2>/dev/null || echo "")
+else
+  raw=""
+fi
+
+if ! is_valid "$raw"; then
+  raw=$(fetch)
+  if is_valid "$raw"; then
+    printf '%s' "$raw" > "$CACHE"
+  else
+    # Fall back to whatever stale-but-valid response we have on disk;
+    # better to show yesterday's temperature than an upstream error.
+    if [ -f "$CACHE" ]; then
+      cached=$(cat "$CACHE" 2>/dev/null || echo "")
+      if is_valid "$cached"; then
+        raw="$cached"
+      else
+        raw=""
+      fi
+    else
+      raw=""
+    fi
+  fi
+fi
+
+[ -z "$raw" ] && exit 0
+
+icon=$(echo "$raw" | cut -d'|' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+temp=$(echo "$raw" | cut -d'|' -f2 | tr -d '+ ' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+[ -n "$temp" ] && printf '%s %s' "$icon" "$temp"

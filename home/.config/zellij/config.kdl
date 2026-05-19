@@ -1,0 +1,7 @@
+// Zellij config - managed by dotfiles
+default_mode "normal"
+default_shell "zsh"
+default_layout "default"
+show_startup_tips false
+pane_frames false
+theme "catppuccin-macchiato"

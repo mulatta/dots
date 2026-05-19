@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# vdirsyncer post_hook: commit after item creation/modification.
+set -euo pipefail
+
+file="$1"
+dir="$(dirname "$file")"
+
+cd "$dir"
+if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+  # Files live in collection subdirectories; keep history at the storage root.
+  git init --quiet ..
+  git -C .. add -A
+  git -C .. commit -m "Initial commit" --quiet || true
+fi
+
+git add "$file"
+git commit -m "Update $(basename "$file")" --quiet || true

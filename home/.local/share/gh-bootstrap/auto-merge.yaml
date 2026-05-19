@@ -1,0 +1,25 @@
+name: Auto Merge Dependency Updates
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+jobs:
+  auto-merge-dependency-updates:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: "auto-merge:${{ github.head_ref }}"
+      cancel-in-progress: true
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Auto Merge
+        uses: Mic92/auto-merge@main
+        with:
+          repo-token: ${{ steps.app-token.outputs.token }}
+          merge-method: squash

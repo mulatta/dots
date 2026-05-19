@@ -1,0 +1,23 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*~
+*.swp
+*.swo
+result
+result-*
+.direnv/
+
+# ck semantic search
+.ck/
+.ckignore
+
+# CLAUDE.md
+CLAUDE.md
+CLAUDE.local.md
+
+
+**/.claude/settings.local.json
+
+.codex

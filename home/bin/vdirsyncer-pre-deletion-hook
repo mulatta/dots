@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# vdirsyncer pre_deletion_hook: commit deletion of items.
+set -euo pipefail
+
+file="$1"
+dir="$(dirname "$file")"
+
+cd "$dir"
+if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+  # Files live in collection subdirectories; keep history at the storage root.
+  git init --quiet ..
+  git -C .. add -A
+  git -C .. commit -m "Initial commit" --quiet || true
+fi
+
+git rm --quiet "$file"
+git commit -m "Delete $(basename "$file")" --quiet || true

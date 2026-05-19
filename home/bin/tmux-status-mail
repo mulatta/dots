@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# tmux status widget: notmuch unread mail as a powerline pill.
+#
+# Pill matches the zjstatus-notify shape on the zellij side so the eye
+# reads the same icon + count layout on both multiplexers. Two segments
+# (icon | count) with rounded U+E0B6 / U+E0B4 caps. Catppuccin-macchiato
+# palette: peach #f5a97f for the icon segment, surface0 #363a4f for the
+# count segment.
+#
+# Outputs nothing when the inbox is empty or notmuch is unavailable —
+# the pill collapses entirely instead of showing a stale ' 0 '.
+set -euo pipefail
+
+command -v notmuch >/dev/null 2>&1 || exit 0
+mail_root="${XDG_DATA_HOME:-$HOME/.local/share}/mail"
+[ -d "$mail_root/.notmuch" ] || exit 0
+
+count=$(notmuch count "tag:unread AND NOT tag:trash AND NOT folder:\"mulatta/Junk Mail\"" 2>/dev/null || echo 0)
+[ "$count" -eq 0 ] && exit 0
+
+color="#f5a97f"
+LCAP=$'\xee\x82\xb6'
+RCAP=$'\xee\x82\xb4'
+
+printf '#[bg=default,fg=%s]%s' "$color" "$LCAP"
+printf '#[bg=%s,fg=#1e2030,bold] 󰊫 ' "$color"
+printf '#[bg=#363a4f,fg=%s,bold] %s ' "$color" "$count"
+printf '#[bg=default,fg=#363a4f]%s' "$RCAP"
