@@ -15,6 +15,7 @@ let
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${wgPrefix}:${maltSuffix}";
   tapsWgIP = "${wgPrefix}::1";
+  secretsYaml = config.clan.core.vars.generators.home-assistant.files."secrets.yaml".path;
 
   domain = "home.mulatta.io";
   port = 8123;
@@ -44,6 +45,8 @@ in
 
       homeassistant = {
         name = "Home";
+        latitude = "!secret home_latitude";
+        longitude = "!secret home_longitude";
         external_url = "https://${domain}";
         internal_url = "https://${domain}";
         unit_system = "metric";
@@ -59,7 +62,27 @@ in
         login_attempts_threshold = 5;
       };
 
-      recorder.db_url = "postgresql://hass@/hass?host=/run/postgresql";
+      recorder = {
+        db_url = "postgresql://hass@/hass?host=/run/postgresql";
+        purge_keep_days = 30;
+      };
+
+      zone = [
+        {
+          name = "Lab";
+          latitude = "!secret lab_latitude";
+          longitude = "!secret lab_longitude";
+          radius = 80;
+          icon = "mdi:flask";
+        }
+        {
+          name = "Parents";
+          latitude = "!secret parents_latitude";
+          longitude = "!secret parents_longitude";
+          radius = 150;
+          icon = "mdi:home-heart";
+        }
+      ];
 
       auth_oidc = {
         client_id = "homeassistant";
@@ -78,6 +101,12 @@ in
     };
   };
 
+  clan.core.vars.generators.home-assistant.files."secrets.yaml" = {
+    secret = true;
+    owner = "hass";
+    group = "hass";
+  };
+
   services.postgresql.ensureDatabases = [ "hass" ];
   services.postgresql.ensureUsers = [
     {
@@ -88,11 +117,13 @@ in
 
   systemd.tmpfiles.rules = [
     "Z /var/lib/hass 0750 hass hass -"
+    "L+ /var/lib/hass/secrets.yaml - - - - ${secretsYaml}"
   ];
 
   systemd.services.home-assistant = {
     requires = [ "postgresql.service" ];
     after = [ "postgresql.service" ];
+    restartTriggers = [ secretsYaml ];
     unitConfig.RequiresMountsFor = [ "/var/lib/hass" ];
   };
 
