@@ -28,7 +28,7 @@ in
   };
 
   imports = [
-    self.inputs.restate-workflows.nixosModules.media-archive
+    self.inputs.restate-workflows.nixosModules.url-media-archive
   ];
 
   clan.core.vars.generators.restate-request-identity = {
@@ -81,14 +81,19 @@ in
     };
   };
 
-  services.restateWorkers.media-archive = {
+  services.restateWorkers.url-media-archive = {
     enable = true;
-    package = self.inputs.restate-workflows.packages.${pkgs.stdenv.hostPlatform.system}.media-archive;
+    package =
+      self.inputs.restate-workflows.packages.${pkgs.stdenv.hostPlatform.system}.url-media-archive;
     group = "media";
     restateAdminUrl = "http://[${maltWgIP}]:9070";
     endpointUrl = "http://127.0.0.1:9080";
-    archiveRoot = "/srv/media/videos/restate";
-    cookiePath = "/var/lib/media-archive/cookies/browser.netscape.txt";
+    archiveRoot = "/srv/media/videos/url-media-archive/A";
+    cookiePath = "/var/lib/url-media-archive/cookies/browser.netscape.txt";
+    ytDlpProbeConcurrency = 1;
+    ytDlpDownloadConcurrency = 1;
+    ytDlpRequestMinIntervalMs = 90000;
+    ytDlpRequestJitterMs = 60000;
     requestIdentity.publicKeys = [
       requestIdentity.files."public-key".value
     ];
@@ -99,7 +104,7 @@ in
     wants = [ "network-online.target" ];
   };
 
-  systemd.services.media-archive-worker.unitConfig.RequiresMountsFor = [
+  systemd.services.url-media-archive-worker.unitConfig.RequiresMountsFor = [
     "/srv/media"
   ];
 
