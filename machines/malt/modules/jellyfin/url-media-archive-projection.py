@@ -1,9 +1,12 @@
 import argparse
+import json
 import os
 import re
 import subprocess
 import time
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 MEDIA_SUFFIXES = {".mp4", ".mkv", ".webm", ".mov", ".m4v"}
 JOB_ID_RE = re.compile(
@@ -14,6 +17,16 @@ PROJECTION_RE = re.compile(
     r"\.(?:mp4|mkv|webm|mov|m4v|nfo)$",
     re.I,
 )
+
+
+@dataclass(frozen=True)
+class ProjectedMedia:
+    job_dir: Path
+    media: Path
+    nfo: Path
+    stem: str
+    identity: str
+    sort_key: tuple[str, str, str]
 
 
 def relative_target(source: Path, library: Path) -> str:
@@ -42,6 +55,34 @@ def ensure_symlink(target: Path, source: Path, library: Path) -> None:
             tmp.unlink()
 
 
+def read_info_json(media: Path) -> dict[str, Any]:
+    info_path = Path(f"{media}.info.json")
+    if not info_path.is_file():
+        return {}
+    try:
+        data = json.loads(info_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def media_identity(media: Path, info: dict[str, Any]) -> str:
+    blake3 = info.get("blake3")
+    if isinstance(blake3, str) and blake3:
+        return f"blake3:{blake3}"
+    return f"path:{media}"
+
+
+def media_sort_key(
+    job_dir: Path, media: Path, info: dict[str, Any]
+) -> tuple[str, str, str]:
+    archived_at = info.get("archivedAt")
+    archived_key = (
+        archived_at if isinstance(archived_at, str) and archived_at else "9999"
+    )
+    return (archived_key, job_dir.name, media.name)
+
+
 def media_files_for_job(job_dir: Path) -> list[Path]:
     return sorted(
         path
@@ -62,24 +103,51 @@ def job_dirs(archive_db: Path) -> list[Path]:
     )
 
 
+def projected_media_for_job(job_dir: Path) -> list[ProjectedMedia]:
+    media_files = media_files_for_job(job_dir)
+    projected = []
+    for index, media in enumerate(media_files, start=1):
+        stem = job_dir.name if len(media_files) == 1 else f"{job_dir.name}-{index:02d}"
+        info = read_info_json(media)
+        projected.append(
+            ProjectedMedia(
+                job_dir=job_dir,
+                media=media,
+                nfo=media.with_suffix(".nfo"),
+                stem=stem,
+                identity=media_identity(media, info),
+                sort_key=media_sort_key(job_dir, media, info),
+            )
+        )
+    return projected
+
+
+def representatives(candidates: list[ProjectedMedia]) -> list[ProjectedMedia]:
+    chosen: dict[str, ProjectedMedia] = {}
+    for candidate in candidates:
+        current = chosen.get(candidate.identity)
+        if current is None or candidate.sort_key < current.sort_key:
+            chosen[candidate.identity] = candidate
+    return sorted(chosen.values(), key=lambda candidate: candidate.sort_key)
+
+
 def reconcile(archive_db: Path, library: Path) -> None:
     library.mkdir(parents=True, exist_ok=True)
     desired: set[str] = set()
     jobs = job_dirs(archive_db)
+    candidates: list[ProjectedMedia] = []
 
     for job_dir in jobs:
-        media_files = media_files_for_job(job_dir)
-        for index, media in enumerate(media_files, start=1):
-            stem = (
-                job_dir.name if len(media_files) == 1 else f"{job_dir.name}-{index:02d}"
-            )
-            media_target = library / f"{stem}{media.suffix.lower()}"
-            nfo_source = media.with_suffix(".nfo")
-            nfo_target = library / f"{stem}.nfo"
-            ensure_symlink(media_target, media, library)
-            ensure_symlink(nfo_target, nfo_source, library)
-            desired.add(media_target.name)
-            desired.add(nfo_target.name)
+        candidates.extend(projected_media_for_job(job_dir))
+
+    visible = representatives(candidates)
+    for candidate in visible:
+        media_target = library / f"{candidate.stem}{candidate.media.suffix.lower()}"
+        nfo_target = library / f"{candidate.stem}.nfo"
+        ensure_symlink(media_target, candidate.media, library)
+        ensure_symlink(nfo_target, candidate.nfo, library)
+        desired.add(media_target.name)
+        desired.add(nfo_target.name)
 
     for entry in library.iterdir():
         if (
@@ -89,8 +157,9 @@ def reconcile(archive_db: Path, library: Path) -> None:
         ):
             entry.unlink()
 
+    hidden = len(candidates) - len(visible)
     print(
-        f"materialized {len(desired)} projection entries from {len(jobs)} archive jobs",
+        f"materialized {len(desired)} projection entries from {len(jobs)} archive jobs; hidden_duplicate_media={hidden}",
         flush=True,
     )
 
