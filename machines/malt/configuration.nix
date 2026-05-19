@@ -13,7 +13,7 @@
     ../../nixosModules/radicle-mulatta.nix
     ./modules/backup.nix
     ./modules/home-assistant.nix
-    ./modules/jellyfin.nix
+    ./modules/jellyfin
     ./modules/linkwarden.nix
     ./modules/miniflux
     ./modules/n8n
@@ -41,6 +41,15 @@
 
   # Enable aarch64 emulation for building Raspberry Pi images
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-compute-runtime
+      intel-media-driver
+      vpl-gpu-rt
+    ];
+  };
 
   environment.systemPackages = with pkgs; [
     vim
