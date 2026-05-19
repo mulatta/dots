@@ -79,6 +79,17 @@ let
       ${pkgs.coreutils}/bin/chmod ${permissions} ${lib.escapeShellArg resultPath}
     '';
 
+  mediaArchiveDb = "/srv/media/videos/url-media-archive/A/db";
+  mediaArchiveLibrary = "/srv/media/videos/library/A";
+  mediaArchiveProjection = pkgs.writeTextFile {
+    name = "url-media-archive-projection";
+    destination = "/bin/url-media-archive-projection";
+    executable = true;
+    text = ''
+      #!${pkgs.python3}/bin/python3
+      ${builtins.readFile ./url-media-archive-projection.py}
+    '';
+  };
 in
 {
   # Declared for NixOS mounts, not for automatic post-provisioning changes.
@@ -153,9 +164,52 @@ in
     "d /srv/media/videos 0755 root media -"
     "d /srv/media/videos/url-media-archive 0755 root media -"
     "d /srv/media/videos/url-media-archive/A 2750 url-media-archive media -"
+    "d /srv/media/videos/library 0755 root media -"
+    "d /srv/media/videos/library/A 2750 url-media-archive media -"
     "d /var/lib/jellyfin/plugins 0750 jellyfin jellyfin -"
     "d /var/lib/jellyfin/plugins/configurations 0750 jellyfin jellyfin -"
   ];
+
+  systemd.services.url-media-archive-projection = {
+    description = "Materialize URL media archive filesystem projection";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "network-online.target"
+      "url-media-archive-worker.service"
+    ];
+    wants = [
+      "network-online.target"
+      "url-media-archive-worker.service"
+    ];
+    unitConfig.RequiresMountsFor = [ "/srv/media" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${mediaArchiveProjection}/bin/url-media-archive-projection watch --archive-db ${mediaArchiveDb} --library ${mediaArchiveLibrary} --inotifywait ${pkgs.inotify-tools}/bin/inotifywait";
+      User = "url-media-archive";
+      Group = "media";
+      Restart = "always";
+      RestartSec = "5s";
+      ReadOnlyPaths = [ mediaArchiveDb ];
+      ReadWritePaths = [ mediaArchiveLibrary ];
+
+      NoNewPrivileges = true;
+      PrivateDevices = true;
+      PrivateTmp = true;
+      ProtectClock = true;
+      ProtectControlGroups = true;
+      ProtectHome = true;
+      ProtectHostname = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      ProtectKernelTunables = true;
+      ProtectProc = "invisible";
+      ProtectSystem = "strict";
+      RestrictAddressFamilies = [ "AF_UNIX" ];
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      SystemCallArchitectures = "native";
+    };
+  };
 
   systemd.services.jellyfin = {
     preStart = lib.mkBefore ''
