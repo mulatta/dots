@@ -92,8 +92,8 @@ in
     cookiePath = "/var/lib/url-media-archive/cookies/browser.netscape.txt";
     ytDlpProbeConcurrency = 1;
     ytDlpDownloadConcurrency = 1;
-    ytDlpRequestMinIntervalMs = 90000;
-    ytDlpRequestJitterMs = 60000;
+    ytDlpRequestMinIntervalMs = 10000;
+    ytDlpRequestJitterMs = 10000;
     requestIdentity.publicKeys = [
       requestIdentity.files."public-key".value
     ];
