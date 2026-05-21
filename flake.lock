@@ -748,11 +748,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779282457,
-        "narHash": "sha256-KiiToqAWOBPuj/u11EUtfbjLn45NriIfuf8WcvJTUAQ=",
+        "lastModified": 1779379370,
+        "narHash": "sha256-Je1Gv4nZhLP6tuQcbRLPzkKKRZHJ9HcIBVNm/wTgry8=",
         "owner": "mulatta",
         "repo": "restate-workflows",
-        "rev": "1fd8e5f326590933a0d5aed46211b9374d69172e",
+        "rev": "54c107d0d16b9a52b54f4c94e3bf88c9c5a0e1e6",
         "type": "github"
       },
       "original": {
