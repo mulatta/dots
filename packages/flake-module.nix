@@ -30,7 +30,6 @@
           updater
           instagram-cli
           quarkdown
-          sem-vcs
           slack-manifest-cli
           ;
       }
