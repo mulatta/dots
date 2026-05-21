@@ -11,7 +11,7 @@ from pathlib import Path
 
 SYSTEM_PROMPT = """\
 You are a focused Personal Information Manager assistant for local calendar,
-email, todo, and contacts workflows.
+email, todo, contacts, and biomedical reference workflows.
 
 This wrapper is not the DAV migration path. Assume vdirsyncer discovery and
 initial sync have already been reviewed and run outside this session.
@@ -23,6 +23,7 @@ Available tools:
 - n8n hooks: n8n-hooks (use store-draft for email drafts)
 - RSS/Miniflux: miniflux-cli (read starred notification entries for calendar-related RSS)
 - Vikunja: vikunja-cli
+- Biomedical references: biorefs-cli
 - Contacts: khard
 - Auth: rbw
 - Basic shell utilities: bash, coreutils, grep, sed, awk, jq, find
@@ -37,6 +38,8 @@ Key XDG directories:
 - Miniflux cache: ~/.cache/miniflux-cli/
 - Miniflux config: ~/.config/miniflux-cli/
 - Vikunja CLI config: ~/.config/vikunja-cli/
+- Bio reference CLI config: ~/.config/biorefs-cli/
+- Bio reference CLI cache: ~/.cache/biorefs-cli/
 
 Safety rules:
 - Do not run vdirsyncer sync, email-sync, mbsync, send mail, create events,
@@ -49,6 +52,8 @@ Safety rules:
   confirmation.
 - Do not print secrets or rbw values. Use rbw only as a credential provider for
   commands that require it.
+- Use biorefs-cli for biomedical literature, PubMed/PMC/NCBI, OpenAlex,
+  PubChem, and legal OA full-text lookup. Never use paywall bypasses.
 
 Common read-only tasks:
 - Show Crab.fit event availability: crabfit-cli show EVENT_ID
@@ -71,6 +76,12 @@ Common read-only tasks:
 - List Vikunja tasks: vikunja-cli -j task list --project Inbox --all
 - Show Vikunja task: vikunja-cli -j task show <task-id>
 - List Vikunja due notifications: vikunja-cli -j notification list --kind due --unread
+- Search PubMed papers: biorefs-cli paper search 'BRCA1 PARP inhibitor resistance' --limit 20 --json
+- Fetch paper metadata: biorefs-cli paper fetch --pmid 35063100 --json
+- Check legal OA full text: biorefs-cli paper fulltext --pmcid PMC8887926 --sections introduction --json
+- Fetch OpenAlex work metadata: biorefs-cli openalex work --doi 10.1016/j.molcel.2021.12.026 --json
+- Fetch NCBI Gene record: biorefs-cli gene fetch --gene-id 672 --json
+- Search PubChem compounds: biorefs-cli compound search olaparib --type name --limit 5 --json
 
 Calendar policy:
 - Valid calendars: personal, academic, research, dev
@@ -112,6 +123,8 @@ RW_DIRS = [
     ".local/share/contacts",
     ".local/share/vdirsyncer",
     ".cache/miniflux-cli",
+    ".cache/biorefs-cli",
+    ".config/biorefs-cli",
     ".cache/vdirsyncer",
     ".cache/notmuch",
     ".cache/rbw",
@@ -342,6 +355,8 @@ def main() -> int:
     (home / ".pi/pim").mkdir(parents=True, exist_ok=True)
     (home / ".claude/outputs").mkdir(parents=True, exist_ok=True)
     (home / ".cache/miniflux-cli").mkdir(parents=True, exist_ok=True)
+    (home / ".cache/biorefs-cli").mkdir(parents=True, exist_ok=True)
+    (home / ".config/biorefs-cli").mkdir(parents=True, exist_ok=True)
 
     tools_path = os.environ.get("PIM_TOOLS_PATH", "")
     pi_bin = os.environ.get("PIM_PI_BIN", "pi")
