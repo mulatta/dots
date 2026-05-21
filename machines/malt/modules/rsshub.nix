@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -65,6 +66,8 @@ in
     redis.enable = true;
     settings = {
       PORT = 1200;
+      CHROMIUM_EXECUTABLE_PATH = lib.getExe pkgs.chromium;
+      PLAYWRIGHT_CLOSE_TIMEOUT = "300000";
       # LISTEN_INADDR_ANY defaults to false (loopback-only); keep default.
     };
   };
