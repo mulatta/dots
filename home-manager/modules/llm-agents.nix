@@ -73,6 +73,7 @@ in
       qmd # dots overlay (for CUDA override chain)
     ])
     ++ [
+      skillzPkgs.biorefs-cli
       aiPkgs.apm
       aiPkgs.ccstatusline
       aiPkgs.codex

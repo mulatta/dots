@@ -6,7 +6,7 @@ itself.
 
 The wrapper assumes local vdirsyncer data has already been reviewed, discovered,
 and synced outside the agent session. It is intended for calendar, mail, todo,
-contacts, RSS/Miniflux, and Vikunja workflows over local XDG data:
+contacts, RSS/Miniflux, Vikunja, and biomedical reference workflows over local XDG data:
 
 - Calendars: `~/.local/share/calendars/`
 - Contacts: `~/.local/share/contacts/`
@@ -17,16 +17,18 @@ contacts, RSS/Miniflux, and Vikunja workflows over local XDG data:
 - Miniflux cache: `~/.cache/miniflux-cli/`
 - Miniflux config: `~/.config/miniflux-cli/`
 - Vikunja CLI config: `~/.config/vikunja-cli/`
+- Bio reference CLI config: `~/.config/biorefs-cli/`
+- Bio reference CLI cache: `~/.cache/biorefs-cli/`
 
 ## Scope
 
 The wrapper provides a restricted PIM tool `PATH` containing `calendar-cli`,
 `crabfit-cli`, `vdirsyncer`, `todoman`, `notmuch`, `afew`, `mrefile`/`mshow`
 from mblaze, `msmtp`, `mbsync`, `email-sync`, `khard`, `miniflux-cli`, `vikunja-cli`,
-`rbw`, and basic shell utilities. It also registers the bundled `crabfit-cli`,
-`miniflux-cli`, and `vikunja-cli` pi skills with `--skill`, keeping them
-available for focused PIM sessions without putting them in the default pi skill
-set.
+`biorefs-cli`, `rbw`, and basic shell utilities. It also registers the bundled
+`crabfit-cli`, `miniflux-cli`, `vikunja-cli`, and `biorefs-cli` pi skills with
+`--skill`, keeping them available for focused PIM sessions without putting them
+in the default pi skill set.
 
 Use `calendar-cli --url` for a VEVENT primary source link and repeated
 `--attach` values for related document/file links.
