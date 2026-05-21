@@ -127,7 +127,9 @@ class TestRunNixUpdateAttrPath:
     """nix-update >=1.14 rejects leading '.#' on the attribute argument."""
 
     def test_attr_has_no_flake_prefix(self, tmp_path: Path):
-        pkg = Package(name="sem-vcs", method="nix-update", path=tmp_path, extra_args=[])
+        pkg = Package(
+            name="example-pkg", method="nix-update", path=tmp_path, extra_args=[]
+        )
 
         ok = subprocess.CompletedProcess([], 0, stdout="", stderr="")
         with patch("updater.__main__.subprocess.run", return_value=ok) as mock_run:
@@ -141,7 +143,7 @@ class TestRunNixUpdateAttrPath:
             f"nix-update attribute must not start with '.#' (got: {attr!r}). "
             "nix-update 1.14+ rejects this with AttributePathError."
         )
-        assert attr == "packages.x86_64-linux.sem-vcs"
+        assert attr == "packages.x86_64-linux.example-pkg"
 
 
 # -- Regression: branch-exists skip must not count as failure --

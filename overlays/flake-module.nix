@@ -82,7 +82,6 @@
         instagram-cli = prev.callPackage ../packages/instagram-cli { };
         quarkdown = prev.callPackage ../packages/quarkdown { };
         radicle-desktop = prev.callPackage ../packages/radicle-desktop { };
-        sem-vcs = prev.callPackage ../packages/sem-vcs { };
 
         # Tool bundles (moved from helix/yazi flake-modules)
         helix-lsp-tools = prev.buildEnv {
