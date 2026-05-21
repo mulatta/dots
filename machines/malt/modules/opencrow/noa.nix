@@ -1,6 +1,7 @@
 { lib, ... }:
 {
   imports = [
+    ./biorefs.nix
     ./calendar.nix
     ./geo.nix
     ./mail.nix
