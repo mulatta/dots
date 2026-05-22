@@ -20,13 +20,14 @@ in
   programs.skillz = {
     enable = true;
     skills = [
+      "biorefs-cli"
       "buildbot-pr-check"
       "calendar-cli"
       "context7-cli"
       "crwl-cli"
+      "kmap-cli"
       "linkwarden-cli"
       "n8n-cli"
-      "kmap-cli"
       "pexpect-cli"
       "vikunja-cli"
     ]
