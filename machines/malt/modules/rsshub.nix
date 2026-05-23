@@ -58,6 +58,15 @@ in
     '';
   };
 
+  fonts.fontconfig.enable = true;
+  fonts.packages = with pkgs; [
+    dejavu_fonts
+    liberation_ttf
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
+  ];
+
   # Miniflux is the only RSSHub consumer; public/SSO exposure would leak feed
   # URLs or add unnecessary auth complexity for a localhost backend.
   services.rsshub = {
@@ -67,7 +76,7 @@ in
     settings = {
       PORT = 1200;
       CHROMIUM_EXECUTABLE_PATH = lib.getExe pkgs.chromium;
-      PLAYWRIGHT_CLOSE_TIMEOUT = "300000";
+      FONTCONFIG_FILE = "/etc/fonts/fonts.conf";
       # LISTEN_INADDR_ANY defaults to false (loopback-only); keep default.
     };
   };
