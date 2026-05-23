@@ -1,9 +1,10 @@
 """Regression tests for updater."""
 
+import importlib.util
 import json
 import subprocess
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -74,50 +75,106 @@ class TestFixPlaceholderHash:
         assert result["npmDepsHash"] == existing_hash
 
 
-# -- Regression: update.py must reset npmDepsHash to placeholder on source change --
+# -- Regression: radicle-desktop update.py must match the DMG package schema --
 
 
-class TestUpdatePyResetsHash:
-    """Verify radicle-desktop update.py resets npmDepsHash when source changes."""
+def load_radicle_update_module():
+    update_script = (
+        Path(__file__).resolve().parents[1] / "radicle-desktop" / "update.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "test_radicle_desktop_update", update_script
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
-    def test_npm_hash_reset_on_source_change(self, tmp_path: Path):
-        """When rev changes, npmDepsHash must become PLACEHOLDER_HASH."""
-        # Simulate existing srcs.json with old hash
-        pkg_dir = tmp_path
-        srcs_file = pkg_dir / "srcs.json"
+
+class TestRadicleDesktopUpdatePy:
+    """Verify radicle-desktop update.py writes the fetchurl DMG schema."""
+
+    def test_writes_version_url_hash_without_npm_placeholder(
+        self, tmp_path: Path, monkeypatch
+    ):
+        srcs_file = tmp_path / "srcs.json"
         srcs_file.write_text(
             json.dumps(
                 {
-                    "version": "0-unstable-2026-01-01",
-                    "rev": "old_rev",
-                    "srcHash": "sha256-oldHash",
-                    "npmDepsHash": "sha256-OldNpmHash000000000000000000000000000000=",
+                    "version": "0.10.0",
+                    "url": "https://example.invalid/radicle-desktop-0.10.0-aarch64.dmg",
+                    "hash": "sha256-old",
                 }
             )
         )
 
-        # Inline the core logic from radicle-desktop/update.py
-        # (the fix: always use placeholder, not current.get())
-        current = json.loads(srcs_file.read_text())
-        new_rev = "new_rev_abc123"
-        assert current["rev"] != new_rev  # source changed
+        module = load_radicle_update_module()
+        module.__file__ = str(tmp_path / "update.py")
+        mirror_url = "https://github.com/mulatta/dots/releases/download/radicle-desktop-mirror/radicle-desktop-0.11.0-aarch64.dmg"
+        mirror_hash = "sha256-newDmgHash0000000000000000000000000000000="
 
-        # This is what the fixed update.py does:
-        npm_hash = PLACEHOLDER_HASH
+        monkeypatch.setattr(
+            module,
+            "get_latest_version",
+            lambda: {"version": "0.11.0", "sha": "b02c1556"},
+            raising=False,
+        )
+        monkeypatch.setattr(
+            module,
+            "mirror_to_github",
+            lambda version, sha: mirror_url,
+            raising=False,
+        )
+        monkeypatch.setattr(
+            module, "get_nix_hash", lambda url: mirror_hash, raising=False
+        )
+        monkeypatch.setattr(
+            module,
+            "get_latest_commit",
+            lambda: ("b02c1556", 1779451373),
+            raising=False,
+        )
+        monkeypatch.setattr(
+            module, "nix_prefetch_git", lambda url, rev: "sha256-src", raising=False
+        )
 
-        new_data = {
-            "version": "0-unstable-2026-03-24",
-            "rev": new_rev,
-            "srcHash": "sha256-newHash",
-            "npmDepsHash": npm_hash,
-        }
-        srcs_file.write_text(json.dumps(new_data, indent=2) + "\n")
+        module.main()
 
         result = json.loads(srcs_file.read_text())
-        assert result["npmDepsHash"] == PLACEHOLDER_HASH, (
-            "npmDepsHash must be reset to placeholder when source changes, "
-            "so fix_placeholder_hash() can compute the correct hash"
+        assert result == {"version": "0.11.0", "url": mirror_url, "hash": mirror_hash}
+        assert PLACEHOLDER_HASH not in srcs_file.read_text()
+
+    def test_skips_when_latest_version_matches_current(
+        self, tmp_path: Path, monkeypatch
+    ):
+        srcs_file = tmp_path / "srcs.json"
+        current = {
+            "version": "0.11.0",
+            "url": "https://example.invalid/radicle-desktop-0.11.0-aarch64.dmg",
+            "hash": "sha256-current",
+        }
+        srcs_file.write_text(json.dumps(current, indent=2) + "\n")
+
+        module = load_radicle_update_module()
+        module.__file__ = str(tmp_path / "update.py")
+        mirror_to_github = Mock()
+        get_nix_hash = Mock()
+
+        monkeypatch.setattr(
+            module,
+            "get_latest_version",
+            lambda: {"version": "0.11.0", "sha": "b02c1556"},
+            raising=False,
         )
+        monkeypatch.setattr(module, "mirror_to_github", mirror_to_github, raising=False)
+        monkeypatch.setattr(module, "get_nix_hash", get_nix_hash, raising=False)
+
+        module.main()
+
+        assert json.loads(srcs_file.read_text()) == current
+        mirror_to_github.assert_not_called()
+        get_nix_hash.assert_not_called()
 
 
 # -- Regression: run_nix_update must pass bare attribute path to nix-update --

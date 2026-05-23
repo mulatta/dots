@@ -1,27 +1,46 @@
 #!/usr/bin/env python3
-"""Update radicle-desktop from Radicle seed node."""
+"""Update radicle-desktop by mirroring the macOS DMG to GitHub releases."""
 
 import json
+import os
 import subprocess
-from datetime import datetime, timezone
+import tempfile
+import urllib.request
 from pathlib import Path
-from urllib.request import urlopen
 
-RADICLE_API = "https://seed.radicle.xyz/api/v1/repos/rad:z4D5UCArafTzTQpDZNQRuqswh3ury"
-
-
-def get_latest_commit() -> tuple[str, int]:
-    """Get latest commit hash and timestamp."""
-    url = f"{RADICLE_API}/commits?perPage=1"
-    with urlopen(url) as resp:
-        data = json.loads(resp.read())[0]
-    return data["id"], data["committer"]["time"]
+LATEST_JSON_URL = (
+    "https://files.radicle.xyz/releases/radicle-desktop/latest/latest.json"
+)
+LATEST_DMG_URL = "https://files.radicle.xyz/releases/radicle-desktop/latest/radicle-desktop-aarch64.dmg"
+MIRROR_REPO = os.environ.get("RADICLE_DESKTOP_MIRROR_REPO", "mulatta/dots")
+RELEASE_TAG = "radicle-desktop-mirror"
 
 
-def nix_prefetch_git(url: str, rev: str) -> str:
-    """Get hash for git repo using nix-prefetch-git."""
+def read_srcs(pkg_dir: Path) -> dict[str, str]:
+    """Read current srcs.json."""
+    srcs_file = pkg_dir / "srcs.json"
+    if srcs_file.exists():
+        result: dict[str, str] = json.loads(srcs_file.read_text())
+        return result
+    return {}
+
+
+def write_srcs(pkg_dir: Path, data: dict[str, str]) -> None:
+    """Write srcs.json with consistent formatting."""
+    (pkg_dir / "srcs.json").write_text(json.dumps(data, indent=2) + "\n")
+
+
+def get_latest_version() -> dict[str, str]:
+    """Fetch latest Radicle Desktop release metadata."""
+    with urllib.request.urlopen(LATEST_JSON_URL) as response:  # noqa: S310
+        result: dict[str, str] = json.loads(response.read().decode())
+        return result
+
+
+def get_nix_hash(url: str) -> str:
+    """Get SRI hash for a URL with Nix."""
     result = subprocess.run(
-        ["nix-prefetch-git", "--quiet", "--url", url, "--rev", rev],
+        ["nix", "store", "prefetch-file", "--json", url],
         capture_output=True,
         text=True,
         check=True,
@@ -30,45 +49,73 @@ def nix_prefetch_git(url: str, rev: str) -> str:
     return data["hash"]
 
 
-def main():
+def run_gh(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
+    """Run GitHub CLI against mirror repo."""
+    return subprocess.run(
+        ["gh", *args, "--repo", MIRROR_REPO],
+        capture_output=True,
+        text=True,
+        check=check,
+    )
+
+
+def mirror_to_github(version: str, sha: str) -> str:
+    """Mirror latest DMG under a versioned GitHub release asset name."""
+    filename = f"radicle-desktop-{version}-aarch64.dmg"
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        local_path = Path(tmpdir) / filename
+        print(f"Downloading {LATEST_DMG_URL}...")
+        urllib.request.urlretrieve(LATEST_DMG_URL, local_path)  # noqa: S310
+
+        body = json.dumps({"version": version, "sha": sha})
+        release_exists = run_gh(["release", "view", RELEASE_TAG], check=False)
+
+        if release_exists.returncode == 0:
+            run_gh(["release", "edit", RELEASE_TAG, "--notes", body])
+        else:
+            run_gh(
+                [
+                    "release",
+                    "create",
+                    RELEASE_TAG,
+                    "--title",
+                    "Radicle Desktop Mirror",
+                    "--notes",
+                    body,
+                ]
+            )
+
+        print("Uploading to GitHub release...")
+        run_gh(["release", "upload", RELEASE_TAG, str(local_path), "--clobber"])
+
+    return (
+        f"https://github.com/{MIRROR_REPO}/releases/download/{RELEASE_TAG}/{filename}"
+    )
+
+
+def main() -> None:
     pkg_dir = Path(__file__).parent
-    srcs_file = pkg_dir / "srcs.json"
+    current = read_srcs(pkg_dir)
 
-    current = json.loads(srcs_file.read_text()) if srcs_file.exists() else {}
+    print("Fetching latest radicle-desktop version...")
+    latest = get_latest_version()
+    version = latest["version"]
+    sha = latest["sha"]
+    print(f"Latest version: {version} ({sha[:8]})")
 
-    rev, timestamp = get_latest_commit()
-    dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-    version = f"0-unstable-{dt.strftime('%Y-%m-%d')}"
-
-    if current.get("rev") == rev:
+    if current.get("version") == version:
         print("Already up to date")
         return
 
-    print(f"Updating to {rev} ({version})")
+    url = mirror_to_github(version, sha)
+    print(f"Mirrored to: {url}")
 
-    # Fetch source hash
-    src_url = "https://seed.radicle.xyz/z4D5UCArafTzTQpDZNQRuqswh3ury.git"
-    print("Fetching source hash...")
-    src_hash = nix_prefetch_git(src_url, rev)
+    print("Fetching hash...")
+    hash_value = get_nix_hash(url)
 
-    # Reset npmDepsHash when source changes so fix_placeholder_hash() recomputes it
-    npm_hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-
-    srcs_file.write_text(
-        json.dumps(
-            {
-                "version": version,
-                "rev": rev,
-                "srcHash": src_hash,
-                "npmDepsHash": npm_hash,
-            },
-            indent=2,
-        )
-        + "\n"
-    )
-
-    print("Updated srcs.json")
-    print("NOTE: Run nix build to compute npmDepsHash if source changed")
+    write_srcs(pkg_dir, {"version": version, "url": url, "hash": hash_value})
+    print(f"Updated to version {version}")
 
 
 if __name__ == "__main__":
