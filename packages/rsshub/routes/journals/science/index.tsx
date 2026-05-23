@@ -8,10 +8,13 @@ import { generateHeaders, PRESETS } from '@/utils/header-generator';
 import { parseDate } from '@/utils/parse-date';
 import type { Browser, Page } from '@/utils/playwright';
 
+import { defaultDelayMs as sharedDefaultDelayMs, defaultJitterMs as sharedDefaultJitterMs, parseNonNegativeIntegerOption, parsePositiveIntegerOption, sleepWithJitter, type Sleep } from '../fetch-policy';
+
 export const baseUrl = 'https://www.science.org';
 export const defaultJournal = 'science';
 export const defaultLimit = 20;
-export const defaultDelayMs = 1500;
+export const defaultDelayMs = sharedDefaultDelayMs;
+export const defaultJitterMs = sharedDefaultJitterMs;
 export const defaultRetries = 3;
 
 export const journals = {
@@ -26,7 +29,6 @@ export const journals = {
 type Journal = keyof typeof journals;
 type RouteKind = 'current' | 'early';
 type CacheGetter<T> = (key: string, getter: () => Promise<T>) => Promise<T>;
-type Sleep = (ms: number) => Promise<void>;
 
 export type ScienceItem = DataItem & {
     doi?: string;
@@ -35,6 +37,8 @@ export type ScienceItem = DataItem & {
 
 export type FetchOptions = {
     delayMs?: number;
+    jitterMs?: number;
+    random?: () => number;
     retries?: number;
     sleep?: Sleep;
 };
@@ -63,16 +67,10 @@ export class ScienceFetchError extends Error {
     }
 }
 
-const sleepDefault: Sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const positiveIntegerOrDefault = (value: string | undefined, fallback: number) => {
-    const parsed = Number.parseInt(value ?? '', 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-};
-
-export const parseLimit = (value: string | undefined) => positiveIntegerOrDefault(value, defaultLimit);
-export const parseDelayMs = (value: string | undefined) => positiveIntegerOrDefault(value, defaultDelayMs);
-export const parseRetries = (value: string | undefined) => positiveIntegerOrDefault(value, defaultRetries);
+export const parseLimit = (value: string | undefined) => parsePositiveIntegerOption(value, defaultLimit);
+export const parseDelayMs = (value: string | undefined) => parseNonNegativeIntegerOption(value, defaultDelayMs);
+export const parseJitterMs = (value: string | undefined) => parseNonNegativeIntegerOption(value, defaultJitterMs);
+export const parseRetries = (value: string | undefined) => parsePositiveIntegerOption(value, defaultRetries);
 
 export const normalizeJournal = (journal: string | undefined): Journal => {
     const normalized = (journal || defaultJournal).toLowerCase();
@@ -186,40 +184,12 @@ const stealthHeaders = () => {
     return headers;
 };
 
-const addStealthInitScript = async (page: Page) => {
-    await page.addInitScript(() => {
-        const defineGetter = <T,>(target: object, property: string, value: T) => {
-            try {
-                Object.defineProperty(target, property, { get: () => value });
-            } catch {
-                // Native browser objects may make some properties non-configurable.
-            }
-        };
-
-        defineGetter(navigator, 'webdriver', undefined);
-        defineGetter(navigator, 'languages', ['en-US', 'en']);
-        defineGetter(navigator, 'plugins', [1, 2, 3, 4, 5]);
-        defineGetter(navigator, 'platform', 'MacIntel');
-        defineGetter(navigator, 'vendor', 'Google Inc.');
-
-        const windowWithChrome = window as Window & { chrome?: { runtime: Record<string, never> } };
-        if (!windowWithChrome.chrome) {
-            try {
-                Object.defineProperty(windowWithChrome, 'chrome', { get: () => ({ runtime: {} }) });
-            } catch {
-                // Some Chromium builds expose a read-only chrome object already.
-            }
-        }
-    });
-};
-
 export const prepareStealthPage = async (page: Page) => {
     const headers = stealthHeaders();
     const { 'user-agent': userAgent, ...extraHeaders } = headers;
 
     await page.setUserAgent(userAgent);
     await page.setExtraHTTPHeaders(extraHeaders);
-    await addStealthInitScript(page);
     await page.setRequestInterception(true);
     page.on('request', (request) => {
         if (shouldBlockRequest(request.resourceType())) {
@@ -265,10 +235,15 @@ const fetchHtmlOnce = async (browser: Browser, url: string, expectedSelector: st
     }
 };
 
+const policy = (options: FetchOptions) => ({
+    delayMs: options.delayMs ?? defaultDelayMs,
+    jitterMs: options.jitterMs ?? defaultJitterMs,
+    random: options.random,
+    sleep: options.sleep,
+});
+
 export const fetchHtmlWithRetries = async (browser: Browser, url: string, expectedSelector: string, options: FetchOptions = {}) => {
     const retries = options.retries ?? defaultRetries;
-    const delayMs = options.delayMs ?? defaultDelayMs;
-    const sleep = options.sleep ?? sleepDefault;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -277,7 +252,7 @@ export const fetchHtmlWithRetries = async (browser: Browser, url: string, expect
         } catch (error) {
             lastError = error;
             if (attempt < retries) {
-                await sleep(delayMs);
+                await sleepWithJitter(policy(options), attempt);
             }
         }
     }
@@ -299,17 +274,12 @@ const enrichArticle = async (browser: Browser, item: ScienceItem, options: Fetch
 };
 
 export const fetchArticleDetails = async (items: ScienceItem[], browser: Browser, tryGet: CacheGetter<ScienceItem>, options: FetchOptions = {}) => {
-    const delayMs = options.delayMs ?? defaultDelayMs;
-    const sleep = options.sleep ?? sleepDefault;
     const details: ScienceItem[] = [];
 
-    for (const [index, item] of items.entries()) {
-        if (index > 0 && delayMs > 0) {
-            await sleep(delayMs);
-        }
-
+    for (const item of items) {
         details.push(
             await tryGet(item.link, async () => {
+                await sleepWithJitter(policy(options));
                 return enrichArticle(browser, item, options);
             })
         );

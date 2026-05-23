@@ -5,12 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import { generatedHeaders, generateHeaders, PRESETS } from '@/utils/header-generator';
 import { parseDate } from '@/utils/parse-date';
-import playwright, { type Browser, type Page } from '@/utils/playwright';
+import type { Browser, Page } from '@/utils/playwright';
+
+import { defaultDelayMs as sharedDefaultDelayMs, defaultJitterMs as sharedDefaultJitterMs, parseNonNegativeIntegerOption, parsePositiveIntegerOption, sleepWithJitter, type Sleep } from '../fetch-policy';
+import playwright from '../stealth';
 
 export const rootUrl = 'https://www.cell.com';
 export const defaultKind = 'inpress';
 export const defaultLimit = 20;
-export const defaultDelayMs = 1500;
+export const defaultDelayMs = sharedDefaultDelayMs;
+export const defaultJitterMs = sharedDefaultJitterMs;
 export const defaultRetries = 3;
 
 const supportedKinds = new Set(['current', 'inpress']);
@@ -45,7 +49,10 @@ export type ListingItem = DataItem & {
 
 export type ArticleFetchOptions = {
     delayMs: number;
+    jitterMs?: number;
+    random?: () => number;
     retries: number;
+    sleep?: Sleep;
     useCache?: boolean;
 };
 
@@ -57,14 +64,6 @@ export class CellPressChallengeError extends Error {
         this.name = 'CellPressChallengeError';
     }
 }
-
-const clampPositiveInteger = (value: string | undefined, fallback: number, maximum: number) => {
-    const parsed = Number.parseInt(value ?? '', 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-        return fallback;
-    }
-    return Math.min(parsed, maximum);
-};
 
 const cleanText = (value: string | undefined | null) => value?.replace(/\s+/g, ' ').trim() ?? '';
 
@@ -129,11 +128,12 @@ export const parseRouteOptions = (ctx) => {
     }
 
     return {
-        delayMs: clampPositiveInteger(ctx.req.query('delayMs'), defaultDelayMs, 10000),
+        delayMs: parseNonNegativeIntegerOption(ctx.req.query('delayMs'), defaultDelayMs, 10000),
+        jitterMs: parseNonNegativeIntegerOption(ctx.req.query('jitterMs'), defaultJitterMs, 10000),
         journal,
         kind,
-        limit: clampPositiveInteger(ctx.req.query('limit'), defaultLimit, 100),
-        retries: clampPositiveInteger(ctx.req.query('retries'), defaultRetries, 5),
+        limit: parsePositiveIntegerOption(ctx.req.query('limit'), defaultLimit, 100),
+        retries: parsePositiveIntegerOption(ctx.req.query('retries'), defaultRetries, 5),
     };
 };
 
@@ -416,7 +416,12 @@ export const parseArticleHtml = (html: string, url: string, fallback: ListingIte
     };
 };
 
-export const sleep = (delayMs: number) => new Promise((resolve) => setTimeout(resolve, delayMs));
+const policy = (options: ArticleFetchOptions) => ({
+    delayMs: options.delayMs,
+    jitterMs: options.jitterMs ?? defaultJitterMs,
+    random: options.random,
+    sleep: options.sleep,
+});
 
 const configureStealthPage = async (page: Page, referer?: string) => {
     const headers = generateHeaders(PRESETS.MODERN_MACOS_CHROME);
@@ -430,22 +435,6 @@ const configureStealthPage = async (page: Page, referer?: string) => {
         ...Object.fromEntries([...generatedHeaders].filter((header) => headers[header]).map((header) => [header, headers[header]])),
         ...(referer ? { referer } : {}),
         'accept-language': headers['accept-language'] || 'en-US,en;q=0.9',
-    });
-
-    await page.addInitScript(() => {
-        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-        Object.defineProperty(navigator, 'platform', { get: () => 'MacIntel' });
-        Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
-        Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
-        Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
-        Object.defineProperty(window, 'chrome', {
-            get: () => ({
-                app: {},
-                runtime: {},
-            }),
-        });
     });
 
     await page.setRequestInterception(true);
@@ -469,7 +458,7 @@ export const fetchPageHtml: PageFetcher = async (browser, url, waitForSelector) 
         if (waitForSelector) {
             await page.waitForSelector(waitForSelector, { timeout: 30000 }).catch(() => undefined);
         }
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(2000);
         return await page.evaluate(() => document.documentElement.outerHTML);
     } finally {
         await page.close();
@@ -481,12 +470,12 @@ export const fetchArticleWithRetries = async (browser: Browser, item: ListingIte
 
     for (let attempt = 1; attempt <= options.retries; attempt++) {
         try {
-            const html = await fetcher(browser, item.link, 'h1, #abstract, #bodymatter, article, main');
+            const html = await fetcher(browser, item.link, '#bodymatter, #article-body, .article-body, .article__body, .ArticleBody, [data-testid="article-body"]');
             return parseArticleHtml(html, item.link, item);
         } catch (error) {
             lastError = error;
             if (attempt < options.retries) {
-                await sleep(options.delayMs);
+                await sleepWithJitter(policy(options), attempt);
             }
         }
     }
@@ -497,12 +486,11 @@ export const fetchArticleWithRetries = async (browser: Browser, item: ListingIte
 export const fetchArticleDetailsSerial = async (browser: Browser, items: ListingItem[], options: ArticleFetchOptions, fetcher: PageFetcher = fetchPageHtml) => {
     const detailedItems: ListingItem[] = [];
 
-    for (const [index, item] of items.entries()) {
-        if (index > 0 && options.delayMs > 0) {
-            await sleep(options.delayMs);
-        }
-
-        const loadArticle = () => fetchArticleWithRetries(browser, item, options, fetcher);
+    for (const item of items) {
+        const loadArticle = async () => {
+            await sleepWithJitter(policy(options));
+            return fetchArticleWithRetries(browser, item, options, fetcher);
+        };
         detailedItems.push(options.useCache === false ? await loadArticle() : await cache.tryGet(`cellpress:article:${item.link}`, loadArticle, config.cache.contentExpire));
     }
 
@@ -519,6 +507,7 @@ export const handler = async (ctx) => {
         const items = parseListingHtml(listingHtml, options.journal, options.kind, options.limit);
         const detailedItems = await fetchArticleDetailsSerial(browser, items, {
             delayMs: options.delayMs,
+            jitterMs: options.jitterMs,
             retries: options.retries,
         });
 
@@ -545,6 +534,10 @@ export const route: Route = {
     parameters: {
         journal: 'Cell Press journal slug, for example `cell` or `molecular-cell`',
         kind: '`current` or `inpress`, defaults to `inpress`',
+        limit: `Maximum article count. Defaults to ${defaultLimit}`,
+        delayMs: `Base delay before article detail fetches and between retries. Defaults to ${defaultDelayMs}`,
+        jitterMs: `Random jitter added to each delay. Defaults to ${defaultJitterMs}`,
+        retries: `Retry count for challenge/selector failures. Defaults to ${defaultRetries}`,
     },
     categories: ['journal'],
     features: {

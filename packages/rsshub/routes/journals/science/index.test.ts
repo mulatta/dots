@@ -104,11 +104,12 @@ describe('Science/AAAS full-content route helpers', () => {
         const browser = new FakeBrowser(() => articleHtml) as any;
         const sleep = vi.fn(async () => {});
 
-        const details = await fetchArticleDetails(items, browser, identityCache, { delayMs: 25, retries: 1, sleep });
+        const details = await fetchArticleDetails(items, browser, identityCache, { delayMs: 25, jitterMs: 0, retries: 1, sleep });
 
         expect(browser.visited).toEqual(items.map((item) => item.link));
-        expect(sleep).toHaveBeenCalledOnce();
-        expect(sleep).toHaveBeenCalledWith(25);
+        expect(sleep).toHaveBeenCalledTimes(2);
+        expect(sleep).toHaveBeenNthCalledWith(1, 25);
+        expect(sleep).toHaveBeenNthCalledWith(2, 25);
         expect(details[0].description).toContain('Structured summary text.');
         expect(details[0].description).toContain('Full body paragraph.');
     });
@@ -119,7 +120,7 @@ describe('Science/AAAS full-content route helpers', () => {
         const browser = new FakeBrowser(() => (++attempts === 1 ? challengeHtml : listingHtml)) as any;
         const sleep = vi.fn(async () => {});
 
-        const html = await fetchListing(browser, 'https://www.science.org/toc/science/current', 'current', { delayMs: 5, retries: 2, sleep });
+        const html = await fetchListing(browser, 'https://www.science.org/toc/science/current', 'current', { delayMs: 5, jitterMs: 0, retries: 2, sleep });
 
         expect(html).toContain('A quantum leap');
         expect(sleep).toHaveBeenCalledWith(5);

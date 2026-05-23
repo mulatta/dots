@@ -1,8 +1,8 @@
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
-import playwright from '@/utils/playwright';
 
-import { defaultDelayMs, defaultRetries, feedMeta, fetchArticleDetails, fetchListing, normalizeJournal, pageUrlFor, parseDelayMs, parseLimit, parseListItems, parseRetries } from './index';
+import playwright from '../stealth';
+import { defaultDelayMs, defaultJitterMs, defaultRetries, feedMeta, fetchArticleDetails, fetchListing, normalizeJournal, pageUrlFor, parseDelayMs, parseJitterMs, parseLimit, parseListItems, parseRetries } from './index';
 
 export const route: Route = {
     path: '/science/current/:journal?',
@@ -11,7 +11,8 @@ export const route: Route = {
     parameters: {
         journal: 'Short name for a journal: science, sciadv, sciimmunol, scirobotics, signaling, stm',
         limit: `Maximum article count. Defaults to 20`,
-        delayMs: `Delay between article detail fetches. Defaults to ${defaultDelayMs}`,
+        delayMs: `Base delay before article detail fetches and between retries. Defaults to ${defaultDelayMs}`,
+        jitterMs: `Random jitter added to each delay. Defaults to ${defaultJitterMs}`,
         retries: `Retry count for challenge/selector failures. Defaults to ${defaultRetries}`,
     },
     features: {
@@ -45,6 +46,7 @@ async function handler(ctx) {
     const limit = parseLimit(ctx.req.query('limit'));
     const options = {
         delayMs: parseDelayMs(ctx.req.query('delayMs')),
+        jitterMs: parseJitterMs(ctx.req.query('jitterMs')),
         retries: parseRetries(ctx.req.query('retries')),
     };
     const pageUrl = pageUrlFor('current', journal);

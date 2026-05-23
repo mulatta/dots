@@ -7,9 +7,11 @@ import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 
 import { baseUrl, cookieJar, getArticleList, getDataLayer } from '../nature/utils';
+import { defaultDelayMs as sharedDefaultDelayMs, defaultJitterMs as sharedDefaultJitterMs, sleepWithJitter } from './fetch-policy';
 
 export const defaultLimit = 20;
-export const defaultDelayMs = 1500;
+export const defaultDelayMs = sharedDefaultDelayMs;
+export const defaultJitterMs = sharedDefaultJitterMs;
 export const defaultRetries = 3;
 
 export type NatureResearchItem = DataItem & {
@@ -18,6 +20,7 @@ export type NatureResearchItem = DataItem & {
 
 export type FetchDetailOptions = {
     delayMs: number;
+    jitterMs: number;
     retries: number;
     partial: boolean;
 };
@@ -71,8 +74,6 @@ export const parseNonNegativeInteger = (value: string | undefined, fallback: num
 
     return Number.parseInt(value, 10);
 };
-
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const fixFigure = ($: ReturnType<typeof load>) => {
     $('picture source').each((_, element) => {
@@ -234,10 +235,7 @@ const getArticleWithRetries = async (item: NatureResearchItem, options: FetchDet
                 break;
             }
 
-            const backoffMs = options.delayMs * (attempt + 1);
-            if (backoffMs > 0) {
-                await sleep(backoffMs);
-            }
+            await sleepWithJitter(options, attempt + 1);
         }
     }
 
@@ -247,10 +245,8 @@ const getArticleWithRetries = async (item: NatureResearchItem, options: FetchDet
 export const fetchArticleDetails = async (items: NatureResearchItem[], options: FetchDetailOptions) => {
     const detailedItems: NatureResearchItem[] = [];
 
-    for (const [index, item] of items.entries()) {
-        if (index > 0 && options.delayMs > 0) {
-            await sleep(options.delayMs);
-        }
+    for (const item of items) {
+        await sleepWithJitter(options);
 
         try {
             detailedItems.push(await getArticleWithRetries(item, options));
@@ -277,6 +273,7 @@ export const handler = async (ctx) => {
     const journal = ctx.req.param('journal') ?? 'nature';
     const limit = parsePositiveInteger(ctx.req.query('limit'), defaultLimit);
     const delayMs = parseNonNegativeInteger(ctx.req.query('delayMs'), defaultDelayMs);
+    const jitterMs = parseNonNegativeInteger(ctx.req.query('jitterMs'), defaultJitterMs);
     const retries = parseNonNegativeInteger(ctx.req.query('retries'), defaultRetries);
     const partial = ctx.req.query('partial') === '1';
     const pageURL = `${baseUrl}/${journal}/research-articles`;
@@ -289,7 +286,7 @@ export const handler = async (ctx) => {
         ...item,
         guid: item.link,
     }));
-    const detailedItems = await fetchArticleDetails(items, { delayMs, retries, partial });
+    const detailedItems = await fetchArticleDetails(items, { delayMs, jitterMs, retries, partial });
 
     return {
         title: `Nature (${pageTitle}) | Latest Research`,
@@ -328,12 +325,13 @@ export const route: Route = {
 Examples:
 
 - [/journals/nature/research/nbt](https://rsshub.app/journals/nature/research/nbt)
-- [/journals/nature/research/ncomms?limit=20&delayMs=1500](https://rsshub.app/journals/nature/research/ncomms?limit=20&delayMs=1500)
+- [/journals/nature/research/ncomms?limit=20&delayMs=1500&jitterMs=1000](https://rsshub.app/journals/nature/research/ncomms?limit=20&delayMs=1500&jitterMs=1000)
 
 Query parameters:
 
 - \`limit\`: positive integer, defaults to \`${defaultLimit}\`.
-- \`delayMs\`: non-negative integer delay between article detail fetches, defaults to \`${defaultDelayMs}\`.
+- \`delayMs\`: non-negative integer base delay before article detail fetches and between retries, defaults to \`${defaultDelayMs}\`.
+- \`jitterMs\`: non-negative integer random jitter added to each delay, defaults to \`${defaultJitterMs}\`.
 - \`retries\`: non-negative integer retry count after the first attempt, defaults to \`${defaultRetries}\`.
 - \`partial=1\`: keep list items when detail fetching fails. By default, any failed detail fetch fails the whole route so readers do not ingest challenge/error pages.
 
