@@ -111,6 +111,11 @@ in
             category = "Notification";
           };
 
+          natureBiotechnology = {
+            url = "http://127.0.0.1:1200/journals/nature/research/nbt?limit=10&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
           githubTrendingRust = {
             title = "GitHub Trend - Rust";
             url = "http://127.0.0.1:1200/github/trending-readme/daily/rust?limit=20";
