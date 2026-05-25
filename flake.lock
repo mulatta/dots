@@ -643,11 +643,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779563025,
-        "narHash": "sha256-k0OKaKtw44/dJPkHgVmvjbP9UA7UeHLWhFCIqRrQ7Ic=",
+        "lastModified": 1779737064,
+        "narHash": "sha256-GxdH3WIjx7+u2gal3dVm4akrXz0VXGM4HUMLCrfA4wE=",
         "owner": "mulatta",
         "repo": "noctalia-plugins",
-        "rev": "4bb023303f1b1aca284015be491c7a31e8420d84",
+        "rev": "7b5c02bc142f34fa5a4fa84a23e08c96648a7c74",
         "type": "github"
       },
       "original": {
