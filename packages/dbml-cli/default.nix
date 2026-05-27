@@ -4,11 +4,11 @@
 }:
 buildNpmPackage {
   pname = "dbml-cli";
-  version = "8.2.1";
+  version = "8.2.2";
 
   src = ./.;
 
-  npmDepsHash = "sha256-BsEDaUIZSn3deCHkktHRypTF7PrVY86UpLGhyokneCc=";
+  npmDepsHash = "sha256-oN1hvXNilJdrOvctx1ni43FiQzzAR1DJA88tstSenyg=";
 
   dontBuild = true;
 
