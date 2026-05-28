@@ -38,7 +38,6 @@
       pkgs.tailscale
       pkgs.typora
       pkgs.zeroclaw
-      pkgs.zotero
     ];
 
   services.nostr-chat = {
