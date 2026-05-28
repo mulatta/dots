@@ -43,6 +43,7 @@
     "slack"
     "zerotier-one"
     "zoom"
+    "zotero"
     # keep-sorted end
   ];
 
