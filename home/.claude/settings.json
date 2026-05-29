@@ -32,7 +32,6 @@
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "rust-skills@rust-skills": true,
     "pyright-lsp@claude-plugins-official": true,
     "engineering-advanced-skills@claude-code-skills": true,
     "biorxiv@life-sciences": true,
@@ -59,12 +58,6 @@
         "repo": "anthropics/life-sciences"
       }
     },
-    "rust-skills": {
-      "source": {
-        "source": "github",
-        "repo": "actionbook/rust-skills"
-      }
-    },
     "ast-grep-marketplace": {
       "source": {
         "source": "github",
@@ -88,5 +81,5 @@
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-daltonized",
   "agentPushNotifEnabled": true,
-  "model": "opus"
+  "skipAutoPermissionPrompt": true
 }
