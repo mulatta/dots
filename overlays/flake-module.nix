@@ -177,6 +177,16 @@
         # nextstep frontend. Remove when nixpkgs fixes the Cocoa emacs build.
         notmuch = prev.notmuch.override { emacs = final.emacs-nox; };
 
+        # TODO: dix 2.0.0's tests canonicalize the temp store under /private/tmp
+        # on Darwin and its path check rejects it (only /nix/store and /tmp/ are
+        # allowed), so checkPhase fails. srvos.update-diff calls `lib.getExe
+        # pkgs.dix` during activation, which drags the broken build into the
+        # darwin system. Runtime only ever sees /nix/store paths, so skip the
+        # test. Remove when dix accepts the macOS /tmp symlink.
+        dix = prev.dix.overrideAttrs (_: {
+          doCheck = false;
+        });
+
         # Current nixpkgs-unstable has Darwin regressions in dante and in
         # appstream's link flags, which breaks zenity. Pin only the broken
         # Darwin packages to Hydra-cached outputs instead of moving all of
