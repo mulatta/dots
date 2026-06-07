@@ -8,6 +8,11 @@
 {
   dconf.enable = true;
 
+  # bitwarden-desktop 2026.5.0 still pins electron_39 (39.8.10), which nixpkgs
+  # marks EOL. Upstream has not bumped it yet; allow until it moves to a
+  # supported electron.
+  nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
+
   imports = [
     ../modules/calendar
     ../modules/keyboard
