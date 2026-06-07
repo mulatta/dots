@@ -16,7 +16,6 @@
     ../../darwinModules/karabiner.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
-    ../../darwinModules/ollama.nix
     ../../darwinModules/openssh.nix
     ../../darwinModules/remote-builder.nix
     ../../darwinModules/sudo.nix
@@ -34,14 +33,6 @@
   clan.core.networking.zerotier = {
     enable = true;
     controller.machineName = "taps";
-  };
-
-  services.ollama = {
-    enable = true;
-    loadModels = [ "bge-m3" ];
-    environmentVariables = {
-      OLLAMA_KEEP_ALIVE = "5m";
-    };
   };
 
   system.activationScripts.postActivation.text = ''
