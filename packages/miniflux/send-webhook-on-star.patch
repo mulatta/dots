@@ -8,7 +8,7 @@ index 63ff7e6..0cb09b5 100644
 +	if err := h.store.ToggleStarred(userID, entryID); err != nil {
 @@ -232,0 +234,19 @@ func (h *handler) toggleStarredHandler(w http.ResponseWriter, r *http.Request) {
 +	builder := h.store.NewEntryQueryBuilder(userID)
-+	builder.WithEntryID(entryID)
++	builder.WithEntryIDs(entryID)
 +
 +	entry, err := builder.GetEntry()
 +	if err != nil {
@@ -95,7 +95,7 @@ index af1a72e..98632c9 100644
 +	if err := h.store.ToggleStarred(userID, entryID); err != nil {
 @@ -19,0 +23,19 @@ func (h *handler) toggleStarred(w http.ResponseWriter, r *http.Request) {
 +	builder := h.store.NewEntryQueryBuilder(userID)
-+	builder.WithEntryID(entryID)
++	builder.WithEntryIDs(entryID)
 +
 +	entry, err := builder.GetEntry()
 +	if err != nil {
