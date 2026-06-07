@@ -169,17 +169,14 @@
               old.checkPhase;
         });
 
-        # TODO: ntfy-sh 2.21.0 missing Darwin in serve_unix.go build tags
-        # upstream ntfy bug: //go:build excludes darwin. Remove when fixed.
-        # ref: https://github.com/NixOS/nixpkgs/issues/493775
-        ntfy-sh = prev.ntfy-sh.overrideAttrs (old: {
-          postPatch = (old.postPatch or "") + ''
-            substituteInPlace cmd/serve_unix.go \
-              --replace-fail \
-                '//go:build linux || dragonfly || freebsd || netbsd || openbsd' \
-                '//go:build linux || dragonfly || freebsd || netbsd || openbsd || darwin'
-          '';
-        });
+        # TODO: emacs 30.2 nextstep (Cocoa) build is broken on Darwin in the
+        # current nixpkgs: Objective-C .m files compile with an older C
+        # standard than the C sources, so conf_post.h's `typedef bool bool_bf`
+        # hits `unknown type name 'bool'`. notmuch only needs emacs to build
+        # its notmuch-emacs lisp, which emacs-nox provides without the broken
+        # nextstep frontend. Remove when nixpkgs fixes the Cocoa emacs build.
+        notmuch = prev.notmuch.override { emacs = final.emacs-nox; };
+
         # Current nixpkgs-unstable has Darwin regressions in dante and in
         # appstream's link flags, which breaks zenity. Pin only the broken
         # Darwin packages to Hydra-cached outputs instead of moving all of
