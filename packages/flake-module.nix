@@ -29,7 +29,6 @@
           pim
           updater
           instagram-cli
-          quarkdown
           slack-manifest-cli
           ;
       }

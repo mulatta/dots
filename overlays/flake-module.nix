@@ -81,7 +81,6 @@
         };
         updater = prev.callPackage ../packages/updater { };
         instagram-cli = prev.callPackage ../packages/instagram-cli { };
-        quarkdown = prev.callPackage ../packages/quarkdown { };
         radicle-desktop = prev.callPackage ../packages/radicle-desktop { };
 
         # Tool bundles (moved from helix/yazi flake-modules)
