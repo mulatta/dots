@@ -14,9 +14,11 @@ import argparse
 import importlib.util
 import json
 import re
+import ssl
 import subprocess
 import sys
 import tempfile
+import urllib.error
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -169,7 +171,17 @@ def run_custom_update(pkg: Package, dry_run: bool = False) -> bool:
         print(f"  Error: {update_script} has no main() function")
         return False
 
-    module.main()
+    # Isolate per-package failures: one update.py crashing must not abort the
+    # whole run. Transient upstream problems (network, expired TLS certs) are
+    # not our bug, so skip them instead of failing the scheduled job.
+    try:
+        module.main()
+    except (urllib.error.URLError, ssl.SSLError) as e:
+        print(f"  Skipped: upstream fetch failed (network/TLS): {e}")
+        return True
+    except Exception as e:
+        print(f"  Error: update.py raised {type(e).__name__}: {e}")
+        return False
     return True
 
 
@@ -195,7 +207,7 @@ def fix_placeholder_hash(pkg: Package, flake_root: Path) -> bool:
 
     match = re.search(r"got:\s+(sha256-\S+)", result.stderr)
     if not match:
-        print(f"  Error: could not extract hash from nix build output")
+        print("  Error: could not extract hash from nix build output")
         if result.stderr:
             print(f"  {result.stderr[:500]}")
         return False
