@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "nix": { "enabled": true },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* 0-3 * * *"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)flake\\.nix$/"],
+      "matchStrings": ["github:karinushka/paneru/(?<currentValue>v[\\d.]+)"],
+      "depNameTemplate": "karinushka/paneru",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["nix"],
+      "automerge": true
+    }
+  ]
+}
