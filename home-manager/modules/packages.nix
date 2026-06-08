@@ -87,7 +87,6 @@
       # Custom packages
       merge-when-green
       miniflux-sync
-      quarkdown
     ]
     ++ (
       let
