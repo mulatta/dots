@@ -10,6 +10,17 @@ let
   skillz = self.inputs.skillz;
   skillzPkgs = skillz.packages.${system};
 
+  officecli = self.inputs.llm-agents.packages.${system}.officecli;
+  # The skill text ships in the upstream source as SKILL.md and CI keeps it in
+  # parity with what the binary emits, so pull it straight from the package
+  # source. Pinning to officecli.src version-locks the skill to the binary
+  # without vendoring a copy that would drift, and avoids dragging the whole
+  # source tree into the runtime closure for one file.
+  officecliSkill = pkgs.runCommand "officecli-skill-${officecli.version}" { } ''
+    mkdir -p "$out"
+    cp ${officecli.src}/SKILL.md "$out/SKILL.md"
+  '';
+
   instanceDefaults = {
     piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
@@ -29,10 +40,13 @@ let
       http = lib.mkDefault ./skills/http;
       document-reading = lib.mkDefault ./skills/document-reading;
       source-triage = lib.mkDefault ./skills/source-triage;
+      officecli = lib.mkDefault officecliSkill;
     };
 
     environment = {
       TZ = lib.mkDefault "Asia/Seoul";
+      # Container has no outbound network; stop officecli probing for updates.
+      OFFICECLI_SKIP_UPDATE = lib.mkDefault "1";
       OPENCROW_PI_PROVIDER = lib.mkDefault "openai-codex";
       OPENCROW_PI_MODEL = lib.mkDefault "gpt-5.5";
 
@@ -93,6 +107,9 @@ let
       skillzPkgs.context7-cli
       skillzPkgs.crwl-cli
       skillzPkgs.pexpect-cli
+      # let binding shadows pkgs.officecli (absent from the pinned nixpkgs);
+      # resolves to the llm-agents build.
+      officecli
     ];
   };
 in
