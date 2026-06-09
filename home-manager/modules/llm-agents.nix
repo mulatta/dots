@@ -10,6 +10,15 @@ let
   aiPkgs = inputs.llm-agents.packages.${system};
   skillzPkgs = inputs.skillz.packages.${system};
   piAgentDeps = pkgs.callPackage ../../home/.pi/agent/default.nix { };
+
+  # officecli ships its skill text in-source and CI keeps it byte-identical to
+  # what the binary emits, so source it from officecli.src instead of vendoring
+  # a copy that would drift. Pinning to .src version-locks the skill to the
+  # binary and keeps the whole source tree out of the profile closure.
+  officecliSkill = pkgs.runCommand "officecli-skill-${aiPkgs.officecli.version}" { } ''
+    mkdir -p "$out"
+    cp ${aiPkgs.officecli.src}/SKILL.md "$out/SKILL.md"
+  '';
   nostorePreload = pkgs.nostore-preload;
   nostoreEnvVar = nostorePreload.passthru.envVar;
   nostoreLib = "${nostorePreload}/lib/libnostore${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
@@ -50,6 +59,11 @@ in
   home.file.".claude/skills/git-surgeon".source =
     "${aiPkgs.git-surgeon}/share/git-surgeon/skills/git-surgeon";
 
+  # officecli skill for both agents — Claude Code reads ~/.claude/skills,
+  # pi discovers ~/.pi/agent/skills.
+  home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
+  home.file.".pi/agent/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
+
   home.file.".claude/skills/zat/SKILL.md".text = ''
     ---
     name: zat
@@ -80,6 +94,7 @@ in
       aiPkgs.codex
       aiPkgs.gemini-cli
       aiPkgs.git-surgeon
+      aiPkgs.officecli
       aiPkgs.tuicr
       aiPkgs.workmux
       aiPkgs.zat
