@@ -16,6 +16,13 @@ let
     )
   )) { self = self.inputs.opencrow; };
 
+  officecli = self.inputs.llm-agents.packages.${system}.officecli;
+  # Use upstream skill text so the skill stays version-locked to the binary
+  # without vendoring the full source tree into the runtime closure.
+  officecliSkill = pkgs.runCommand "officecli-skill-${officecli.version}" { } ''
+    mkdir -p "$out"
+    cp ${officecli.src}/SKILL.md "$out/SKILL.md"
+  '';
   instanceDefaults = {
     piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
@@ -35,10 +42,13 @@ let
       http = lib.mkDefault ./skills/http;
       document-reading = lib.mkDefault ./skills/document-reading;
       source-triage = lib.mkDefault ./skills/source-triage;
+      officecli = lib.mkDefault officecliSkill;
     };
 
     environment = {
       TZ = lib.mkDefault "Asia/Seoul";
+      # Container has no outbound network; stop officecli probing for updates.
+      OFFICECLI_SKIP_UPDATE = lib.mkDefault "1";
       OPENCROW_PI_PROVIDER = lib.mkDefault "openai-codex";
       OPENCROW_PI_MODEL = lib.mkDefault "gpt-5.5";
 
@@ -71,7 +81,6 @@ let
     # Lists merge additively, unlike scalar defaults; keep the baseline
     # packages unconditional so domain modules cannot accidentally drop them.
     extraPackages = with pkgs; [
-      catdoc
       coreutils
       curl
       fd
@@ -94,11 +103,12 @@ let
       yq-go
       zip
       zstd
-      python313Packages.markitdown
       python313Packages.pymupdf
       skillzPkgs.context7-cli
       skillzPkgs.crwl-cli
       skillzPkgs.pexpect-cli
+      # Resolve to the llm-agents build, not pinned nixpkgs.
+      officecli
     ];
   };
 in
