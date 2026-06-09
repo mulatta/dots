@@ -79,7 +79,6 @@ let
     # Lists merge additively, unlike scalar defaults; keep the baseline
     # packages unconditional so domain modules cannot accidentally drop them.
     extraPackages = with pkgs; [
-      catdoc
       coreutils
       curl
       fd
@@ -102,7 +101,6 @@ let
       yq-go
       zip
       zstd
-      python313Packages.markitdown
       python313Packages.pymupdf
       skillzPkgs.context7-cli
       skillzPkgs.crwl-cli

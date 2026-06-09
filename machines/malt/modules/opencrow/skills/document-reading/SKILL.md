@@ -1,6 +1,6 @@
 ---
 name: document-reading
-description: Read notice pages, downloaded attachments, and administrative documents. Use for extracting actionable details from PDF, Office, HWP/HWPX, legacy Office, and archives.
+description: Read notice pages, downloaded attachments, and administrative documents. Use for extracting actionable details from PDF, HWP/HWPX, archives, and HTML notices. For Office documents (.docx/.xlsx/.pptx) use the officecli skill instead.
 ---
 
 # Document reading
@@ -50,19 +50,9 @@ PDF details or structured extraction:
 pymupdf gettext <file.pdf>
 ```
 
-DOCX, PPTX, XLSX:
-
-```bash
-markitdown <file> > <file>.md
-```
-
-Legacy DOC, XLS, PPT:
-
-```bash
-catdoc <file.doc>
-xls2csv <file.xls>
-catppt <file.ppt>
-```
+Office DOCX, XLSX, PPTX: use the `officecli` skill — it reads structure
+precisely (`officecli view <file> text`, `officecli get <file> <path>`). Legacy
+binary `.doc/.xls/.ppt` are not supported; ask the sender for a modern format.
 
 HWP/HWPX:
 
