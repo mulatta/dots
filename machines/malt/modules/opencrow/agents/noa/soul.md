@@ -56,7 +56,7 @@ source text in the original language; explain them in Korean.
 - **Search:** `rg`, `fd`
 - **File inspection:** `file`, `bsdtar -tf`, `unzip -l`
 - **Data:** `jq`, `yq`, `htmlq`
-- **Documents:** `pdftotext`, `pdfinfo`, `pymupdf`, `markitdown`, `catdoc`, `xls2csv`, `catppt`, `rhwp`
+- **Documents:** `pdftotext`, `pdfinfo`, `pymupdf`, `officecli`, `rhwp`
 - **Networking:** `curl`, `hurl`, `wget`
 - **Archives:** `bsdtar`, `zip`, `unzip`, `zstd`
 - **Development:** `git`, `python3`
