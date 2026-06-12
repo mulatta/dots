@@ -13,6 +13,7 @@ from updater.__main__ import (
     Package,
     create_pr_for_package,
     fix_placeholder_hash,
+    run_custom_update,
     run_nix_update,
 )
 
@@ -237,3 +238,39 @@ class TestCreatePrBranchExists:
 
         assert result is True
         mock_create.assert_called_once()
+
+
+# -- Regression: a child update.py parsing argparse must not see the parent's
+# argv, and its SystemExit must not abort the whole run. rsshub/update.py uses
+# argparse; when imported it parsed the updater's sys.argv (`--pr`), which
+# argparse rejected with sys.exit(2) — SystemExit is BaseException, escaped the
+# except Exception guard, and crashed the scheduled job with exit code 2. --
+
+
+class TestRunCustomUpdateArgvIsolation:
+    def _write_update_py(self, pkg_dir: Path, body: str) -> None:
+        (pkg_dir / "update.py").write_text(body)
+
+    def test_argparse_child_does_not_see_parent_argv(self, pkg_dir: Path, monkeypatch):
+        """An update.py using argparse must not inherit the updater's argv."""
+        self._write_update_py(
+            pkg_dir,
+            "import argparse\n"
+            "def main():\n"
+            "    p = argparse.ArgumentParser()\n"
+            "    p.add_argument('--check', action='store_true')\n"
+            "    p.parse_args()\n",
+        )
+        # Simulate the updater being invoked as `updater --pr`.
+        monkeypatch.setattr("sys.argv", ["updater", "--pr"])
+
+        assert run_custom_update(make_package(pkg_dir)) is True
+
+    def test_child_systemexit_does_not_propagate(self, pkg_dir: Path):
+        """A SystemExit inside update.py is a per-package failure, not a crash."""
+        self._write_update_py(
+            pkg_dir,
+            "def main():\n    raise SystemExit('boom')\n",
+        )
+        # Must return False (failure) rather than raising out of the loop.
+        assert run_custom_update(make_package(pkg_dir)) is False

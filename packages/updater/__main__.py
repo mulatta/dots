@@ -174,14 +174,30 @@ def run_custom_update(pkg: Package, dry_run: bool = False) -> bool:
     # Isolate per-package failures: one update.py crashing must not abort the
     # whole run. Transient upstream problems (network, expired TLS certs) are
     # not our bug, so skip them instead of failing the scheduled job.
+    #
+    # An update.py is imported into this process, so it inherits our sys.argv.
+    # Scripts that argparse their own flags (e.g. rsshub's --check) would parse
+    # the updater's argv ("--pr") and argparse.exit(2) on the unknown flag.
+    # Hide our argv behind the script path so each main() parses no extra args,
+    # and catch SystemExit so such an exit() is a per-package failure rather
+    # than a BaseException that escapes and aborts the scheduled job.
+    saved_argv = sys.argv
+    sys.argv = [str(update_script)]
     try:
         module.main()
     except (urllib.error.URLError, ssl.SSLError) as e:
         print(f"  Skipped: upstream fetch failed (network/TLS): {e}")
         return True
+    except SystemExit as e:
+        if e.code in (None, 0):
+            return True
+        print(f"  Error: update.py exited with code {e.code}")
+        return False
     except Exception as e:
         print(f"  Error: update.py raised {type(e).__name__}: {e}")
         return False
+    finally:
+        sys.argv = saved_argv
     return True
 
 
