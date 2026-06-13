@@ -67,6 +67,8 @@
           "**/secrets.yml"
           # pi rewrites this on every run with its own style
           "home/.pi/**"
+          # vendored pnpm lockfiles are generated; yamlfmt churns them
+          "**/pnpm-lock.yaml"
         ];
       };
     };
