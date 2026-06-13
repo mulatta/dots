@@ -70,9 +70,17 @@ in
       # local feed URLs despite its default SSRF guard.
       FETCHER_ALLOW_PRIVATE_NETWORKS = 1;
       # GitHub README feeds render multiple API-backed entries through local
-      # RSSHub. Cold cache refreshes can exceed Miniflux's 20s default.
-      HTTP_CLIENT_TIMEOUT = 60;
+      # RSSHub. Cold cache refreshes can exceed Miniflux's 20s default; the
+      # Nature route adds deliberate per-item delays (delayMs/jitter/retries)
+      # to dodge upstream blocking and lands near 40s, so keep generous margin.
+      HTTP_CLIENT_TIMEOUT = 120;
       POLLING_FREQUENCY = 30;
+      # RSSHub feeds fail transiently from upstream issues (e.g. INU serving a
+      # broken TLS chain, nature.com latency spikes). The default limit of 3
+      # permanently parks a feed after 3 such errors, and a parked feed is
+      # never repolled so its error count never clears - a deadlock requiring
+      # manual intervention. 0 disables parking so feeds self-heal next cycle.
+      POLLING_PARSING_ERROR_LIMIT = 0;
       CLEANUP_ARCHIVE_READ_DAYS = 60;
       CLEANUP_ARCHIVE_UNREAD_DAYS = 180;
     };
