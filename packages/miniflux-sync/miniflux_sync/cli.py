@@ -225,7 +225,23 @@ def sync_feeds(
             update_after_create = {
                 k: v for k, v in wanted_settings.items() if k in UPDATE_ONLY_KEYS
             }
-            feed_id = client.create_feed(url, category_id=cat_id, **create_settings)
+            try:
+                feed_id = client.create_feed(url, category_id=cat_id, **create_settings)
+            except miniflux.ServerError as exc:
+                # Miniflux can answer create_feed with "duplicated feed" while
+                # still persisting the feed row. This happens for full-content
+                # journal routes (e.g. Cell Press) whose fetched payload trips
+                # Miniflux's duplicate detection even though get_feeds() did not
+                # report the URL at the start of this run. Treating it as fatal
+                # aborts the whole manifest and leaves every later feed unsynced.
+                # The feed exists, so the desired state is already met; the next
+                # run sees it via get_feeds() and reconciles its settings.
+                if "duplicated feed" not in str(exc):
+                    raise
+                print(
+                    f"[feed] exists {url} (server reported duplicate)", file=sys.stderr
+                )
+                continue
             if update_after_create:
                 client.update_feed(feed_id, **update_after_create)
 
