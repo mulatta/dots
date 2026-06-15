@@ -3,10 +3,27 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import miniflux
 import pytest
 
 from miniflux_sync.bootstrap import BootstrapError, _ensure_webhook_integration
 from miniflux_sync.cli import default_config_path, load_manifest, sync_feeds
+
+
+class FakeResponse:
+    """Minimal requests.Response stand-in for building miniflux errors."""
+
+    def __init__(self, status_code: int, error_message: str) -> None:
+        self.status_code = status_code
+        self.headers = {"Content-Type": "application/json"}
+        self._error_message = error_message
+
+    def json(self) -> dict[str, str]:
+        return {"error_message": self._error_message}
+
+
+def duplicated_feed_error() -> miniflux.ServerError:
+    return miniflux.ServerError(FakeResponse(500, "fetcher: duplicated feed"))
 
 
 def test_load_manifest_reads_json(tmp_path: Path, monkeypatch: Any) -> None:
@@ -68,12 +85,17 @@ def test_ensure_webhook_integration_rejects_enabled_without_url() -> None:
 
 
 class FakeClient:
-    def __init__(self, feeds: list[dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self,
+        feeds: list[dict[str, Any]] | None = None,
+        duplicate_urls: set[str] | None = None,
+    ) -> None:
         self.feeds = feeds or []
         self.categories = [{"id": 1, "title": "All"}]
         self.created_feeds: list[tuple[str, int, dict[str, Any]]] = []
         self.updated_feeds: list[tuple[int, dict[str, Any]]] = []
         self.deleted_feeds: list[int] = []
+        self.duplicate_urls = duplicate_urls or set()
 
     def get_feeds(self) -> list[dict[str, Any]]:
         return self.feeds
@@ -87,6 +109,8 @@ class FakeClient:
         return {"id": category["id"]}
 
     def create_feed(self, url: str, *, category_id: int, **kwargs: Any) -> int:
+        if url in self.duplicate_urls:
+            raise duplicated_feed_error()
         self.created_feeds.append((url, category_id, kwargs))
         return 42
 
@@ -222,3 +246,41 @@ def test_sync_feeds_reports_orphans_without_deleting(tmp_path: Path) -> None:
     assert client.created_feeds == []
     assert client.updated_feeds == []
     assert client.deleted_feeds == []
+
+
+def test_sync_feeds_tolerates_duplicate_feed_and_continues(tmp_path: Path) -> None:
+    # Miniflux can reject create_feed with "duplicated feed" for a URL that
+    # get_feeds() did not list at the start of the run. That must not abort the
+    # whole manifest: every later feed still has to be synced.
+    duplicate = "https://example.com/cell.xml"
+    later = "https://example.com/science.xml"
+    client = FakeClient(duplicate_urls={duplicate})
+
+    sync_feeds(
+        client,
+        [
+            {"url": duplicate, "category": "All"},
+            {"url": later, "category": "All"},
+        ],
+        base=tmp_path,
+        dry_run=False,
+    )
+
+    assert client.created_feeds == [(later, 1, {})]
+    assert client.deleted_feeds == []
+
+
+def test_sync_feeds_reraises_non_duplicate_server_error(tmp_path: Path) -> None:
+    class FailingClient(FakeClient):
+        def create_feed(self, url: str, *, category_id: int, **kwargs: Any) -> int:
+            raise miniflux.ServerError(FakeResponse(500, "internal server error"))
+
+    client = FailingClient()
+
+    with pytest.raises(miniflux.ServerError):
+        sync_feeds(
+            client,
+            [{"url": "https://example.com/feed.xml", "category": "All"}],
+            base=tmp_path,
+            dry_run=False,
+        )
