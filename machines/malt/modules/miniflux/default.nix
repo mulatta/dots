@@ -124,6 +124,36 @@ in
             category = "All";
           };
 
+          nature = {
+            title = "Nature";
+            url = "http://127.0.0.1:1200/journals/nature/research/nature?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
+          natureCommunications = {
+            title = "Nature Communications";
+            url = "http://127.0.0.1:1200/journals/nature/research/ncomms?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
+          natureMethods = {
+            title = "Nature Methods";
+            url = "http://127.0.0.1:1200/journals/nature/research/nmeth?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
+          cell = {
+            title = "Cell";
+            url = "http://127.0.0.1:1200/journals/cell/cell/inpress?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
+          science = {
+            title = "Science";
+            url = "http://127.0.0.1:1200/journals/science/current/science?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            category = "All";
+          };
+
           githubTrendingRust = {
             title = "GitHub Trend - Rust";
             url = "http://127.0.0.1:1200/github/trending-readme/daily/rust?limit=20";
