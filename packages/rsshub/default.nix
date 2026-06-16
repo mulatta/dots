@@ -36,7 +36,7 @@ rsshub.overrideAttrs (
       version = old.version;
       src = patchedSrc;
       fetcherVersion = 3;
-      hash = "sha256-RiNkGF//t7YLKf6vlH/XAhJiEwd/7fDEgwMquuWqVRs=";
+      hash = "sha256-cK7fHzSylOGfkCtetTDi2C+k2yCF1YlJDb0YPL6pYmo=";
       pnpm = pnpm_10;
     };
 
