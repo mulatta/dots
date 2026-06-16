@@ -695,22 +695,6 @@
         "type": "github"
       }
     },
-    "overlay-nixpkgs-dante-zenity": {
-      "locked": {
-        "lastModified": 1781604444,
-        "narHash": "sha256-8/EOUNG8QA1nPmfjIDaMGRqBKEN3HjiFrXyfpLEiMrs=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "ac80908b4528982650dada009b4323d126390b93",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "ac80908b4528982650dada009b4323d126390b93",
-        "type": "github"
-      }
-    },
     "paneru": {
       "inputs": {
         "flake-parts": [
@@ -871,7 +855,6 @@
         "nixpkgs": "nixpkgs_3",
         "noctalia-plugins": "noctalia-plugins",
         "opencrow": "opencrow",
-        "overlay-nixpkgs-dante-zenity": "overlay-nixpkgs-dante-zenity",
         "paneru": "paneru",
         "pi-agent-extensions": "pi-agent-extensions",
         "restate-workflows": "restate-workflows",
