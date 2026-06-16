@@ -9,12 +9,6 @@
       final: prev:
       let
         system = prev.stdenv.hostPlatform.system;
-        danteZenityPkgs = import inputs.overlay-nixpkgs-dante-zenity {
-          inherit system;
-          config = {
-            allowUnfree = prev.config.allowUnfree or false;
-          };
-        };
       in
       {
         # qmd: kept in overlay for CUDA override chain (gpu-support.nix)
@@ -154,19 +148,6 @@
           doCheck = false;
         });
 
-        # TODO: nushell 0.112.1 SHLVL tests fail in sandbox (Operation not permitted)
-        # Fixed in 0.112.2 on master but not yet in nixpkgs-unstable channel.
-        # Remove when nixpkgs-unstable advances past e787d9e711e7.
-        nushell = prev.nushell.overrideAttrs (old: {
-          checkPhase =
-            builtins.replaceStrings
-              [ "--skip=shell::environment::env::path_is_a_list_in_repl" ]
-              [
-                "--skip=shell::environment::env::path_is_a_list_in_repl --skip=shell::environment::env::env_shlvl_in_exec_repl --skip=shell::environment::env::env_shlvl_in_repl"
-              ]
-              old.checkPhase;
-        });
-
         # TODO: emacs 30.2 nextstep (Cocoa) build is broken on Darwin in the
         # current nixpkgs: Objective-C .m files compile with an older C
         # standard than the C sources, so conf_post.h's `typedef bool bool_bf`
@@ -174,23 +155,6 @@
         # its notmuch-emacs lisp, which emacs-nox provides without the broken
         # nextstep frontend. Remove when nixpkgs fixes the Cocoa emacs build.
         notmuch = prev.notmuch.override { emacs = final.emacs-nox; };
-
-        # TODO: dix 2.0.0's tests canonicalize the temp store under /private/tmp
-        # on Darwin and its path check rejects it (only /nix/store and /tmp/ are
-        # allowed), so checkPhase fails. srvos.update-diff calls `lib.getExe
-        # pkgs.dix` during activation, which drags the broken build into the
-        # darwin system. Runtime only ever sees /nix/store paths, so skip the
-        # test. Remove when dix accepts the macOS /tmp symlink.
-        dix = prev.dix.overrideAttrs (_: {
-          doCheck = false;
-        });
-
-        # Current nixpkgs-unstable has Darwin regressions in dante and in
-        # appstream's link flags, which breaks zenity. Pin only the broken
-        # Darwin packages to Hydra-cached outputs instead of moving all of
-        # nixpkgs to master.
-        dante = danteZenityPkgs.dante;
-        zenity = danteZenityPkgs.zenity;
 
         nostr-chat-bar = prev.callPackage ../packages/nostr-chat-bar { };
         systemctl-macos = prev.callPackage ../packages/systemctl { };

@@ -150,10 +150,6 @@
       url = "github:rytswd/pi-agent-extensions";
       flake = false;
     };
-
-    # Pinned overlays
-    overlay-nixpkgs-dante-zenity.url = "github:NixOS/nixpkgs/ac80908b4528982650dada009b4323d126390b93";
-
   };
 
   outputs =
