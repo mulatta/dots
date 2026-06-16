@@ -2,7 +2,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 
 import playwright from '../stealth';
-import { defaultDelayMs, defaultJitterMs, defaultRetries, feedMeta, fetchArticleDetails, fetchListing, normalizeJournal, pageUrlFor, parseDelayMs, parseJitterMs, parseLimit, parseListItems, parseRetries } from './index';
+import { collectResearchArticleDetails, defaultDelayMs, defaultJitterMs, defaultRetries, feedMeta, fetchListing, normalizeJournal, pageUrlFor, parseDelayMs, parseJitterMs, parseLimit, parseListItems, parseRetries } from './index';
 
 export const route: Route = {
     path: '/science/early/:journal?',
@@ -53,8 +53,12 @@ async function handler(ctx) {
 
     try {
         const html = await fetchListing(browser, pageUrl, 'early', options);
-        const list = parseListItems(html, 'early', limit);
-        const items = await fetchArticleDetails(list, browser, cache.tryGet, options);
+        // Over-fetch candidates: first release interleaves research with front
+        // matter, so walk up to 3x the limit (capped) and keep only research
+        // types until `limit` are collected.
+        const poolLimit = Math.min(limit * 3, 30);
+        const list = parseListItems(html, 'early', poolLimit);
+        const items = await collectResearchArticleDetails(list, browser, cache.tryGet, options, limit);
 
         return {
             ...feedMeta('early', journal, pageUrl, html),
