@@ -107,7 +107,7 @@ in
 
     system.build.installBootLoader = "${lib.getExe kernelInstaller}";
     system.boot.loader.id = "raspberrypi-direct";
-    system.boot.loader.kernelFile = pkgs.stdenv.hostPlatform.linux-kernel.target;
+    system.boot.loader.kernelFile = config.boot.kernelPackages.kernel.target;
 
     system.activationScripts.raspberryPiFirmware = {
       text = "${lib.getExe firmwareInstaller}";
