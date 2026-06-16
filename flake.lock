@@ -697,17 +697,17 @@
     },
     "overlay-nixpkgs-dante-zenity": {
       "locked": {
-        "lastModified": 1781604444,
-        "narHash": "sha256-8/EOUNG8QA1nPmfjIDaMGRqBKEN3HjiFrXyfpLEiMrs=",
+        "lastModified": 1781619320,
+        "narHash": "sha256-HicNJCDXPuYSBknoPeawlYWATp+cAgTCYartZXmH23g=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ac80908b4528982650dada009b4323d126390b93",
+        "rev": "a75cd823bb8a1a856b9cef71f7fe7c0084946b44",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ac80908b4528982650dada009b4323d126390b93",
+        "rev": "a75cd823bb8a1a856b9cef71f7fe7c0084946b44",
         "type": "github"
       }
     },

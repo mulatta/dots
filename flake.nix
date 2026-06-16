@@ -152,7 +152,7 @@
     };
 
     # Pinned overlays
-    overlay-nixpkgs-dante-zenity.url = "github:NixOS/nixpkgs/ac80908b4528982650dada009b4323d126390b93";
+    overlay-nixpkgs-dante-zenity.url = "github:NixOS/nixpkgs/a75cd823bb8a1a856b9cef71f7fe7c0084946b44";
 
   };
 
