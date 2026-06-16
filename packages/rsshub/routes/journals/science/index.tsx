@@ -102,39 +102,79 @@ const extractDoi = (href: string | undefined) => {
 
 const text = (element: Cheerio<Element>, selector: string) => element.find(selector).text().replace(/\s+/g, ' ').trim();
 
+const cardToItem = ($: ReturnType<typeof load>, element: Element): ScienceItem | undefined => {
+    const item = $(element);
+    const titleLink = item.find('.article-title a, a[href*="/doi/"]').first();
+    const title = titleLink.attr('title') || titleLink.text().replace(/\s+/g, ' ').trim();
+    const href = titleLink.attr('href');
+    const link = absoluteScienceUrl(href);
+
+    if (!title || !link) {
+        return;
+    }
+
+    const pubDateText = item.find('.card-meta__item time, time').first().attr('datetime') || text(item, '.card-meta__item time, time');
+    const authors = item
+        .find('.card-meta ul[title="list of authors"] li, .loa-authors li, .authors li')
+        .toArray()
+        .map((author) => $(author).text().replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .join(', ');
+
+    return {
+        title,
+        link,
+        doi: extractDoi(href),
+        pubDate: pubDateText ? parseDate(pubDateText) : undefined,
+        author: authors || undefined,
+    };
+};
+
+// Science groups the current issue into sections (Editorial, News, Commentary,
+// Analysis, Research, Careers, Products & Materials). Primary research, reviews
+// and reports all live under "Research" - which is rendered BELOW the front
+// matter, so a flat top-N scan of cards only ever reaches editorials and news
+// and never the papers. Restrict the current issue to research sections; the
+// per-article type filter downstream stays as the safety net.
+const RESEARCH_SECTION = /research|review|report/i;
+
 export const parseListItems = (html: string, kind: RouteKind, limit = defaultLimit): ScienceItem[] => {
     const $ = load(html);
-    const listSelector = kind === 'current' ? selectors.currentList : selectors.earlyList;
 
+    if (kind === 'current') {
+        const researchCards: Element[] = [];
+        $('.toc__section').each((_, section) => {
+            // The section heading is a plain h2/h3/h4 (currently `<h4>Research</h4>`),
+            // which sits before the cards. Exclude `.article-title` so we read the
+            // section label and not the first article's title (some of which also
+            // contain the word "research").
+            const heading = $(section)
+                .find('h2, h3, h4')
+                .not('.article-title')
+                .first()
+                .text()
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (RESEARCH_SECTION.test(heading)) {
+                $(section)
+                    .find('.card')
+                    .each((__, card) => researchCards.push(card));
+            }
+        });
+        if (researchCards.length > 0) {
+            return researchCards
+                .map((element) => cardToItem($, element))
+                .filter((item): item is ScienceItem => item !== undefined)
+                .slice(0, limit);
+        }
+        // No recognizable research section (markup drift): fall through to the
+        // flat card scan so the feed degrades to unfiltered rather than empty.
+    }
+
+    const listSelector = kind === 'current' ? selectors.currentList : selectors.earlyList;
     return $(listSelector)
         .toArray()
-        .map((element): ScienceItem | undefined => {
-            const item = $(element);
-            const titleLink = item.find('.article-title a, a[href*="/doi/"]').first();
-            const title = titleLink.attr('title') || titleLink.text().replace(/\s+/g, ' ').trim();
-            const href = titleLink.attr('href');
-            const link = absoluteScienceUrl(href);
-
-            if (!title || !link) {
-                return;
-            }
-
-            const pubDateText = item.find('.card-meta__item time, time').first().attr('datetime') || text(item, '.card-meta__item time, time');
-            const authors = item
-                .find('.card-meta ul[title="list of authors"] li, .loa-authors li, .authors li')
-                .toArray()
-                .map((author) => $(author).text().replace(/\s+/g, ' ').trim())
-                .filter(Boolean)
-                .join(', ');
-
-            return {
-                title,
-                link,
-                doi: extractDoi(href),
-                pubDate: pubDateText ? parseDate(pubDateText) : undefined,
-                author: authors || undefined,
-            };
-        })
+        .map((element) => cardToItem($, element))
         .filter((item): item is ScienceItem => item !== undefined)
         .slice(0, limit);
 };
