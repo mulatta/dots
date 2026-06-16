@@ -726,11 +726,11 @@
     "pi-agent-extensions": {
       "flake": false,
       "locked": {
-        "lastModified": 1780178773,
-        "narHash": "sha256-f2FeaY65EOGFXiVDFStmZOz1wtfYxiBc+fDZ8ZzlJbg=",
+        "lastModified": 1781528793,
+        "narHash": "sha256-sWFbRQ6xa1zpB1/F3RgFN+BcNgBau/5KhYNcHCLpA1E=",
         "owner": "rytswd",
         "repo": "pi-agent-extensions",
-        "rev": "54cba1fbcbbbad733080b98a2b087c69f715cf75",
+        "rev": "8ab1546585b0ed117ec090675ed2eccdeb19cdca",
         "type": "github"
       },
       "original": {
