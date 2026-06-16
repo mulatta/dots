@@ -12,7 +12,6 @@
           rsshub
           chartdb
           bulwark-webmail
-          dbml-cli
           merge-when-green
           claude-code
           claude-md

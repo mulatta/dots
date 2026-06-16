@@ -24,7 +24,6 @@
     in
     [
       myPkgs.chartdb
-      myPkgs.dbml-cli
       myPkgs.instagram-cli
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry

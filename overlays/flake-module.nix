@@ -48,7 +48,6 @@
         };
         chartdb = prev.callPackage ../packages/chartdb { };
         bulwark-webmail = prev.callPackage ../packages/bulwark-webmail { };
-        dbml-cli = prev.callPackage ../packages/dbml-cli { };
         merge-when-green = prev.callPackage ../packages/merge-when-green {
           flake-fmt = inputs.flake-fmt.packages.${system}.default;
         };
