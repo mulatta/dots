@@ -1,7 +1,8 @@
 {
   "includeCoAuthoredBy": false,
   "permissions": {
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "deny": ["Bash(git push*)", "Bash(jj git push*)"]
   },
   "model": "opus[1m]",
   "hooks": {
