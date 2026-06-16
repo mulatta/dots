@@ -269,6 +269,37 @@ const getPageTitle = ($: ReturnType<typeof load>, journal: string) => {
     }
 };
 
+// Fetch the research-articles listing, retrying when it comes back empty.
+// nature.com intermittently serves a challenge/empty page to the plain `got`
+// request - far more often for high-traffic flagship journals (nature, ncomms)
+// than for the smaller ones - which otherwise yields zero items and a hard
+// "route is empty" 503. Retrying the listing dodges those transient blocks.
+const fetchListing = async (pageURL: string, limit: number, options: { delayMs: number; jitterMs: number; retries: number }) => {
+    let pageCapture: ReturnType<typeof load> | undefined;
+
+    for (let attempt = 0; attempt <= options.retries; attempt++) {
+        try {
+            const pageResponse = await got(pageURL, { cookieJar });
+            pageCapture = load(pageResponse.data);
+            const items = (getArticleList(pageCapture) as NatureResearchItem[]).slice(0, limit).map((item) => ({
+                ...item,
+                guid: item.link,
+            }));
+            if (items.length > 0) {
+                return { pageCapture, items };
+            }
+        } catch {
+            // Network/HTTP error: fall through to the retry delay below.
+        }
+
+        if (attempt < options.retries) {
+            await sleepWithJitter(options, attempt + 1);
+        }
+    }
+
+    return { pageCapture, items: [] as NatureResearchItem[] };
+};
+
 export const handler = async (ctx) => {
     const journal = ctx.req.param('journal') ?? 'nature';
     const limit = parsePositiveInteger(ctx.req.query('limit'), defaultLimit);
@@ -278,19 +309,14 @@ export const handler = async (ctx) => {
     const partial = ctx.req.query('partial') === '1';
     const pageURL = `${baseUrl}/${journal}/research-articles`;
 
-    const pageResponse = await got(pageURL, { cookieJar });
-    const pageCapture = load(pageResponse.data);
-    const pageTitle = getPageTitle(pageCapture, journal);
+    const { pageCapture, items } = await fetchListing(pageURL, limit, { delayMs, jitterMs, retries });
+    const pageTitle = pageCapture ? getPageTitle(pageCapture, journal) : (journalNames[journal] ?? journal);
 
-    const items = (getArticleList(pageCapture) as NatureResearchItem[]).slice(0, limit).map((item) => ({
-        ...item,
-        guid: item.link,
-    }));
     const detailedItems = await fetchArticleDetails(items, { delayMs, jitterMs, retries, partial });
 
     return {
         title: `Nature (${pageTitle}) | Latest Research`,
-        description: pageCapture('meta[name="description"]').attr('content') || 'Nature, a nature research journal',
+        description: pageCapture?.('meta[name="description"]').attr('content') || 'Nature, a nature research journal',
         link: pageURL,
         item: detailedItems,
     };
