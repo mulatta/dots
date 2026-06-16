@@ -170,6 +170,14 @@ describe('Science/AAAS full-content route helpers', () => {
         expect(parseArticleType('<html><body></body></html>')).toBe('');
     });
 
+    it('flags the markerless news template as News so it is filtered out', () => {
+        // science.org news items carry no meta-panel/dc.Type and no #bodymatter.
+        expect(parseArticleType('<html><body><div class="news-article-content"><p>News.</p></div></body></html>')).toBe('News');
+        // A scholarly page (has #bodymatter) with no marker stays unknown and
+        // fails open, so real research is never dropped on markup drift.
+        expect(parseArticleType('<html><body><section id="bodymatter"><p>Body.</p></section></body></html>')).toBe('');
+    });
+
     it('keeps only research-type articles and stops at the limit', async () => {
         const research = (n: number) => `<html><body><div class="meta-panel__type">Research Article</div><section id="bodymatter"><p>Body ${n}.</p></section></body></html>`;
         const editorial = '<html><body><div class="meta-panel__type">Editorial</div><div class="news-article-content"><p>Opinion.</p></div></body></html>';

@@ -269,7 +269,20 @@ export const fetchListing = async (browser: Browser, url: string, kind: RouteKin
 
 export const parseArticleType = (html: string): string => {
     const $ = load(html);
-    return $('.meta-panel__type').first().text().replace(/\s+/g, ' ').trim() || ($('meta[name="dc.Type"]').attr('content') ?? '').trim();
+    const label = $('.meta-panel__type').first().text().replace(/\s+/g, ' ').trim() || ($('meta[name="dc.Type"]').attr('content') ?? '').trim();
+    if (label) {
+        return label;
+    }
+    // News/blog items (ScienceInsider, In Depth, New Products, ...) render
+    // through a separate template that carries no scholarly type marker at all,
+    // unlike Editorials/Perspectives/Letters which do. Without this they would
+    // hit the keep-on-unknown fallback and leak into the feed, so flag the news
+    // template explicitly. Genuine scholarly pages always carry `#bodymatter`,
+    // so an unmarked page with only news content is news.
+    if ($('.news-article-content, .news-article-content--featured').length && !$('section#bodymatter').length) {
+        return 'News';
+    }
+    return '';
 };
 
 const enrichArticle = async (browser: Browser, item: ScienceItem, options: FetchOptions) => {
