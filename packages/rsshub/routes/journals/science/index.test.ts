@@ -164,6 +164,25 @@ describe('Science/AAAS full-content route helpers', () => {
         expect(parseLimit(undefined)).toBe(20);
     });
 
+    it('keeps only the research section of the current issue', () => {
+        // Mirror the real markup: section heading is an <h4> and the first card's
+        // <h3 class="article-title"> in the News section contains the word
+        // "research" - the section filter must read the h4 label, not that title.
+        const sectionedHtml = `<!doctype html><html><body>
+<section class="toc__section"><h4 class="mb-2x sans-serif">News</h4>
+  <div class="card"><h3 class="article-title text-deep-gray"><a href="/doi/10.1126/science.news1" title="In defense of the research project grant">In defense of the research project grant</a></h3></div>
+</section>
+<section class="toc__section"><h4 class="mb-2x sans-serif">Research</h4>
+  <div class="card"><h3 class="article-title text-deep-gray"><a href="/doi/10.1126/science.res1" title="A research paper">A research paper</a></h3></div>
+  <div class="card"><h3 class="article-title text-deep-gray"><a href="/doi/10.1126/science.res2" title="Another paper">Another paper</a></h3></div>
+</section>
+</body></html>`;
+
+        const items = parseListItems(sectionedHtml, 'current', 20);
+
+        expect(items.map((item) => item.title)).toEqual(['A research paper', 'Another paper']);
+    });
+
     it('reads the article type from the panel label or dc.Type', () => {
         expect(parseArticleType('<html><body><div class="meta-panel__type">Research Article</div></body></html>')).toBe('Research Article');
         expect(parseArticleType('<html><head><meta name="dc.Type" content="editorial"></head><body></body></html>')).toBe('editorial');
