@@ -176,6 +176,19 @@ describe('journals/nature research route', () => {
         expect(mocks.cacheStore.has(articleUrl('s41587-026-00003-3'))).toBe(true);
     });
 
+    it('retries the listing when nature.com returns an empty research-articles page', async () => {
+        mocks.got.mockResolvedValueOnce({ data: listFixture([]) }).mockResolvedValueOnce({
+            data: listFixture([{ id: 's41587-026-00009-9', title: 'Recovered article', date: '2026-05-09' }]),
+        });
+        mocks.ofetch.mockResolvedValue(detailFixture('s41587-026-00009-9', 'Recovered article'));
+
+        const result = await handler(makeCtx({ limit: '1', delayMs: '0', jitterMs: '0', retries: '1' }));
+
+        expect(mocks.got).toHaveBeenCalledTimes(2);
+        expect(result.item).toHaveLength(1);
+        expect(result.item[0]).toMatchObject({ title: 'Recovered article', link: articleUrl('s41587-026-00009-9') });
+    });
+
     it('reports JSON-LD null as a clean failure and does not cache it', async () => {
         mocks.ofetch.mockResolvedValue(jsonLdNullFixture);
 
