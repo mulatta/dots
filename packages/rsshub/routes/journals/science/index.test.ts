@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchArticleDetails, fetchListing, parseArticleDescription, parseLimit, parseListItems, ScienceFetchError } from '@/routes/journals/science';
+import { collectResearchArticleDetails, fetchArticleDetails, fetchListing, parseArticleDescription, parseArticleType, parseLimit, parseListItems, ScienceFetchError, type ScienceItem } from '@/routes/journals/science';
 
 const listingHtml = `<!doctype html>
 <html>
@@ -162,5 +162,31 @@ describe('Science/AAAS full-content route helpers', () => {
         expect(parseLimit('0')).toBe(20);
         expect(parseLimit('not-a-number')).toBe(20);
         expect(parseLimit(undefined)).toBe(20);
+    });
+
+    it('reads the article type from the panel label or dc.Type', () => {
+        expect(parseArticleType('<html><body><div class="meta-panel__type">Research Article</div></body></html>')).toBe('Research Article');
+        expect(parseArticleType('<html><head><meta name="dc.Type" content="editorial"></head><body></body></html>')).toBe('editorial');
+        expect(parseArticleType('<html><body></body></html>')).toBe('');
+    });
+
+    it('keeps only research-type articles and stops at the limit', async () => {
+        const research = (n: number) => `<html><body><div class="meta-panel__type">Research Article</div><section id="bodymatter"><p>Body ${n}.</p></section></body></html>`;
+        const editorial = '<html><body><div class="meta-panel__type">Editorial</div><div class="news-article-content"><p>Opinion.</p></div></body></html>';
+        const htmlForUrl = (url: string) => (url.includes('editorial') ? editorial : research(Number(url.slice(-1))));
+        const browser = new FakeBrowser(htmlForUrl) as any;
+        const items: ScienceItem[] = [
+            { title: 'r1', link: 'https://www.science.org/doi/10.1126/science.r1' },
+            { title: 'ed', link: 'https://www.science.org/doi/10.1126/science.editorial' },
+            { title: 'r2', link: 'https://www.science.org/doi/10.1126/science.r2' },
+            { title: 'r3', link: 'https://www.science.org/doi/10.1126/science.r3' },
+        ];
+
+        const kept = await collectResearchArticleDetails(items, browser, identityCache, { delayMs: 0, jitterMs: 0, retries: 1, sleep: vi.fn(async () => {}) }, 2);
+
+        expect(kept).toHaveLength(2);
+        expect(kept.every((item) => item.articleType === 'Research Article')).toBe(true);
+        // The editorial is dropped, so the limit is filled from later research.
+        expect(kept.map((item) => item.title)).toEqual(['r1', 'r2']);
     });
 });

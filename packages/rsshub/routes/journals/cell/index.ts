@@ -7,6 +7,7 @@ import { generatedHeaders, generateHeaders, PRESETS } from '@/utils/header-gener
 import { parseDate } from '@/utils/parse-date';
 import type { Browser, Page } from '@/utils/playwright';
 
+import { isIncludedArticleType } from '../article-type';
 import { defaultDelayMs as sharedDefaultDelayMs, defaultJitterMs as sharedDefaultJitterMs, parseNonNegativeIntegerOption, parsePositiveIntegerOption, sleepWithJitter, type Sleep } from '../fetch-policy';
 import playwright from '../stealth';
 
@@ -45,6 +46,7 @@ const articleHeadingText = /^(abstract|graphical abstract|introduction|results|d
 
 export type ListingItem = DataItem & {
     link: string;
+    articleType?: string;
 };
 
 export type ArticleFetchOptions = {
@@ -399,6 +401,7 @@ export const parseArticleHtml = (html: string, url: string, fallback: ListingIte
         fallback.pubDate;
     const doi = parseDoi($) || fallback.doi;
     const description = renderArticleDescription($, url);
+    const articleType = cleanText($('.meta-panel__type').first().text()) || metaContent($, ['meta[name="dc.Type"]']) || fallback.articleType;
 
     if (!cleanText(load(description).text())) {
         throw new CellPressChallengeError(`Cell Press article description empty for ${url}`);
@@ -406,6 +409,7 @@ export const parseArticleHtml = (html: string, url: string, fallback: ListingIte
 
     return {
         ...fallback,
+        articleType,
         author,
         description,
         doi,
@@ -483,18 +487,49 @@ export const fetchArticleWithRetries = async (browser: Browser, item: ListingIte
     throw new Error(`Failed to fetch Cell Press article after ${options.retries} attempts: ${item.link}; ${lastError instanceof Error ? lastError.message : String(lastError)}`);
 };
 
+const fetchArticleDetail = (browser: Browser, item: ListingItem, options: ArticleFetchOptions, fetcher: PageFetcher) => {
+    const loadArticle = async () => {
+        await sleepWithJitter(policy(options));
+        return fetchArticleWithRetries(browser, item, options, fetcher);
+    };
+    return options.useCache === false ? loadArticle() : cache.tryGet(`cellpress:article:${item.link}`, loadArticle, config.cache.contentExpire);
+};
+
 export const fetchArticleDetailsSerial = async (browser: Browser, items: ListingItem[], options: ArticleFetchOptions, fetcher: PageFetcher = fetchPageHtml) => {
     const detailedItems: ListingItem[] = [];
 
     for (const item of items) {
-        const loadArticle = async () => {
-            await sleepWithJitter(policy(options));
-            return fetchArticleWithRetries(browser, item, options, fetcher);
-        };
-        detailedItems.push(options.useCache === false ? await loadArticle() : await cache.tryGet(`cellpress:article:${item.link}`, loadArticle, config.cache.contentExpire));
+        detailedItems.push(await fetchArticleDetail(browser, item, options, fetcher));
     }
 
     return detailedItems;
+};
+
+// Fetch listing candidates one by one and keep only research-type articles
+// (see article-type.ts) until `limit` are collected. The listing mixes research
+// with front matter and the type is only known after fetching the article page,
+// so we walk a larger candidate pool and stop early. A candidate whose fetch
+// fails (challenge/parse error) is skipped rather than failing the whole feed,
+// since the pool supplies alternatives.
+export const collectResearchArticles = async (browser: Browser, candidates: ListingItem[], options: ArticleFetchOptions, limit: number, fetcher: PageFetcher = fetchPageHtml) => {
+    const kept: ListingItem[] = [];
+
+    for (const item of candidates) {
+        if (kept.length >= limit) {
+            break;
+        }
+        let detailed: ListingItem;
+        try {
+            detailed = await fetchArticleDetail(browser, item, options, fetcher);
+        } catch {
+            continue;
+        }
+        if (isIncludedArticleType(detailed.articleType)) {
+            kept.push(detailed);
+        }
+    }
+
+    return kept;
 };
 
 export const handler = async (ctx) => {
@@ -504,12 +539,21 @@ export const handler = async (ctx) => {
 
     try {
         const listingHtml = await fetchPageHtml(browser, currentUrl, 'a[href*="/fulltext/"]');
-        const items = parseListingHtml(listingHtml, options.journal, options.kind, options.limit);
-        const detailedItems = await fetchArticleDetailsSerial(browser, items, {
-            delayMs: options.delayMs,
-            jitterMs: options.jitterMs,
-            retries: options.retries,
-        });
+        // Over-fetch the candidate pool: the listing mixes research with front
+        // matter, so walk up to 3x the requested limit (capped) of newest items
+        // and keep only research types until `limit` are collected.
+        const poolLimit = Math.min(options.limit * 3, 30);
+        const candidates = parseListingHtml(listingHtml, options.journal, options.kind, poolLimit);
+        const detailedItems = await collectResearchArticles(
+            browser,
+            candidates,
+            {
+                delayMs: options.delayMs,
+                jitterMs: options.jitterMs,
+                retries: options.retries,
+            },
+            options.limit
+        );
 
         const title = `Cell Press ${options.journal} ${options.kind} full content`;
         return {

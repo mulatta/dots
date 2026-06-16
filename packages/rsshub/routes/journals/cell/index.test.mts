@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Browser } from '@/utils/playwright';
 
-import { CellPressChallengeError, fetchArticleDetailsSerial, fetchArticleWithRetries, isChallengeOrErrorPage, parseArticleHtml, parseListingHtml, parseRouteOptions, rootUrl, type ListingItem, type PageFetcher } from './index';
+import { CellPressChallengeError, collectResearchArticles, fetchArticleDetailsSerial, fetchArticleWithRetries, isChallengeOrErrorPage, parseArticleHtml, parseListingHtml, parseRouteOptions, rootUrl, type ListingItem, type PageFetcher } from './index';
 
 const listingFixture = `
 <html>
@@ -42,6 +42,7 @@ const articleFixture = `
   </head>
   <body>
     <div class="login-modal">Login to your account</div>
+    <div class="meta-panel__type">Article</div>
     <article id="article">
       <h1>Human cell atlases reveal resilient circuits</h1>
       <section id="graphical-abstract">
@@ -175,5 +176,28 @@ describe('Cell Press route helpers', () => {
 
     it('applies listing limit', () => {
         expect(parseListingHtml(listingFixture, 'cell', 'current', 1)).toHaveLength(1);
+    });
+
+    it('extracts the article type label', () => {
+        const item = parseArticleHtml(articleFixture, `${rootUrl}/cell/fulltext/S0092-8674(25)00502-2`, listingItem(`${rootUrl}/cell/fulltext/S0092-8674(25)00502-2`));
+        expect(item.articleType).toBe('Article');
+    });
+
+    it('keeps only research-type articles and stops at the limit', async () => {
+        const obituaryFixture = articleFixture.replace('<div class="meta-panel__type">Article</div>', '<div class="meta-panel__type">Obituary</div>');
+        const fetcher: PageFetcher = async (_, url) => {
+            await Promise.resolve();
+            // The second candidate is an obituary; everything else is research.
+            return url.endsWith('00503-4') ? obituaryFixture : articleFixture.replace('10.1016/j.cell.2026.05.002', `10.1016/j.cell.2026.05.${url.slice(-6, -2)}`);
+        };
+        const candidates = ['00502-2', '00503-4', '00504-6', '00505-8'].map((pii) => listingItem(`${rootUrl}/cell/fulltext/S0092-8674(25)${pii}`));
+
+        const kept = await collectResearchArticles(mockBrowser, candidates, { delayMs: 0, retries: 1, useCache: false }, 2, fetcher);
+
+        expect(kept).toHaveLength(2);
+        expect(kept.every((item) => item.articleType === 'Article')).toBe(true);
+        // The obituary (00503-4) is dropped, so the limit is filled from the
+        // research candidates that follow it.
+        expect(kept.map((item) => item.link)).toEqual([`${rootUrl}/cell/fulltext/S0092-8674(25)00502-2`, `${rootUrl}/cell/fulltext/S0092-8674(25)00504-6`]);
     });
 });

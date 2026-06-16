@@ -8,6 +8,7 @@ import { generateHeaders, PRESETS } from '@/utils/header-generator';
 import { parseDate } from '@/utils/parse-date';
 import type { Browser, Page } from '@/utils/playwright';
 
+import { isIncludedArticleType } from '../article-type';
 import { defaultDelayMs as sharedDefaultDelayMs, defaultJitterMs as sharedDefaultJitterMs, parseNonNegativeIntegerOption, parsePositiveIntegerOption, sleepWithJitter, type Sleep } from '../fetch-policy';
 
 export const baseUrl = 'https://www.science.org';
@@ -33,6 +34,7 @@ type CacheGetter<T> = (key: string, getter: () => Promise<T>) => Promise<T>;
 export type ScienceItem = DataItem & {
     doi?: string;
     link: string;
+    articleType?: string;
 };
 
 export type FetchOptions = {
@@ -265,10 +267,16 @@ export const fetchListing = async (browser: Browser, url: string, kind: RouteKin
     return fetchHtmlWithRetries(browser, url, listSelector, options);
 };
 
+export const parseArticleType = (html: string): string => {
+    const $ = load(html);
+    return $('.meta-panel__type').first().text().replace(/\s+/g, ' ').trim() || ($('meta[name="dc.Type"]').attr('content') ?? '').trim();
+};
+
 const enrichArticle = async (browser: Browser, item: ScienceItem, options: FetchOptions) => {
     const html = await fetchHtmlWithRetries(browser, item.link, selectors.article, options);
     return {
         ...item,
+        articleType: parseArticleType(html),
         description: parseArticleDescription(html),
     };
 };
@@ -286,6 +294,36 @@ export const fetchArticleDetails = async (items: ScienceItem[], browser: Browser
     }
 
     return details;
+};
+
+// Walk the listing pool and keep only research-type articles (see
+// article-type.ts) until `limit` are collected. The Science current/early
+// listings interleave research with editorials, perspectives, letters, news
+// and book reviews, and the type is only known after fetching the article page,
+// so we over-fetch and stop early. A candidate whose fetch fails (challenge/
+// missing selector) is skipped rather than failing the whole feed.
+export const collectResearchArticleDetails = async (items: ScienceItem[], browser: Browser, tryGet: CacheGetter<ScienceItem>, options: FetchOptions, limit: number) => {
+    const kept: ScienceItem[] = [];
+
+    for (const item of items) {
+        if (kept.length >= limit) {
+            break;
+        }
+        let detailed: ScienceItem;
+        try {
+            detailed = await tryGet(item.link, async () => {
+                await sleepWithJitter(policy(options));
+                return enrichArticle(browser, item, options);
+            });
+        } catch {
+            continue;
+        }
+        if (isIncludedArticleType(detailed.articleType)) {
+            kept.push(detailed);
+        }
+    }
+
+    return kept;
 };
 
 export const feedMeta = (kind: RouteKind, journal: Journal, pageUrl: string, html: string) => {
