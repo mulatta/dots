@@ -124,7 +124,7 @@
     };
 
     rhwp = {
-      url = "github:mulatta/rhwp-nix/a50cae05ae69748afa9ee7cf5b937cb8375637e8";
+      url = "github:mulatta/rhwp-nix/649f88b56f479b11f10b0a0eda67657d1e7e0c05";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
