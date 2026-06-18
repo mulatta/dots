@@ -58,10 +58,10 @@ let
   };
 
   # Build profile arguments string
-  mkProfileArgs = profiles: lib.concatMapStrings (s: " -P \"${s}\"") profiles;
+  mkProfileArgs = profiles: lib.concatMapStrings (s: " -P ${lib.escapeShellArg s}") profiles;
 
   # Build extra arguments string
-  mkExtraArgs = args: lib.concatMapStrings (s: " \"${s}\"") args;
+  mkExtraArgs = args: lib.concatMapStrings (s: " ${lib.escapeShellArg s}") args;
 
   # Create backup script for files backup
   mkFilesBackupScript =
@@ -69,8 +69,10 @@ let
     let
       profileArgs = mkProfileArgs backup.useProfiles;
       extraArgs = mkExtraArgs backup.extraArgs;
-      sourcesArgs = lib.concatMapStrings (s: " \"${s}\"") backup.sources;
-      asPathArg = lib.optionalString (backup.asPath != null) " --as-path \"${backup.asPath}\"";
+      sourcesArgs = lib.concatMapStrings (s: " ${lib.escapeShellArg s}") backup.sources;
+      asPathArg = lib.optionalString (
+        backup.asPath != null
+      ) " --as-path ${lib.escapeShellArg backup.asPath}";
     in
     pkgs.writeScript "rustic-backup-files-${name}" ''
       #!${pkgs.bash}/bin/bash
