@@ -23,7 +23,6 @@
       myPkgs = self.packages.${system};
     in
     [
-      myPkgs.chartdb
       myPkgs.instagram-cli
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry

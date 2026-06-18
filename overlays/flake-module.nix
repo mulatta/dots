@@ -38,7 +38,6 @@
         rsshub = prev.callPackage ../packages/rsshub {
           rsshub = prev.rsshub;
         };
-        chartdb = prev.callPackage ../packages/chartdb { };
         bulwark-webmail = prev.callPackage ../packages/bulwark-webmail { };
         merge-when-green = prev.callPackage ../packages/merge-when-green {
           flake-fmt = inputs.flake-fmt.packages.${system}.default;

@@ -14,7 +14,6 @@
         };
         inherit (pkgs)
           rsshub
-          chartdb
           bulwark-webmail
           merge-when-green
           claude-md
