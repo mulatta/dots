@@ -183,7 +183,7 @@ in
   };
 
   # FETCHER_ALLOW_PRIVATE_NETWORKS is required for localhost RSSHub feeds, but
-  # keep Miniflux from becoming a path to other private IPv4/link-local services.
+  # keep Miniflux from becoming a path to other private/link-local services.
   # Loopback stays allowed for RSSHub; PostgreSQL remains on AF_UNIX.
   systemd.services.miniflux.serviceConfig = {
     IPAddressAllow = [
@@ -195,6 +195,9 @@ in
       "172.16.0.0/12"
       "192.168.0.0/16"
       "169.254.0.0/16"
+      # IPv6 ULA (covers the WireGuard fd28::/.. mesh) and link-local
+      "fc00::/7"
+      "fe80::/10"
     ];
   };
 
