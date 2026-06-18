@@ -3,7 +3,7 @@
   imports = [ inputs.treefmt-nix.flakeModule ];
 
   perSystem =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
       treefmt = {
         # Worktrees use a .git file, so anchor formatting on the flake root.
@@ -45,7 +45,7 @@
 
           # ruff-isort: organize imports before ruff-format.
           ruff-isort = {
-            command = pkgs.ruff;
+            command = lib.getExe pkgs.ruff;
             options = [
               "check"
               "--fix"
