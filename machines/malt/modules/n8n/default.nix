@@ -106,7 +106,6 @@ in
       N8N_EDITOR_BASE_URL = "https://${n8nDomain}";
       WEBHOOK_URL = "https://${n8nApiDomain}";
 
-      # PostgreSQL database configuration
       DB_TYPE = "postgresdb";
       DB_POSTGRESDB_HOST = "/run/postgresql";
       DB_POSTGRESDB_DATABASE = "n8n";
@@ -139,7 +138,6 @@ in
     taskRunners.enable = true;
   };
 
-  # PostgreSQL database for n8n
   services.postgresql.ensureDatabases = [ "n8n" ];
   services.postgresql.ensureUsers = [
     {

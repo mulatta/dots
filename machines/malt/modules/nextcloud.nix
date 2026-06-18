@@ -14,7 +14,6 @@ let
   tapsWgIP = "${wgPrefix}::1";
 in
 {
-  # ZFS dataset for Nextcloud data
   disko.devices.zpool.zroot.datasets."nextcloud" = {
     type = "zfs_fs";
     mountpoint = "/var/lib/nextcloud";
@@ -35,8 +34,6 @@ in
       openssl rand -hex 24 > "$out/admin-password"
     '';
   };
-
-  # Note: OAuth client secret not needed - using Kanidm public client with PKCE
 
   services.nextcloud = {
     enable = true;
@@ -64,7 +61,6 @@ in
       loglevel = 2; # 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
     };
 
-    # PHP opcache settings
     phpOptions = {
       "opcache.interned_strings_buffer" = "16";
     };
@@ -75,7 +71,7 @@ in
     extraAppsEnable = true;
   };
 
-  # Ensure correct ownership for ZFS dataset
+  # ZFS auto-creates the dataset root-owned; reset it to the service user.
   systemd.tmpfiles.rules = [
     "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
   ];
@@ -93,9 +89,8 @@ in
       # Enable OIDC app
       nextcloud-occ app:enable user_oidc || true
 
-      # Create or update provider (public client - no secret needed)
-      # Nextcloud user_oidc app may require a secret even for public clients
-      # Use a placeholder or empty string if PKCE is supported
+      # user_oidc requires the clientsecret flag even for a PKCE public client,
+      # so pass an empty string.
       nextcloud-occ user_oidc:provider kanidm \
         --clientid="nextcloud" \
         --clientsecret="" \
