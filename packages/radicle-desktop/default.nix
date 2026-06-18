@@ -30,6 +30,8 @@ stdenv.mkDerivation {
   meta = {
     description = "Desktop app for Radicle, a peer-to-peer code collaboration stack";
     homepage = "https://radicle.xyz/";
+    # Prebuilt .app from an upstream release; no buildable source here.
+    sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
     license = lib.licenses.gpl3Plus;
     platforms = [ "aarch64-darwin" ];
     mainProgram = "radicle";
