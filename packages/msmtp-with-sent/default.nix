@@ -7,7 +7,7 @@
 # Wrapper for msmtp that saves sent mail to the local maildir.
 writeShellScriptBin "msmtp" ''
   tmpfile=$(mktemp)
-  trap "rm -f $tmpfile" EXIT
+  trap 'rm -f "$tmpfile"' EXIT
 
   cat > "$tmpfile"
 
