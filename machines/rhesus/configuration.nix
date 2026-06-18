@@ -1,7 +1,6 @@
 {
   self,
   pkgs,
-  lib,
   ...
 }:
 {
@@ -23,7 +22,7 @@
     ../../darwinModules/zerotier.nix
   ];
 
-  clan.core.networking.targetHost = lib.mkForce "root@rhesus.x";
+  clan.core.networking.targetHost = "root@rhesus.x";
   system.primaryUser = "seungwon";
 
   networking.hostName = "rhesus";
