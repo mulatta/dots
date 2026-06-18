@@ -5,14 +5,12 @@
   ...
 }:
 let
-  n8nApiUrl = "http://[${
-    self.inputs.clan-core.lib.getPublicValue {
-      flake = config.clan.core.settings.directory;
-      machine = "taps";
-      generator = "wireguard-network-wireguard";
-      file = "prefix";
-    }
-  }:${config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value}]:5678";
+  system = pkgs.stdenv.hostPlatform.system;
+
+  wgPrefix = self.lib.wgPrefix;
+  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
+  maltWgIP = "${wgPrefix}:${maltSuffix}";
+  n8nApiUrl = "http://[${maltWgIP}]:5678";
 
   n8nHooksConfig = pkgs.writeText "n8n-hooks-config.json" (
     builtins.toJSON {
@@ -57,8 +55,6 @@ let
     mkdir -p "$out/share/vikunja-cli"
     cp -r ${../../../../home/.local/share/vikunja-cli/templates} "$out/share/vikunja-cli/templates"
   '';
-
-  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   services.opencrow.credentialFiles."n8n-hooks-token" =

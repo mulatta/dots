@@ -7,7 +7,7 @@
 }:
 let
   clanLib = self.inputs.clan-core.lib;
-  wgPrefix = config.clan.core.vars.generators.wireguard-network-wireguard.files.prefix.value;
+  wgPrefix = self.lib.wgPrefix;
   maltSuffix = clanLib.getPublicValue {
     flake = config.clan.core.settings.directory;
     machine = "malt";
