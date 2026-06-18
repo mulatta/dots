@@ -13,13 +13,12 @@ writeShellScriptBin "yazi" ''
   XDG_CONFIG_HOME=''${XDG_CONFIG_HOME:-$HOME/.config}
   YAZI_CONFIG="$XDG_CONFIG_HOME/yazi-standalone"
 
-  # Clean and copy config (fresh every run like Mic92 nvim)
+  # Fresh copy each run so the standalone config never drifts from source.
   rm -rf "$YAZI_CONFIG"
   mkdir -p "$YAZI_CONFIG"
   cp -arfT '${yazi-config}'/ "$YAZI_CONFIG"
   chmod -R u+w "$YAZI_CONFIG"
 
-  # Copy plugins
   mkdir -p "$YAZI_CONFIG/plugins"
   cp -arfT '${yazi-plugins}/share/yazi/plugins'/ "$YAZI_CONFIG/plugins"
   chmod -R u+w "$YAZI_CONFIG/plugins"

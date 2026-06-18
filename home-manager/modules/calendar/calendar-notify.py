@@ -218,7 +218,6 @@ def send_notification(title: str, time_str: str, body: str = "") -> None:
             text=True,
         )
     else:
-        # Linux notification using notify-send
         result = subprocess.run(
             [
                 "notify-send",

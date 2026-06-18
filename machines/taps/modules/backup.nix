@@ -38,7 +38,7 @@
     };
 
     backups = {
-      # PostgreSQL backup (all databases) - every 6 hours
+      # PostgreSQL backup (all databases)
       postgres.niks3 = {
         startAt = "*-*-* 00,06,12,18:00:00";
         prefix = "/postgres";
