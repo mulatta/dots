@@ -24,6 +24,7 @@ python3Packages.buildPythonApplication {
 
   preCheck = ''
     ruff check .
+    ruff format --check .
     mypy slack_manifest_cli tests
   '';
 
