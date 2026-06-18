@@ -23,7 +23,7 @@
       nvd
 
       # Shell & terminal
-      # bat + bat-extras moved to ../modules/bat.nix (programs.bat)
+      # bat is configured in ../modules/bat.nix (programs.bat).
       btop
       direnv
       eza

@@ -1,6 +1,5 @@
 {
   flake.nixosModules = {
-    # Export default nixosModule for use by all NixOS machines
     default = ../nixosModules/default.nix;
     bulwark-webmail = ../nixosModules/bulwark-webmail;
     restate = ../nixosModules/restate;
