@@ -115,7 +115,6 @@ lib.mkMerge [
       Service = {
         Type = "oneshot";
         ExecStart = "${calendarNotifyScript}/bin/calendar-notify";
-        Environment = "DISPLAY=:0";
       };
     };
 
