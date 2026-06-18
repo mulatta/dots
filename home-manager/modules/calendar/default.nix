@@ -7,7 +7,6 @@
   ...
 }:
 let
-  # Python environment for calendar-notify
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
       icalendar
@@ -24,7 +23,6 @@ let
 
   calendarSyncScript = pkgs.writeShellScriptBin "calendar-sync" ''
     #!/usr/bin/env bash
-    # Sync calendars with vdirsyncer
     export PATH="${pkgs.rbw}/bin:$PATH"
     ${pkgs.vdirsyncer}/bin/vdirsyncer sync
   '';
@@ -86,7 +84,6 @@ lib.mkMerge [
       vdirsyncerPreDeletionHook
     ];
 
-    # Create calendar/contacts directories
     home.activation.createPimDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run mkdir -p "${dataHome}/calendars"
       run mkdir -p "${dataHome}/contacts"

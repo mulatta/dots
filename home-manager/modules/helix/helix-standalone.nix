@@ -15,7 +15,7 @@ let
     HELIX_STANDALONE_XDG="$HOME/.config/helix-standalone"
     HELIX_STANDALONE="$HELIX_STANDALONE_XDG/helix"
 
-    # Clean and copy config (fresh every run)
+    # Fresh copy each run so the isolated config can't drift from source.
     rm -rf "$HELIX_STANDALONE_XDG"
     mkdir -p "$HELIX_STANDALONE"
     cp -arfT '${helix-config}'/ "$HELIX_STANDALONE"

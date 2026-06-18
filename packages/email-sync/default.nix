@@ -65,7 +65,6 @@ writeShellApplication {
     echo "Syncing emails from IMAP servers..."
     mbsync -c "$ISYNC_CONFIG" -a
 
-    # Initialize notmuch if needed
     if [ ! -d "$MAILDIR/.notmuch" ]; then
       echo "Initializing notmuch database..."
       notmuch new
@@ -89,7 +88,6 @@ writeShellApplication {
       notmuch new --quiet
     fi
 
-    # Resync after local changes
     echo "Resyncing after local changes..."
     mbsync -c "$ISYNC_CONFIG" -a || true
 
