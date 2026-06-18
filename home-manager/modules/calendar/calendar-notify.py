@@ -6,13 +6,12 @@ import logging
 import os
 import platform
 import subprocess
-import sys
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytz
-from dateutil.rrule import rrulestr
+from dateutil.rrule import rrulebase, rrulestr
 from icalendar import Calendar, Event
 from icalendar.prop import vDDDTypes, vDuration
 
@@ -28,7 +27,7 @@ CALENDAR_DIR = XDG_DATA_HOME / "calendars"
 type DateOrDateTime = date | datetime
 type DurationLike = timedelta | vDuration
 type TriggerType = datetime | timedelta | vDDDTypes
-type RRuleType = rrulestr | None
+type RRuleType = rrulebase | None
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +35,8 @@ logger = logging.getLogger(__name__)
 class EventOccurrenceProcessor:
     """Handles event occurrence calculations."""
 
-    def __init__(self, event: Event, ics_path: Path) -> None:
+    def __init__(self, event: Event) -> None:
         self.event = event
-        self.ics_path = ics_path
         self.dtstart = event.get("DTSTART")
         self.dtstart_dt: DateOrDateTime | None = None
         self.duration: timedelta | None = None
@@ -140,15 +138,9 @@ def parse_trigger_time(trigger: TriggerType, event_start: datetime) -> datetime 
         alarm_time = event_start + trigger.td
     elif isinstance(trigger, timedelta):
         alarm_time = event_start + trigger
-    else:
-        try:
-            if hasattr(trigger, "td"):
-                alarm_time = event_start + trigger.td
-            elif isinstance(trigger, timedelta):
-                alarm_time = event_start + trigger
-        except TypeError:
-            alarm_time = event_start - timedelta(minutes=15)
 
+    # Unknown trigger shapes leave alarm_time None; the caller falls back to a
+    # -15min default when an event yields no parseable alarm.
     return alarm_time
 
 
@@ -173,7 +165,7 @@ def parse_recurrence_rule(rrule_str: str, dtstart: DateOrDateTime) -> RRuleType:
         rrule_str = rrule_str.removeprefix("RRULE:")
         return rrulestr(rrule_str, dtstart=dtstart)
     except (ValueError, TypeError) as e:
-        print(f"Error parsing RRULE: {e}", file=sys.stderr)
+        logger.error(f"Error parsing RRULE: {e}")
         return None
 
 
@@ -209,15 +201,18 @@ def send_notification(title: str, time_str: str, body: str = "") -> None:
     logger.info(f"Sending notification: '{title}' at {time_str}")
 
     if platform.system() == "Darwin":
-        # macOS notification using osascript
+        # macOS notification using osascript. Pass the title/message as argv
+        # rather than interpolating into the AppleScript source, so event
+        # fields cannot break out of the string or inject script.
         notification_title = f"Event at {time_str}"
         notification_text = title + ("\n" + body if body else "")
-        notification_title = notification_title.replace('"', '\\"')
-        notification_text = notification_text.replace('"', '\\"')
-
-        script = f'display alert "{notification_title}" message "{notification_text}" as critical'
+        script = (
+            "on run argv\n"
+            "  display alert (item 1 of argv) message (item 2 of argv) as critical\n"
+            "end run"
+        )
         result = subprocess.run(
-            ["osascript", "-e", script],
+            ["osascript", "-e", script, notification_title, notification_text],
             check=False,
             capture_output=True,
             text=True,
@@ -302,14 +297,14 @@ def process_calendar_file(db: Any, ics_path: Path) -> None:
 
         for component in cal.walk():
             if component.name == "VEVENT":
-                processor = EventOccurrenceProcessor(component, ics_path)
+                processor = EventOccurrenceProcessor(component)
                 occurrences = processor.get_occurrences(start_date, end_date)
 
                 for occurrence_start, duration in occurrences:
                     process_event_alarms(db, component, occurrence_start, duration)
 
     except (ValueError, TypeError, OSError) as e:
-        print(f"Error processing {ics_path}: {e}", file=sys.stderr)
+        logger.error(f"Error processing {ics_path}: {e}")
 
 
 def main() -> None:
