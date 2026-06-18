@@ -24,7 +24,6 @@ in
     systemd.services.qdrant.serviceConfig.User = "qdrant";
     systemd.services.qdrant.serviceConfig.Group = "qdrant";
 
-    # ZFS dataset for Qdrant data
     disko.devices.zpool.zroot.datasets."qdrant" = {
       type = "zfs_fs";
       mountpoint = "/var/lib/qdrant";
@@ -47,7 +46,6 @@ in
           enable_cors = true;
         };
 
-        # Storage paths
         storage = {
           storage_path = "/var/lib/qdrant/storage";
           snapshots_path = "/var/lib/qdrant/snapshots";
@@ -63,7 +61,6 @@ in
         # Disable telemetry
         telemetry_disabled = true;
 
-        # Logging
         log_level = "INFO";
       };
     };
@@ -74,12 +71,11 @@ in
       CPUQuota = "200%"; # 2 cores
     };
 
-    # Ensure correct ownership for ZFS dataset
+    # ZFS auto-creates the dataset root-owned; reset it to the service user.
     systemd.tmpfiles.rules = [
       "Z /var/lib/qdrant 0750 qdrant qdrant -"
     ];
 
-    # Firewall: allow access from WireGuard network
     networking.firewall.interfaces."wireguard".allowedTCPPorts = [
       6333 # HTTP API
       6334 # gRPC API
