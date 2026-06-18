@@ -5,13 +5,7 @@
   ...
 }:
 let
-  clanLib = self.inputs.clan-core.lib;
-  wgPrefix = clanLib.getPublicValue {
-    flake = config.clan.core.settings.directory;
-    machine = "taps";
-    generator = "wireguard-network-wireguard";
-    file = "prefix";
-  };
+  wgPrefix = self.lib.wgPrefix;
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${wgPrefix}:${maltSuffix}";
   # Taps has no public suffix (it's the WG gateway), so trust the whole

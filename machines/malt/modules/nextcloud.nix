@@ -8,6 +8,10 @@ let
   # Kanidm OIDC settings
   kanidmDomain = "idm.mulatta.io";
   kanidmIssuer = "https://${kanidmDomain}/oauth2/openid/nextcloud";
+
+  wgPrefix = self.lib.wgPrefix;
+  # taps is the WireGuard controller (::1); it fronts nextcloud as reverse proxy
+  tapsWgIP = "${wgPrefix}::1";
 in
 {
   # ZFS dataset for Nextcloud data
@@ -50,7 +54,7 @@ in
 
     settings = {
       overwriteprotocol = "https";
-      trusted_proxies = [ "fd28:387a:57:8f00::1" ];
+      trusted_proxies = [ tapsWgIP ];
       default_phone_region = "KR";
       maintenance_window_start = 3; # 3 AM UTC
       files_external_allow_create_new_local = true;

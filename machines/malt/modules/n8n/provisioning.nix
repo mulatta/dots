@@ -5,12 +5,7 @@
   ...
 }:
 let
-  wgPrefix = self.inputs.clan-core.lib.getPublicValue {
-    flake = config.clan.core.settings.directory;
-    machine = "taps";
-    generator = "wireguard-network-wireguard";
-    file = "prefix";
-  };
+  wgPrefix = self.lib.wgPrefix;
   maltWgIP = "${wgPrefix}:${config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value}";
   n8nApiUrl = "http://[${maltWgIP}]:5678";
   restateIngressUrl = "http://[${maltWgIP}]:8081";
