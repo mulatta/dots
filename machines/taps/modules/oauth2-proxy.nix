@@ -43,6 +43,23 @@ let
     "--upstream=http://[${maltWgIP}]:9070"
     "--http-address=127.0.0.1:4181"
   ];
+
+  # Both proxies are public OIDC clients, so the only generated secret is the
+  # cookie-signing key; the client secret is an unused placeholder.
+  mkOauth2ProxySecret = {
+    files."env" = {
+      secret = true;
+      owner = "oauth2-proxy";
+    };
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      COOKIE_SECRET=$(openssl rand -hex 16)
+      cat > "$out/env" <<EOF
+      OAUTH2_PROXY_COOKIE_SECRET=$COOKIE_SECRET
+      OAUTH2_PROXY_CLIENT_SECRET=unused-public-client
+      EOF
+    '';
+  };
 in
 {
   # oauth2-proxy needs kanidm to be running for OIDC discovery
@@ -50,36 +67,8 @@ in
     after = [ "kanidm.service" ];
     wants = [ "kanidm.service" ];
   };
-  clan.core.vars.generators.oauth2-proxy = {
-    files."env" = {
-      secret = true;
-      owner = "oauth2-proxy";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      # Generate exactly 32 hex characters (16 bytes of entropy, 32-byte string)
-      COOKIE_SECRET=$(openssl rand -hex 16)
-      cat > "$out/env" <<EOF
-      OAUTH2_PROXY_COOKIE_SECRET=$COOKIE_SECRET
-      OAUTH2_PROXY_CLIENT_SECRET=unused-public-client
-      EOF
-    '';
-  };
-
-  clan.core.vars.generators.oauth2-proxy-restate = {
-    files."env" = {
-      secret = true;
-      owner = "oauth2-proxy";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      COOKIE_SECRET=$(openssl rand -hex 16)
-      cat > "$out/env" <<EOF
-      OAUTH2_PROXY_COOKIE_SECRET=$COOKIE_SECRET
-      OAUTH2_PROXY_CLIENT_SECRET=unused-public-client
-      EOF
-    '';
-  };
+  clan.core.vars.generators.oauth2-proxy = mkOauth2ProxySecret;
+  clan.core.vars.generators.oauth2-proxy-restate = mkOauth2ProxySecret;
 
   systemd.services.oauth2-proxy-restate = {
     description = "OAuth2 Proxy for Restate";
