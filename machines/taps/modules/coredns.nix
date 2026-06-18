@@ -4,13 +4,7 @@
   ...
 }:
 let
-  # Helper to read clan vars
-  readVarFile =
-    machine: generator: file:
-    let
-      path = self + "/vars/per-machine/${machine}/${generator}/${file}/value";
-    in
-    if builtins.pathExists path then lib.strings.trim (builtins.readFile path) else null;
+  readVarFile = self.lib.readVarFile;
 
   # Get ZeroTier IPs for .i domain
   zerotierIPs = {
