@@ -141,21 +141,6 @@
         };
       }
       // prev.lib.optionalAttrs prev.stdenv.isDarwin {
-        # TODO: direnv 2.37.1 test/direnv-test.zsh can hang indefinitely in
-        # the Darwin sandbox. Remove when nixpkgs-unstable carries a fixed
-        # test suite.
-        direnv = prev.direnv.overrideAttrs (_old: {
-          doCheck = false;
-        });
-
-        # TODO: emacs 30.2 nextstep (Cocoa) build is broken on Darwin in the
-        # current nixpkgs: Objective-C .m files compile with an older C
-        # standard than the C sources, so conf_post.h's `typedef bool bool_bf`
-        # hits `unknown type name 'bool'`. notmuch only needs emacs to build
-        # its notmuch-emacs lisp, which emacs-nox provides without the broken
-        # nextstep frontend. Remove when nixpkgs fixes the Cocoa emacs build.
-        notmuch = prev.notmuch.override { emacs = final.emacs-nox; };
-
         nostr-chat-bar = prev.callPackage ../packages/nostr-chat-bar { };
         systemctl-macos = prev.callPackage ../packages/systemctl { };
       };
