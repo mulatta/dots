@@ -35,8 +35,6 @@
   };
 
   system.activationScripts.postActivation.text = ''
-    # disable spotlight
-    # launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist >/dev/null 2>&1 || true
     # disable fseventsd on /nix volume
     mkdir -p /nix/.fseventsd
     test -e /nix/.fseventsd/no_log || touch /nix/.fseventsd/no_log

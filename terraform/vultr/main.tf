@@ -17,7 +17,6 @@ resource "vultr_ssh_key" "taps" {
   ssh_key = chomp(file(var.ssh_public_key_path))
 }
 
-# Main instance resource
 # Provision with Ubuntu, then use: clan machines install taps --target-host root@<IP>
 resource "vultr_instance" "taps" {
   hostname = var.hostname

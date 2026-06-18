@@ -70,7 +70,7 @@
         instagram-cli = prev.callPackage ../packages/instagram-cli { };
         radicle-desktop = prev.callPackage ../packages/radicle-desktop { };
 
-        # Tool bundles (moved from helix/yazi flake-modules)
+        # Tool bundles consumed by the helix/yazi modules.
         helix-lsp-tools = prev.buildEnv {
           name = "helix-lsp-tools";
           paths = with prev; [
