@@ -18,6 +18,10 @@ let
   requestIdentity = config.clan.core.vars.generators.restate-request-identity;
 in
 {
+  imports = [
+    self.inputs.restate-workflows.nixosModules.url-media-archive
+  ];
+
   disko.devices.zpool.zroot.datasets."restate" = {
     type = "zfs_fs";
     mountpoint = "/var/lib/restate";
@@ -26,10 +30,6 @@ in
       "com.sun:auto-snapshot" = "true";
     };
   };
-
-  imports = [
-    self.inputs.restate-workflows.nixosModules.url-media-archive
-  ];
 
   clan.core.vars.generators.restate-request-identity = {
     files."private-key.pem" = {
