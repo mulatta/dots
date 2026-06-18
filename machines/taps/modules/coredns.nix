@@ -11,7 +11,6 @@ let
     taps = readVarFile "taps" "zerotier" "zerotier-ip";
     malt = readVarFile "malt" "zerotier" "zerotier-ip";
     pint = readVarFile "pint" "zerotier" "zerotier-ip";
-    # rhesus needs vars generated first
     rhesus = readVarFile "rhesus" "zerotier" "zerotier-ip";
   };
 
@@ -33,7 +32,6 @@ let
     rhesus = if wgSuffixes.rhesus != null then "${wgPrefix}:${wgSuffixes.rhesus}" else null;
   };
 
-  # Generate hosts entries for a domain
   mkHostsEntries =
     ips: domain:
     lib.concatStringsSep "\n" (
@@ -42,7 +40,6 @@ let
       )
     );
 
-  # taps IPs for binding
   tapsZerotierIP = zerotierIPs.taps;
   tapsWireguardIP = wgIPs.taps;
 
@@ -83,7 +80,6 @@ let
   '';
 in
 {
-  # Open DNS port in firewall
   networking.firewall = {
     allowedTCPPorts = [ 53 ];
     allowedUDPPorts = [ 53 ];

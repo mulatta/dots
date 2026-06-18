@@ -93,7 +93,7 @@ in
     client.enable = true;
     package = pkgs.kanidmWithSecretProvisioning_1_10;
 
-    # Client settings for CLI tools (used by stalwart token script)
+    # Used by the stalwart token script (kanidm CLI).
     client.settings = {
       uri = "https://${domain}";
     };
@@ -106,8 +106,7 @@ in
       # LDAP server for IMAP/SMTP authentication (Stalwart, etc.)
       ldapbindaddress = "127.0.0.1:3636";
 
-      # TLS via ACME (nginx handles public TLS, kanidm uses self-signed internally)
-      # For direct TLS, use ACME certs:
+      # Serve TLS on the listener from the ACME certs (kanidm requires its own TLS).
       tls_chain = "/var/lib/acme/${domain}/fullchain.pem";
       tls_key = "/var/lib/acme/${domain}/key.pem";
 
@@ -129,9 +128,7 @@ in
       enable = true;
       autoRemove = true;
 
-      # Groups
       groups = {
-        # Mail users - can access Stalwart Mail
         mail_users = {
           members = [
             "seungwon"
@@ -139,42 +136,33 @@ in
             "noa"
           ];
         };
-        # Cloud users - can access Nextcloud
         cloud_users = {
           members = [
             "seungwon"
             "n8n_bot"
           ];
         };
-        # Automation users - can access n8n
         automation_users = {
           members = [ "seungwon" ];
         };
-        # Task users - can access Vikunja
         task_users = {
           members = [ "seungwon" ];
         };
-        # Document users - can access Paperless
         paperless_users = {
           members = [ "seungwon" ];
         };
-        # RSS users - can access Miniflux
         rss_users = {
           members = [ "seungwon" ];
         };
-        # Bookmark users - can access Linkwarden
         bookmark_users = {
           members = [ "seungwon" ];
         };
-        # Media users - can access Jellyfin
         media_users = {
           members = [ "seungwon" ];
         };
-        # Home automation users - can access Home Assistant
         homeassistant_users = {
           members = [ "seungwon" ];
         };
-        # Admin group
         admins = {
           members = [ "seungwon" ];
         };
@@ -196,7 +184,6 @@ in
         };
       };
 
-      # Users (persons)
       persons = {
         seungwon = {
           displayName = "Seungwon";
@@ -494,7 +481,7 @@ in
     wants = [ "acme-finished-${domain}.target" ];
   };
 
-  # nginx reverse proxy (optional, for HTTP→HTTPS redirect)
+  # Public nginx vhost; reverse-proxies all traffic to the kanidm listener.
   services.nginx.virtualHosts.${domain} = {
     forceSSL = true;
     enableACME = true;
