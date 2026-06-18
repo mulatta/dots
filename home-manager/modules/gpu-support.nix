@@ -1,5 +1,6 @@
 # GPU support profile
-# Overrides pkgs with cudaSupport=true and applies llm-agents-cuda overlay for qmd
+# Rebuilds pkgs with cudaSupport=true; qmd picks up CUDA via a local override
+# in the llm-agents module keyed off pkgs.config.cudaSupport.
 {
   lib,
   self,
@@ -17,7 +18,6 @@
       };
       overlays = [
         self.overlays.dots
-        self.overlays.llm-agents-cuda # overrides pkgs.qmd with CUDA support
       ];
     }
   );

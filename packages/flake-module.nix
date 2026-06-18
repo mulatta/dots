@@ -1,19 +1,22 @@
-{ ... }:
+{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
       lib,
+      system,
       ...
     }:
     {
       packages = {
+        claude-code = pkgs.callPackage ../packages/claude-code {
+          claude-code = inputs.llm-agents.packages.${system}.claude-code;
+        };
         inherit (pkgs)
           rsshub
           chartdb
           bulwark-webmail
           merge-when-green
-          claude-code
           claude-md
           rbw-pinentry
           rhwp
