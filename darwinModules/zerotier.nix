@@ -172,7 +172,9 @@ in
         done
 
         ${lib.concatMapStringsSep "\n" (network: ''
-          if ! ${ztCli} listnetworks 2>/dev/null | grep -q "${network}"; then
+          # Match the network-id column exactly; a bare grep would also match
+          # the id as a substring of another network's row.
+          if ! ${ztCli} listnetworks 2>/dev/null | awk '{print $3}' | grep -qx "${network}"; then
             echo "Joining ZeroTier network ${network}..."
             ${ztCli} join "${network}" || true
           fi
