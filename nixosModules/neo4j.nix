@@ -13,7 +13,6 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    # ZFS dataset for Neo4j data
     disko.devices.zpool.zroot.datasets."neo4j" = {
       type = "zfs_fs";
       mountpoint = "/var/lib/neo4j";
@@ -25,7 +24,6 @@ in
     };
 
     services.neo4j = {
-      # Directories
       directories = {
         home = "/var/lib/neo4j";
         data = "/var/lib/neo4j/data";
@@ -71,12 +69,11 @@ in
       https.enable = false;
     };
 
-    # Ensure correct ownership for ZFS dataset
+    # ZFS auto-creates the dataset root-owned; reset it to the service user.
     systemd.tmpfiles.rules = [
       "Z /var/lib/neo4j 0750 neo4j neo4j -"
     ];
 
-    # Firewall: allow access from WireGuard network
     networking.firewall.interfaces."wireguard".allowedTCPPorts = [
       7474 # HTTP
       7687 # Bolt

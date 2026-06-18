@@ -28,7 +28,6 @@ let
   # Merge defaults into each profile (user settings override defaults)
   mergedProfiles = lib.mapAttrs (_: v: lib.recursiveUpdate defaultProfileSettings v) cfg.profiles;
 
-  # Generate TOML config files for each profile
   configFiles = lib.mapAttrs (k: v: tomlFormat.generate "rustic-${k}.toml" v) mergedProfiles;
 
   # Common backup options shared across all backup types
@@ -57,13 +56,10 @@ let
     };
   };
 
-  # Build profile arguments string
   mkProfileArgs = profiles: lib.concatMapStrings (s: " -P ${lib.escapeShellArg s}") profiles;
 
-  # Build extra arguments string
   mkExtraArgs = args: lib.concatMapStrings (s: " ${lib.escapeShellArg s}") args;
 
-  # Create backup script for files backup
   mkFilesBackupScript =
     name: backup:
     let
@@ -80,7 +76,6 @@ let
       ${cfg.package}/bin/rustic backup${sourcesArgs}${asPathArg}${profileArgs}${extraArgs}
     '';
 
-  # Create backup script for command backup
   mkCommandBackupScript =
     name: backup:
     let
@@ -96,7 +91,6 @@ let
       ${cfg.package}/bin/rustic backup --stdin-command "${backup.command}" -${filenameArg}${profileArgs}${extraArgs}
     '';
 
-  # Create backup script for PostgreSQL backup
   mkPostgresBackupScript =
     name: _backup:
     let
@@ -118,7 +112,6 @@ let
         | xargs -I {} ${systemctl} start --no-block rustic-postgres-db-${name}@{}.service
     '';
 
-  # Create globals backup script for PostgreSQL
   mkPostgresGlobalsScript =
     name: backup:
     let
@@ -135,7 +128,6 @@ let
           -${profileArgs}${extraArgs}
     '';
 
-  # Create per-database backup script for PostgreSQL
   mkPostgresDbScript =
     name: backup:
     let
@@ -153,7 +145,6 @@ let
           -${profileArgs}${extraArgs}
     '';
 
-  # Create backup script for SQLite backup
   mkSqliteBackupScript =
     name: backup:
     let
