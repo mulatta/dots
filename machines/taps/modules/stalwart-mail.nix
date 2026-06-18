@@ -350,6 +350,8 @@ in
         port = 5432;
         database = "stalwart-mail";
         user = "stalwart-mail";
+        # Connects over the unix socket with peer authentication, so the
+        # password is never used. The field is required, hence the placeholder.
         password = "unused";
         timeout = "15s";
         tls.enable = false;
