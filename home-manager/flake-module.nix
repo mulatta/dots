@@ -44,7 +44,7 @@
             lib.makeBinPath [
               pkgs.coreutils
               pkgs.findutils
-              pkgs.hostname
+              pkgs.unixtools.hostname
               pkgs.stow
               pkgs.nixVersions.latest
               inputs.home-manager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager
