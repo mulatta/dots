@@ -1,5 +1,6 @@
 {
   inputs,
+  self,
   lib,
   pkgs,
   ...
@@ -9,6 +10,14 @@ let
   pi-ext = inputs.pi-agent-extensions;
   aiPkgs = inputs.llm-agents.packages.${system};
   skillzPkgs = inputs.skillz.packages.${system};
+  # On GPU hosts pkgs is rebuilt with cudaSupport=true (gpu-support.nix); rebuild
+  # qmd with CUDA there, otherwise take the cached upstream build. qmd sources
+  # cudaPackages from its own pkgs, so cudaSupport is the only arg it accepts.
+  qmd =
+    if pkgs.config.cudaSupport or false then
+      aiPkgs.qmd.override { cudaSupport = true; }
+    else
+      aiPkgs.qmd;
   piAgentDeps = pkgs.callPackage ../../home/.pi/agent/default.nix { };
 
   # officecli ships its skill text in-source and CI keeps it byte-identical to
@@ -81,13 +90,13 @@ in
 
   home.packages =
     (with pkgs; [
-      claude-code # custom wrapper (dots overlay)
       claude-md # dots overlay
       pim # dots overlay
       pueue
-      qmd # dots overlay (for CUDA override chain)
     ])
     ++ [
+      self.packages.${system}.claude-code # custom wrapper, flake package output
+      qmd # local binding; CUDA-grafted on GPU hosts
       skillzPkgs.biorefs-cli
       aiPkgs.apm
       aiPkgs.ccstatusline
@@ -106,7 +115,7 @@ in
         # Extensions are symlinked from dotfiles, so node walk-up misses
         # their npm deps. NODE_PATH points jiti at the prebuilt node_modules.
         export NODE_PATH="${piAgentDeps}/node_modules''${NODE_PATH:+:$NODE_PATH}"
-        exec ${inputs.llm-agents.packages.${system}.pi}/bin/pi "$@"
+        exec ${aiPkgs.pi}/bin/pi "$@"
       '')
     ];
 }

@@ -11,8 +11,6 @@
         system = prev.stdenv.hostPlatform.system;
       in
       {
-        # qmd: kept in overlay for CUDA override chain (gpu-support.nix)
-        qmd = inputs.llm-agents.packages.${system}.qmd;
         nitrous = inputs.nitrous.packages.${system}.default;
         # afew: fix pkg_resources deprecation warning (PR #363 merged but not in 3.0.1)
         afew = prev.afew.overridePythonAttrs (old: {
@@ -44,9 +42,6 @@
         bulwark-webmail = prev.callPackage ../packages/bulwark-webmail { };
         merge-when-green = prev.callPackage ../packages/merge-when-green {
           flake-fmt = inputs.flake-fmt.packages.${system}.default;
-        };
-        claude-code = prev.callPackage ../packages/claude-code {
-          claude-code = inputs.llm-agents.packages.${system}.claude-code;
         };
         claude-md = prev.callPackage ../packages/claude-md { };
         rbw-pinentry = prev.callPackage ../packages/rbw-pinentry { };
@@ -144,14 +139,6 @@
         nostr-chat-bar = prev.callPackage ../packages/nostr-chat-bar { };
         systemctl-macos = prev.callPackage ../packages/systemctl { };
       };
-
-    # Requires: dots overlay applied first (provides qmd), cudaSupport=true in nixpkgs config
-    llm-agents-cuda = final: prev: {
-      qmd = prev.qmd.override {
-        cudaSupport = true;
-        cudaPackages = final.cudaPackages;
-      };
-    };
   };
 
   perSystem =
