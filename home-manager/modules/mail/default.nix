@@ -25,7 +25,6 @@
         khard
         notmuch
         rbw
-        w3m
       ]);
     }
 
