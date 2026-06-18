@@ -83,7 +83,6 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      # Vars generator for zerotier identity
       clan.core.vars.generators.zerotier = {
         files.zerotier-identity-secret = {
           secret = true;
@@ -102,7 +101,6 @@ in
         '';
       };
 
-      # Link clan options to service options
       services.zerotierone = {
         enable = true;
         joinNetworks = lib.mkIf (cfg.networkId != null) [ cfg.networkId ];

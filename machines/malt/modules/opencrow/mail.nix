@@ -35,9 +35,8 @@
     };
   };
 
-  # Host-side scaffolding for Noa's flagged-mail view. The agent
-  # container only sees a read-only bind mount; the JMAP handoff
-  # populates it on the host as noa-mail.
+  # noa-mail owns the flagged-mail handoff Maildir on the host; the JMAP
+  # service runs as this user.
   users.users.noa-mail = {
     isSystemUser = true;
     description = "Owner of the Noa flagged-mail handoff on malt";
@@ -90,9 +89,8 @@
     };
   };
 
-  # Straightforward, idempotent wakeup. A later JMAP EventSource or push
-  # webhook can start the same oneshot for lower latency; this timer
-  # should remain as the safety net.
+  # A later JMAP EventSource or push webhook could trigger the same oneshot
+  # for lower latency; keep this timer as the safety net.
   systemd.timers.noa-jmap-handoff = {
     description = "Periodically hand off seungwon flagged mail to Noa";
     wantedBy = [ "timers.target" ];
