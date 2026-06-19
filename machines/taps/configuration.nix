@@ -27,6 +27,7 @@
     ./modules/nginx
     ./modules/niks3.nix
     ./modules/oauth2-proxy.nix
+    ./modules/zhost.nix
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix

@@ -286,6 +286,16 @@ resource "cloudflare_dns_record" "restate_api_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "zotero_a" {
+  zone_id = local.zone_id
+  name    = "zotero"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "zhost (self-hosted Zotero sync)"
+}
+
 # =============================================================================
 # Mail DNS Records (migrated from cloudflare-dns.nix)
 # =============================================================================

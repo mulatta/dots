@@ -864,6 +864,7 @@
         "srvos": "srvos",
         "treefmt-nix": "treefmt-nix",
         "zen-browser": "zen-browser",
+        "zhost": "zhost",
         "zjstatus": "zjstatus",
         "zsh-helix-mode": "zsh-helix-mode"
       }
@@ -1085,6 +1086,29 @@
       "original": {
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
+        "type": "github"
+      }
+    },
+    "zhost": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781951636,
+        "narHash": "sha256-UuQhisMrLyNt85mXdUita3eVCqypvTtXjmQbqIAUDqs=",
+        "owner": "mulatta",
+        "repo": "zhost",
+        "rev": "4e424fadbd42b501d9e6340bb9e7bc331938f418",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "zhost",
         "type": "github"
       }
     },

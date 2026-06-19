@@ -37,6 +37,7 @@
     ./nip05.nix
     ./security-txt.nix
     ./vikunja.nix
+    ./zotero.nix
   ];
 
   services.nginx = {
