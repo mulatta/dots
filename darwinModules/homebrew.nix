@@ -43,7 +43,10 @@
     "slack"
     "zerotier-one"
     "zoom"
-    "zotero"
+    # zotero: removed — replaced by the zhost-patched build via home-manager
+    # (programs.zotero), which points the client at zotero.mulatta.io. Keeping
+    # the cask would install a second, upstream-pointed Zotero into /Applications
+    # that shares the same local profile and corrupts sync.
     # keep-sorted end
   ];
 
