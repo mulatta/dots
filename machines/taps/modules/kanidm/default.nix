@@ -157,6 +157,9 @@ in
         bookmark_users = {
           members = [ "seungwon" ];
         };
+        zotero_users = {
+          members = [ "seungwon" ];
+        };
         media_users = {
           members = [ "seungwon" ];
         };
@@ -288,6 +291,24 @@ in
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.automation_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
+
+        # zhost (self-hosted Zotero) — gates only the enrollment /login path
+        # via oauth2-proxy; the sync API itself is public + API-key-authed.
+        zhost = {
+          displayName = "Zotero (zhost)";
+          originUrl = [
+            "https://zotero.${baseDomain}"
+            "https://zotero.${baseDomain}/oauth2/callback"
+          ];
+          originLanding = "https://zotero.${baseDomain}";
+          public = true;
+          enableLocalhostRedirects = false;
+          scopeMaps.zotero_users = [
             "openid"
             "email"
             "profile"

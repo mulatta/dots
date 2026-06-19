@@ -66,6 +66,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    zhost = {
+      url = "github:mulatta/zhost";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     n8n-nodes = {
       url = "github:mulatta/n8n-nodes";
       inputs.flake-parts.follows = "flake-parts";
