@@ -8,7 +8,6 @@ Infrastructure-as-Code for mulatta.io services.
 | ---------- | ------------------------- | -------------------------------------------------------------------- |
 | vultr      | VPS provisioning          | `VULTR_API`                                                          |
 | cloudflare | DNS A records, R2 buckets | Cloudflare token from clan vars                                      |
-| github     | Repository management     | `GITHUB_TOKEN`                                                       |
 | aws        | SES SMTP relay            | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFLARE_API_TOKEN` |
 
 ## Secrets Management
@@ -18,7 +17,6 @@ Infrastructure-as-Code for mulatta.io services.
 Secrets used exclusively by Terraform are stored in `terraform/secrets.yaml` (SOPS encrypted):
 
 - `VULTR_API` - Vultr API key for VPS management
-- `GITHUB_TOKEN` - GitHub API token for repo management
 - `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` - Cloudflare R2 for Terraform state backend
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - AWS (SES, IAM)
 - `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` - Cloudflare (shared, also in Terraform)

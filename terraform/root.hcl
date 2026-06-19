@@ -38,7 +38,6 @@ generate "terraform" {
   contents  = <<EOF
 terraform {
   required_providers {
-    github     = { source = "integrations/github" }
     cloudflare = { source = "cloudflare/cloudflare" }
     vultr      = { source = "vultr/vultr" }
     sops       = { source = "carlpett/sops" }
