@@ -16,6 +16,7 @@
     ../modules/paneru.nix
     ../modules/tmux-open-file.nix
     ../modules/zen.nix
+    ../modules/zotero.nix
   ];
 
   home.packages =
