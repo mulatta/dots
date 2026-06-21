@@ -123,6 +123,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-minecraft = {
+      url = "github:Infinidoge/nix-minecraft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     noctalia-plugins = {
       url = "github:mulatta/noctalia-plugins";
       inputs.nixpkgs.follows = "nixpkgs";
