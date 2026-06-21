@@ -13,5 +13,9 @@
     apiUrl = "https://zotero.mulatta.io/";
     wwwUrl = "https://zotero.mulatta.io/";
     streamUrl = "wss://zotero.mulatta.io/stream/";
+    # Don't let metadata retrieval / import translators attach publisher subject
+    # keywords as automatic tags; tagging is driven by the controlled vocabulary
+    # (MeSH-grounded) via the agent/CLI instead.
+    prefs."extensions.zotero.automaticTags" = false;
   };
 }
