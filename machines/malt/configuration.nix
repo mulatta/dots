@@ -15,6 +15,7 @@
     ./modules/home-assistant.nix
     ./modules/jellyfin
     ./modules/linkwarden.nix
+    ./modules/minecraft.nix
     ./modules/miniflux
     ./modules/n8n
     ./modules/network.nix
