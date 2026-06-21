@@ -22,6 +22,7 @@
     # DNS records managed by terraform/cloudflare/dns.tf
     ./modules/kanidm
     ./modules/coredns.nix
+    ./modules/headscale.nix
     ./modules/disko-vps.nix
     ./modules/network.nix
     ./modules/nginx
