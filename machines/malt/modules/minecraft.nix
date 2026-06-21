@@ -1,16 +1,7 @@
-# Minecraft server, reachable only over the headscale tailnet.
-#
-# Players join the tailnet (control plane on taps) and connect to
-# malt.ts.mulatta.io:25565; there is no public game port. The firewall
-# below opens the port solely on the tailscale interface, so even on the
-# LAN the server is invisible.
-#
-# Vanilla (not Paper) on purpose: no plugin/mod loader means no
-# third-party JAR supply chain and a far smaller remote-code-execution
-# surface. Identity is handled by Mojang/Microsoft (online-mode) and the
-# whitelist is the final gate on who may join. Process and network
-# isolation are layered on in machines/malt/modules/minecraft-hardening
-# (see the hardening commit).
+# Minecraft server reachable only over the headscale tailnet: the firewall
+# opens 25565 on tailscale0 only, so there is no public or LAN-facing port.
+# Vanilla (not Paper): no mod loader, smaller RCE surface. online-mode +
+# whitelist are the identity gates.
 { self, pkgs, ... }:
 let
   port = 25565;
@@ -32,8 +23,7 @@ in
   services.minecraft-servers = {
     enable = true;
     eula = true;
-    # The port is opened manually below, scoped to the tailnet interface.
-    openFirewall = false;
+    openFirewall = false; # opened on tailscale0 only, below
     dataDir = "/var/lib/minecraft";
 
     servers.survival = {
@@ -41,21 +31,37 @@ in
       package = pkgs.vanillaServers.vanilla-1_21_11;
       serverProperties = {
         server-port = port;
-        online-mode = true; # Mojang/Microsoft account verification + packet encryption
+        online-mode = true; # account verification + packet encryption
         white-list = true;
-        enforce-whitelist = true; # refuse logins not on the list, even if it is toggled at runtime
+        enforce-whitelist = true; # enforce even if toggled at runtime
         enforce-secure-profile = true;
         spawn-protection = 0;
         motd = "malt";
       };
-      # nix-minecraft renders whitelist.json from this. Fill with
-      # "<username>" = "<uuid>"; entries (UUID is the stable key).
       whitelist = {
+        # "<username>" = "<uuid>";  (UUID is the stable key)
       };
     };
   };
 
-  # Only reachable through the headscale tailnet, never on a public or LAN
-  # interface (malt is behind CGNAT regardless).
+  # tailnet-only; never public/LAN (malt is CGNAT anyway).
   networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ port ];
+
+  # nix-minecraft sandboxes FS/syscall but not network egress. Block lateral
+  # movement from a JVM RCE with a deny-list (default stays allow, so Mojang
+  # and the loopback DNS stub keep working) covering RFC1918 LAN and the
+  # wg-mesh prefix. Tailnet players are not denied. Loopback-bound services
+  # stay reachable (resolver needs it) -- close with netns/container if the
+  # threat grows (Paper/mods, no whitelist).
+  systemd.services."minecraft-server-survival".serviceConfig = {
+    NoNewPrivileges = true;
+    IPAddressDeny = [
+      "10.0.0.0/8"
+      "172.16.0.0/12"
+      "192.168.0.0/16"
+      "169.254.0.0/16"
+      "fe80::/10"
+      "${self.lib.wgPrefix}::/64"
+    ];
+  };
 }
