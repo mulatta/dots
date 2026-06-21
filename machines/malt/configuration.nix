@@ -23,6 +23,7 @@
     ./modules/paperless.nix
     ./modules/restate.nix
     ./modules/rsshub.nix
+    ./modules/tailscale.nix
     ./modules/vikunja.nix
   ];
 
