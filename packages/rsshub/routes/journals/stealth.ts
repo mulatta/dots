@@ -1,8 +1,11 @@
 import { config } from '@/config';
 import type { Browser, Page } from '@/utils/playwright';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import type { Browser as PlaywrightBrowser, BrowserContext, BrowserContextOptions, LaunchOptions, Page as PlaywrightPage, Request as PlaywrightRequest, Response as PlaywrightResponse, Route as PlaywrightRoute } from 'playwright';
-import { chromium } from 'playwright-extra';
+// RSSHub ships patchright (a stealth-hardened Playwright fork) as its browser
+// engine; it replaced playwright-core. Use it directly: patchright already
+// defeats automation fingerprinting, and its docs warn that stacking
+// puppeteer-extra-plugin-stealth on top breaks the patches, so no plugin here.
+import { chromium } from 'patchright';
+import type { Browser as PlaywrightBrowser, BrowserContext, BrowserContextOptions, LaunchOptions, Page as PlaywrightPage, Request as PlaywrightRequest, Response as PlaywrightResponse, Route as PlaywrightRoute } from 'patchright';
 
 type SetCookieParam = Parameters<BrowserContext['addCookies']>[0][number];
 type Cookie = Awaited<ReturnType<BrowserContext['cookies']>>[number];
@@ -27,8 +30,6 @@ type FinishedRequest = {
 type RequestHandler = (request: RouteRequest) => Promise<void> | void;
 type RequestFinishedHandler = (request: FinishedRequest) => Promise<void> | void;
 type HandledRouteRequest = RouteRequest & { handled: boolean };
-
-chromium.use(StealthPlugin());
 
 const normalizeWaitUntil = (waitUntil: GotoOptions['waitUntil']) => (waitUntil === 'networkidle0' || waitUntil === 'networkidle2' ? 'networkidle' : waitUntil);
 
