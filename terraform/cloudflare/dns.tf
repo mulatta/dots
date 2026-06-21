@@ -84,6 +84,30 @@ resource "cloudflare_dns_record" "vaultwarden_a" {
   proxied = false
 }
 
+# headscale control plane. Must stay DNS-only (proxied = false): the
+# Tailscale noise/DERP long-poll connections break behind Cloudflare's proxy.
+resource "cloudflare_dns_record" "headscale_a" {
+  zone_id = local.zone_id
+  name    = "headscale"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
+# Friendly address for the Minecraft server: resolves to malt's headscale
+# tailnet IP, so players type "minecraft.mulatta.io" (no port; default 25565).
+# Only reachable from tailnet members; non-members resolve but cannot route to
+# 100.64.0.0/10. Update if malt's node IP changes (headscale nodes list).
+resource "cloudflare_dns_record" "minecraft_a" {
+  zone_id = local.zone_id
+  name    = "minecraft"
+  content = "100.64.0.1"
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "n8n_a" {
   zone_id = local.zone_id
   name    = "n8n"
