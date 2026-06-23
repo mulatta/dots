@@ -1113,11 +1113,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782213296,
-        "narHash": "sha256-OVqetmeAAhZTVToM4t11t1cGGNtXJOevcYy9b5tmjW8=",
+        "lastModified": 1782215108,
+        "narHash": "sha256-9otrlKe31aKq/hIJT/YayBvG0N1BmDMxO/iiPA4fOOk=",
         "owner": "mulatta",
         "repo": "zhost",
-        "rev": "28b23b078c9109635b79dedb84a20d023d57e608",
+        "rev": "6fd6a58941e82d6ffb8a54c9b2cd83a6996dde28",
         "type": "github"
       },
       "original": {
