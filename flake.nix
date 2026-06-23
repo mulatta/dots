@@ -68,7 +68,6 @@
 
     zhost = {
       url = "github:mulatta/zhost";
-      inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
