@@ -33,7 +33,11 @@ let
   #     from `headscale preauthkeys create --user mc-server`.
   #   - each player is a headscale user added to group:players below.
   aclPolicy = {
-    groups."group:players" = [ ]; # add player users (e.g. "alice@") as onboarded
+    groups."group:players" = [
+      "seungwon@"
+      "jungwon@"
+      "jongmin@"
+    ]; # add player users (e.g. "alice@") as onboarded
     acls = [
       {
         action = "accept";
