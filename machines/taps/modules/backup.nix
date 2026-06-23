@@ -102,9 +102,10 @@
         useProfiles = [ "rustic" ];
       };
 
-      # Kanidm backup directory (Kanidm already creates daily backups)
+      # Kanidm writes its own daily dump at 03:00; run after it (not before) so
+      # the offsite copy contains the same day's dump rather than yesterday's.
       files.kanidm = {
-        startAt = "*-*-* 02:00:00";
+        startAt = "*-*-* 03:30:00";
         sources = [ "/var/backup/kanidm" ];
         useProfiles = [ "rustic" ];
       };
