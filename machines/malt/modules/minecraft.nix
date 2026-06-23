@@ -2,16 +2,28 @@
 # opens 25565 on tailscale0 only, so there is no public or LAN-facing port.
 # Vanilla (not Paper): no mod loader, smaller RCE surface. online-mode +
 # whitelist are the identity gates.
-{ self, pkgs, ... }:
+{
+  self,
+  pkgs,
+  lib,
+  ...
+}:
 let
   port = 25565;
-  # username -> Minecraft UUID (dashed). Everyone here is whitelisted; the
-  # operators list below picks ops out of this same set via `inherit`.
+  # username -> Minecraft UUID (dashed). Everyone here is whitelisted.
   users = {
     lsw1167 = "f5d061e1-c9db-47a6-8dd1-3929fd4ba98f";
     Halley76 = "352fd97d-2409-4aad-9d25-2d24b36f360a";
     _garden7 = "cfa03f09-03d7-42ad-b17e-43593c7d6213";
   };
+  # Operators grouped by op-permission-level. Expand into ops.json entries.
+  mkOps = lib.concatMapAttrs (
+    level: names:
+    lib.genAttrs names (name: {
+      uuid = users.${name};
+      level = lib.toInt level;
+    })
+  );
 in
 {
   imports = [ self.inputs.nix-minecraft.nixosModules.minecraft-servers ];
@@ -46,9 +58,15 @@ in
         motd = "malt";
       };
       whitelist = users;
-      # Server operators (level 4). Managed here, not in-game: /op at runtime
-      # is overwritten on restart.
-      operators = { inherit (users) lsw1167 Halley76 _garden7; };
+      # Operators by level. Managed here, not in-game:
+      # /op at runtime is overwritten on restart.
+      operators = mkOps {
+        "4" = [ "lsw1167" ];
+        "2" = [
+          "Halley76"
+          "_garden7"
+        ];
+      };
     };
   };
 
