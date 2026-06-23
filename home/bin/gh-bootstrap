@@ -3,7 +3,8 @@
 #
 # Configures GitHub-side repo state that cannot live as a file in the repo:
 # merge strategy, the build-with-buildbot topic, and branch rulesets requiring
-# the buildbot/nix-eval check. Dependabot config and the auto-merge workflow
+# the buildbot/nix-eval and buildbot/nix-build checks. Dependabot config and the
+# auto-merge workflow
 # ship as files via the flake-templates scaffold (flakify), not from here, so
 # no App secrets are deployed.
 #
@@ -227,7 +228,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. Branch rulesets (with buildbot/nix-eval required check)
+# 4. Branch rulesets (with buildbot/nix-eval + buildbot/nix-build required checks)
 # ---------------------------------------------------------------------------
 echo "==> [4/4] Branch rulesets..."
 
@@ -265,7 +266,8 @@ for BRANCH in "${BRANCHES[@]}"; do
       "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "buildbot/nix-eval" }
+          { "context": "buildbot/nix-eval" },
+          { "context": "buildbot/nix-build" }
         ]
       }
     },
