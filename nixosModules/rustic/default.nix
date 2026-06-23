@@ -88,7 +88,10 @@ let
     pkgs.writeScript "rustic-backup-command-${name}" ''
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
-      ${cfg.package}/bin/rustic backup --stdin-command "${backup.command}" -${filenameArg}${profileArgs}${extraArgs}
+      # --force: rustic 0.11.3 skips reading stdin when a parent snapshot
+      # exists, silently producing 0-byte backups. Force a full read so stdin
+      # is always consumed (chunk dedup against the repo still applies).
+      ${cfg.package}/bin/rustic backup --force --stdin-command "${backup.command}" -${filenameArg}${profileArgs}${extraArgs}
     '';
 
   mkPostgresBackupScript =
@@ -124,6 +127,7 @@ let
       ${pkgs.sudo}/bin/sudo -u postgres \
         ${config.services.postgresql.package}/bin/pg_dumpall --globals-only \
         | ${cfg.package}/bin/rustic backup \
+          --force \
           --stdin-filename "${backup.prefix}/globals.sql" \
           -${profileArgs}${extraArgs}
     '';
@@ -141,6 +145,7 @@ let
       ${pkgs.sudo}/bin/sudo -u postgres \
         ${config.services.postgresql.package}/bin/pg_dump "$DB_NAME" \
         | ${cfg.package}/bin/rustic backup \
+          --force \
           --stdin-filename "${backup.prefix}/db/$DB_NAME.sql" \
           -${profileArgs}${extraArgs}
     '';
