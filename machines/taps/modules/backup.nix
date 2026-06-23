@@ -115,6 +115,15 @@
         sources = [ "/var/backup/route96" ];
         useProfiles = [ "rustic" ];
       };
+
+      # Vaultwarden data dir: attachments and the RSA key live on disk, not in
+      # the PostgreSQL database (which the postgres backup covers). Small and
+      # static, so a live copy is fine. Vaultwarden has no server-side export.
+      files.vaultwarden = {
+        startAt = "*-*-* 02:30:00";
+        sources = [ "/var/lib/vaultwarden" ];
+        useProfiles = [ "rustic" ];
+      };
     };
 
     prune = {
