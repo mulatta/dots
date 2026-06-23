@@ -622,11 +622,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1780243769,
-        "narHash": "sha256-x5UQuRsH3MqI0U9afaXSNqzTPSeZlRLvFAav2Ux1pNw=",
+        "lastModified": 1781577229,
+        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "331800de5053fcebacf6813adb5db9c9dca22a0c",
+        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
         "type": "github"
       },
       "original": {
@@ -920,11 +920,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780860204,
-        "narHash": "sha256-Z7r1TIxEvHZgtUP33R5c0P6q50xdYxK8G8gPe5CJX0M=",
+        "lastModified": 1782063677,
+        "narHash": "sha256-CD/FkbCHj/uod7izvohsd33T0FYqdyvcQgwxEJxxmH0=",
         "owner": "mulatta",
         "repo": "skillz",
-        "rev": "6a288bb1445dd97d8dd22a4af0a5c8f57eae46db",
+        "rev": "730ab92a86921520dbe85ad5758b23063f8e297c",
         "type": "github"
       },
       "original": {
