@@ -51,8 +51,15 @@
         useProfiles = [ "rustic" ];
       };
 
-      # Media files (nextcloud data) excluded from backup
-      # Rely on ZFS snapshots for local redundancy
+      # Nextcloud data -> R2 (offsite), from a ZFS snapshot for a consistent
+      # point-in-time. The Nextcloud database is already covered by the
+      # postgres backup above; this adds the data files.
+      files.nextcloud = {
+        sources = [ "/var/lib/nextcloud/.zfs/snapshot/rustic" ];
+        asPath = "/var/lib/nextcloud";
+        startAt = "*-*-* 04:30:00";
+        useProfiles = [ "rustic" ];
+      };
     };
 
     prune = {
@@ -77,5 +84,13 @@
       "${pkgs.zfs}/bin/zfs snapshot zroot/minecraft@rustic"
     ];
     ExecStartPost = "-${pkgs.zfs}/bin/zfs destroy zroot/minecraft@rustic";
+  };
+
+  systemd.services."rustic-backup-files-nextcloud".serviceConfig = {
+    ExecStartPre = [
+      "-${pkgs.zfs}/bin/zfs destroy zroot/nextcloud@rustic"
+      "${pkgs.zfs}/bin/zfs snapshot zroot/nextcloud@rustic"
+    ];
+    ExecStartPost = "-${pkgs.zfs}/bin/zfs destroy zroot/nextcloud@rustic";
   };
 }
