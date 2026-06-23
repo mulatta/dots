@@ -95,9 +95,12 @@ let
     '';
 
   mkPostgresBackupScript =
-    name: _backup:
+    name: backup:
     let
       systemctl = "${config.systemd.package}/bin/systemctl";
+      excludeFilter = lib.optionalString (backup.excludeDatabases != [ ]) (
+        " | ${pkgs.gnugrep}/bin/grep -vxE ${lib.escapeShellArg (lib.concatStringsSep "|" backup.excludeDatabases)}"
+      );
     in
     pkgs.writeScript "rustic-backup-postgres-${name}" ''
       #!${pkgs.bash}/bin/bash
@@ -106,12 +109,12 @@ let
       # Start globals backup
       ${systemctl} start --no-block rustic-postgres-globals-${name}.service
 
-      # Get list of databases and start backup for each
+      # Get list of databases (minus any excluded) and start backup for each
       ${pkgs.sudo}/bin/sudo -u postgres \
         ${config.services.postgresql.package}/bin/psql \
         -c 'SELECT datname FROM pg_database WHERE datistemplate = false' \
         --csv \
-        | tail -n +2 \
+        | tail -n +2${excludeFilter} \
         | xargs -I {} ${systemctl} start --no-block rustic-postgres-db-${name}@{}.service
     '';
 
@@ -252,6 +255,12 @@ in
                 type = lib.types.str;
                 default = "/postgres";
                 description = "Path prefix for dumps in the backup";
+              };
+              excludeDatabases = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                example = [ "stalwart-mail" ];
+                description = "Databases to skip (e.g. backed up another way).";
               };
             };
           }
