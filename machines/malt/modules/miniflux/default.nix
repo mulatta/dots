@@ -117,38 +117,42 @@ in
             category = "Notification";
           };
 
+          # Journal feeds use each publisher's official RSS/eTOC directly:
+          # title + abstract only, no full-text scraping (that moved to the
+          # on-demand paperfetch-cli path). All reachable plain-HTTP, no
+          # Cloudflare, so RSSHub no longer needs a headless browser for these.
           natureBiotechnology = {
-            url = "http://127.0.0.1:1200/journals/nature/research/nbt?limit=10&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.nature.com/nbt.rss";
             category = "All";
           };
 
           nature = {
             title = "Nature";
-            url = "http://127.0.0.1:1200/journals/nature/research/nature?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.nature.com/nature.rss";
             category = "All";
           };
 
           natureCommunications = {
             title = "Nature Communications";
-            url = "http://127.0.0.1:1200/journals/nature/research/ncomms?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.nature.com/ncomms.rss";
             category = "All";
           };
 
           natureMethods = {
             title = "Nature Methods";
-            url = "http://127.0.0.1:1200/journals/nature/research/nmeth?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.nature.com/nmeth.rss";
             category = "All";
           };
 
           cell = {
             title = "Cell";
-            url = "http://127.0.0.1:1200/journals/cell/cell/inpress?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.cell.com/cell/inpress.rss";
             category = "All";
           };
 
           science = {
             title = "Science";
-            url = "http://127.0.0.1:1200/journals/science/current/science?limit=6&delayMs=1500&jitterMs=1000&retries=3";
+            url = "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science";
             category = "All";
           };
 
