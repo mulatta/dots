@@ -30,6 +30,7 @@
       (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
       pkgs.basalt
       pkgs.czkawka-full
+      pkgs.dorion
       pkgs.google-chrome
       pkgs.mpv
       pkgs.nitrous
