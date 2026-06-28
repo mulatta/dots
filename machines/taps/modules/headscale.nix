@@ -37,6 +37,8 @@ let
       "seungwon@"
       "jungwon@"
       "jongmin@"
+      "giwon@"
+      "sukmin@"
     ]; # add player users (e.g. "alice@") as onboarded
     acls = [
       {

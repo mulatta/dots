@@ -15,6 +15,8 @@ let
     lsw1167 = "f5d061e1-c9db-47a6-8dd1-3929fd4ba98f";
     Halley76 = "352fd97d-2409-4aad-9d25-2d24b36f360a";
     _garden7 = "cfa03f09-03d7-42ad-b17e-43593c7d6213";
+    GIEUK17 = "e92a2225-4879-47ac-9f6f-a598869d4248";
+    Nolly_12 = "62343ba7-77f1-4949-aad7-d6aa35a79417";
   };
   # Operators grouped by op-permission-level. Expand into ops.json entries.
   mkOps = lib.concatMapAttrs (
@@ -65,6 +67,8 @@ in
         "2" = [
           "Halley76"
           "_garden7"
+          "GIEUK17"
+          "Nolly_12"
         ];
       };
     };
