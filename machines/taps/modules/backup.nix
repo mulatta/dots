@@ -127,15 +127,21 @@
       };
     };
 
+    # Prune takes an exclusive repo lock, so keep it clear of the nightly
+    # backup window (last daily backup is files.kanidm at 03:30). Run it after
+    # everything else has finished rather than at 03:00 mid-window.
     prune = {
       enable = true;
-      startAt = "Sun *-*-* 03:00:00";
+      startAt = "Sun *-*-* 04:30:00";
       useProfiles = [ "rustic" ];
     };
 
+    # Check reads the whole repo; isolate it from the daily backups so the two
+    # don't contend on the same repo. Previously collided with files.kanidm at
+    # 03:30 (and on the 1st, also overlapped the Sunday prune).
     check = {
       enable = true;
-      startAt = "*-*-01 03:30:00";
+      startAt = "*-*-01 05:30:00";
       useProfiles = [ "rustic" ];
     };
   };
