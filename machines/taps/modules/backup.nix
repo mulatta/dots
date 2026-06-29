@@ -102,9 +102,10 @@
         useProfiles = [ "rustic" ];
       };
 
-      # Kanidm backup directory (Kanidm already creates daily backups)
+      # Kanidm writes its own daily dump at 03:00; run after it (not before) so
+      # the offsite copy contains the same day's dump rather than yesterday's.
       files.kanidm = {
-        startAt = "*-*-* 02:00:00";
+        startAt = "*-*-* 03:30:00";
         sources = [ "/var/backup/kanidm" ];
         useProfiles = [ "rustic" ];
       };
@@ -115,17 +116,32 @@
         sources = [ "/var/backup/route96" ];
         useProfiles = [ "rustic" ];
       };
+
+      # Vaultwarden data dir: attachments and the RSA key live on disk, not in
+      # the PostgreSQL database (which the postgres backup covers). Small and
+      # static, so a live copy is fine. Vaultwarden has no server-side export.
+      files.vaultwarden = {
+        startAt = "*-*-* 02:30:00";
+        sources = [ "/var/lib/vaultwarden" ];
+        useProfiles = [ "rustic" ];
+      };
     };
 
+    # Prune takes an exclusive repo lock, so keep it clear of the nightly
+    # backup window (last daily backup is files.kanidm at 03:30). Run it after
+    # everything else has finished rather than at 03:00 mid-window.
     prune = {
       enable = true;
-      startAt = "Sun *-*-* 03:00:00";
+      startAt = "Sun *-*-* 04:30:00";
       useProfiles = [ "rustic" ];
     };
 
+    # Check reads the whole repo; isolate it from the daily backups so the two
+    # don't contend on the same repo. Previously collided with files.kanidm at
+    # 03:30 (and on the 1st, also overlapped the Sunday prune).
     check = {
       enable = true;
-      startAt = "*-*-01 03:30:00";
+      startAt = "*-*-01 06:30:00";
       useProfiles = [ "rustic" ];
     };
   };
