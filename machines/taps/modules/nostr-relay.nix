@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   pkgs,
   ...
 }:
@@ -80,7 +82,14 @@ in
       enableTCPKeepalive = false
 
       writePolicy {
-        plugin = ""
+        plugin = "${writePolicyPlugin}"
+      }
+
+      logging {
+        # Clients replay stale ephemeral (kind 2xxxx) events constantly; the
+        # default logs every rejected one, flooding journald with nothing
+        # actionable.
+        invalidEvents = false
       }
     }
   '';
@@ -89,6 +98,9 @@ in
     description = "strfry Nostr relay";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
+    # The write-policy plugin reads the allowlist path from this; strfry execs
+    # the plugin, which inherits the relay process environment.
+    environment.STRFRY_ALLOWLIST = "${allowlistFile}";
 
     serviceConfig = {
       Type = "simple";
