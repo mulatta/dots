@@ -411,172 +411,198 @@ in
           RCLONE_CONFIG = "/etc/rclone/rclone.conf";
         };
         rclonePath = [ pkgs.rclone ];
+        # Backups run at idle IO and lowest CPU priority inside a shared
+        # weight-limited slice, so a long dedup/upload yields to the
+        # interactive services sharing the box instead of starving them.
+        withBackupLimits = lib.mapAttrs (
+          _: svc:
+          svc
+          // {
+            serviceConfig = svc.serviceConfig // {
+              Slice = "rustic-backup.slice";
+              Nice = 19;
+              IOSchedulingClass = "idle";
+            };
+          }
+        );
       in
-      # Repository initialization service
-      {
-        "rustic-init" = {
-          description = "Initialize rustic repository";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            User = "rustic";
+      withBackupLimits (
+        # Repository initialization service
+        {
+          "rustic-init" = {
+            description = "Initialize rustic repository";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              User = "rustic";
+            };
+            script = ''
+              # Try to initialize; if already initialized, that's fine
+              output=$(${cfg.package}/bin/rustic init 2>&1) && {
+                echo "Repository initialized successfully"
+              } || {
+                if echo "$output" | grep -q "Config file already exists"; then
+                  echo "Repository already initialized"
+                else
+                  echo "$output" >&2
+                  exit 1
+                fi
+              }
+            '';
           };
-          script = ''
-            # Try to initialize; if already initialized, that's fine
-            output=$(${cfg.package}/bin/rustic init 2>&1) && {
-              echo "Repository initialized successfully"
-            } || {
-              if echo "$output" | grep -q "Config file already exists"; then
-                echo "Repository already initialized"
-              else
-                echo "$output" >&2
-                exit 1
-              fi
-            }
-          '';
-        };
-      }
-      # Files backups
-      // lib.mapAttrs' (name: backup: {
-        name = "rustic-backup-files-${name}";
-        value = {
-          description = "Rustic files backup: ${name}";
-          after = [ "rustic-init.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = backup.user;
-            ExecStart = "${mkFilesBackupScript name backup}";
+        }
+        # Files backups
+        // lib.mapAttrs' (name: backup: {
+          name = "rustic-backup-files-${name}";
+          value = {
+            description = "Rustic files backup: ${name}";
+            after = [ "rustic-init.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = backup.user;
+              ExecStart = "${mkFilesBackupScript name backup}";
+            };
+            startAt = backup.startAt;
           };
-          startAt = backup.startAt;
-        };
-      }) cfg.backups.files
-      # Command backups
-      // lib.mapAttrs' (name: backup: {
-        name = "rustic-backup-command-${name}";
-        value = {
-          description = "Rustic command backup: ${name}";
-          after = [ "rustic-init.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = backup.user;
-            ExecStart = "${mkCommandBackupScript name backup}";
+        }) cfg.backups.files
+        # Command backups
+        // lib.mapAttrs' (name: backup: {
+          name = "rustic-backup-command-${name}";
+          value = {
+            description = "Rustic command backup: ${name}";
+            after = [ "rustic-init.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = backup.user;
+              ExecStart = "${mkCommandBackupScript name backup}";
+            };
+            startAt = backup.startAt;
           };
-          startAt = backup.startAt;
-        };
-      }) cfg.backups.commands
-      # PostgreSQL backups (main service + globals + per-db template)
-      // lib.concatMapAttrs (name: backup: {
-        "rustic-backup-postgres-${name}" = {
-          description = "Rustic PostgreSQL backup: ${name}";
-          after = [
-            "rustic-init.service"
-            "postgresql.service"
-          ];
-          requires = [ "postgresql.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-            ExecStart = "${mkPostgresBackupScript name backup}";
+        }) cfg.backups.commands
+        # PostgreSQL backups (main service + globals + per-db template)
+        // lib.concatMapAttrs (name: backup: {
+          "rustic-backup-postgres-${name}" = {
+            description = "Rustic PostgreSQL backup: ${name}";
+            after = [
+              "rustic-init.service"
+              "postgresql.service"
+            ];
+            requires = [ "postgresql.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = "root";
+              ExecStart = "${mkPostgresBackupScript name backup}";
+            };
+            startAt = backup.startAt;
           };
-          startAt = backup.startAt;
-        };
-        "rustic-postgres-globals-${name}" = {
-          description = "Rustic PostgreSQL globals backup: ${name}";
-          after = [
-            "rustic-init.service"
-            "postgresql.service"
-          ];
-          requires = [ "postgresql.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-            ExecStart = "${mkPostgresGlobalsScript name backup}";
+          "rustic-postgres-globals-${name}" = {
+            description = "Rustic PostgreSQL globals backup: ${name}";
+            after = [
+              "rustic-init.service"
+              "postgresql.service"
+            ];
+            requires = [ "postgresql.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = "root";
+              ExecStart = "${mkPostgresGlobalsScript name backup}";
+            };
           };
-        };
-        "rustic-postgres-db-${name}@" = {
-          description = "Rustic PostgreSQL database backup: ${name} (%i)";
-          after = [
-            "rustic-init.service"
-            "postgresql.service"
-          ];
-          requires = [ "postgresql.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-            ExecStart = "${mkPostgresDbScript name backup} %i";
+          "rustic-postgres-db-${name}@" = {
+            description = "Rustic PostgreSQL database backup: ${name} (%i)";
+            after = [
+              "rustic-init.service"
+              "postgresql.service"
+            ];
+            requires = [ "postgresql.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = "root";
+              ExecStart = "${mkPostgresDbScript name backup} %i";
+            };
           };
-        };
-      }) cfg.backups.postgres
-      # SQLite backups
-      // lib.mapAttrs' (name: backup: {
-        name = "rustic-backup-sqlite-${name}";
-        value = {
-          description = "Rustic SQLite backup: ${name}";
-          after = [ "rustic-init.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = backup.user;
-            ExecStart = "${mkSqliteBackupScript name backup}";
+        }) cfg.backups.postgres
+        # SQLite backups
+        // lib.mapAttrs' (name: backup: {
+          name = "rustic-backup-sqlite-${name}";
+          value = {
+            description = "Rustic SQLite backup: ${name}";
+            after = [ "rustic-init.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = backup.user;
+              ExecStart = "${mkSqliteBackupScript name backup}";
+            };
+            startAt = backup.startAt;
           };
-          startAt = backup.startAt;
-        };
-      }) cfg.backups.sqlite
-      # Prune service
-      // lib.optionalAttrs cfg.prune.enable {
-        "rustic-prune" = {
-          description = "Rustic prune old backups";
-          after = [ "rustic-init.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = "rustic";
-            ExecStart =
-              let
-                profileArgs = mkProfileArgs cfg.prune.useProfiles;
-                extraArgs = mkExtraArgs cfg.prune.extraArgs;
-              in
-              "${cfg.package}/bin/rustic forget --prune${profileArgs}${extraArgs}";
+        }) cfg.backups.sqlite
+        # Prune service
+        // lib.optionalAttrs cfg.prune.enable {
+          "rustic-prune" = {
+            description = "Rustic prune old backups";
+            after = [ "rustic-init.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = "rustic";
+              ExecStart =
+                let
+                  profileArgs = mkProfileArgs cfg.prune.useProfiles;
+                  extraArgs = mkExtraArgs cfg.prune.extraArgs;
+                in
+                "${cfg.package}/bin/rustic forget --prune${profileArgs}${extraArgs}";
+            };
+            startAt = cfg.prune.startAt;
           };
-          startAt = cfg.prune.startAt;
-        };
-      }
-      # Check service
-      // lib.optionalAttrs cfg.check.enable {
-        "rustic-check" = {
-          description = "Rustic repository check";
-          after = [ "rustic-init.service" ];
-          environment = rcloneEnv;
-          path = rclonePath;
-          serviceConfig = {
-            Type = "oneshot";
-            User = "rustic";
-            ExecStart =
-              let
-                profileArgs = mkProfileArgs cfg.check.useProfiles;
-                extraArgs = mkExtraArgs cfg.check.extraArgs;
-              in
-              "${cfg.package}/bin/rustic check${profileArgs}${extraArgs}";
+        }
+        # Check service
+        // lib.optionalAttrs cfg.check.enable {
+          "rustic-check" = {
+            description = "Rustic repository check";
+            after = [ "rustic-init.service" ];
+            environment = rcloneEnv;
+            path = rclonePath;
+            serviceConfig = {
+              Type = "oneshot";
+              User = "rustic";
+              ExecStart =
+                let
+                  profileArgs = mkProfileArgs cfg.check.useProfiles;
+                  extraArgs = mkExtraArgs cfg.check.extraArgs;
+                in
+                "${cfg.package}/bin/rustic check${profileArgs}${extraArgs}";
+            };
+            startAt = cfg.check.startAt;
           };
-          startAt = cfg.check.startAt;
-        };
+        }
+      );
+
+    systemd.slices."rustic-backup" = {
+      description = "Resource-limited rustic backup jobs";
+      sliceConfig = {
+        # Defaults are 100; lower weights only bite under contention, where
+        # backups should yield CPU and disk IO to the interactive services.
+        CPUWeight = 20;
+        IOWeight = 20;
       };
+    };
   };
 }
