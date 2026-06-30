@@ -13,7 +13,7 @@ let
 in
 {
   imports = [
-    self.inputs.restate-workflows.nixosModules.url-media-archive
+    self.inputs.automation-runtime.nixosModules.url-media-archive
   ];
 
   disko.devices.zpool.zroot.datasets."restate" = {
@@ -78,7 +78,7 @@ in
   services.restateWorkers.url-media-archive = {
     enable = true;
     package =
-      self.inputs.restate-workflows.packages.${pkgs.stdenv.hostPlatform.system}.url-media-archive;
+      self.inputs.automation-runtime.packages.${pkgs.stdenv.hostPlatform.system}.url-media-archive;
     group = "media";
     restateAdminUrl = "http://[${maltWgIP}]:9070";
     endpointUrl = "http://127.0.0.1:9080";
