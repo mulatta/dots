@@ -1,0 +1,66 @@
+{
+  "replace": false,
+  "patterns": [
+    { "pattern": "\\bssh\\b", "label": "ssh" },
+    { "pattern": "\\bgit\\s+push\\b", "label": "push git branch" },
+    {
+      "pattern": "\\bgit\\s+checkout\\s+(\\S+\\s+)?--\\s",
+      "label": "git checkout (reset files)"
+    },
+    {
+      "pattern": "\\bgit\\s+checkout\\s+\\.\\s*($|[;&|])",
+      "label": "git checkout (reset all files)"
+    },
+    {
+      "pattern": "\\bgit\\s+reset\\s+--hard\\b",
+      "label": "discard git changes"
+    },
+    { "pattern": "\\bgit\\s+clean\\b", "label": "delete untracked git files" },
+    {
+      "pattern": "\\bclan\\s+machines\\s+(update|install)\\b",
+      "label": "deploy/manage clan machine"
+    },
+    {
+      "pattern": "\\b(nixos-rebuild|darwin-rebuild)\\s+(switch|boot|test)\\b",
+      "label": "rebuild system"
+    },
+    {
+      "pattern": "\\bnh\\s+(os|home)\\s+(switch|boot|test)\\b",
+      "label": "switch Nix profile/system"
+    },
+    {
+      "pattern": "\\b(tofu|terraform)\\s+(apply|destroy|import|taint|untaint)\\b",
+      "label": "modify Terraform/OpenTofu state or infra"
+    },
+    {
+      "pattern": "\\bterragrunt\\s+(run-all\\s+)?(apply|destroy|import|taint|untaint)\\b",
+      "label": "modify infra via Terragrunt"
+    },
+    {
+      "pattern": "\\bgh\\s+api\\b.*\\b(--method|-X)(=|\\s+)(POST|PUT|PATCH|DELETE)\\b",
+      "label": "mutate GitHub via API"
+    },
+    {
+      "pattern": "\\bgh\\s+issue\\s+create\\b",
+      "label": "create GitHub issue"
+    },
+    {
+      "pattern": "\\bgh\\s+issue\\s+(close|delete|edit|comment)\\b",
+      "label": "modify GitHub issue"
+    },
+    { "pattern": "\\bgh\\s+pr\\s+create\\b", "label": "create GitHub PR" },
+    {
+      "pattern": "\\bgh\\s+pr\\s+(close|merge|edit|comment|review)\\b",
+      "label": "modify GitHub PR"
+    },
+    {
+      "pattern": "\\bgh\\s+repo\\s+(create|delete|rename|archive|edit)\\b",
+      "label": "modify GitHub repo"
+    },
+    {
+      "pattern": "\\bgh\\s+release\\s+(create|delete|edit)\\b",
+      "label": "modify GitHub release"
+    },
+    { "pattern": "\\bmsmtp\\b", "label": "send email" }
+  ]
+}
