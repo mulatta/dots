@@ -3,27 +3,54 @@
   pkgs,
   ...
 }:
-let
-  # Reproduce the config the stalwart service runs with (the module's own
-  # configFile is a private let-binding) so --export reads the configured
-  # stores. It is a pure toml render of services.stalwart.settings.
-  stalwartConfig = (pkgs.formats.toml { }).generate "stalwart.toml" config.services.stalwart.settings;
-in
 {
   imports = [ ../../../nixosModules/rustic ];
   # Rustic password secret generator (per-machine, different repos)
-  clan.core.vars.generators.rustic = {
-    files."password.txt" = {
-      secret = true;
-      owner = "rustic";
-      group = "rustic";
+  clan.core.vars.generators = {
+    rustic = {
+      files."password.txt" = {
+        secret = true;
+        owner = "rustic";
+        group = "rustic";
+      };
+
+      runtimeInputs = [ pkgs.openssl ];
+
+      script = ''
+        openssl rand -base64 32 > "$out/password.txt"
+      '';
     };
 
-    runtimeInputs = [ pkgs.openssl ];
-
-    script = ''
-      openssl rand -base64 32 > "$out/password.txt"
-    '';
+    # Dedicated R2 key for the append-only mail blob copy. This must be
+    # separate from both Stalwart's primary bucket key and rustic's backup key:
+    # Stalwart must not be able to mutate the backup bucket, and rustic's
+    # general backup key must not gain access to mail bodies.
+    stalwart-r2-copy = {
+      files."rclone.conf" = {
+        secret = true;
+        owner = "rustic";
+        group = "rustic";
+      };
+      prompts."access-key-id" = {
+        description = "R2 access key ID that can read mail-blobs and write mail-blobs-backup";
+        type = "hidden";
+      };
+      prompts."secret-access-key" = {
+        description = "R2 secret access key that can read mail-blobs and write mail-blobs-backup";
+        type = "hidden";
+      };
+      script = ''
+        cat > "$out/rclone.conf" <<EOF
+        [mail-blobs-copy]
+        type = s3
+        provider = Cloudflare
+        access_key_id = $(tr -d '\r\n' < "$prompts/access-key-id")
+        secret_access_key = $(tr -d '\r\n' < "$prompts/secret-access-key")
+        endpoint = https://a36871be6860124304dfb5c3b3eb8c1a.r2.cloudflarestorage.com
+        no_check_bucket = true
+        EOF
+      '';
+    };
   };
 
   # Service-specific dependencies (rclone env is set in rustic module)
@@ -31,29 +58,28 @@ in
     rustic-backup-files-kanidm.after = [ "kanidm.service" ];
     rustic-backup-files-route96.after = [ "route96-db-backup.service" ];
 
-    # Stalwart's own export captures ALL stores -- the PostgreSQL data plus the
-    # local RocksDB settings/queue that a raw pg_dump of stalwart-mail misses.
-    # Runs online (no downtime); stages to /var/backup/stalwart for rustic.
-    stalwart-export = {
-      description = "Stalwart full store export for backup";
-      after = [ "stalwart-mail.service" ];
-      startAt = "*-*-* 01:00:00";
+    # Append-only copy of the R2 blob store to the mail-blobs-backup bucket. R2
+    # has no object versioning, so this is the recovery path if Stalwart's blob
+    # GC (or a bug/compromised token) removes a live blob from mail-blobs:
+    # "copy --ignore-existing" -- never "sync" -- only adds missing objects and
+    # never propagates deletions, so the backup keeps blobs the primary dropped. A
+    # dedicated rclone key reads mail-blobs and writes mail-blobs-backup; it is
+    # intentionally separate from Stalwart's own token and rustic's backup key.
+    mail-blobs-backup = {
+      description = "Copy Stalwart R2 blobs to the backup bucket";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      startAt = "*-*-* 05:00:00";
+      environment.RCLONE_CONFIG =
+        config.clan.core.vars.generators.stalwart-r2-copy.files."rclone.conf".path;
       serviceConfig = {
         Type = "oneshot";
-        User = "stalwart-mail";
-        Group = "stalwart-mail";
-        ExecStartPre = "${pkgs.findutils}/bin/find /var/backup/stalwart -mindepth 1 -delete";
-        ExecStart = "${config.services.stalwart.package}/bin/stalwart --config=${stalwartConfig} --export /var/backup/stalwart";
+        User = "rustic";
+        Group = "rustic";
+        ExecStart = "${pkgs.rclone}/bin/rclone copy --s3-no-check-bucket --ignore-existing mail-blobs-copy:mail-blobs mail-blobs-copy:mail-blobs-backup";
       };
     };
-
-    # Back up the export only after it finishes.
-    rustic-backup-files-stalwart.after = [ "stalwart-export.service" ];
   };
-
-  systemd.tmpfiles.rules = [
-    "d /var/backup/stalwart 0750 stalwart-mail stalwart-mail -"
-  ];
 
   services.rustic = {
     enable = true;
@@ -67,15 +93,13 @@ in
     };
 
     backups = {
-      # PostgreSQL backup (all databases except those backed up another way)
+      # PostgreSQL backup (all databases). Stalwart's blobs now live in R2, so
+      # its database is small enough to dump here alongside the rest instead of
+      # via a separate full-store export.
       postgres.niks3 = {
         startAt = "*-*-* 00,06,12,18:00:00";
         prefix = "/postgres";
         useProfiles = [ "rustic" ];
-        # stalwart-mail is captured more completely by the stalwart-export
-        # service above (postgres data + the local RocksDB store), so skip its
-        # redundant ~8 GB pg_dump here.
-        excludeDatabases = [ "stalwart-mail" ];
       };
 
       # Kanidm backup directory (Kanidm already creates daily backups)
@@ -89,15 +113,6 @@ in
       files.route96 = {
         startAt = "*-*-* 02:15:00";
         sources = [ "/var/backup/route96" ];
-        useProfiles = [ "rustic" ];
-      };
-
-      # Stalwart full export (see the stalwart-export service above) -> R2.
-      # This replaces relying on the postgres dump alone, which misses the
-      # RocksDB store; the postgres dump of stalwart-mail is now redundant.
-      files.stalwart = {
-        startAt = "*-*-* 02:45:00";
-        sources = [ "/var/backup/stalwart" ];
         useProfiles = [ "rustic" ];
       };
     };
