@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "automation-runtime": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782833401,
+        "narHash": "sha256-UJoyMQq5OZDmRWl7WnVr6yPQsGC0YRRXfXg+4z9RjP4=",
+        "owner": "mulatta",
+        "repo": "automation-runtime",
+        "rev": "2aaa656f85bfd86ee67395715a58145d8c140edb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "automation-runtime",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -793,29 +816,6 @@
         "type": "github"
       }
     },
-    "restate-workflows": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1781294554,
-        "narHash": "sha256-QTS7zTen/DbNxVvl8HiLcvhgCqSdSV0GDOnhEBMd3gw=",
-        "owner": "mulatta",
-        "repo": "restate-workflows",
-        "rev": "9ebecdba0a08e29b593096f052c7a9579b517864",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "restate-workflows",
-        "type": "github"
-      }
-    },
     "rhwp": {
       "inputs": {
         "flake-parts": [
@@ -891,6 +891,7 @@
     },
     "root": {
       "inputs": {
+        "automation-runtime": "automation-runtime",
         "clan-core": "clan-core",
         "direnv-instant": "direnv-instant",
         "disko": "disko",
@@ -911,7 +912,6 @@
         "opencrow": "opencrow",
         "paneru": "paneru",
         "pi-agent-extensions": "pi-agent-extensions",
-        "restate-workflows": "restate-workflows",
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",

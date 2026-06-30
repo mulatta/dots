@@ -78,8 +78,8 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    restate-workflows = {
-      url = "github:mulatta/restate-workflows";
+    automation-runtime = {
+      url = "github:mulatta/automation-runtime";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
