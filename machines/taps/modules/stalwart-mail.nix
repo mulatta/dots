@@ -237,6 +237,33 @@ in
         openssl rand -base64 32 | tr -d '\n' > "$out/password"
       '';
     };
+
+    # Scoped R2 credentials for the mail-blobs bucket (Object Read & Write on
+    # that bucket only), kept separate from the account-wide rustic R2 keys so
+    # a Stalwart compromise can't reach the backup bucket. Stalwart reads them
+    # by file path via %{file:...}% in the blob store config.
+    stalwart-r2 = {
+      files."access-key-id" = {
+        secret = true;
+        owner = "stalwart-mail";
+      };
+      files."secret-access-key" = {
+        secret = true;
+        owner = "stalwart-mail";
+      };
+      prompts."access-key-id" = {
+        description = "R2 access key ID for the mail-blobs bucket";
+        type = "hidden";
+      };
+      prompts."secret-access-key" = {
+        description = "R2 secret access key for the mail-blobs bucket";
+        type = "hidden";
+      };
+      script = ''
+        cp "$prompts/access-key-id" "$out/access-key-id"
+        cp "$prompts/secret-access-key" "$out/secret-access-key"
+      '';
+    };
   };
 
   services.stalwart = {
