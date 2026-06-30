@@ -831,11 +831,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781631519,
-        "narHash": "sha256-GsvG7B5F14TZUCHQY6hU4pnQsq18g51c7GOjRk+rvok=",
+        "lastModified": 1782392514,
+        "narHash": "sha256-8rvO5tNchGnesC+t7ODk5MIkuBh6KLjGFXI/2W/EDoM=",
         "owner": "mulatta",
         "repo": "rhwp-nix",
-        "rev": "d09818918ef8b97a0aab34333f7dedd9d3d96ab7",
+        "rev": "e9dd0fbc8278456ff6ca9c0b55eb66e9c2b9e2d7",
         "type": "github"
       },
       "original": {
@@ -876,11 +876,11 @@
     "rhwp-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1780932548,
-        "narHash": "sha256-lkSlIusb4QiEsNrsTqY5XZdotZ5YlkwEPulp2iV+2+s=",
+        "lastModified": 1782315019,
+        "narHash": "sha256-phDhnuF5UwUsXuHPOgihzT3hfyBlpQItwrLcSC8fgDs=",
         "owner": "edwardkim",
         "repo": "rhwp",
-        "rev": "bc38ff55a7e8acb65aebebe237dca0542480d381",
+        "rev": "10f5c51e65e0e8e9260cf1498972db14ea04c29e",
         "type": "github"
       },
       "original": {
