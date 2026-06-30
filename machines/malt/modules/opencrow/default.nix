@@ -33,8 +33,8 @@ let
 
     environment = {
       TZ = lib.mkDefault "Asia/Seoul";
-      OPENCROW_PI_PROVIDER = lib.mkDefault "anthropic";
-      OPENCROW_PI_MODEL = lib.mkDefault "claude-opus-4-8";
+      OPENCROW_PI_PROVIDER = lib.mkDefault "openai-codex";
+      OPENCROW_PI_MODEL = lib.mkDefault "gpt-5.5";
 
       # Periodic awareness check. Noa reads mutable HEARTBEAT.md from
       # the state directory; manage that file out-of-band.
