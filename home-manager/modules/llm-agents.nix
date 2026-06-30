@@ -111,7 +111,7 @@ in
         # Block readdir(/nix/store) for the agent and its children; exported
         # before pueued so queued tasks inherit it too.
         export ${nostoreEnvVar}="${nostoreLib}''${${nostoreEnvVar}:+:${"$"}${nostoreEnvVar}}"
-        ${pkgs.pueue}/bin/pueued -d 2>/dev/null || true
+        ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
         # Extensions are symlinked from dotfiles, so node walk-up misses
         # their npm deps. NODE_PATH points jiti at the prebuilt node_modules.
         export NODE_PATH="${piAgentDeps}/node_modules''${NODE_PATH:+:$NODE_PATH}"

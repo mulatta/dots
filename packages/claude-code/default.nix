@@ -19,8 +19,7 @@ writeShellApplication {
     export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
     if ! pueue status &>/dev/null; then
-      echo "Starting pueue daemon..." >&2
-      pueued -d
+      pueued -d >/dev/null 2>&1 || true
     fi
 
     exec claude  "$@"
