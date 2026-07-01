@@ -11,7 +11,7 @@ let
   skillzPkgs = skillz.packages.${system};
 
   instanceDefaults = {
-    piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi;
+    piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
     extensions = {
       memory = lib.mkDefault true;
