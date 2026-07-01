@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Seungwon Lee <seungwon@mulatta.io>
+Date: Wed, 1 Jul 2026 12:30:00 +0900
+Subject: [PATCH] fix: exclude body headers from DeleteObject signed headers
+
+DeleteObject has no request body. Signing generated content-length and
+content-type headers makes Cloudflare R2 reject the canonical request.
+Keep DELETE aligned with the body-less GET commands.
+---
+ src/request/request_trait.rs | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/request/request_trait.rs b/src/request/request_trait.rs
+index 7f341c2698..8b56c97ab 100644
+--- a/src/request/request_trait.rs
++++ b/src/request/request_trait.rs
+@@ -742,6 +742,7 @@ pub trait Request {
+             Command::HeadObject => {}
+             Command::GetObject => {}
+             Command::GetObjectRange { .. } => {}
++            Command::DeleteObject => {}
+             Command::GetObjectTagging => {}
+             Command::GetBucketLocation => {}
+             Command::ListBuckets => {}
+-- 
+2.50.0

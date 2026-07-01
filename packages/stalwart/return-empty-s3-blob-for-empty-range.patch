@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Seungwon Lee <seungwon@mulatta.io>
+Date: Wed, 1 Jul 2026 12:30:00 +0900
+Subject: [PATCH] store: return an empty S3 blob for empty ranges
+
+JMAP can expose zero-byte MIME attachment parts. Downloading such a part
+asks the blob store for range 0..0. The S3 backend forwards this to
+rust-s3 as get_object_range(path, 0, Some(0)), but rust-s3 asserts that
+start < end and panics.
+
+Return an empty blob locally instead of sending an invalid range request.
+---
+ crates/store/src/backend/s3/mod.rs | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/crates/store/src/backend/s3/mod.rs b/crates/store/src/backend/s3/mod.rs
+index 04283701d..e96c046a6 100644
+--- a/crates/store/src/backend/s3/mod.rs
++++ b/crates/store/src/backend/s3/mod.rs
+@@ -84,6 +84,12 @@ impl S3Store {
+         key: &[u8],
+         range: Range<usize>,
+     ) -> trc::Result<Option<Vec<u8>>> {
++        // Empty MIME parts are valid. Avoid rust-s3's range assertion for
++        // get_object_range(path, 0, Some(0)).
++        if range.start >= range.end {
++            return Ok(Some(Vec::new()));
++        }
++
+         let path = self.build_key(key);
+         let mut retries_left = self.max_retries;
+ 
