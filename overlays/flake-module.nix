@@ -39,6 +39,10 @@
         # downloads and blob garbage collection. Keep this until rust-s3 merges
         # PRs #459/#465 and Stalwart bumps the crate.
         stalwart = prev.stalwart.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [
+            ../packages/stalwart/return-empty-s3-blob-for-empty-range.patch
+          ];
+
           cargoDeps =
             let
               rust-s3-r2-range-get-signing-fix = prev.fetchpatch {
@@ -52,7 +56,8 @@
               chmod -R u+w "$out/source-registry-0/rust-s3-0.35.1"
               cd "$out/source-registry-0/rust-s3-0.35.1"
               patch -p1 < ${rust-s3-r2-range-get-signing-fix}
-              sed -i '/Command::GetBucketLocation => {}/a\            Command::DeleteObject => {}' src/request/request_trait.rs
+              patch -p1 < ${../packages/stalwart/rust-s3-skip-delete-object-body-headers.patch}
+              grep -F 'Command::GetObjectRange { .. } => {}' src/request/request_trait.rs
               grep -F 'Command::DeleteObject => {}' src/request/request_trait.rs
             '';
         });
