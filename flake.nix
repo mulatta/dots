@@ -154,6 +154,7 @@
     # Agentic tools
     skillz = {
       url = "github:mulatta/skillz";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
