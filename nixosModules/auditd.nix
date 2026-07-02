@@ -2,6 +2,9 @@
   security.audit = {
     enable = true;
     rules = [
+      # systemd sandboxing emits high-volume BPF records we do not act on.
+      "-a always,exclude -F msgtype=BPF"
+
       # Session tracking (wtmp=login history, btmp=failed logins)
       "-w /var/log/wtmp -p wa -k session"
       "-w /var/log/btmp -p wa -k session"
@@ -22,4 +25,11 @@
   };
 
   security.auditd.enable = true;
+
+  # Bound audit.log growth to roughly 250 MiB.
+  security.auditd.settings = {
+    max_log_file = 50; # MiB per file
+    num_logs = 5;
+    max_log_file_action = "ROTATE";
+  };
 }
