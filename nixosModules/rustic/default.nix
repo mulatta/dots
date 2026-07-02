@@ -10,12 +10,10 @@ let
   cfg = config.services.rustic;
 
   # Default settings applied to all profiles
-  # - cache-dir: Use dedicated cache directory accessible by rustic user
   # - rclone-command: Skip bucket creation check (buckets provisioned by terraform)
   # - forget: Default retention policy
   defaultProfileSettings = {
     repository = {
-      cache-dir = "/var/lib/rustic/cache";
       options.rclone-command = "rclone serve restic --addr localhost:0 --s3-no-check-bucket";
     };
     forget = {
@@ -60,6 +58,10 @@ let
 
   mkExtraArgs = args: lib.concatMapStrings (s: " ${lib.escapeShellArg s}") args;
 
+  cacheDirFor = user: "${cfg.cacheBaseDir}/${user}";
+
+  mkCacheArgs = user: " --cache-dir ${lib.escapeShellArg (cacheDirFor user)}";
+
   mkFilesBackupScript =
     name: backup:
     let
@@ -73,7 +75,7 @@ let
     pkgs.writeScript "rustic-backup-files-${name}" ''
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
-      ${cfg.package}/bin/rustic backup${sourcesArgs}${asPathArg}${profileArgs}${extraArgs}
+      ${cfg.package}/bin/rustic backup${sourcesArgs}${asPathArg}${profileArgs}${mkCacheArgs backup.user}${extraArgs}
     '';
 
   mkCommandBackupScript =
@@ -91,7 +93,7 @@ let
       # --force: rustic 0.11.3 skips reading stdin when a parent snapshot
       # exists, silently producing 0-byte backups. Force a full read so stdin
       # is always consumed (chunk dedup against the repo still applies).
-      ${cfg.package}/bin/rustic backup --force --stdin-command "${backup.command}" -${filenameArg}${profileArgs}${extraArgs}
+      ${cfg.package}/bin/rustic backup --force --stdin-command "${backup.command}" -${filenameArg}${profileArgs}${mkCacheArgs backup.user}${extraArgs}
     '';
 
   mkPostgresBackupScript =
@@ -132,7 +134,7 @@ let
         | ${cfg.package}/bin/rustic backup \
           --force \
           --stdin-filename "${backup.prefix}/globals.sql" \
-          -${profileArgs}${extraArgs}
+          -${profileArgs}${mkCacheArgs "root"}${extraArgs}
     '';
 
   mkPostgresDbScript =
@@ -150,7 +152,7 @@ let
         | ${cfg.package}/bin/rustic backup \
           --force \
           --stdin-filename "${backup.prefix}/db/$DB_NAME.sql" \
-          -${profileArgs}${extraArgs}
+          -${profileArgs}${mkCacheArgs "root"}${extraArgs}
     '';
 
   mkSqliteBackupScript =
@@ -164,9 +166,21 @@ let
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
       ${pkgs.sqlite}/bin/sqlite3 "${backup.database}" ".backup '${backup.tempPath}/${backupName}'"
-      ${cfg.package}/bin/rustic backup "${backup.tempPath}/${backupName}"${profileArgs}${extraArgs}
+      ${cfg.package}/bin/rustic backup "${backup.tempPath}/${backupName}"${profileArgs}${mkCacheArgs backup.user}${extraArgs}
       rm -f "${backup.tempPath}/${backupName}"
     '';
+
+  backupUsers = lib.unique (
+    [
+      "root"
+      "rustic"
+    ]
+    ++ lib.mapAttrsToList (_: backup: backup.user) cfg.backups.files
+    ++ lib.mapAttrsToList (_: backup: backup.user) cfg.backups.commands
+    ++ lib.mapAttrsToList (_: backup: backup.user) cfg.backups.sqlite
+  );
+
+  cacheDirRuleFor = user: "d ${cacheDirFor user} 0700 ${user} - - -";
 
 in
 {
@@ -174,6 +188,19 @@ in
     enable = lib.mkEnableOption "rustic backup service";
 
     package = lib.mkPackageOption pkgs "rustic" { };
+
+    cacheBaseDir = lib.mkOption {
+      type = lib.types.path;
+      default = "/var/cache/rustic";
+      description = ''
+        Base directory for per-service-user rustic caches.
+
+        Rustic caches include repository indexes. Sharing one cache between root
+        backup jobs and unprivileged prune/check jobs leaves root-owned stale
+        index files behind, which can make checks report remote 404s for packs
+        that pruning already removed.
+      '';
+    };
 
     profiles = lib.mkOption {
       type = lib.types.attrsOf tomlFormat.type;
@@ -356,6 +383,11 @@ in
       cfg.package
       pkgs.rclone
     ];
+
+    systemd.tmpfiles.rules = [
+      "d ${cfg.cacheBaseDir} 0755 root root - -"
+    ]
+    ++ map cacheDirRuleFor backupUsers;
 
     # Shared rclone R2 credentials (prompted once, shared across machines)
     clan.core.vars.generators.rclone-r2 = {
@@ -553,7 +585,7 @@ in
                 profileArgs = mkProfileArgs cfg.prune.useProfiles;
                 extraArgs = mkExtraArgs cfg.prune.extraArgs;
               in
-              "${cfg.package}/bin/rustic forget --prune${profileArgs}${extraArgs}";
+              "${cfg.package}/bin/rustic forget --prune${profileArgs}${mkCacheArgs "rustic"}${extraArgs}";
           };
           startAt = cfg.prune.startAt;
         };
@@ -573,7 +605,7 @@ in
                 profileArgs = mkProfileArgs cfg.check.useProfiles;
                 extraArgs = mkExtraArgs cfg.check.extraArgs;
               in
-              "${cfg.package}/bin/rustic check${profileArgs}${extraArgs}";
+              "${cfg.package}/bin/rustic check${profileArgs}${mkCacheArgs "rustic"}${extraArgs}";
           };
           startAt = cfg.check.startAt;
         };
