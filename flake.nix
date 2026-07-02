@@ -56,6 +56,7 @@
     # Infra-level modules sources
     fast-nix-gc = {
       url = "github:Mic92/fast-nix-gc";
+      inputs.nix-darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
