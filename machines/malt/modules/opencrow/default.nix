@@ -10,6 +10,12 @@ let
   skillz = self.inputs.skillz;
   skillzPkgs = skillz.packages.${system};
 
+  opencrowModule = import (builtins.toFile "opencrow-module.nix" (
+    builtins.replaceStrings [ "pkgs.hostPlatform" ] [ "pkgs.stdenv.hostPlatform" ] (
+      builtins.readFile "${self.inputs.opencrow}/nix/module.nix"
+    )
+  )) { self = self.inputs.opencrow; };
+
   instanceDefaults = {
     piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
@@ -98,7 +104,7 @@ let
 in
 {
   imports = [
-    self.inputs.opencrow.nixosModules.default
+    opencrowModule
     ./noa.nix
   ];
 

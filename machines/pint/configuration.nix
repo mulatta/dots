@@ -16,7 +16,6 @@
     ./modules/network.nix
   ];
 
-  boot.initrd.systemd.enable = lib.mkForce false;
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "usbhid"

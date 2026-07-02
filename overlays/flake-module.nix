@@ -38,7 +38,7 @@
         # Cloudflare R2 rejects those signatures, breaking JMAP attachment
         # downloads and blob garbage collection. Keep this until rust-s3 merges
         # PRs #459/#465 and Stalwart bumps the crate.
-        stalwart = prev.stalwart.overrideAttrs (old: {
+        stalwart = prev.stalwart_0_15.overrideAttrs (old: {
           patches = (old.patches or [ ]) ++ [
             ../packages/stalwart/return-empty-s3-blob-for-empty-range.patch
           ];
