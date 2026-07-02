@@ -33,11 +33,9 @@
       pkgs.dorion
       pkgs.google-chrome
       pkgs.mpv
-      pkgs.nitrous
       pkgs.obsidian
       pkgs.tailscale
       pkgs.typora
-      pkgs.zeroclaw
     ];
 
   services.nostr-chat = {
