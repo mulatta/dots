@@ -1,5 +1,17 @@
-{ self, pkgs, ... }:
 {
+  lib,
+  self,
+  pkgs,
+  ...
+}:
+let
+  inherit (lib) mkDefault mkForce;
+in
+{
+  imports = [
+    self.inputs.fast-nix-gc.darwinModules.default
+  ];
+
   nixpkgs.overlays = [
     self.overlays.dots
   ];
@@ -13,17 +25,10 @@
     # the latest pre-2.34 release that nixpkgs still ships.
     package = pkgs.nixVersions.nix_2_31;
 
-    gc.automatic = true;
-    gc.interval = [
-      {
-        Weekday = 1;
-        Hour = 0;
-        Minute = 15;
-      }
-    ];
-    gc.options = "--delete-older-than 14d";
-
-    optimise.automatic = true;
+    # fast-nix-gc and fast-nix-optimise take the same gc.lock; keep stock
+    # launchd jobs off so nix-darwin does not run slower duplicate jobs.
+    gc.automatic = mkForce false;
+    optimise.automatic = mkForce false;
 
     settings = {
       min-free = toString (10 * 1024 * 1024 * 1024); # 10 GB
@@ -56,6 +61,31 @@
       fallback = true;
       warn-dirty = false;
     };
+  };
+
+  services.fast-nix-gc = {
+    enable = mkDefault true;
+    automatic = mkDefault true;
+    startCalendarInterval = mkDefault [
+      {
+        Weekday = 1;
+        Hour = 0;
+        Minute = 15;
+      }
+    ];
+    deleteOlderThan = mkDefault "14d";
+  };
+
+  services.fast-nix-optimise = {
+    enable = mkDefault true;
+    automatic = mkDefault true;
+    startCalendarInterval = mkDefault [
+      {
+        Weekday = 1;
+        Hour = 1;
+        Minute = 15;
+      }
+    ];
   };
 
   launchd.daemons.nix-daemon = {

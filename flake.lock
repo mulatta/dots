@@ -225,6 +225,9 @@
     },
     "fast-nix-gc": {
       "inputs": {
+        "nix-darwin": [
+          "nix-darwin"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -233,11 +236,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780845467,
-        "narHash": "sha256-Nfb0WpfGGfwIbtR4H9GL86f4zKagINaDkxPtHfQky1w=",
+        "lastModified": 1782724226,
+        "narHash": "sha256-3LUiQ9vfNc9YmgXNC6yO7uvLbL9GUj59f4/vS2unZN4=",
         "owner": "Mic92",
         "repo": "fast-nix-gc",
-        "rev": "4ec2e6b9e300fe89e54afeea275041c0f9802767",
+        "rev": "478b6c87af6f03df7167cdfcb8e4f26cdce15a82",
         "type": "github"
       },
       "original": {
