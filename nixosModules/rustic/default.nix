@@ -443,6 +443,12 @@ in
           RCLONE_CONFIG = "/etc/rclone/rclone.conf";
         };
         rclonePath = [ pkgs.rclone ];
+        maintenanceJobLimits = {
+          Slice = "rustic-maintenance.slice";
+          Nice = 19;
+          IOSchedulingClass = "idle";
+        };
+        withMaintenanceLimits = svc: svc // { serviceConfig = svc.serviceConfig // maintenanceJobLimits; };
       in
       # Repository initialization service
       {
@@ -476,7 +482,7 @@ in
       # Files backups
       // lib.mapAttrs' (name: backup: {
         name = "rustic-backup-files-${name}";
-        value = {
+        value = withMaintenanceLimits {
           description = "Rustic files backup: ${name}";
           after = [ "rustic-init.service" ];
           environment = rcloneEnv;
@@ -492,7 +498,7 @@ in
       # Command backups
       // lib.mapAttrs' (name: backup: {
         name = "rustic-backup-command-${name}";
-        value = {
+        value = withMaintenanceLimits {
           description = "Rustic command backup: ${name}";
           after = [ "rustic-init.service" ];
           environment = rcloneEnv;
@@ -507,7 +513,7 @@ in
       }) cfg.backups.commands
       # PostgreSQL backups (main service + globals + per-db template)
       // lib.concatMapAttrs (name: backup: {
-        "rustic-backup-postgres-${name}" = {
+        "rustic-backup-postgres-${name}" = withMaintenanceLimits {
           description = "Rustic PostgreSQL backup: ${name}";
           after = [
             "rustic-init.service"
@@ -523,7 +529,7 @@ in
           };
           startAt = backup.startAt;
         };
-        "rustic-postgres-globals-${name}" = {
+        "rustic-postgres-globals-${name}" = withMaintenanceLimits {
           description = "Rustic PostgreSQL globals backup: ${name}";
           after = [
             "rustic-init.service"
@@ -538,7 +544,7 @@ in
             ExecStart = "${mkPostgresGlobalsScript name backup}";
           };
         };
-        "rustic-postgres-db-${name}@" = {
+        "rustic-postgres-db-${name}@" = withMaintenanceLimits {
           description = "Rustic PostgreSQL database backup: ${name} (%i)";
           after = [
             "rustic-init.service"
@@ -557,7 +563,7 @@ in
       # SQLite backups
       // lib.mapAttrs' (name: backup: {
         name = "rustic-backup-sqlite-${name}";
-        value = {
+        value = withMaintenanceLimits {
           description = "Rustic SQLite backup: ${name}";
           after = [ "rustic-init.service" ];
           environment = rcloneEnv;
@@ -572,7 +578,7 @@ in
       }) cfg.backups.sqlite
       # Prune service
       // lib.optionalAttrs cfg.prune.enable {
-        "rustic-prune" = {
+        "rustic-prune" = withMaintenanceLimits {
           description = "Rustic prune old backups";
           after = [ "rustic-init.service" ];
           environment = rcloneEnv;
@@ -592,7 +598,7 @@ in
       }
       # Check service
       // lib.optionalAttrs cfg.check.enable {
-        "rustic-check" = {
+        "rustic-check" = withMaintenanceLimits {
           description = "Rustic repository check";
           after = [ "rustic-init.service" ];
           environment = rcloneEnv;
@@ -610,5 +616,13 @@ in
           startAt = cfg.check.startAt;
         };
       };
+
+    systemd.slices."rustic-maintenance" = {
+      description = "Resource-limited rustic maintenance jobs";
+      sliceConfig = {
+        CPUWeight = 20;
+        IOWeight = 20;
+      };
+    };
   };
 }
