@@ -1,0 +1,230 @@
+diff --git a/nostr/backend.go b/nostr/backend.go
+index ae63333..f1abab6 100644
+--- a/nostr/backend.go
++++ b/nostr/backend.go
+@@ -30,6 +30,11 @@ const metadataRefreshInterval = 24 * time.Hour
+ // NIP-59 randomization window with margin.
+ const seenRumorTTL = 7 * 24 * time.Hour
+ 
++// subscriptionRefreshInterval bounds how long a relay subscription can stay
++// open without a fresh REQ. Some relays/proxies stop pushing events while the
++// websocket remains writable, so periodic refresh is the recovery path.
++var subscriptionRefreshInterval = 15 * time.Minute
++
+ // ProfileConfig holds NIP-01 kind 0 metadata fields.
+ type ProfileConfig struct {
+ 	Name        string // NIP-01 "name"
+@@ -135,25 +140,13 @@ func (b *Backend) Run(ctx context.Context) error {
+ 	// they don't know the recipient's, so we need to listen on those too.
+ 	subRelays := b.discoverSubscriptionRelays(ctx)
+ 
+-	since := subscriptionSince(ctx, b.db)
+-
+-	slog.Info("nostr: subscribing to DMs", "pubkey", b.keys.PK.Hex(), "since", since, "relays", subRelays)
+-
+-	ctx, cancel := context.WithCancel(ctx)
+-	// Ensure pruneSeenLoop stops even if the events channel closes
+-	// without Stop() being called.
++	runCtx, cancel := context.WithCancel(ctx)
+ 	defer cancel()
+ 
+ 	b.cancel.Set(cancel)
+ 
+-	events := b.pool.SubscribeMany(ctx, subRelays, gonostr.Filter{
+-		Kinds: []gonostr.Kind{gonostr.KindGiftWrap},
+-		Tags:  gonostr.TagMap{"p": {b.keys.PK.Hex()}},
+-		Since: since,
+-	}, gonostr.SubscriptionOptions{})
+-
+ 	// Periodically prune the dedup set so it doesn't grow unbounded.
+-	go b.pruneSeenLoop(ctx)
++	go b.pruneSeenLoop(runCtx)
+ 
+ 	// Drain the publish queue in the background. Use a separate context
+ 	// so the queue keeps running while reaction goroutines finish enqueueing
+@@ -166,17 +159,85 @@ func (b *Backend) Run(ctx context.Context) error {
+ 		close(pubDone)
+ 	}()
+ 
+-	for ie := range events {
++	b.runSubscriptionLoop(runCtx, pubCtx, subRelays)
++
++	return b.drainAndShutdown(runCtx, pubCancel, pubDone)
++}
++
++func (b *Backend) runSubscriptionLoop(ctx, pubCtx context.Context, subRelays []string) {
++	for ctx.Err() == nil {
++		since := subscriptionSince(ctx, b.db)
++
++		slog.Info("nostr: subscribing to DMs", "pubkey", b.keys.PK.Hex(), "since", since, "relays", subRelays)
++
++		subCtx, subCancel := context.WithCancel(ctx)
++		events, closed := b.pool.SubscribeManyNotifyClosed(subCtx, subRelays, gonostr.Filter{
++			Kinds: []gonostr.Kind{gonostr.KindGiftWrap},
++			Tags:  gonostr.TagMap{"p": {b.keys.PK.Hex()}},
++			Since: since,
++		}, gonostr.SubscriptionOptions{})
++
++		reason := b.runSubscription(subCtx, pubCtx, events, closed)
++		subCancel()
++
+ 		if ctx.Err() != nil {
+ 			break
+ 		}
+ 
+-		slog.Debug("nostr: gift wrap received from relay", "relay", ie.Relay.URL, "event_id", ie.ID.Hex())
+-		evt := ie.Event
+-		b.processGiftWrap(ctx, pubCtx, &evt)
+-	}
++		slog.Warn("nostr: subscription closed, reconnecting", "reason", reason)
+ 
+-	return b.drainAndShutdown(ctx, pubCancel, pubDone)
++		select {
++		case <-ctx.Done():
++			return
++		case <-time.After(time.Second):
++		}
++	}
++}
++
++func (b *Backend) runSubscription(
++	ctx context.Context,
++	pubCtx context.Context,
++	events <-chan gonostr.RelayEvent,
++	closed <-chan gonostr.RelayClosed,
++) string {
++	refresh := time.NewTimer(subscriptionRefreshInterval)
++	defer refresh.Stop()
++
++	for {
++		select {
++		case ie, ok := <-events:
++			if !ok {
++				return "events channel closed"
++			}
++
++			if ctx.Err() != nil {
++				return "context cancelled"
++			}
++
++			slog.Debug("nostr: gift wrap received from relay", "relay", ie.Relay.URL, "event_id", ie.ID.Hex())
++			evt := ie.Event
++			b.processGiftWrap(ctx, pubCtx, &evt)
++		case rc, ok := <-closed:
++			if !ok {
++				closed = nil
++				continue
++			}
++			if rc.HandledAuth {
++				continue
++			}
++			relayURL := ""
++			if rc.Relay != nil {
++				relayURL = rc.Relay.URL
++			}
++			slog.Warn("nostr: relay closed subscription", "relay", relayURL, "reason", rc.Reason)
++			return "relay closed subscription"
++		case <-refresh.C:
++			slog.Info("nostr: forcing resubscribe", "reason", "periodic subscription refresh")
++			return "periodic subscription refresh"
++		case <-ctx.Done():
++			return "context cancelled"
++		}
++	}
+ }
+ 
+ // Stop signals the backend to shut down.
+diff --git a/nostr/backend_test.go b/nostr/backend_test.go
+index f2d1be4..fa583f6 100644
+--- a/nostr/backend_test.go
++++ b/nostr/backend_test.go
+@@ -122,6 +122,38 @@ func fetchGiftWrapRumor(ctx context.Context, t *testing.T, relays []string, kr g
+ 	}
+ }
+ 
++func TestRun_PeriodicallyRefreshesSubscription(t *testing.T) {
++	wsURL, cleanup, requests := testutil.StartCountingTestRelay(t)
++	defer cleanup()
++
++	old := subscriptionRefreshInterval
++	subscriptionRefreshInterval = 100 * time.Millisecond
++	defer func() { subscriptionRefreshInterval = old }()
++
++	botSK := gonostr.Generate()
++	b := newTestBackend(t, botSK, []string{wsURL}, nil)
++
++	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
++	defer cancel()
++
++	runErr := runBackendAsync(ctx, b)
++
++	deadline := time.After(1500 * time.Millisecond)
++	for {
++		if requests.Load() >= 2 {
++			cancel()
++			<-runErr
++			return
++		}
++
++		select {
++		case <-deadline:
++			t.Fatalf("subscription requests = %d, want at least 2", requests.Load())
++		case <-time.After(25 * time.Millisecond):
++		}
++	}
++}
++
+ func TestRun_ReceivesDM(t *testing.T) {
+ 	t.Parallel()
+ 
+diff --git a/testutil/relay.go b/testutil/relay.go
+index 97dd71a..8b17c13 100644
+--- a/testutil/relay.go
++++ b/testutil/relay.go
+@@ -1,10 +1,13 @@
+ package testutil
+ 
+ import (
++	"context"
+ 	"net/http/httptest"
+ 	"strings"
++	"sync/atomic"
+ 	"testing"
+ 
++	"fiatjaf.com/nostr"
+ 	"fiatjaf.com/nostr/eventstore/slicestore"
+ 	"fiatjaf.com/nostr/khatru"
+ )
+@@ -14,6 +17,14 @@ import (
+ func StartTestRelay(t *testing.T) (string, func()) {
+ 	t.Helper()
+ 
++	wsURL, cleanup, _ := StartCountingTestRelay(t)
++
++	return wsURL, cleanup
++}
++
++func StartCountingTestRelay(t *testing.T) (string, func(), *atomic.Int64) {
++	t.Helper()
++
+ 	relay := khatru.NewRelay()
+ 
+ 	store := &slicestore.SliceStore{}
+@@ -23,9 +34,16 @@ func StartTestRelay(t *testing.T) (string, func()) {
+ 
+ 	relay.UseEventstore(store, 500)
+ 
++	requests := &atomic.Int64{}
++	relay.OnRequest = func(_ context.Context, _ nostr.Filter) (bool, string) {
++		requests.Add(1)
++
++		return false, ""
++	}
++
+ 	srv := httptest.NewServer(relay)
+ 
+ 	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http")
+ 
+-	return wsURL, srv.Close
++	return wsURL, srv.Close, requests
+ }

@@ -24,6 +24,11 @@ let
     cp ${officecli.src}/SKILL.md "$out/SKILL.md"
   '';
   instanceDefaults = {
+    package = lib.mkDefault (
+      self.inputs.opencrow.packages.${system}.opencrow.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./nostr-periodic-resubscribe.patch ];
+      })
+    );
     piPackage = lib.mkDefault self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
     extensions = {
