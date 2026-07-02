@@ -96,6 +96,9 @@
         };
         updater = prev.callPackage ../packages/updater { };
         instagram-cli = prev.callPackage ../packages/instagram-cli { };
+        instant-deploy = prev.callPackage ../packages/instant-deploy {
+          clan-cli = inputs.clan-core.packages.${system}.clan-cli;
+        };
         radicle-desktop = prev.callPackage ../packages/radicle-desktop { };
 
         # Tool bundles consumed by the helix/yazi modules.

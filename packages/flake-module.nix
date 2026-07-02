@@ -30,6 +30,7 @@
           pim
           updater
           instagram-cli
+          instant-deploy
           slack-manifest-cli
           ;
       }
