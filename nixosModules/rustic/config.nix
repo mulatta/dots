@@ -87,24 +87,28 @@ let
     name: backup:
     let
       systemctl = "${config.systemd.package}/bin/systemctl";
-      excludeFilter = lib.optionalString (backup.excludeDatabases != [ ]) (
-        " | ${pkgs.gnugrep}/bin/grep -vxE ${lib.escapeShellArg (lib.concatStringsSep "|" backup.excludeDatabases)}"
-      );
+      systemdEscape = "${config.systemd.package}/bin/systemd-escape";
+      databaseFilter =
+        if backup.excludeDatabases == [ ] then
+          "${pkgs.coreutils}/bin/tail -n +2"
+        else
+          "${pkgs.coreutils}/bin/tail -n +2 | ${pkgs.gawk}/bin/awk 'NR==FNR { exclude[$0]=1; next } !($0 in exclude)' ${pkgs.writeText "rustic-postgres-excluded-databases-${name}" (lib.concatLines backup.excludeDatabases)} -";
     in
     pkgs.writeScript "rustic-backup-postgres-${name}" ''
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
 
-      # Start globals backup
-      ${systemctl} start --no-block rustic-postgres-globals-${name}.service
+      ${systemctl} start rustic-postgres-globals-${name}.service
 
-      # Get list of databases (minus any excluded) and start backup for each
       ${pkgs.sudo}/bin/sudo -u postgres \
         ${config.services.postgresql.package}/bin/psql \
         -c 'SELECT datname FROM pg_database WHERE datistemplate = false' \
         --csv \
-        | tail -n +2${excludeFilter} \
-        | xargs -I {} ${systemctl} start --no-block rustic-postgres-db-${name}@{}.service
+        | ${databaseFilter} \
+        | while IFS= read -r database; do
+            unit=$(${systemdEscape} --template=rustic-postgres-db-${name}@.service "$database")
+            ${systemctl} start "$unit"
+          done
     '';
 
   mkPostgresGlobalsScript =
@@ -129,6 +133,8 @@ let
   mkPostgresDbScript =
     name: backup:
     let
+      systemdEscape = "${config.systemd.package}/bin/systemd-escape";
+      backupPrefix = lib.escapeShellArg backup.prefix;
       rusticArgs = mkRusticArgs {
         inherit (backup) useProfiles extraArgs;
         cacheUser = "root";
@@ -137,12 +143,13 @@ let
     pkgs.writeScript "rustic-postgres-db-${name}" ''
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
-      DB_NAME="$1"
+      DB_NAME=$(${systemdEscape} --unescape "$1")
+      BACKUP_PREFIX=${backupPrefix}
       ${pkgs.sudo}/bin/sudo -u postgres \
         ${config.services.postgresql.package}/bin/pg_dump "$DB_NAME" \
         | ${cfg.package}/bin/rustic backup \
           --force \
-          --stdin-filename "${backup.prefix}/db/$DB_NAME.sql" \
+          --stdin-filename "$BACKUP_PREFIX/db/$DB_NAME.sql" \
           -${rusticArgs}
     '';
 
@@ -151,6 +158,7 @@ let
     let
       backupName = if backup.backupName != null then backup.backupName else baseNameOf backup.database;
       backupPath = "${backup.tempPath}/${backupName}";
+      sqliteBackupCommand = ".backup '${builtins.replaceStrings [ "'" ] [ "''" ] backupPath}'";
       rusticArgs = mkRusticArgs {
         inherit (backup) useProfiles extraArgs;
         cacheUser = backup.user;
@@ -159,9 +167,9 @@ let
     pkgs.writeScript "rustic-backup-sqlite-${name}" ''
       #!${pkgs.bash}/bin/bash
       set -euo pipefail
-      ${pkgs.sqlite}/bin/sqlite3 ${lib.escapeShellArg backup.database} ".backup ${lib.escapeShellArg backupPath}"
+      ${pkgs.sqlite}/bin/sqlite3 ${lib.escapeShellArg backup.database} ${lib.escapeShellArg sqliteBackupCommand}
       ${cfg.package}/bin/rustic backup ${lib.escapeShellArg backupPath}${rusticArgs}
-      rm -f ${lib.escapeShellArg backupPath}
+      ${pkgs.coreutils}/bin/rm -f ${lib.escapeShellArg backupPath}
     '';
 
   backupUsers = lib.unique (
@@ -358,7 +366,7 @@ in
             output=$(${cfg.package}/bin/rustic init 2>&1) && {
               echo "Repository initialized successfully"
             } || {
-              if echo "$output" | grep -q "Config file already exists"; then
+              if echo "$output" | ${pkgs.gnugrep}/bin/grep -q "Config file already exists"; then
                 echo "Repository already initialized"
               else
                 echo "$output" >&2
