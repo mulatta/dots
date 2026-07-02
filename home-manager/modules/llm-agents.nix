@@ -61,8 +61,11 @@ in
   home.file.".pi/agent/extensions/questionnaire.ts".source = "${pi-ext}/questionnaire/index.ts";
   home.file.".pi/agent/extensions/slow-mode.ts".source = "${pi-ext}/slow-mode/index.ts";
   home.file.".pi/agent/extensions/notify.ts".source = "${pi-ext}/notify/index.ts";
+  home.file.".pi/agent/extensions/permission-gate".source = "${pi-ext}/permission-gate";
   home.file.".pi/agent/extensions/stash".source = "${pi-ext}/stash";
   home.file.".pi/agent/extensions/statusline".source = "${pi-ext}/statusline";
+  home.file.".config/pi-agent-extensions/permission-gate/rules.json".source =
+    ../../home/.config/pi-agent-extensions/permission-gate/rules.json;
 
   # git-surgeon ships a skill teaching agents how to use its git primitives.
   home.file.".claude/skills/git-surgeon".source =
