@@ -42,6 +42,7 @@ class OmpProfileTests(unittest.TestCase):
             "sessionDir": "~/.omp/state/lim/sessions",
             "config": {"skills": {"includeSkills": ["zhost-cli"]}},
             "prompt": {"text": "prompt"},
+            "extensions": ["/ext/statusline"],
             "enabledTools": ["read", "bash"],
         }
 
@@ -52,6 +53,47 @@ class OmpProfileTests(unittest.TestCase):
         self.assertEqual(args, ["auth-broker", "login", "anthropic"])
         self.assertNotIn("--config", args)
         self.assertNotIn("--append-system-prompt", args)
+        self.assertNotIn("--extension", args)
+
+    def test_launch_adds_extensions(self) -> None:
+        mod = load_module()
+        profile = {"extensions": ["/ext/permission-gate", "/ext/statusline"]}
+
+        args = mod.build_omp_args("lim", profile, ["hello"], False)
+
+        self.assertEqual(
+            args,
+            [
+                "--extension",
+                "/ext/permission-gate",
+                "--extension",
+                "/ext/statusline",
+                "hello",
+            ],
+        )
+
+    def test_prompt_commands_append_runtime_context(self) -> None:
+        mod = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            profile = {
+                "runtimeDir": tmp,
+                "prompt": {
+                    "text": "base",
+                    "commands": [
+                        {
+                            "label": "Dynamic",
+                            "command": [sys.executable, "-c", "print('context')"],
+                        }
+                    ],
+                },
+            }
+
+            args = mod.build_omp_args("pim", profile, [], False, os.environ.copy())
+            prompt_path = Path(args[args.index("--append-system-prompt") + 1])
+
+            self.assertEqual(
+                prompt_path.read_text(encoding="utf-8"), "base\nDynamic:\ncontext"
+            )
 
     def test_run_profile_sets_agent_dir_and_tool_path(self) -> None:
         mod = load_module()

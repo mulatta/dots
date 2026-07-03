@@ -178,7 +178,61 @@ def write_runtime_config(profile_name: str, profile: dict[str, Any]) -> Path | N
     return path
 
 
-def write_runtime_prompt(profile_name: str, profile: dict[str, Any]) -> Path | None:
+def format_prompt_command_output(entry: Any, output: str) -> str:
+    if isinstance(entry, dict) and entry.get("label"):
+        return f"{entry['label']}:\n{output}"
+    return output
+
+
+def run_prompt_command(entry: Any, env: dict[str, str]) -> str | None:
+    if isinstance(entry, str):
+        command: str | list[str] = expand_str(entry)
+        timeout = 10
+        fallback = None
+    elif isinstance(entry, dict):
+        raw_command = entry.get("command")
+        if not raw_command:
+            return None
+        if isinstance(raw_command, list):
+            command = [expand_str(str(part)) for part in raw_command]
+        else:
+            command = expand_str(str(raw_command))
+        timeout = int(entry.get("timeout", 10))
+        fallback = entry.get("fallback")
+    else:
+        return None
+
+    try:
+        result = subprocess.run(
+            command,
+            shell=isinstance(command, str),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except (
+        FileNotFoundError,
+        subprocess.SubprocessError,
+        subprocess.TimeoutExpired,
+    ) as error:
+        output = str(fallback or f"Unable to run command: {error}")
+    else:
+        output = result.stdout.rstrip()
+        if result.returncode != 0 and not output:
+            output = str(
+                fallback or f"Command failed with exit code {result.returncode}"
+            )
+
+    if not output:
+        return None
+    return format_prompt_command_output(entry, output)
+
+
+def write_runtime_prompt(
+    profile_name: str, profile: dict[str, Any], env: dict[str, str]
+) -> Path | None:
     prompt = profile.get("prompt") or {}
     if not prompt:
         return None
@@ -191,6 +245,11 @@ def write_runtime_prompt(profile_name: str, profile: dict[str, Any]) -> Path | N
     prompt_file = prompt.get("file")
     if prompt_file:
         parts.append(expand_path(prompt_file).read_text(encoding="utf-8"))
+
+    for command in prompt.get("commands") or []:
+        output = run_prompt_command(command, env)
+        if output:
+            parts.append(output)
 
     if not parts:
         return None
@@ -205,6 +264,7 @@ def build_omp_args(
     profile: dict[str, Any],
     args: list[str],
     passthrough: bool,
+    env: dict[str, str] | None = None,
 ) -> list[str]:
     if passthrough:
         return args
@@ -219,9 +279,12 @@ def build_omp_args(
     if session_dir:
         omp_args.extend(["--session-dir", str(expand_path(session_dir))])
 
-    prompt_path = write_runtime_prompt(profile_name, profile)
+    prompt_path = write_runtime_prompt(profile_name, profile, env or os.environ.copy())
     if prompt_path is not None:
         omp_args.extend(["--append-system-prompt", str(prompt_path)])
+
+    for extension in profile.get("extensions") or []:
+        omp_args.extend(["--extension", str(expand_path(extension))])
 
     enabled_tools = profile.get("enabledTools")
     if enabled_tools:
@@ -295,7 +358,14 @@ def run_sandboxed(
     ]
 
     add_existing_bind(bwrap_args, "--bind", expand_path(xdg_runtime))
-    for raw in sandbox.get("rw") or []:
+    for raw in [
+        *[
+            profile[key]
+            for key in ("agentDir", "sessionDir", "runtimeDir")
+            if profile.get(key)
+        ],
+        *(sandbox.get("rw") or []),
+    ]:
         add_existing_bind(bwrap_args, "--bind", expand_path(raw))
     for raw in sandbox.get("ro") or []:
         add_existing_bind(bwrap_args, "--ro-bind", expand_path(raw))
@@ -311,6 +381,7 @@ def run_sandboxed(
         "XDG_CONFIG_HOME",
         "PI_CODING_AGENT_DIR",
         *TOOL_ENV_KEYS,
+        *[str(key) for key in (profile.get("env") or {}).keys()],
         *[str(key) for key in sandbox.get("envKeys") or []],
     ]
     env["HOME"] = str(home)
@@ -351,7 +422,7 @@ def run_profile(profile_name: str, profile: dict[str, Any], args: list[str]) -> 
     passthrough = is_passthrough(profile, args)
     command = [
         backend_command(profile),
-        *build_omp_args(profile_name, profile, args, passthrough),
+        *build_omp_args(profile_name, profile, args, passthrough, env),
     ]
     if sandbox_enabled(profile, passthrough):
         return run_sandboxed(command, env, profile)

@@ -60,6 +60,12 @@ let
           description = "OMP tools enabled for launch sessions.";
         };
 
+        extensions = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "OMP extensions loaded for launch sessions.";
+        };
+
         skillPackages = lib.mkOption {
           type = lib.types.listOf lib.types.package;
           default = [ ];
@@ -95,6 +101,17 @@ let
             type = lib.types.nullOr lib.types.str;
             default = null;
             description = "System prompt file appended for launch sessions.";
+          };
+
+          commands = lib.mkOption {
+            type = lib.types.listOf (
+              lib.types.oneOf [
+                lib.types.str
+                lib.types.attrs
+              ]
+            );
+            default = [ ];
+            description = "Commands whose stdout is appended to the launch system prompt.";
           };
         };
 
@@ -172,6 +189,7 @@ let
         sessionDir
         runtimeDir
         enabledTools
+        extensions
         env
         ensureDirs
         passthroughCommands
@@ -179,7 +197,7 @@ let
         ;
       toolPath = (map (pkg: "${pkg}/bin") profile.toolPackages) ++ profile.toolPath;
       config = lib.recursiveUpdate (lib.optionalAttrs hasSkillScope (skillConfig profile)) profile.config;
-      prompt = lib.filterAttrs (_: value: value != null) profile.prompt;
+      prompt = lib.filterAttrs (_: value: value != null && value != [ ]) profile.prompt;
     };
 
   profileFiles = lib.mapAttrs' (
