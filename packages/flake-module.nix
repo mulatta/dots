@@ -17,6 +17,7 @@
           bulwark-webmail
           merge-when-green
           claude-md
+          omp-profile
           rbw-pinentry
           rhwp
           rhwp-studio

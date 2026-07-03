@@ -71,6 +71,9 @@
           flake-fmt = inputs.flake-fmt.packages.${system}.default;
         };
         claude-md = prev.callPackage ../packages/claude-md { };
+        omp-profile = prev.callPackage ../packages/omp-profile {
+          omp = inputs.llm-agents.packages.${system}.omp;
+        };
         rbw-pinentry = prev.callPackage ../packages/rbw-pinentry { };
         rhwp = inputs.rhwp.packages.${system}.rhwp-cli;
         rhwp-studio = inputs.rhwp.packages.${system}.rhwp-studio;
