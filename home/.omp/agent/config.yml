@@ -1,0 +1,19 @@
+tools:
+  # Native omp is a high-capability sibling. Keep file edits smooth but make
+  # execution/browser/delegation explicit until workflows settle.
+  approvalMode: write
+  approval:
+    bash: prompt
+    browser: prompt
+    task: prompt
+    github: prompt
+    web_search: allow
+skills:
+  # OMP reads ~/.claude/skills by default. Keep coding/research helpers but
+  # avoid ambient PIM/service-control skills outside pim's sandbox.
+  ignoredSkills:
+    - calendar-cli
+    - linkwarden-cli
+    - n8n-cli
+    - pexpect-cli
+    - vikunja-cli

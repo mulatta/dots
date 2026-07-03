@@ -105,6 +105,7 @@ in
       aiPkgs.gemini-cli
       aiPkgs.git-surgeon
       aiPkgs.officecli
+      aiPkgs.omp
       aiPkgs.tuicr
       aiPkgs.workmux
       aiPkgs.zat
