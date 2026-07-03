@@ -10,5 +10,6 @@
   "compaction": {
     "enabled": true
   },
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "theme": "dark"
 }
