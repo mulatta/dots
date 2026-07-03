@@ -1,6 +1,5 @@
 {
   "extraRules": [
-    { "pattern": "\\bssh\\b", "label": "ssh" },
     { "pattern": "\\bgit\\s+push\\b", "label": "push git branch" },
     {
       "pattern": "\\bgit\\s+checkout\\s+(\\S+\\s+)?--\\s",
