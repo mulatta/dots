@@ -964,11 +964,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782892627,
-        "narHash": "sha256-HGYdLZxLFC1M5tIAgN0CIkIpjWOTHMIs0BTJLf7IASk=",
+        "lastModified": 1783182243,
+        "narHash": "sha256-pPXcXihX5CBvbxX+ol2yQEYXBw/et95gYXR16DSAlzc=",
         "owner": "mulatta",
         "repo": "skillz",
-        "rev": "14d2474f0070629d642da6bb86f1739bb1fc2cc3",
+        "rev": "c3f6935f2e87b2a1f835698d06bf9ccf20404cf3",
         "type": "github"
       },
       "original": {
