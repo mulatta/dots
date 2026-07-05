@@ -17,6 +17,7 @@ let
     _garden7 = "cfa03f09-03d7-42ad-b17e-43593c7d6213";
     GIEUK17 = "e92a2225-4879-47ac-9f6f-a598869d4248";
     Nolly_12 = "62343ba7-77f1-4949-aad7-d6aa35a79417";
+    smree = "bedc1677-a297-4def-ae1b-7f9e08bbc3c3";
   };
   # Operators grouped by op-permission-level. Expand into ops.json entries.
   mkOps = lib.concatMapAttrs (
@@ -69,6 +70,7 @@ in
           "_garden7"
           "GIEUK17"
           "Nolly_12"
+          "smree"
         ];
       };
     };
