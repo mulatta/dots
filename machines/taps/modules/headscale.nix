@@ -35,7 +35,7 @@ let
   aclPolicy = {
     groups."group:players" = [
       "seungwon@"
-      "seungming@"
+      "seungmin@"
       "jungwon@"
       "jongmin@"
       "giwon@"
