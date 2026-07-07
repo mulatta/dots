@@ -46,6 +46,10 @@ let
     NOSTR_CHAT_RELAYS = lib.concatStringsSep "," cfg.relays;
     NOSTR_CHAT_DISPLAY_NAME = cfg.displayName;
     NOSTR_CHAT_SECRET_CMD = cfg.secretCommand;
+    XDG_CACHE_HOME = config.xdg.cacheHome;
+    XDG_CONFIG_HOME = config.xdg.configHome;
+    XDG_DATA_HOME = config.xdg.dataHome;
+    XDG_STATE_HOME = config.xdg.stateHome;
     PATH = lib.makeBinPath [
       pkgs.rbw
       pkgs.coreutils
