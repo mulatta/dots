@@ -26,6 +26,14 @@ py.buildPythonApplication {
     py.keyring
   ];
 
+  pythonImportsCheck = [ "rbw_pinentry" ];
+
+  checkPhase = ''
+    runHook preCheck
+    python -m unittest discover -s tests
+    runHook postCheck
+  '';
+
   postInstall = ''
     wrapProgram $out/bin/rbw-pinentry \
       --prefix PATH : ${lib.makeBinPath [ zenity ]}

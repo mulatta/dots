@@ -2,8 +2,6 @@ import argparse
 import platform
 import sys
 
-import keyring
-
 from .pinentry import Pinentry
 
 
@@ -54,14 +52,8 @@ def main() -> None:
 
     if args.clear:
         pinentry = Pinentry()
-        try:
-            keyring.delete_password(pinentry.service_name, pinentry.rbw_profile)
-            print(f"Cleared password for profile: {pinentry.rbw_profile}")
-        except keyring.errors.PasswordDeleteError:
-            print(f"No password found for profile: {pinentry.rbw_profile}")
-        except keyring.errors.KeyringError as e:
-            print(f"Failed to clear password: {e}", file=sys.stderr)
-            sys.exit(1)
+        pinentry.clear_cached_password()
+        print(f"Cleared password for profile: {pinentry.rbw_profile}")
         sys.exit(0)
 
     pinentry = Pinentry()
