@@ -19,9 +19,9 @@ This command finishes work on the current branch by:
 ## Step 1: Commit
 
 If there are staged changes, commit them. Use imperative mood and the
-repository's subject convention; prefer `<context>: <description>` when existing
+repository's subject convention; prefer \`<context>: <description>\` when existing
 history uses scoped subjects. Avoid Conventional Commits type prefixes like
-`feat:`, `fix:`, or `build(deps):` unless the repository uses them. Skip if
+\`feat:\`, \`fix:\`, or \`build(deps):\` unless the repository uses them. Skip if
 nothing is staged.
 
 ## Step 2: Rebase
