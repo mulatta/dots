@@ -31,8 +31,9 @@ for the same concept.
 Use commit messages in this style:
 
 - imperative mood
-- concise subject, no conventional commit prefixes
-- optional context prefix only when it adds clarity, e.g. `cli:` or `docs:`
+- concise subject using the repository's convention
+- prefer `<context>: <description>` when existing history uses scoped subjects, e.g. `cli:` or `docs:`
+- avoid Conventional Commits type prefixes like `feat:`, `fix:`, or `build(deps):` unless the repository uses them
 - body paragraphs when needed
 - explain why the change is needed, not just what changed
 
