@@ -11,8 +11,8 @@ Commit the changes using this style:
 
 - when writing commit messages focus on the WHY rather than the WHAT.
 - imperative mood
-- use the repository's subject convention; prefer `<context>: <description>` when existing history uses scoped subjects
-- avoid Conventional Commits type prefixes like `feat:`, `fix:`, or `build(deps):` unless the repository uses them
+- use the repository's subject convention; prefer \`<context>: <description>\` when existing history uses scoped subjects
+- avoid Conventional Commits type prefixes like \`feat:\`, \`fix:\`, or \`build(deps):\` unless the repository uses them
 - paragraphs instead of bullet points
 
 If nothing is staged, stage all changes first (\`git add -A\`).
