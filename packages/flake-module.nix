@@ -19,7 +19,6 @@
           claude-md
           rbw-pinentry
           rhwp
-          rhwp-studio
           email-sync
           msmtp-with-sent
           n8n-hooks
