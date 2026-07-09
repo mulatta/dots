@@ -1,10 +1,10 @@
 {
   "includeCoAuthoredBy": false,
   "permissions": {
-    "defaultMode": "auto",
-    "deny": ["Bash(git push*)", "Bash(jj git push*)"]
+    "deny": ["Bash(git push*)", "Bash(jj git push*)"],
+    "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "fable",
   "hooks": {
     "Notification": [
       {
