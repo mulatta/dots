@@ -31,7 +31,6 @@
           updater
           instagram-cli
           instant-deploy
-          slack-manifest-cli
           ;
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {

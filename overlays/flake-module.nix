@@ -78,7 +78,6 @@
         msmtp-with-sent = prev.callPackage ../packages/msmtp-with-sent { };
         n8n-hooks = prev.callPackage ../packages/n8n-hooks { };
         jellyfin-plugin-sso-auth = prev.callPackage ../packages/jellyfin-plugin-sso-auth { };
-        slack-manifest-cli = prev.callPackage ../packages/slack-manifest-cli { };
         miniflux-sync = prev.callPackage ../packages/miniflux-sync { };
         ntfy-subscribe = prev.callPackage ../packages/ntfy-subscribe { };
         nostore-preload = prev.callPackage ../packages/nostore-preload { };
