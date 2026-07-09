@@ -3,7 +3,7 @@
   "followUpMode": "all",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "minimal",
   "skills": [
     "~/.claude/skills"
   ],
@@ -11,5 +11,5 @@
     "enabled": true
   },
   "hideThinkingBlock": true,
-  "theme": "dark"
+  "theme": "tokyonight"
 }
