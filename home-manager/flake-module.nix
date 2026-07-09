@@ -114,7 +114,6 @@
         macos = mkHomeConfig { extraModules = [ ./profiles/macos.nix ]; };
       }
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
-        desktop = mkHomeConfig { extraModules = [ ./profiles/desktop.nix ]; };
         psi = mkHomeConfig { extraModules = [ ./profiles/psi.nix ]; };
       };
     };
