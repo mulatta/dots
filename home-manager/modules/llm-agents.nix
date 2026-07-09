@@ -104,6 +104,7 @@ in
       aiPkgs.codex
       aiPkgs.gemini-cli
       aiPkgs.git-surgeon
+      aiPkgs.jscpd
       aiPkgs.officecli
       aiPkgs.tuicr
       aiPkgs.workmux
