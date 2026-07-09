@@ -11,7 +11,6 @@
         system = prev.stdenv.hostPlatform.system;
       in
       {
-        nitrous = inputs.nitrous.packages.${system}.default;
         # afew: fix pkg_resources deprecation warning (PR #363 merged but not in 3.0.1)
         afew = prev.afew.overridePythonAttrs (old: {
           version = "3.0.2";
@@ -73,7 +72,6 @@
         claude-md = prev.callPackage ../packages/claude-md { };
         rbw-pinentry = prev.callPackage ../packages/rbw-pinentry { };
         rhwp = inputs.rhwp.packages.${system}.rhwp-cli;
-        rhwp-studio = inputs.rhwp.packages.${system}.rhwp-studio;
         email-sync = prev.callPackage ../packages/email-sync { };
         msmtp-with-sent = prev.callPackage ../packages/msmtp-with-sent { };
         n8n-hooks = prev.callPackage ../packages/n8n-hooks { };

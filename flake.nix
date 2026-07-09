@@ -119,11 +119,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nitrous = {
-      url = "github:pinpox/nitrous";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nix-minecraft = {
       url = "github:Infinidoge/nix-minecraft";
       inputs.nixpkgs.follows = "nixpkgs";
