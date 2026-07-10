@@ -1,6 +1,7 @@
 {
   lib,
   fetchFromGitHub,
+  fetchurl,
   swiftPackages,
   swift,
 }:
@@ -17,6 +18,10 @@ let
     repo = "swift-cmark";
     rev = "924936d0427cb25a61169739a7660230bffa6ea6";
     hash = "sha256-0pyZ5yQRsbiKwz2XT8N6dMwCLcmM28qQOrxHcV6uH7g=";
+  };
+  mermaid-js = fetchurl {
+    url = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
+    hash = "sha256-dNfEbavKMowilHM5EKiqHtDDdFF3bo1Sldo4ordY+5s=";
   };
 in
 swiftPackages.stdenv.mkDerivation {
@@ -52,6 +57,7 @@ swiftPackages.stdenv.mkDerivation {
     install -m 755 nostr-chat-bar $out/bin/nostr-chat-bar
     install -m 644 NostrChatBar.icns $out/share/nostr-chat-bar/NostrChatBar.icns
     install -m 644 NoaMenuBarTemplate.png $out/share/nostr-chat-bar/NoaMenuBarTemplate.png
+    install -m 644 ${mermaid-js} $out/share/nostr-chat-bar/mermaid.min.js
     runHook postInstall
   '';
 

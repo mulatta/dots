@@ -131,6 +131,7 @@ in
       run install -m 644 "${barInfoPlist}" "${barApp}/Contents/Info.plist"
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/NostrChatBar.icns" "${barApp}/Contents/Resources/NostrChatBar.icns"
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/NoaMenuBarTemplate.png" "${barApp}/Contents/Resources/NoaMenuBarTemplate.png"
+      run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/mermaid.min.js" "${barApp}/Contents/Resources/mermaid.min.js"
       run /usr/bin/codesign --force --deep --sign - "${barApp}"
     '';
 
