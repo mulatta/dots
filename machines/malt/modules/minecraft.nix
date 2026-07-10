@@ -50,7 +50,7 @@ in
 
     servers.survival = {
       enable = true;
-      package = pkgs.vanillaServers.vanilla-1_21_11;
+      package = pkgs.vanillaServers.vanilla-26_1_2;
       serverProperties = {
         server-port = port;
         online-mode = true; # account verification + packet encryption
