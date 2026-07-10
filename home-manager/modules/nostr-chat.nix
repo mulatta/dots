@@ -125,6 +125,9 @@ in
 
     home.activation.createNostrChatState = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run mkdir -p "${stateDir}"
+      if [ -e "${barApp}" ]; then
+        run chmod -R u+w "${barApp}"
+      fi
       run rm -rf "${barApp}"
       run mkdir -p "${barApp}/Contents/MacOS" "${barApp}/Contents/Resources"
       run install -m 755 "${cfg.barPackage}/bin/nostr-chat-bar" "${barApp}/Contents/MacOS/nostr-chat-bar"
@@ -132,6 +135,10 @@ in
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/NostrChatBar.icns" "${barApp}/Contents/Resources/NostrChatBar.icns"
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/NoaMenuBarTemplate.png" "${barApp}/Contents/Resources/NoaMenuBarTemplate.png"
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/mermaid.min.js" "${barApp}/Contents/Resources/mermaid.min.js"
+      run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/katex.min.js" "${barApp}/Contents/Resources/katex.min.js"
+      run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/katex.min.css" "${barApp}/Contents/Resources/katex.min.css"
+      run cp -R "${cfg.barPackage}/share/nostr-chat-bar/fonts" "${barApp}/Contents/Resources/fonts"
+      run chmod -R u+w "${barApp}"
       run /usr/bin/codesign --force --deep --sign - "${barApp}"
     '';
 

@@ -23,6 +23,10 @@ let
     url = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
     hash = "sha256-dNfEbavKMowilHM5EKiqHtDDdFF3bo1Sldo4ordY+5s=";
   };
+  katex = fetchurl {
+    url = "https://registry.npmjs.org/katex/-/katex-0.16.22.tgz";
+    hash = "sha256-6eDRZ9sxdUgcutr/OOjZCxMPaj3bRRpH5DxXf9UR82U=";
+  };
 in
 swiftPackages.stdenv.mkDerivation {
   pname = "nostr-chat-bar";
@@ -58,6 +62,10 @@ swiftPackages.stdenv.mkDerivation {
     install -m 644 NostrChatBar.icns $out/share/nostr-chat-bar/NostrChatBar.icns
     install -m 644 NoaMenuBarTemplate.png $out/share/nostr-chat-bar/NoaMenuBarTemplate.png
     install -m 644 ${mermaid-js} $out/share/nostr-chat-bar/mermaid.min.js
+    tar -xzf ${katex}
+    install -m 644 package/dist/katex.min.js $out/share/nostr-chat-bar/katex.min.js
+    install -m 644 package/dist/katex.min.css $out/share/nostr-chat-bar/katex.min.css
+    cp -R package/dist/fonts $out/share/nostr-chat-bar/fonts
     runHook postInstall
   '';
 
