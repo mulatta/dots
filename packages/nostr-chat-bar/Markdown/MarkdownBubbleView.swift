@@ -50,6 +50,8 @@ final class MarkdownBubbleView: NSView {
                 stack.addArrangedSubview(textView)
             case let .mermaid(source):
                 stack.addArrangedSubview(MermaidDiagramView(source: source, mine: mine))
+            case let .math(source):
+                stack.addArrangedSubview(MathBlockView(source: source, mine: mine))
             }
         }
         invalidateIntrinsicContentSize()
@@ -73,45 +75,88 @@ final class MarkdownBubbleView: NSView {
 private enum MarkdownBubbleBlock {
     case markdown(String)
     case mermaid(String)
+    case math(String)
 }
 
 private enum MarkdownBubbleBlocks {
     static func parse(_ text: String) -> [MarkdownBubbleBlock] {
         var blocks: [MarkdownBubbleBlock] = []
         var markdown: [String] = []
-        var mermaid: [String] = []
-        var inMermaid = false
+        var special: [String] = []
+        var specialKind: MarkdownBubbleBlockKind?
 
         for line in text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init) {
-            if inMermaid {
-                if line.trimmingCharacters(in: .whitespaces).hasPrefix("```") {
-                    blocks.append(.mermaid(mermaid.joined(separator: "\n")))
-                    mermaid.removeAll()
-                    inMermaid = false
+            if let kind = specialKind {
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                if kind.closes(trimmed) {
+                    blocks.append(kind.block(source: special.joined(separator: "\n")))
+                    special.removeAll()
+                    specialKind = nil
                 } else {
-                    mermaid.append(line)
+                    special.append(line)
                 }
                 continue
             }
 
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed == "```mermaid" || trimmed == "~~~mermaid" {
+            if trimmed.hasPrefix("$$"), trimmed.hasSuffix("$$"), trimmed.count > 4 {
                 if !markdown.isEmpty {
                     blocks.append(.markdown(markdown.joined(separator: "\n")))
                     markdown.removeAll()
                 }
-                inMermaid = true
+                let body = String(trimmed.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespaces)
+                blocks.append(.math(body))
+            } else if let kind = MarkdownBubbleBlockKind(opening: trimmed) {
+                if !markdown.isEmpty {
+                    blocks.append(.markdown(markdown.joined(separator: "\n")))
+                    markdown.removeAll()
+                }
+                specialKind = kind
             } else {
                 markdown.append(line)
             }
         }
 
-        if inMermaid {
-            markdown.append("```mermaid")
-            markdown.append(contentsOf: mermaid)
+        if let kind = specialKind {
+            markdown.append(kind.openingFence)
+            markdown.append(contentsOf: special)
         }
         if !markdown.isEmpty { blocks.append(.markdown(markdown.joined(separator: "\n"))) }
         return blocks
+    }
+}
+
+private enum MarkdownBubbleBlockKind {
+    case mermaid
+    case math
+
+    init?(opening: String) {
+        switch opening {
+        case "```mermaid", "~~~mermaid": self = .mermaid
+        case "```math", "~~~math", "```latex", "~~~latex", "$$": self = .math
+        default: return nil
+        }
+    }
+
+    var openingFence: String {
+        switch self {
+        case .mermaid: "```mermaid"
+        case .math: "$$"
+        }
+    }
+
+    func closes(_ line: String) -> Bool {
+        switch self {
+        case .mermaid: line.hasPrefix("```") || line.hasPrefix("~~~")
+        case .math: line == "$$" || line.hasPrefix("```") || line.hasPrefix("~~~")
+        }
+    }
+
+    func block(source: String) -> MarkdownBubbleBlock {
+        switch self {
+        case .mermaid: .mermaid(source)
+        case .math: .math(source)
+        }
     }
 }
 
@@ -119,15 +164,20 @@ private final class MermaidDiagramView: NSView {
     private static let maxContentWidth: CGFloat = 460
     private let webView: WKWebView
 
-    override var intrinsicContentSize: NSSize {
-        NSSize(width: Self.maxContentWidth, height: 280)
-    }
+    override var intrinsicContentSize: NSSize { NSSize(width: Self.maxContentWidth, height: 280) }
 
     init(source: String, mine: Bool) {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
         webView = WKWebView(frame: .zero, configuration: configuration)
         super.init(frame: .zero)
+        configureWebView(height: 280)
+        webView.loadHTMLString(Self.html(source: source, mine: mine), baseURL: ResourceLoader.baseURL())
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func configureWebView(height: CGFloat) {
         wantsLayer = true
         layer?.cornerRadius = 8
         layer?.masksToBounds = true
@@ -139,13 +189,10 @@ private final class MermaidDiagramView: NSView {
             webView.topAnchor.constraint(equalTo: topAnchor),
             webView.bottomAnchor.constraint(equalTo: bottomAnchor),
             widthAnchor.constraint(equalToConstant: Self.maxContentWidth),
-            heightAnchor.constraint(equalToConstant: 280),
+            heightAnchor.constraint(equalToConstant: height),
         ])
         webView.setValue(false, forKey: "drawsBackground")
-        webView.loadHTMLString(Self.html(source: source, mine: mine), baseURL: nil)
     }
-
-    required init?(coder: NSCoder) { fatalError() }
 
     private static func html(source: String, mine: Bool) -> String {
         let theme = mine ? "dark" : "default"
@@ -165,7 +212,7 @@ private final class MermaidDiagramView: NSView {
         <body>
           <pre class="mermaid">\(escapeHTML(source))</pre>
           <script>
-            \(mermaidScript())
+            \(ResourceLoader.script(named: "mermaid.min"))
             mermaid.initialize({ startOnLoad: true, theme: '\(theme)', securityLevel: 'strict' });
           </script>
         </body>
@@ -173,21 +220,104 @@ private final class MermaidDiagramView: NSView {
         """
     }
 
-    private static func mermaidScript() -> String {
-        guard let source = mermaidSource() else {
-            return "window.mermaid = { initialize: () => {}, run: () => {} };"
+    private static func escapeHTML(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+    }
+}
+
+private final class MathBlockView: NSView {
+    private static let maxContentWidth: CGFloat = 460
+    private let webView: WKWebView
+
+    override var intrinsicContentSize: NSSize { NSSize(width: Self.maxContentWidth, height: 120) }
+
+    init(source: String, mine: Bool) {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+        webView = WKWebView(frame: .zero, configuration: configuration)
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.cornerRadius = 8
+        layer?.masksToBounds = true
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(webView)
+        NSLayoutConstraint.activate([
+            webView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            webView.topAnchor.constraint(equalTo: topAnchor),
+            webView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            widthAnchor.constraint(equalToConstant: Self.maxContentWidth),
+            heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
+        ])
+        webView.setValue(false, forKey: "drawsBackground")
+        webView.loadHTMLString(Self.html(source: source, mine: mine), baseURL: ResourceLoader.baseURL())
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private static func html(source: String, mine: Bool) -> String {
+        let color = mine ? "#ffffff" : "#111111"
+        return """
+        <!doctype html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            \(ResourceLoader.css(named: "katex.min"))
+            html, body { margin: 0; padding: 0; background: transparent; color: \(color); overflow: auto; }
+            body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 8px; }
+            #math { font-size: 16px; }
+          </style>
+        </head>
+        <body>
+          <div id="math"></div>
+          <script>
+            \(ResourceLoader.script(named: "katex.min"))
+            katex.render(\(jsonString(source)), document.getElementById('math'), { displayMode: true, throwOnError: false, trust: false });
+          </script>
+        </body>
+        </html>
+        """
+    }
+
+    private static func jsonString(_ value: String) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]),
+              let encoded = String(data: data, encoding: .utf8) else { return "\"\"" }
+        return encoded
+    }
+}
+
+private enum ResourceLoader {
+    static func script(named name: String) -> String {
+        guard let source = resource(named: name, extension: "js") else {
+            return "console.warn('\(name) unavailable');"
         }
         return source.replacingOccurrences(of: "</script", with: "<\\/script")
     }
 
-    private static func mermaidSource() -> String? {
+    static func css(named name: String) -> String {
+        resource(named: name, extension: "css") ?? ""
+    }
+
+    static func baseURL() -> URL? {
+        if let resourceURL = Bundle.main.resourceURL { return resourceURL }
+        return URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
+            .appendingPathComponent("../share/nostr-chat-bar/")
+            .standardizedFileURL
+    }
+
+    private static func resource(named name: String, extension ext: String) -> String? {
+        let filename = "\(name).\(ext)"
         let candidates = [
-            Bundle.main.url(forResource: "mermaid.min", withExtension: "js"),
-            Bundle.main.resourceURL?.appendingPathComponent("mermaid.min.js"),
+            Bundle.main.url(forResource: name, withExtension: ext),
+            Bundle.main.resourceURL?.appendingPathComponent(filename),
             URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
-                .appendingPathComponent("../share/nostr-chat-bar/mermaid.min.js"),
+                .appendingPathComponent("../share/nostr-chat-bar/\(filename)"),
             URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-                .appendingPathComponent("Resources/mermaid.min.js"),
+                .appendingPathComponent("Resources/\(filename)"),
         ].compactMap { $0 }
         for url in candidates {
             if let source = try? String(contentsOf: url.standardizedFileURL, encoding: .utf8) {
@@ -195,13 +325,6 @@ private final class MermaidDiagramView: NSView {
             }
         }
         return nil
-    }
-
-    private static func escapeHTML(_ value: String) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
     }
 }
 
