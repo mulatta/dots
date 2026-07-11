@@ -31,10 +31,26 @@ let
   webAssets = buildNpmPackage {
     pname = "nostr-chat-bar-web";
     version = "0.1.0";
-    src = ./web;
-    npmDepsHash = "sha256-KZ0Ak3hGEJwkrRKe/ldRceAeslO0VafUW0ege38w0Ns=";
+    # Tests exercise the shared rendering fixture one directory up, so
+    # the npm source tree carries Fixtures next to web.
+    src = lib.fileset.toSource {
+      root = ./.;
+      fileset = lib.fileset.unions [
+        ./web
+        ./Fixtures
+      ];
+    };
+    sourceRoot = "source/web";
+    npmDepsHash = "sha256-xCpTe1lC2BNO1tTuUPeLwvhWHWtfWueFGtfe7QMugT4=";
     npmBuildScript = "build";
     npmFlags = [ "--ignore-scripts" ];
+    doCheck = true;
+    checkPhase = ''
+      runHook preCheck
+      npm test
+      npm run typecheck
+      runHook postCheck
+    '';
     installPhase = ''
       runHook preInstall
       mkdir -p $out
