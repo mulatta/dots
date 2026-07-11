@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { postAction } from "../bridge";
 import type { Message } from "../model";
 import { relativeTime } from "../time";
@@ -9,6 +9,8 @@ const props = defineProps<{
   message: Message;
   replyPreview: string | null;
   now: number;
+  searchHit: boolean;
+  searchCurrent: boolean;
 }>();
 
 const meta = computed(() => {
@@ -26,7 +28,12 @@ const undelivered = computed(
   () => props.message.mine && (props.message.state === "pending" || props.message.tries > 0),
 );
 
-function act(type: "reply" | "copy" | "retry" | "cancel"): void {
+// The attachment URL carries only the message ID; the native scheme
+// handler resolves and authorizes the actual file.
+const mediaURL = computed(() => `nostr-chat-media://message/${props.message.id}`);
+const imageFailed = ref(false);
+
+function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
   postAction({ type, messageId: props.message.id });
 }
 </script>
@@ -34,7 +41,10 @@ function act(type: "reply" | "copy" | "retry" | "cancel"): void {
 <template>
   <article
     class="bubble-row"
-    :class="message.mine ? 'mine' : 'theirs'"
+    :class="[
+      message.mine ? 'mine' : 'theirs',
+      { 'search-hit': searchHit, 'search-current': searchCurrent },
+    ]"
     :data-message-id="message.id"
   >
     <!-- Hover-reveal gutter actions, same UX as the AppKit cells. -->
@@ -46,6 +56,16 @@ function act(type: "reply" | "copy" | "retry" | "cancel"): void {
     </div>
     <div class="bubble">
       <div v-if="message.replyTo" class="reply-quote">↳ {{ replyPreview }}</div>
+      <figure v-if="message.hasImage" class="attachment">
+        <img
+          v-if="!imageFailed"
+          :src="mediaURL"
+          alt="attachment"
+          @error="imageFailed = true"
+          @click="act('open-image')"
+        />
+        <figcaption v-else class="attachment-missing">attachment unavailable</figcaption>
+      </figure>
       <MessageBody :text="message.text" />
       <div class="meta">
         {{ meta }}

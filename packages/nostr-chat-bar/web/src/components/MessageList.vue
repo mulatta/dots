@@ -15,6 +15,8 @@ defineProps<{ store: MessageStore; now: number }>();
       :message="message"
       :reply-preview="store.replyPreview(message.replyTo)"
       :now="now"
+      :search-hit="store.isSearchHit(message.id)"
+      :search-current="store.isSearchCurrent(message.id)"
     />
   </section>
 </template>

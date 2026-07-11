@@ -35,6 +35,8 @@ function bubble(overrides: Partial<Message>) {
       message: message(overrides),
       replyPreview: null,
       now: 1_783_650_000_000,
+      searchHit: false,
+      searchCurrent: false,
     },
   });
 }

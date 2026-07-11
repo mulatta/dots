@@ -21,6 +21,12 @@ export interface ConnectionStatus {
   relaysTotal: number;
 }
 
+export interface SearchStatus {
+  current: number;
+  total: number;
+  currentId: string | null;
+}
+
 export interface MessageStore {
   readonly messages: Message[];
   readonly connection: ConnectionStatus;
@@ -30,6 +36,11 @@ export interface MessageStore {
   remove(id: string): void;
   setConnection(status: ConnectionStatus): void;
   replyPreview(replyTo: string): string | null;
+  setSearch(query: string): SearchStatus;
+  stepSearch(direction: -1 | 1): SearchStatus;
+  closeSearch(): void;
+  isSearchHit(id: string): boolean;
+  isSearchCurrent(id: string): boolean;
 }
 
 const REPLY_UNAVAILABLE = "Original message unavailable";
@@ -38,7 +49,27 @@ export function createMessageStore(): MessageStore {
   const state = reactive({
     messages: [] as Message[],
     connection: { streaming: false, relaysUp: 0, relaysTotal: 0 } as ConnectionStatus,
+    searchQuery: "",
+    searchCursor: 0,
   });
+
+  // Newest-first, so stepping forward walks toward older messages —
+  // same order the native search used.
+  function searchHits(): string[] {
+    if (!state.searchQuery) return [];
+    const query = state.searchQuery.toLowerCase();
+    return state.messages
+      .filter((message) => message.text.toLowerCase().includes(query))
+      .map((message) => message.id)
+      .reverse();
+  }
+
+  function searchStatus(): SearchStatus {
+    const hits = searchHits();
+    if (hits.length === 0) return { current: 0, total: 0, currentId: null };
+    const cursor = Math.min(state.searchCursor, hits.length - 1);
+    return { current: cursor + 1, total: hits.length, currentId: hits[cursor] };
+  }
 
   function indexOf(id: string): number {
     return state.messages.findIndex((message) => message.id === id);
@@ -94,6 +125,34 @@ export function createMessageStore(): MessageStore {
       if (!target) return REPLY_UNAVAILABLE;
       const flat = target.text.replace(/\n/g, " ");
       return flat.length > 80 ? `${flat.slice(0, 79)}…` : flat;
+    },
+
+    setSearch(query) {
+      state.searchQuery = query;
+      state.searchCursor = 0;
+      return searchStatus();
+    },
+
+    stepSearch(direction) {
+      const total = searchHits().length;
+      if (total > 0) {
+        state.searchCursor =
+          (Math.min(state.searchCursor, total - 1) + direction + total) % total;
+      }
+      return searchStatus();
+    },
+
+    closeSearch() {
+      state.searchQuery = "";
+      state.searchCursor = 0;
+    },
+
+    isSearchHit(id) {
+      return searchHits().includes(id);
+    },
+
+    isSearchCurrent(id) {
+      return searchStatus().currentId === id;
     },
   };
 }
