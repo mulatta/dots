@@ -51,6 +51,9 @@ final class ChatWindowController: NSWindowController,
             self?.rows.map(\.webPayload) ?? []
         }
         history.onAction = { [weak self] action in self?.handle(action) }
+        history.mediaPathResolver = { [weak self] id in
+            self?.rows.first(where: { $0.id == id })?.image
+        }
         build()
     }
     required init?(coder: NSCoder) { fatalError() }

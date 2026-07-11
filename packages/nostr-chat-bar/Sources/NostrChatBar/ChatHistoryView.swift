@@ -16,6 +16,13 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     var onAction: ((WebAction) -> Void)?
     /// Full canonical snapshot; called on every renderer `ready`.
     var snapshotProvider: (() -> [[String: Any]])?
+    /// Message ID → local attachment path, resolved from canonical rows.
+    var mediaPathResolver: ((String) -> String?)? {
+        get { mediaHandler.resolvePath }
+        set { mediaHandler.resolvePath = newValue }
+    }
+
+    private let mediaHandler = MediaSchemeHandler()
 
     override init(frame frameRect: NSRect) {
         let configuration = WKWebViewConfiguration()
@@ -24,6 +31,7 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
             configuration.setURLSchemeHandler(
                 RendererSchemeHandler(root: root), forURLScheme: RendererSchemeHandler.scheme)
         }
+        configuration.setURLSchemeHandler(mediaHandler, forURLScheme: MediaSchemeHandler.scheme)
         webView = WKWebView(frame: .zero, configuration: configuration)
         super.init(frame: frameRect)
 

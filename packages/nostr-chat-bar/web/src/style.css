@@ -79,6 +79,47 @@ body {
   text-decoration: underline;
 }
 
+/* Search outlines: every hit gets a border, the current one stands
+   out — same palette as the native cells. */
+.search-hit .bubble {
+  outline: 2px solid #ff9500;
+}
+
+.search-current .bubble {
+  outline-color: #ffcc00;
+}
+
+.attachment {
+  margin: 0 0 4px;
+}
+
+.attachment img {
+  max-width: 320px;
+  max-height: 240px;
+  border-radius: 8px;
+  cursor: zoom-in;
+}
+
+.attachment-missing {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.unseen-indicator {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: none;
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 11px;
+  background: #0a82ff;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 .bubble {
   max-width: 78%;
   padding: 10px 14px 8px;
