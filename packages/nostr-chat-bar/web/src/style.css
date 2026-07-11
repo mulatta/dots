@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.history {
+  min-height: 100vh;
+}

@@ -1,5 +1,6 @@
 {
   lib,
+  buildNpmPackage,
   fetchFromGitHub,
   fetchurl,
   swiftPackages,
@@ -26,6 +27,20 @@ let
   katex = fetchurl {
     url = "https://registry.npmjs.org/katex/-/katex-0.16.22.tgz";
     hash = "sha256-6eDRZ9sxdUgcutr/OOjZCxMPaj3bRRpH5DxXf9UR82U=";
+  };
+  webAssets = buildNpmPackage {
+    pname = "nostr-chat-bar-web";
+    version = "0.1.0";
+    src = ./web;
+    npmDepsHash = "sha256-KZ0Ak3hGEJwkrRKe/ldRceAeslO0VafUW0ege38w0Ns=";
+    npmBuildScript = "build";
+    npmFlags = [ "--ignore-scripts" ];
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out
+      cp -R dist $out/dist
+      runHook postInstall
+    '';
   };
 in
 swiftPackages.stdenv.mkDerivation {
@@ -68,6 +83,8 @@ swiftPackages.stdenv.mkDerivation {
     install -m 644 package/dist/katex.min.js $out/share/nostr-chat-bar/katex.min.js
     install -m 644 package/dist/katex.min.css $out/share/nostr-chat-bar/katex.min.css
     cp -R package/dist/fonts $out/share/nostr-chat-bar/fonts
+    mkdir -p $out/share/nostr-chat-bar/web
+    cp -R ${webAssets}/dist/. $out/share/nostr-chat-bar/web/
     runHook postInstall
   '';
 
