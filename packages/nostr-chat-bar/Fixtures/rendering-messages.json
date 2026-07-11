@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "description": "Representative message-history rendering cases shared by the native baseline and TypeScript renderer tests.",
+  "messages": [
+    {
+      "case": "plain-incoming-unicode",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000001",
+        "mine": false,
+        "text": "안녕하세요. Plain text with emoji 👋 and literal <angle brackets>.",
+        "timestamp": 1783641600,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Preserve Hangul, emoji, and angle-bracket text without interpreting it as HTML.",
+        "Align the bubble as incoming."
+      ]
+    },
+    {
+      "case": "markdown-outgoing",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000002",
+        "mine": true,
+        "text": "## Summary\n\nUse **bold**, *emphasis*, `inline code`, and [Nostr](https://nostr.com).\n\n> Quoted Markdown",
+        "timestamp": 1783641660,
+        "ack": "✓✓",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "sent",
+        "tries": 1
+      },
+      "expectations": [
+        "Render heading, emphasis, inline code, link, and block quote.",
+        "Align the bubble as outgoing and show delivery state without rerendering its body."
+      ]
+    },
+    {
+      "case": "gfm-table-task-list",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000003",
+        "mine": false,
+        "text": "| Item | State |\n| --- | --- |\n| Parser | done |\n| Bridge | pending |\n\n- [x] GFM table\n- [ ] WebKit bridge\n\n~~obsolete~~ current",
+        "timestamp": 1783641720,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Render a table, disabled task controls, and strikethrough.",
+        "Keep table content within the message viewport."
+      ]
+    },
+    {
+      "case": "fenced-code",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000004",
+        "mine": false,
+        "text": "```typescript\nconst fence = \"~~~mermaid\";\nconsole.log(fence);\n```",
+        "timestamp": 1783641780,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Render the complete TypeScript source as code.",
+        "Do not classify fence-like text inside the code block as Mermaid."
+      ]
+    },
+    {
+      "case": "mermaid-diagram",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000005",
+        "mine": false,
+        "text": "```mermaid\ngraph TD\n  A[Receive] --> B{Safe?}\n  B -->|yes| C[Render]\n  B -->|no| D[Fallback]\n```",
+        "timestamp": 1783641840,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Render one Mermaid SVG from an inert placeholder after sanitization.",
+        "Do not rerender the diagram for timestamp or delivery-only updates."
+      ]
+    },
+    {
+      "case": "inline-and-display-math",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000006",
+        "mine": true,
+        "text": "Euler wrote $e^{i\\pi} + 1 = 0$.\n\n$$\n\\int_0^1 x^2 \\, dx = \\frac{1}{3}\n$$",
+        "timestamp": 1783641900,
+        "ack": "✓",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "sent",
+        "tries": 1
+      },
+      "expectations": [
+        "Render inline and display math with bundled KaTeX assets.",
+        "Load no network resources."
+      ]
+    },
+    {
+      "case": "malformed-special-fence",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000007",
+        "mine": false,
+        "text": "Before\n\n```mermaid\ngraph TD\n  A --> B\n\nAfter without a closing fence",
+        "timestamp": 1783641960,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Fail safely without executing malformed source.",
+        "Preserve readable source as a code fallback."
+      ]
+    },
+    {
+      "case": "hostile-markup",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000008",
+        "mine": false,
+        "text": "<script>alert('script')</script>\n\n<img src=x onerror=alert('image')>\n\n[bad](javascript:alert('link'))\n\n<iframe src=\"https://example.com\"></iframe>",
+        "timestamp": 1783642020,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Execute no script or event handler.",
+        "Remove iframe, remote image, and javascript URL capabilities.",
+        "Perform no network request."
+      ]
+    },
+    {
+      "case": "reply-target",
+      "message": {
+        "id": "0000000000000000000000000000000000000000000000000000000000000009",
+        "mine": false,
+        "text": "Original message retained in history.",
+        "timestamp": 1783642080,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": ["Provide preview text for the following reply fixture."]
+    },
+    {
+      "case": "reply-existing-target",
+      "message": {
+        "id": "000000000000000000000000000000000000000000000000000000000000000a",
+        "mine": true,
+        "text": "Reply with an available target.",
+        "timestamp": 1783642140,
+        "ack": "✓✓",
+        "hasImage": false,
+        "replyTo": "0000000000000000000000000000000000000000000000000000000000000009",
+        "state": "sent",
+        "tries": 1
+      },
+      "expectations": [
+        "Resolve and show an abbreviated preview of the retained target."
+      ]
+    },
+    {
+      "case": "reply-missing-target",
+      "message": {
+        "id": "000000000000000000000000000000000000000000000000000000000000000b",
+        "mine": false,
+        "text": "Reply after its target left maxHistory.",
+        "timestamp": 1783642200,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Keep the reply marker visible.",
+        "Show the stable Original message unavailable placeholder."
+      ]
+    },
+    {
+      "case": "image-message",
+      "message": {
+        "id": "000000000000000000000000000000000000000000000000000000000000000c",
+        "mine": false,
+        "text": "Attachment caption",
+        "timestamp": 1783642260,
+        "ack": "",
+        "hasImage": true,
+        "replyTo": "",
+        "state": "",
+        "tries": 0
+      },
+      "expectations": [
+        "Derive the attachment URL from the message ID.",
+        "Expose no filesystem path to JavaScript.",
+        "Show a stable unavailable state when no fixture file is registered."
+      ]
+    },
+    {
+      "case": "pending-retry",
+      "message": {
+        "id": "000000000000000000000000000000000000000000000000000000000000000d",
+        "mine": true,
+        "text": "Pending delivery",
+        "timestamp": 1783642320,
+        "ack": "",
+        "hasImage": false,
+        "replyTo": "",
+        "state": "pending",
+        "tries": 3
+      },
+      "expectations": [
+        "Show pending or retry presentation and native-action controls.",
+        "Emit only the message ID for retry or cancel actions."
+      ]
+    }
+  ]
+}

@@ -34,6 +34,8 @@ swiftPackages.stdenv.mkDerivation {
 
   src = ./.;
 
+  MACOSX_DEPLOYMENT_TARGET = "14.0";
+
   nativeBuildInputs = [
     swift
     swiftPackages.swiftpm

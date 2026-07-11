@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
 import PackageDescription
 import class Foundation.ProcessInfo
 
@@ -11,7 +11,7 @@ if let localMarkdown = ProcessInfo.processInfo.environment["NOSTR_CHAT_BAR_SWIFT
 
 let package = Package(
     name: "nostr-chat-bar",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     products: [
         .executable(name: "nostr-chat-bar", targets: ["nostr-chat-bar"]),
     ],
