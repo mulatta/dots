@@ -9,6 +9,7 @@
     "noUnusedParameters": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "types": ["vite/client"]
