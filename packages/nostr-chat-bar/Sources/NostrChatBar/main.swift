@@ -57,12 +57,6 @@ final class AppController: NSObject, NSApplicationDelegate,
             self?.chat.setRelays(streaming: false, up: 0, total: 0, urls: [])
         }
         daemon.start()
-
-        // Relative timestamps ("now" → "1m") need a periodic redraw;
-        // a coarse minute tick is enough and only runs while visible.
-        Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
-            self?.chat.refreshTimestamps()
-        }
     }
 
     private func configureStatusItem(unread: Int) {
