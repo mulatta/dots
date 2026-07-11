@@ -1,5 +1,14 @@
+/* Initial target is parity with the AppKit bubbles: same spacing,
+   accent-on-white scheme, and system appearance via prefers-color-scheme. */
+
 :root {
   color-scheme: light dark;
+  --bubble-incoming: rgba(255, 255, 255, 0.78);
+  --text-incoming: rgba(13, 13, 13, 1);
+  --meta-incoming: rgba(64, 64, 64, 0.7);
+  --bubble-mine: #0a82ff;
+  --text-mine: #fff;
+  --meta-mine: rgba(255, 255, 255, 0.7);
 }
 
 html,
@@ -8,8 +17,131 @@ body {
   padding: 0;
   background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
 }
 
 .history {
   min-height: 100vh;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 6px;
+}
+
+.bubble-row {
+  display: flex;
+}
+
+.bubble-row.mine {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 78%;
+  padding: 10px 14px 8px;
+  border-radius: 12px;
+  overflow-wrap: break-word;
+}
+
+.bubble-row.theirs .bubble {
+  background: var(--bubble-incoming);
+  color: var(--text-incoming);
+}
+
+.bubble-row.mine .bubble {
+  background: var(--bubble-mine);
+  color: var(--text-mine);
+}
+
+.reply-quote {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 9px;
+  margin-top: 4px;
+}
+
+.bubble-row.theirs .meta {
+  color: var(--meta-incoming);
+}
+
+.bubble-row.mine .meta {
+  color: var(--meta-mine);
+}
+
+.message-body > :first-child {
+  margin-top: 0;
+}
+
+.message-body > :last-child {
+  margin-bottom: 0;
+}
+
+.message-body pre {
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.bubble-row.mine .message-body pre {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.message-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.message-body table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+.message-body th,
+.message-body td {
+  border: 1px solid currentColor;
+  padding: 2px 8px;
+}
+
+.message-body blockquote {
+  margin: 4px 0;
+  padding-left: 8px;
+  border-left: 3px solid currentColor;
+  opacity: 0.85;
+}
+
+.message-body a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.bubble-row.theirs .message-body a {
+  color: -webkit-link;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-error {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.katex-display {
+  margin: 8px 0;
+  overflow-x: auto;
 }

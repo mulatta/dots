@@ -13,34 +13,18 @@ let package = Package(
     name: "nostr-chat-bar",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "nostr-chat-bar", targets: ["nostr-chat-bar"]),
+        .executable(name: "nostr-chat-bar", targets: ["NostrChatBar"]),
     ],
     dependencies: [
         markdownDependency,
     ],
     targets: [
         .executableTarget(
-            name: "nostr-chat-bar",
+            name: "NostrChatBar",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
             ],
-            path: ".",
-            exclude: [
-                "default.nix",
-                "NostrChatBar.icns",
-                "NoaMenuBarTemplate.png",
-            ],
-            sources: [
-                "BubbleCell.swift",
-                "ChatWindowController.swift",
-                "ComposeView.swift",
-                "Daemon.swift",
-                "DropPanel.swift",
-                "Extensions.swift",
-                "Markdown",
-                "Models.swift",
-                "main.swift",
-            ],
+            path: "Sources/NostrChatBar",
             linkerSettings: [
                 .linkedFramework("Cocoa"),
                 .linkedFramework("Foundation"),
@@ -48,4 +32,8 @@ let package = Package(
                 .linkedFramework("UserNotifications"),
                 .linkedFramework("WebKit"),
             ]),
+        .testTarget(
+            name: "NostrChatBarTests",
+            dependencies: ["NostrChatBar"],
+            path: "Tests/NostrChatBarTests"),
     ])
