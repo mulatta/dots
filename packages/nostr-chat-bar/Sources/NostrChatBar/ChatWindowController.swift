@@ -2,15 +2,14 @@ import Cocoa
 import Foundation
 import UserNotifications
 
-final class ChatWindowController: NSWindowController, NSTableViewDataSource,
-    NSTableViewDelegate, NSTextViewDelegate, NSSearchFieldDelegate
+final class ChatWindowController: NSWindowController,
+    NSTextViewDelegate, NSSearchFieldDelegate
 {
     private let daemon: Daemon
     private(set) var rows: [Row] = []
     private let maxHistory: Int
 
-    private let table = NSTableView()
-    private let scroll = NSScrollView()
+    private let history = ChatHistoryView()
     private let input = ComposeView()
     private let header = NSTextField(labelWithString: "Chat")
     private let status = NSTextField(labelWithString: "connecting…")
@@ -21,9 +20,6 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
     private let search = NSSearchField()
     private let searchCount = NSTextField(labelWithString: "")
     private weak var searchRowRef: NSStackView?
-    // Hit list = row indices, newest-first so ↓ walks toward older.
-    private var hits: [Int] = []
-    private var hitCursor = 0
     private var replyTarget: Row? { didSet { updateReplyBar() } }
 
     private let panelWidth: CGFloat = 760
@@ -51,6 +47,10 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         w.animationBehavior = .none  // we drive the slide ourselves
         super.init(window: w)
         w.onCancel = { [weak self] in self?.hide() }
+        history.snapshotProvider = { [weak self] in
+            self?.rows.map(\.webPayload) ?? []
+        }
+        history.onAction = { [weak self] action in self?.handle(action) }
         build()
     }
     required init?(coder: NSCoder) { fatalError() }
@@ -92,26 +92,6 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         send.contentTintColor = .controlAccentColor
         send.keyEquivalent = "\r"
         send.keyEquivalentModifierMask = .command
-
-        table.headerView = nil
-        // Big-Sur+ tables default to .inset which pads the leading edge
-        // and zero-pads trailing — our right-aligned bubbles end up
-        // clipped against the scroller. .plain gives us the full row.
-        table.style = .plain
-        table.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
-        table.rowSizeStyle = .custom
-        table.usesAutomaticRowHeights = true
-        table.selectionHighlightStyle = .none
-        table.backgroundColor = .clear
-        table.intercellSpacing = NSSize(width: 0, height: 8)
-        let col = NSTableColumn(identifier: .init("c"))
-        col.resizingMask = .autoresizingMask
-        table.addTableColumn(col)
-        table.dataSource = self
-        table.delegate = self
-        scroll.documentView = table
-        scroll.hasVerticalScroller = true
-        scroll.drawsBackground = false
 
         input.font = .systemFont(ofSize: 13)
         input.isRichText = false
@@ -165,10 +145,9 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         ])
 
         // ── Search bar (⌘F) ───────────────────────────────────────────
-        // Substring match over the in-memory mirror; outlines via
-        // BubbleCell.searchHit, ↵/⇧↵ step, Esc closes. Cheap enough
-        // at maxHistory rows that we just reloadData on every change
-        // — no async, no diffing.
+        // The DOM owns message positions now, so hit calculation and
+        // scrolling live in the renderer; this field only sends query
+        // changes and steps, and shows the counts reported back.
         search.placeholderString = "Search"
         search.sendsSearchStringImmediately = true
         search.target = self
@@ -218,23 +197,20 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         sendRow.spacing = 10
         pill.heightAnchor.constraint(equalToConstant: 38).isActive = true
 
-        // The history viewport must be independent of the document height.
-        // NSTableView's fitting height is the full conversation, so tying the
-        // scroll view height to the table makes the panel grow instead of
-        // scrolling. Let the stack allocate the remaining fixed panel space to
-        // historyBox and make the table scroll inside that viewport.
+        // The WebView scrolls its own document; the stack just hands it
+        // the remaining fixed panel space.
         let historyBox = NSView()
         historyBox.setContentHuggingPriority(.defaultLow, for: .vertical)
         historyBox.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-        scroll.setContentHuggingPriority(.defaultLow, for: .vertical)
-        scroll.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        historyBox.addSubview(scroll)
+        history.setContentHuggingPriority(.defaultLow, for: .vertical)
+        history.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        history.translatesAutoresizingMaskIntoConstraints = false
+        historyBox.addSubview(history)
         NSLayoutConstraint.activate([
-            scroll.leadingAnchor.constraint(equalTo: historyBox.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: historyBox.trailingAnchor),
-            scroll.topAnchor.constraint(equalTo: historyBox.topAnchor),
-            scroll.bottomAnchor.constraint(equalTo: historyBox.bottomAnchor),
+            history.leadingAnchor.constraint(equalTo: historyBox.leadingAnchor),
+            history.trailingAnchor.constraint(equalTo: historyBox.trailingAnchor),
+            history.topAnchor.constraint(equalTo: historyBox.topAnchor),
+            history.bottomAnchor.constraint(equalTo: historyBox.bottomAnchor),
             historyBox.heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
         ])
 
@@ -281,6 +257,7 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         status.toolTip = urls.joined(separator: "\n")
         let c: NSColor = !streaming ? .systemRed : (up < total ? .systemOrange : .systemGreen)
         dot.layer?.backgroundColor = c.cgColor
+        history.setConnection(streaming: streaming, up: up, total: total)
     }
 
     func apply(_ ev: Event) {
@@ -297,7 +274,8 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         case "sent":
             guard let id = ev.target else { return }
             if ev.state == "cancelled" {
-                rows.removeAll { $0.id == id }; table.reloadData()
+                rows.removeAll { $0.id == id }
+                history.remove(id: id)
             } else { patch(id) { $0.state = "sent"; $0.tries = 0 } }
         case "retry":
             guard let id = ev.target else { return }
@@ -328,42 +306,61 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         var i = rows.count
         while i > 0 && rows[i-1].ts > r.ts { i -= 1 }
         rows.insert(r, at: i)
-        if rows.count > maxHistory { rows.removeFirst(rows.count - maxHistory) }
-        let shouldStick = atBottom || r.mine
-        table.reloadData()
-        if shouldStick { scrollToEndDeferred() }
+        var trimmed: [String] = []
+        if rows.count > maxHistory {
+            trimmed = rows.prefix(rows.count - maxHistory).map(\.id)
+            rows.removeFirst(rows.count - maxHistory)
+        }
+        history.upsert(r)
+        for id in trimmed { history.remove(id: id) }
         if m.dir == "in" && !(m.read ?? true) {
             unread += 1
             if !(window?.isVisible ?? false) { notify(m.content) }
         }
     }
 
-    func refreshTimestamps() {
-        guard window?.isVisible == true, !rows.isEmpty else { return }
-        table.reloadData(
-            forRowIndexes: IndexSet(integersIn: 0..<rows.count),
-            columnIndexes: [0])
-    }
-
+    // Metadata-only mirror: the renderer patches bubble chrome by ID
+    // and never re-renders the body for these fields.
     private func patch(_ id: String, _ f: (inout Row) -> Void) {
         guard let i = rows.firstIndex(where: { $0.id == id }) else { return }
         f(&rows[i])
-        table.reloadData(forRowIndexes: [i], columnIndexes: [0])
+        let row = rows[i]
+        history.patch(
+            id: id,
+            fields: [
+                "ack": row.ack,
+                "state": row.state,
+                "tries": row.tries,
+                "hasImage": !row.image.isEmpty,
+            ])
     }
 
-    private var atBottom: Bool {
-        let clip = scroll.contentView.bounds
-        return clip.maxY >= table.bounds.height - 40
-    }
-    private func scrollToEnd() {
-        guard rows.count > 0 else { return }
-        table.scrollRowToVisible(rows.count - 1)
-    }
-    private func scrollToEndDeferred() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self, self.rows.count > 0 else { return }
-            self.table.layoutSubtreeIfNeeded()
-            self.scrollToEnd()
+    // Renderer → native intents. Every action is resolved against the
+    // canonical rows; IDs that don't exist (or point at someone else's
+    // message for retry/cancel) are ignored.
+    private func handle(_ action: WebAction) {
+        switch action {
+        case .ready:
+            break  // consumed by ChatHistoryView
+        case let .reply(id):
+            replyTarget = rows.first { $0.id == id }
+        case let .copy(id):
+            guard let row = rows.first(where: { $0.id == id }) else { return }
+            copyToPasteboard(row.text)
+        case let .retry(id):
+            guard rows.contains(where: { $0.id == id && $0.mine }) else { return }
+            daemon.send(["cmd": "retry", "id": id])
+        case let .cancel(id):
+            guard rows.contains(where: { $0.id == id && $0.mine }) else { return }
+            daemon.send(["cmd": "cancel", "id": id])
+        case let .openLink(url):
+            NSWorkspace.shared.open(url)
+        case let .openImage(id):
+            guard let row = rows.first(where: { $0.id == id }), !row.image.isEmpty
+            else { return }
+            NSWorkspace.shared.open(URL(fileURLWithPath: row.image))
+        case let .searchStatus(current, total):
+            searchCount.stringValue = total == 0 ? "0" : "\(current)/\(total)"
         }
     }
 
@@ -447,7 +444,6 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         w.invalidateShadow()
 
         w.makeFirstResponder(input)
-        scrollToEnd()
         unread = 0
         daemon.send(["cmd": "mark-read"])
     }
@@ -487,7 +483,6 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         daemon.send(c)
         input.string = ""
         replyTarget = nil
-        scrollToEndDeferred()
     }
     @objc private func clearReply() { replyTarget = nil }
 
@@ -502,38 +497,19 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
     @objc private func searchClose() {
         search.stringValue = ""
         searchRowRef?.isHidden = true
-        hits = []; hitCursor = 0
-        table.reloadData()
+        searchCount.stringValue = ""
+        history.closeSearch()
         window?.makeFirstResponder(input)
     }
     @objc private func searchChanged() {
-        let q = search.stringValue.lowercased()
-        if q.isEmpty {
-            hits = []; hitCursor = 0; searchCount.stringValue = ""
-            table.reloadData(); return
-        }
-        hits = rows.indices.reversed().filter {
-            rows[$0].text.lowercased().contains(q)
-        }
-        hitCursor = 0
-        table.reloadData()
-        jump()
+        let q = search.stringValue
+        if q.isEmpty { searchCount.stringValue = "" }
+        history.setSearch(query: q)
     }
     @objc private func searchPrev() { step(-1) }
     @objc private func searchNext() { step(1) }
     private func step(_ d: Int) {
-        guard !hits.isEmpty else { return }
-        hitCursor = (hitCursor + d + hits.count) % hits.count
-        // Cell already configured; only the "current" outline moves.
-        table.reloadData()
-        jump()
-    }
-    private func jump() {
-        searchCount.stringValue = hits.isEmpty ? "0"
-            : "\(hitCursor + 1)/\(hits.count)"
-        if let i = hits[safe: hitCursor] {
-            table.scrollRowToVisible(i)
-        }
+        history.stepSearch(d)
     }
     private func updateReplyBar() {
         let on = replyTarget != nil
@@ -587,40 +563,10 @@ final class ChatWindowController: NSWindowController, NSTableViewDataSource,
         }
     }
 
-    // MARK: table
-
-    func numberOfRows(in _: NSTableView) -> Int { rows.count }
-
-    func tableView(_ tv: NSTableView, viewFor _: NSTableColumn?, row: Int) -> NSView? {
-        let r = rows[row]
-        let cell = tv.makeView(withIdentifier: .init("bubble"), owner: nil) as? BubbleCell
-            ?? BubbleCell()
-        cell.identifier = .init("bubble")
-        cell.onReply = { [weak self] in self?.replyTarget = r }
-        cell.onCopy = { [weak self] in self?.copyToPasteboard(r.text) }
-        let q = r.replyTo.isEmpty ? nil
-            : rows.first(where: { $0.id == r.replyTo })?.text
-        let sq = (searchRowRef?.isHidden ?? true) ? "" : search.stringValue
-        cell.configure(r, ago: ago(r.ts), quoted: q,
-                       searchHit: !sq.isEmpty
-                           && r.text.lowercased().contains(sq.lowercased()),
-                       searchCurrent: hits[safe: hitCursor] == row)
-        return cell
-    }
-
     private func copyToPasteboard(_ text: String) {
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(text, forType: .string)
-    }
-
-    private let rel: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter(); f.unitsStyle = .short; return f
-    }()
-    private func ago(_ ts: Int64) -> String {
-        let d = Date(timeIntervalSince1970: TimeInterval(ts))
-        if Date().timeIntervalSince(d) < 60 { return "now" }
-        return rel.localizedString(for: d, relativeTo: Date())
     }
 }
 

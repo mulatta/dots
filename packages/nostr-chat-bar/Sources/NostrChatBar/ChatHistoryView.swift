@@ -6,7 +6,10 @@ import WebKit
 /// mirrors the canonical `rows` into the page and relays user intent
 /// back out as validated `WebAction`s.
 final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegate {
-    private let webView: WKWebView
+    // Internal (not private) so harnesses and tests can observe the
+    // rendered document; production code outside this file must not
+    // touch it.
+    let webView: WKWebView
     private var readyGate: RendererReadyGate!
 
     /// Validated renderer actions, minus `ready` which is handled here.
@@ -17,6 +20,10 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     override init(frame frameRect: NSRect) {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
+        if let root = Self.rendererRoot() {
+            configuration.setURLSchemeHandler(
+                RendererSchemeHandler(root: root), forURLScheme: RendererSchemeHandler.scheme)
+        }
         webView = WKWebView(frame: .zero, configuration: configuration)
         super.init(frame: frameRect)
 
@@ -46,9 +53,13 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     // MARK: renderer loading
 
     /// The built Vite bundle: `web/` inside the .app resources, with the
-    /// share/ layout as fallback for running the bare binary.
+    /// share/ layout as fallback for running the bare binary and an env
+    /// override for development and harnesses.
     static func rendererRoot() -> URL? {
         var candidates: [URL] = []
+        if let override = ProcessInfo.processInfo.environment["NOSTR_CHAT_BAR_WEB_ROOT"] {
+            candidates.append(URL(fileURLWithPath: override))
+        }
         if let resources = Bundle.main.resourceURL {
             candidates.append(resources.appendingPathComponent("web"))
         }
@@ -61,13 +72,12 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     }
 
     private func loadRenderer() {
-        guard let root = Self.rendererRoot() else {
+        guard Self.rendererRoot() != nil else {
             FileHandle.standardError.write(
                 Data("nostr-chat-bar: web renderer assets not found\n".utf8))
             return
         }
-        webView.loadFileURL(
-            root.appendingPathComponent("index.html"), allowingReadAccessTo: root)
+        webView.load(URLRequest(url: RendererSchemeHandler.pageURL))
     }
 
     // MARK: native → renderer
@@ -159,9 +169,7 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
         _ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        guard let url = navigationAction.request.url, url.isFileURL,
-              url.lastPathComponent == "index.html"
-        else {
+        guard navigationAction.request.url == RendererSchemeHandler.pageURL else {
             decisionHandler(.cancel)
             return
         }

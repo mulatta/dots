@@ -34,10 +34,49 @@ body {
 
 .bubble-row {
   display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .bubble-row.mine {
   justify-content: flex-end;
+}
+
+/* Hover-reveal actions beside the bubble; order-swapped for own
+   messages so the gutter sits in the free space. */
+.gutter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.bubble-row:hover .gutter {
+  opacity: 1;
+}
+
+.gutter.right {
+  order: 2;
+}
+
+.action {
+  border: none;
+  background: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+.action:hover {
+  opacity: 1;
+}
+
+.meta .action {
+  font-size: 9px;
+  text-decoration: underline;
 }
 
 .bubble {

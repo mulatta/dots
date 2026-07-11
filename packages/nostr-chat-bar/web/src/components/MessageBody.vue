@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { postAction } from "../bridge";
 import { renderMarkdown } from "../markdown";
 import { renderMermaidBlocks, type Appearance } from "../mermaid";
 
@@ -27,8 +28,19 @@ watch(html, async () => {
   await nextTick();
   await paintDiagrams();
 });
+
+// Links never navigate the history page; they surface as bridge
+// actions that Swift validates and opens externally.
+function onClick(event: MouseEvent): void {
+  const target = event.target as HTMLElement | null;
+  const anchor = target?.closest?.("a[href]");
+  if (!anchor) return;
+  event.preventDefault();
+  const url = anchor.getAttribute("href");
+  if (url) postAction({ type: "open-link", url });
+}
 </script>
 
 <template>
-  <div ref="host" class="message-body" v-html="html"></div>
+  <div ref="host" class="message-body" v-html="html" @click="onClick"></div>
 </template>

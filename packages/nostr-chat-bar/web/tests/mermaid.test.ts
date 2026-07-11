@@ -34,8 +34,10 @@ describe("mermaid classification", () => {
 // Runtime tests use sources Mermaid rejects at parse time: jsdom lacks
 // the SVG layout APIs needed to complete a successful render, so only
 // the fast, deterministic error path is testable here. Successful
-// rendering is covered by the WebKit acceptance checks.
-describe("mermaid runtime", () => {
+// rendering is covered by the WebKit acceptance checks. The generous
+// timeout absorbs the first dynamic import of the ~2 MB Mermaid chunk,
+// which takes tens of seconds inside the Nix build sandbox.
+describe("mermaid runtime", { timeout: 120_000 }, () => {
   const invalid = "```mermaid\nnot a diagram %%{ }%%\n```";
 
   it("keeps source visible and adds an error indicator on failure", async () => {

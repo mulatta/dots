@@ -140,6 +140,7 @@ in
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/katex.min.js" "${barApp}/Contents/Resources/katex.min.js"
       run install -m 644 "${cfg.barPackage}/share/nostr-chat-bar/katex.min.css" "${barApp}/Contents/Resources/katex.min.css"
       run cp -R "${cfg.barPackage}/share/nostr-chat-bar/fonts" "${barApp}/Contents/Resources/fonts"
+      run cp -R "${cfg.barPackage}/share/nostr-chat-bar/web" "${barApp}/Contents/Resources/web"
       run chmod -R u+w "${barApp}"
       run /usr/bin/codesign --force --deep --sign - "${barApp}"
     '';
