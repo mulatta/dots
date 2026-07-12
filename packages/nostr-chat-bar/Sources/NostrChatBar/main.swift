@@ -3,8 +3,8 @@
 // Thin port of the noctalia-shell Panel.qml: same NDJSON-over-unix-socket
 // protocol (see daemon/ipc.go), same "daemon is source of truth" model.
 // We keep one persistent connection, send a `replay` on every connect,
-// and mirror events into an NSTableView. Zero state survives the app —
-// quit/relaunch just replays from sqlite.
+// and mirror events into a persistent WebKit renderer. Renderer state
+// is disposable; quit or relaunch rebuilds it from sqlite.
 //
 // Deliberately Cocoa, not SwiftUI: small native binary, wrapped by
 // home-manager in a tiny .app bundle so macOS has a stable notification
@@ -146,14 +146,11 @@ final class AppController: NSObject, NSApplicationDelegate,
         }
     }
 
-    func userNotificationCenter(_: UNUserNotificationCenter,
-                                willPresent _: UNNotification,
-                                withCompletionHandler done: @escaping (UNNotificationPresentationOptions) -> Void) {
-        if #available(macOS 11.0, *) {
-            done([.banner, .list, .sound])
-        } else {
-            done([.alert, .sound])
-        }
+    func userNotificationCenter(
+        _: UNUserNotificationCenter, willPresent _: UNNotification,
+        withCompletionHandler done: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        done([.banner, .list, .sound])
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter,
@@ -165,8 +162,6 @@ final class AppController: NSObject, NSApplicationDelegate,
         }
     }
 
-    // ⌥G global toggle. Carbon RegisterEventHotKey is the one API that
-    // grabs a system-wide key without Accessibility permissions.
     // ⌘F while the panel is up. The compose NSTextView would otherwise
     // beep on performFindPanelAction:. addLocalMonitor is enough — we
     // only want it when our window is key, not system-wide.
@@ -180,6 +175,7 @@ final class AppController: NSObject, NSApplicationDelegate,
         }
     }
 
+    // Carbon can register the ⌥G global toggle without Accessibility permission.
     private func registerHotkey() {
         var spec = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
