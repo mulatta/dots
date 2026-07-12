@@ -23,14 +23,16 @@ final class AppController: NSObject, NSApplicationDelegate,
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let daemon: Daemon
     private let chat: ChatWindowController
+    private let control: ControlSocketServer
 
     private let maxHistory: Int
     private var hotkey: EventHotKeyRef?
 
-    init(socket: String, maxHistory: Int) {
+    init(socket: String, controlSocket: String, maxHistory: Int) {
         self.maxHistory = maxHistory
         daemon = Daemon(path: socket)
         chat = ChatWindowController(daemon: daemon, maxHistory: maxHistory)
+        control = ControlSocketServer(path: controlSocket)
         super.init()
     }
 
@@ -57,6 +59,23 @@ final class AppController: NSObject, NSApplicationDelegate,
             self?.chat.setRelays(streaming: false, up: 0, total: 0, urls: [])
         }
         daemon.start()
+
+        // Scriptable panel control (screenshot helper, keybinds). The
+        // daemon socket already covers message commands; this one only
+        // moves the window, so a failure to bind is not fatal.
+        control.onCommand = { [weak self] command in
+            switch command {
+            case .toggle: self?.chat.toggle()
+            case .present: self?.chat.present()
+            case .hide: self?.chat.hide()
+            }
+        }
+        do {
+            try control.start()
+        } catch {
+            FileHandle.standardError.write(
+                Data("nostr-chat-bar: control socket unavailable: \(error)\n".utf8))
+        }
     }
 
     private func configureStatusItem(unread: Int) {
@@ -203,22 +222,42 @@ func defaultSocket() -> String {
     return t + "/nostr-chatd.sock"
 }
 
+func die(_ message: String) -> Never {
+    FileHandle.standardError.write(Data("\(message)\n".utf8))
+    exit(1)
+}
+
 var socket = defaultSocket()
+var controlSocket: String?
 var maxHistory = 200
 do {
     var it = CommandLine.arguments.dropFirst().makeIterator()
     while let a = it.next() {
         switch a {
-        case "--socket": if let v = it.next() { socket = v }
-        case "--max-history": if let v = it.next(), let n = Int(v) { maxHistory = n }
+        case "--socket":
+            guard let v = it.next() else { die("missing value for --socket") }
+            socket = v
+        case "--control-socket":
+            guard let v = it.next() else { die("missing value for --control-socket") }
+            controlSocket = v
+        case "--max-history":
+            guard let v = it.next(), let n = Int(v), n > 0 else {
+                die("--max-history requires a positive integer")
+            }
+            maxHistory = n
         case "--help", "-h":
-            print("usage: nostr-chat-bar [--socket PATH] [--max-history N]")
+            print(
+                "usage: nostr-chat-bar [--socket PATH] [--control-socket PATH] [--max-history N]")
             exit(0)
         default:
-            FileHandle.standardError.write(Data("unknown option: \(a)\n".utf8)); exit(1)
+            die("unknown option: \(a)")
         }
     }
 }
+// Same directory convention as the flock: the control socket lives
+// beside the daemon socket unless overridden.
+let resolvedControlSocket = controlSocket
+    ?? (socket as NSString).deletingLastPathComponent + "/nostr-chat-bar-ctl.sock"
 
 // Single-instance guard: a second copy (dev build vs launchd agent)
 // would register ⌥G twice and show two 💬 items. flock the socket's
@@ -237,6 +276,7 @@ do {
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
-let ctrl = AppController(socket: socket, maxHistory: maxHistory)
+let ctrl = AppController(
+    socket: socket, controlSocket: resolvedControlSocket, maxHistory: maxHistory)
 app.delegate = ctrl
 app.run()
