@@ -42,7 +42,13 @@ final class ChatWindowController: NSWindowController,
     private let panelWidth: CGFloat = 760
     private let panelHeight: CGFloat = 620
 
-    var peerName = "Chat" { didSet { header.stringValue = peerName } }
+    var peerName = "Chat" {
+        didSet {
+            header.stringValue = peerName
+            updateComposePlaceholder()
+        }
+    }
+    private var isStreaming = false { didSet { updateComposePlaceholder() } }
     var onUnreadChanged: ((Int) -> Void)?
     private var unread = 0 { didSet { onUnreadChanged?(unread) } }
 
@@ -64,6 +70,13 @@ final class ChatWindowController: NSWindowController,
         w.animationBehavior = .none  // we drive the slide ourselves
         super.init(window: w)
         w.onCancel = { [weak self] in self?.hide() }
+        // Drag a file from Finder anywhere onto the panel to send it;
+        // same path as the paperclip, so no unlink of the source.
+        let dropTarget = DropTargetView()
+        dropTarget.onFileDrop = { [weak self] path in
+            self?.daemon.send(["cmd": "send-file", "path": path])
+        }
+        w.contentView = dropTarget
         history.snapshotProvider = { [weak self] in
             self?.rows.map(\.webPayload) ?? []
         }
@@ -73,6 +86,7 @@ final class ChatWindowController: NSWindowController,
         }
         history.start()
         build()
+        updateComposePlaceholder()
     }
     required init?(coder: NSCoder) { fatalError() }
 
@@ -273,7 +287,12 @@ final class ChatWindowController: NSWindowController,
 
     // MARK: state
 
+    private func updateComposePlaceholder() {
+        input.placeholder = isStreaming ? "Message \(peerName)…" : "waiting for daemon…"
+    }
+
     func setRelays(streaming: Bool, up: Int, total: Int, urls: [String]) {
+        isStreaming = streaming
         status.stringValue = streaming ? "connected · \(up)/\(total)" : "offline"
         status.toolTip = urls.joined(separator: "\n")
         let c: NSColor = !streaming ? .systemRed : (up < total ? .systemOrange : .systemGreen)
