@@ -23,6 +23,9 @@ final class ChatWindowController: NSWindowController,
     private let daemon: Daemon
     private(set) var rows: [Row] = []
     private let maxHistory: Int
+    // Upstream QML behavior, opt-in here: raise the panel on live
+    // unread messages instead of posting a banner.
+    private let autoOpen: Bool
 
     private let history = ChatHistoryView()
     private let input = ComposeView()
@@ -52,9 +55,10 @@ final class ChatWindowController: NSWindowController,
     var onUnreadChanged: ((Int) -> Void)?
     private var unread = 0 { didSet { onUnreadChanged?(unread) } }
 
-    init(daemon: Daemon, maxHistory: Int) {
+    init(daemon: Daemon, maxHistory: Int, autoOpen: Bool = false) {
         self.daemon = daemon
         self.maxHistory = maxHistory
+        self.autoOpen = autoOpen
         let w = DropPanel(
             contentRect: NSRect(x: 0, y: 0, width: 760, height: 620),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
@@ -366,7 +370,12 @@ final class ChatWindowController: NSWindowController,
         for id in trimmed { history.remove(id: id) }
         if m.dir == "in" && !(m.read ?? true) {
             unread += 1
-            if !(window?.isVisible ?? false) { notify(m.content) }
+            // The daemon marks replayed history as read, so this only
+            // fires for live messages — startup won't pop the panel or
+            // toast yesterday's conversation.
+            if !(window?.isVisible ?? false) {
+                if autoOpen { present() } else { notify(m.content) }
+            }
         }
     }
 

@@ -117,6 +117,16 @@ in
       default = 50;
       description = "Maximum number of messages loaded into the menubar UI.";
     };
+
+    autoOpenOnMessage = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Raise the chat panel when a live unread message arrives instead
+        of posting a notification banner (the upstream noctalia
+        behavior). Off by default: banners are the macOS convention.
+      '';
+    };
   };
 
   config = lib.mkIf (pkgs.stdenv.isDarwin && cfg.enable) {
@@ -175,7 +185,8 @@ in
           cfg.socket
           "--max-history"
           (toString cfg.maxHistory)
-        ];
+        ]
+        ++ lib.optional cfg.autoOpenOnMessage "--auto-open";
         KeepAlive = true;
         RunAtLoad = true;
         ProcessType = "Interactive";
