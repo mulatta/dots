@@ -121,6 +121,7 @@ extension Row {
             "replyTo": replyTo,
             "state": state,
             "tries": tries,
+            "error": error,
         ]
     }
 }

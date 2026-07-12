@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { postAction } from "../bridge";
 import type { Message } from "../model";
+import { scrollToMessage } from "../scroll";
 import { relativeTime } from "../time";
 import MessageBody from "./MessageBody.vue";
 
@@ -13,15 +14,24 @@ const props = defineProps<{
   searchCurrent: boolean;
 }>();
 
-const meta = computed(() => {
-  const parts = [relativeTime(props.message.timestamp, props.now)];
-  if (props.message.mine) {
-    if (props.message.tries > 0) parts.push("⚠");
-    else if (props.message.state === "pending") parts.push("…");
-    else if (props.message.ack) parts.push(props.message.ack);
-  }
-  return parts.join("  ");
+const time = computed(() => relativeTime(props.message.timestamp, props.now));
+
+// Delivery ladder, matching the upstream QML bubble:
+// ⚠ retrying → 🕓 pending → ✓ sent (no ack yet) → ✓✓ read, with any
+// other ack (emoji reaction) shown verbatim.
+const deliveryMark = computed(() => {
+  if (!props.message.mine) return "";
+  const m = props.message;
+  if (m.tries > 0) return "⚠";
+  if (m.state === "pending") return "🕓";
+  if (m.ack === "") return "✓";
+  return m.ack === "+" || m.ack === "✓" ? "✓✓" : m.ack;
 });
+
+const failed = computed(() => props.message.mine && props.message.tries > 0);
+const pending = computed(
+  () => props.message.mine && props.message.state === "pending",
+);
 
 // Undelivered own messages expose the native retry/cancel commands.
 const undelivered = computed(
@@ -39,6 +49,12 @@ watch([() => props.message.id, () => props.message.hasImage], () => {
 function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
   postAction({ type, messageId: props.message.id });
 }
+
+// Clicking the quote jumps to the original bubble, like the upstream
+// panel; a target outside maxHistory is simply not found.
+function jumpToQuote(): void {
+  if (props.message.replyTo) scrollToMessage(props.message.replyTo);
+}
 </script>
 
 <template>
@@ -46,7 +62,7 @@ function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
     class="bubble-row"
     :class="[
       message.mine ? 'mine' : 'theirs',
-      { 'search-hit': searchHit, 'search-current': searchCurrent },
+      { 'search-hit': searchHit, 'search-current': searchCurrent, pending },
     ]"
     :data-message-id="message.id"
   >
@@ -58,7 +74,9 @@ function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
       <button class="action copy" title="copy" @click="act('copy')">⧉</button>
     </div>
     <div class="bubble">
-      <div v-if="message.replyTo" class="reply-quote">↳ {{ replyPreview }}</div>
+      <div v-if="message.replyTo" class="reply-quote" @click="jumpToQuote">
+        ↳ {{ replyPreview }}
+      </div>
       <figure v-if="message.hasImage" class="attachment">
         <img
           v-if="!imageFailed"
@@ -71,7 +89,14 @@ function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
       </figure>
       <MessageBody :text="message.text" />
       <div class="meta">
-        {{ meta }}
+        {{ time }}
+        <span
+          v-if="deliveryMark"
+          class="delivery"
+          :class="{ failed }"
+          :title="failed ? message.error || undefined : undefined"
+          >{{ deliveryMark }}</span
+        >
         <template v-if="undelivered">
           <button class="action retry" title="retry now" @click="act('retry')">retry</button>
           <button class="action cancel" title="cancel send" @click="act('cancel')">cancel</button>

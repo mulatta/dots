@@ -113,7 +113,7 @@ describe("message list rendering", () => {
     const wrapper = mount(MessageList, { props: { store, now } });
     await wrapper.vm.$nextTick();
     const before = wrapper.get(".message-body").element;
-    expect(wrapper.get(".meta").text()).toContain("…");
+    expect(wrapper.get(".meta").text()).toContain("🕓");
 
     store.patch(id, { state: "sent", ack: "✓✓" });
     await wrapper.vm.$nextTick();

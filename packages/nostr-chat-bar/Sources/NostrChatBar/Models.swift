@@ -33,7 +33,7 @@ struct Event: Codable {
     let text: String?
 }
 
-// In-memory mirror — what the table view binds to.
+// In-memory mirror — the canonical model the web renderer is fed from.
 struct Row {
     let id: String
     let mine: Bool
@@ -44,4 +44,6 @@ struct Row {
     var state: String
     var tries: Int
     let replyTo: String
+    // Last publish error from the daemon's retry event; cleared on sent.
+    var error: String = ""
 }

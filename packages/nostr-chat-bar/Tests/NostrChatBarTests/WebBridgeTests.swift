@@ -165,6 +165,13 @@ final class RowPayloadTests: XCTestCase {
         XCTAssertEqual(payload["hasImage"] as? Bool, false)
         XCTAssertEqual(payload["state"] as? String, "sent")
         XCTAssertEqual(payload["tries"] as? Int, 2)
+        XCTAssertEqual(payload["error"] as? String, "")
+    }
+
+    func testPayloadCarriesRetryError() {
+        var failing = row(image: "")
+        failing.error = "relay timeout"
+        XCTAssertEqual(failing.webPayload["error"] as? String, "relay timeout")
     }
 
     func testDeliveryActionsRequireUndeliveredOwnMessage() {
