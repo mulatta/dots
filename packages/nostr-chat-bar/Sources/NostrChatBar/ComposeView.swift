@@ -5,6 +5,36 @@ final class ComposeView: NSTextView {
 
     var onSend: (() -> Void)?
 
+    // NSTextView has no placeholder API; draw one while empty. The
+    // controller keeps it in sync with connection state and peer name.
+    var placeholder: String = "" { didSet { needsDisplay = true } }
+
+    override var string: String {
+        get { super.string }
+        set {
+            super.string = newValue
+            needsDisplay = true
+        }
+    }
+
+    override func didChangeText() {
+        super.didChangeText()
+        needsDisplay = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        guard string.isEmpty, !placeholder.isEmpty else { return }
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.placeholderTextColor,
+            .font: font ?? .systemFont(ofSize: 13),
+        ]
+        let origin = NSPoint(
+            x: textContainerInset.width + (textContainer?.lineFragmentPadding ?? 0),
+            y: textContainerInset.height)
+        (placeholder as NSString).draw(at: origin, withAttributes: attributes)
+    }
+
     // Handle Return here, before key-binding resolution —
     // StandardKeyBinding.dict has no Shift+Return entry, so by the
     // time doCommandBy fires the modifier is already lost. Any
