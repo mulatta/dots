@@ -33,6 +33,15 @@ struct Event: Codable {
     let text: String?
 }
 
+// One banner per failure episode: the 0→1 tries transition, and only
+// if this message hasn't already produced one. Later backoff cycles and
+// replays stay silent — the per-bubble ⚠ is the durable signal.
+enum RetryNotificationPolicy {
+    static func shouldNotify(previousTries: Int, newTries: Int, alreadyNotified: Bool) -> Bool {
+        previousTries == 0 && newTries >= 1 && !alreadyNotified
+    }
+}
+
 // In-memory mirror — the canonical model the web renderer is fed from.
 struct Row {
     let id: String

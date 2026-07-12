@@ -36,6 +36,8 @@ final class ChatWindowController: NSWindowController,
     private let searchCount = NSTextField(labelWithString: "")
     private weak var searchRowRef: NSStackView?
     private var replyTarget: Row? { didSet { updateReplyBar() } }
+    // Messages that already produced a "send failed" banner this episode.
+    private var notifiedRetryIds: Set<String> = []
 
     private let panelWidth: CGFloat = 760
     private let panelHeight: CGFloat = 620
@@ -291,13 +293,25 @@ final class ChatWindowController: NSWindowController,
             insert(m)
         case "sent":
             guard let id = ev.target else { return }
+            notifiedRetryIds.remove(id)
             if ev.state == "cancelled" {
                 rows.removeAll { $0.id == id }
                 history.remove(id: id)
             } else { patch(id) { $0.state = "sent"; $0.tries = 0; $0.error = "" } }
         case "retry":
             guard let id = ev.target else { return }
-            patch(id) { $0.tries = ev.tries ?? 0; $0.error = ev.text ?? "" }
+            let previousTries = rows.first(where: { $0.id == id })?.tries ?? 0
+            let newTries = ev.tries ?? 0
+            patch(id) { $0.tries = newTries; $0.error = ev.text ?? "" }
+            if RetryNotificationPolicy.shouldNotify(
+                previousTries: previousTries, newTries: newTries,
+                alreadyNotified: notifiedRetryIds.contains(id))
+            {
+                notifiedRetryIds.insert(id)
+                // Same visibility rule as message banners: with the
+                // panel open the red ⚠ on the bubble is the signal.
+                if !(window?.isVisible ?? false) { notify("send failed, retrying") }
+            }
         case "ack":
             guard let id = ev.target else { return }
             patch(id) { $0.ack = ev.mark ?? "✓" }
