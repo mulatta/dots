@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { postAction } from "../bridge";
 import type { Message } from "../model";
 import { relativeTime } from "../time";
@@ -32,6 +32,9 @@ const undelivered = computed(
 // handler resolves and authorizes the actual file.
 const mediaURL = computed(() => `nostr-chat-media://message/${props.message.id}`);
 const imageFailed = ref(false);
+watch([() => props.message.id, () => props.message.hasImage], () => {
+  imageFailed.value = false;
+});
 
 function act(type: "reply" | "copy" | "retry" | "cancel" | "open-image"): void {
   postAction({ type, messageId: props.message.id });

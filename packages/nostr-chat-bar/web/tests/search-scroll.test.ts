@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import MessageBubble from "../src/components/MessageBubble.vue";
 import { installNativeAPI, type WebAction } from "../src/bridge";
 import { createMessageStore, type Message } from "../src/model";
-import { insertBehavior } from "../src/scroll";
+import { insertBehavior, scrollToMessage } from "../src/scroll";
 
 function captureActions(): WebAction[] {
   const actions: WebAction[] = [];
@@ -81,6 +81,34 @@ describe("search", () => {
       { type: "search-status", current: 2, total: 2 },
     ]);
   });
+
+  it("refreshes active search counts when messages change", () => {
+    const actions = captureActions();
+    const store = populated();
+    const api = installNativeAPI(store);
+    api.setSearch("match");
+    actions.length = 0;
+
+    const added = "d".repeat(64);
+    api.upsertMessage(message({ id: added, timestamp: 4, text: "new match" }));
+    api.removeMessage(added);
+
+    expect(actions).toEqual([
+      { type: "search-status", current: 1, total: 3 },
+      { type: "search-status", current: 1, total: 2 },
+    ]);
+  });
+
+  it("scrolls to message IDs without treating them as selectors", () => {
+    const id = 'hostile"] [data-message-id="other';
+    const target = document.createElement("article");
+    target.dataset.messageId = id;
+    target.scrollIntoView = vi.fn();
+    document.body.appendChild(target);
+
+    expect(() => scrollToMessage(id)).not.toThrow();
+    expect(target.scrollIntoView).toHaveBeenCalledWith({ block: "center" });
+  });
 });
 
 describe("scroll and unseen transitions", () => {
@@ -143,6 +171,14 @@ describe("attachments", () => {
     await wrapper.get(".attachment img").trigger("error");
     expect(wrapper.find(".attachment img").exists()).toBe(false);
     expect(wrapper.get(".attachment-missing").text()).toBe("attachment unavailable");
+  });
+
+  it("retries image loading when an attachment becomes available again", async () => {
+    const wrapper = bubble({ hasImage: true });
+    await wrapper.get(".attachment img").trigger("error");
+    await wrapper.setProps({ message: message({ hasImage: false }) });
+    await wrapper.setProps({ message: message({ hasImage: true }) });
+    expect(wrapper.find(".attachment img").exists()).toBe(true);
   });
 
   it("renders no attachment markup without an image", () => {

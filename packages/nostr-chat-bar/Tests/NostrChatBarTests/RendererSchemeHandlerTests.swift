@@ -51,6 +51,27 @@ final class RendererSchemeHandlerTests: XCTestCase {
         XCTAssertNil(RendererSchemeHandler.resolve(path: "/assets", root: root))
     }
 
+    func testRejectsOtherSchemesAndHosts() {
+        XCTAssertNotNil(
+            RendererSchemeHandler.resolve(
+                url: URL(string: "nostr-chat-app://renderer/index.html")!, root: root))
+        XCTAssertNil(
+            RendererSchemeHandler.resolve(
+                url: URL(string: "nostr-chat-app://other/index.html")!, root: root))
+        XCTAssertNil(
+            RendererSchemeHandler.resolve(
+                url: URL(string: "https://renderer/index.html")!, root: root))
+    }
+
+    func testRejectsSymlinksOutsideRoot() throws {
+        let link = root.appendingPathComponent("assets/outside.js")
+        try FileManager.default.createSymbolicLink(
+            at: link,
+            withDestinationURL: root.deletingLastPathComponent()
+                .appendingPathComponent("outside-secret"))
+        XCTAssertNil(RendererSchemeHandler.resolve(path: "/assets/outside.js", root: root))
+    }
+
     func testMimeTypes() {
         XCTAssertEqual(RendererSchemeHandler.mimeType(forExtension: "html"), "text/html")
         XCTAssertEqual(RendererSchemeHandler.mimeType(forExtension: "js"), "text/javascript")

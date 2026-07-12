@@ -167,6 +167,20 @@ final class RowPayloadTests: XCTestCase {
         XCTAssertEqual(payload["tries"] as? Int, 2)
     }
 
+    func testDeliveryActionsRequireUndeliveredOwnMessage() {
+        let id = String(repeating: "a", count: 64)
+        func candidate(mine: Bool, state: String, tries: Int) -> Row {
+            Row(
+                id: id, mine: mine, text: "body", ts: 1, ack: "", image: "",
+                state: state, tries: tries, replyTo: "")
+        }
+
+        XCTAssertTrue(candidate(mine: true, state: "pending", tries: 0).allowsDeliveryAction)
+        XCTAssertTrue(candidate(mine: true, state: "sent", tries: 1).allowsDeliveryAction)
+        XCTAssertFalse(candidate(mine: true, state: "sent", tries: 0).allowsDeliveryAction)
+        XCTAssertFalse(candidate(mine: false, state: "pending", tries: 1).allowsDeliveryAction)
+    }
+
     func testSnapshotPreservesRowOrder() {
         let rows = (1...5).map { index in
             Row(

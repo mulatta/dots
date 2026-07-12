@@ -2,6 +2,21 @@ import Cocoa
 import Foundation
 import UserNotifications
 
+enum SearchNavigation {
+    static func direction(for command: Selector, shift: Bool) -> Int? {
+        switch command {
+        case #selector(NSResponder.insertNewline(_:)):
+            return shift ? -1 : 1
+        case #selector(NSResponder.moveDown(_:)):
+            return 1
+        case #selector(NSResponder.moveUp(_:)):
+            return -1
+        default:
+            return nil
+        }
+    }
+}
+
 final class ChatWindowController: NSWindowController,
     NSTextViewDelegate, NSSearchFieldDelegate
 {
@@ -54,6 +69,7 @@ final class ChatWindowController: NSWindowController,
         history.mediaPathResolver = { [weak self] id in
             self?.rows.first(where: { $0.id == id })?.image
         }
+        history.start()
         build()
     }
     required init?(coder: NSCoder) { fatalError() }
@@ -260,7 +276,6 @@ final class ChatWindowController: NSWindowController,
         status.toolTip = urls.joined(separator: "\n")
         let c: NSColor = !streaming ? .systemRed : (up < total ? .systemOrange : .systemGreen)
         dot.layer?.backgroundColor = c.cgColor
-        history.setConnection(streaming: streaming, up: up, total: total)
     }
 
     func apply(_ ev: Event) {
@@ -338,9 +353,7 @@ final class ChatWindowController: NSWindowController,
             ])
     }
 
-    // Renderer → native intents. Every action is resolved against the
-    // canonical rows; IDs that don't exist (or point at someone else's
-    // message for retry/cancel) are ignored.
+    // Resolve renderer intents against canonical rows before side effects.
     private func handle(_ action: WebAction) {
         switch action {
         case .ready:
@@ -351,17 +364,21 @@ final class ChatWindowController: NSWindowController,
             guard let row = rows.first(where: { $0.id == id }) else { return }
             copyToPasteboard(row.text)
         case let .retry(id):
-            guard rows.contains(where: { $0.id == id && $0.mine }) else { return }
+            guard rows.contains(where: { $0.id == id && $0.allowsDeliveryAction }) else { return }
             daemon.send(["cmd": "retry", "id": id])
         case let .cancel(id):
-            guard rows.contains(where: { $0.id == id && $0.mine }) else { return }
+            guard rows.contains(where: { $0.id == id && $0.allowsDeliveryAction }) else { return }
             daemon.send(["cmd": "cancel", "id": id])
         case let .openLink(url):
             NSWorkspace.shared.open(url)
         case let .openImage(id):
-            guard let row = rows.first(where: { $0.id == id }), !row.image.isEmpty
+            guard let file = MediaAuthorizer.authorize(
+                id: id,
+                resolvePath: { [weak self] id in
+                    self?.rows.first(where: { $0.id == id })?.image
+                })
             else { return }
-            NSWorkspace.shared.open(URL(fileURLWithPath: row.image))
+            NSWorkspace.shared.open(file)
         case let .searchStatus(current, total):
             searchCount.stringValue = total == 0 ? "0" : "\(current)/\(total)"
         }
@@ -549,21 +566,18 @@ final class ChatWindowController: NSWindowController,
         return true
     }
 
-    // NSSearchField key handling — separate delegate hook from the
-    // NSTextView one above. ↵/⇧↵ step, Esc closes, ↓/↑ step too.
     func control(_: NSControl, textView _: NSTextView,
-                 doCommandBy sel: Selector) -> Bool {
-        switch sel {
-        case #selector(NSResponder.insertNewline(_:)),
-             #selector(NSResponder.moveDown(_:)):
-            step(1); return true
-        case #selector(NSResponder.insertBacktab(_:)),
-             #selector(NSResponder.moveUp(_:)):
-            step(-1); return true
-        case #selector(NSResponder.cancelOperation(_:)):
-            searchClose(); return true
-        default: return false
+                 doCommandBy command: Selector) -> Bool {
+        let shift = NSApp.currentEvent?.modifierFlags.contains(.shift) == true
+        if let direction = SearchNavigation.direction(for: command, shift: shift) {
+            step(direction)
+            return true
         }
+        if command == #selector(NSResponder.cancelOperation(_:)) {
+            searchClose()
+            return true
+        }
+        return false
     }
 
     private func copyToPasteboard(_ text: String) {
