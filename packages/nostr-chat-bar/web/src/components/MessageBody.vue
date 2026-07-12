@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { postAction } from "../bridge";
 import { renderMarkdown } from "../markdown";
 import { renderMermaidBlocks, type Appearance } from "../mermaid";
@@ -10,21 +10,27 @@ const props = defineProps<{ text: string }>();
 
 const host = ref<HTMLElement | null>(null);
 const html = computed(() => renderMarkdown(props.text));
-
-function appearance(): Appearance {
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
+const appearance = ref<Appearance>(
+  window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+);
+let appearanceQuery: MediaQueryList | undefined;
 
 async function paintDiagrams(): Promise<void> {
-  if (host.value) await renderMermaidBlocks(host.value, appearance());
+  if (host.value) await renderMermaidBlocks(host.value, appearance.value);
 }
 
-onMounted(paintDiagrams);
-watch(html, async () => {
-  // v-html has replaced the subtree by the next tick; repaint from the
-  // fresh placeholders.
+function updateAppearance(): void {
+  appearance.value = appearanceQuery?.matches ? "dark" : "light";
+}
+
+onMounted(() => {
+  appearanceQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
+  appearanceQuery?.addEventListener("change", updateAppearance);
+  updateAppearance();
+  void paintDiagrams();
+});
+onUnmounted(() => appearanceQuery?.removeEventListener("change", updateAppearance));
+watch([html, appearance], async () => {
   await nextTick();
   await paintDiagrams();
 });
@@ -42,5 +48,11 @@ function onClick(event: MouseEvent): void {
 </script>
 
 <template>
-  <div ref="host" class="message-body" v-html="html" @click="onClick"></div>
+  <div
+    :key="appearance"
+    ref="host"
+    class="message-body"
+    v-html="html"
+    @click="onClick"
+  ></div>
 </template>
