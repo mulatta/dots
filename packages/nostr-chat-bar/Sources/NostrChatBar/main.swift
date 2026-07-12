@@ -28,10 +28,11 @@ final class AppController: NSObject, NSApplicationDelegate,
     private let maxHistory: Int
     private var hotkey: EventHotKeyRef?
 
-    init(socket: String, controlSocket: String, maxHistory: Int) {
+    init(socket: String, controlSocket: String, maxHistory: Int, autoOpen: Bool) {
         self.maxHistory = maxHistory
         daemon = Daemon(path: socket)
-        chat = ChatWindowController(daemon: daemon, maxHistory: maxHistory)
+        chat = ChatWindowController(
+            daemon: daemon, maxHistory: maxHistory, autoOpen: autoOpen)
         control = ControlSocketServer(path: controlSocket)
         super.init()
     }
@@ -230,6 +231,7 @@ func die(_ message: String) -> Never {
 var socket = defaultSocket()
 var controlSocket: String?
 var maxHistory = 200
+var autoOpen = false
 do {
     var it = CommandLine.arguments.dropFirst().makeIterator()
     while let a = it.next() {
@@ -245,9 +247,11 @@ do {
                 die("--max-history requires a positive integer")
             }
             maxHistory = n
+        case "--auto-open": autoOpen = true
         case "--help", "-h":
             print(
-                "usage: nostr-chat-bar [--socket PATH] [--control-socket PATH] [--max-history N]")
+                "usage: nostr-chat-bar [--socket PATH] [--control-socket PATH]"
+                    + " [--max-history N] [--auto-open]")
             exit(0)
         default:
             die("unknown option: \(a)")
@@ -277,6 +281,7 @@ do {
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 let ctrl = AppController(
-    socket: socket, controlSocket: resolvedControlSocket, maxHistory: maxHistory)
+    socket: socket, controlSocket: resolvedControlSocket, maxHistory: maxHistory,
+    autoOpen: autoOpen)
 app.delegate = ctrl
 app.run()
