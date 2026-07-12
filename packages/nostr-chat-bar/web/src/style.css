@@ -144,6 +144,18 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* Dim while the outbox still owns the message; ✓ takes over after. */
+.pending .bubble {
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.delivery.failed {
+  color: #ff3b30;
+  cursor: help;
 }
 
 .meta {

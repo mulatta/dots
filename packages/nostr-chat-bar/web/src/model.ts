@@ -13,6 +13,8 @@ export interface Message {
   replyTo: string;
   state: "pending" | "sent" | "";
   tries: number;
+  /** Last publish error from the daemon's retry event; "" when clear. */
+  error?: string;
 }
 
 export interface SearchStatus {

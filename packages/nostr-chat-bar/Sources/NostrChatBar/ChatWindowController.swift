@@ -294,10 +294,10 @@ final class ChatWindowController: NSWindowController,
             if ev.state == "cancelled" {
                 rows.removeAll { $0.id == id }
                 history.remove(id: id)
-            } else { patch(id) { $0.state = "sent"; $0.tries = 0 } }
+            } else { patch(id) { $0.state = "sent"; $0.tries = 0; $0.error = "" } }
         case "retry":
             guard let id = ev.target else { return }
-            patch(id) { $0.tries = ev.tries ?? 0 }
+            patch(id) { $0.tries = ev.tries ?? 0; $0.error = ev.text ?? "" }
         case "ack":
             guard let id = ev.target else { return }
             patch(id) { $0.ack = ev.mark ?? "✓" }
@@ -350,6 +350,7 @@ final class ChatWindowController: NSWindowController,
                 "state": row.state,
                 "tries": row.tries,
                 "hasImage": !row.image.isEmpty,
+                "error": row.error,
             ])
     }
 
