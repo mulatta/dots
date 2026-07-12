@@ -1,6 +1,7 @@
 {
   lib,
   buildNpmPackage,
+  jq,
   swiftPackages,
   swift,
 }:
@@ -73,6 +74,8 @@ swiftPackages.stdenv.mkDerivation {
     runHook preInstall
     mkdir -p $out/bin $out/share/nostr-chat-bar/web
     install -m 755 nostr-chat-bar $out/bin/nostr-chat-bar
+    install -m 755 nostr-chat-shot.sh $out/bin/nostr-chat-shot
+    substituteInPlace $out/bin/nostr-chat-shot --replace-fail "@jq@" ${lib.getExe jq}
     install -m 644 NostrChatBar.icns $out/share/nostr-chat-bar/NostrChatBar.icns
     install -m 644 NoaMenuBarTemplate.png $out/share/nostr-chat-bar/NoaMenuBarTemplate.png
     cp -R ${webAssets}/dist/. $out/share/nostr-chat-bar/web/
