@@ -139,6 +139,12 @@ in
       run cp -R "${cfg.barPackage}/share/nostr-chat-bar/web" "${barApp}/Contents/Resources/web"
       run chmod -R u+w "${barApp}"
       run /usr/bin/codesign --force --deep --sign - "${barApp}"
+      # The agent plist points at the stable ~/Applications path, so it
+      # never changes and Home Manager never restarts the agent. Without
+      # an explicit kickstart the old process keeps running the deleted
+      # binary — stale UI, missing new resources, and it holds the
+      # single-instance flock so KeepAlive respawns exit immediately.
+      run /bin/launchctl kickstart -k "gui/$(id -u)/org.nix-community.home.nostr-chat-bar" || true
     '';
 
     launchd.enable = true;
