@@ -77,9 +77,6 @@ describe("native API installation", () => {
 
     api.removeMessage("c".repeat(64));
     expect(store.messages).toHaveLength(2);
-
-    api.setConnection({ streaming: true, relaysUp: 2, relaysTotal: 3 });
-    expect(store.connection).toEqual({ streaming: true, relaysUp: 2, relaysTotal: 3 });
   });
 
   it("converges to any snapshot after simulated reload", () => {

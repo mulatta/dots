@@ -15,12 +15,6 @@ export interface Message {
   tries: number;
 }
 
-export interface ConnectionStatus {
-  streaming: boolean;
-  relaysUp: number;
-  relaysTotal: number;
-}
-
 export interface SearchStatus {
   current: number;
   total: number;
@@ -29,15 +23,14 @@ export interface SearchStatus {
 
 export interface MessageStore {
   readonly messages: Message[];
-  readonly connection: ConnectionStatus;
   replace(messages: Message[]): void;
   upsert(message: Message): void;
   patch(id: string, patch: Partial<Message>): void;
   remove(id: string): void;
-  setConnection(status: ConnectionStatus): void;
   replyPreview(replyTo: string): string | null;
   setSearch(query: string): SearchStatus;
   stepSearch(direction: -1 | 1): SearchStatus;
+  activeSearchStatus(): SearchStatus | null;
   closeSearch(): void;
   isSearchHit(id: string): boolean;
   isSearchCurrent(id: string): boolean;
@@ -48,7 +41,6 @@ const REPLY_UNAVAILABLE = "Original message unavailable";
 export function createMessageStore(): MessageStore {
   const state = reactive({
     messages: [] as Message[],
-    connection: { streaming: false, relaysUp: 0, relaysTotal: 0 } as ConnectionStatus,
     searchQuery: "",
     searchCursor: 0,
   });
@@ -78,9 +70,6 @@ export function createMessageStore(): MessageStore {
   return {
     get messages() {
       return state.messages;
-    },
-    get connection() {
-      return state.connection;
     },
 
     replace(messages) {
@@ -113,10 +102,6 @@ export function createMessageStore(): MessageStore {
       if (at >= 0) state.messages.splice(at, 1);
     },
 
-    setConnection(status) {
-      state.connection = status;
-    },
-
     // The reply target may have aged out of maxHistory; the marker must
     // survive with a stable placeholder instead of disappearing.
     replyPreview(replyTo) {
@@ -140,6 +125,10 @@ export function createMessageStore(): MessageStore {
           (Math.min(state.searchCursor, total - 1) + direction + total) % total;
       }
       return searchStatus();
+    },
+
+    activeSearchStatus() {
+      return state.searchQuery ? searchStatus() : null;
     },
 
     closeSearch() {

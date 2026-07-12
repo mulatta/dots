@@ -1,16 +1,12 @@
 import Cocoa
 import WebKit
 
-/// The message-history viewport: one persistent WKWebView hosting the
-/// bundled Vue renderer. Swift stays authoritative — this view only
-/// mirrors the canonical `rows` into the page and relays user intent
-/// back out as validated `WebAction`s.
+/// Persistent WebKit viewport for the bundled message renderer.
 final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegate {
-    // Internal (not private) so harnesses and tests can observe the
-    // rendered document; production code outside this file must not
-    // touch it.
     let webView: WKWebView
-    private var readyGate: RendererReadyGate!
+    private let readyGate = RendererReadyGate()
+    private var started = false
+    private var searchQuery = ""
 
     /// Validated renderer actions, minus `ready` which is handled here.
     var onAction: ((WebAction) -> Void)?
@@ -25,8 +21,10 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     private let mediaHandler = MediaSchemeHandler()
 
     override init(frame frameRect: NSRect) {
+        let messageHandler = WeakScriptMessageHandler()
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
+        configuration.userContentController.add(messageHandler, name: "bridge")
         if let root = Self.rendererRoot() {
             configuration.setURLSchemeHandler(
                 RendererSchemeHandler(root: root), forURLScheme: RendererSchemeHandler.scheme)
@@ -35,9 +33,8 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
         webView = WKWebView(frame: .zero, configuration: configuration)
         super.init(frame: frameRect)
 
-        readyGate = RendererReadyGate { [weak self] in self?.pushSnapshot() }
-        configuration.userContentController.add(
-            WeakScriptMessageHandler(delegate: self), name: "bridge")
+        messageHandler.delegate = self
+        readyGate.onReady = { [weak self] in self?.pushSnapshot() }
         webView.navigationDelegate = self
         webView.setValue(false, forKey: "drawsBackground")
         #if DEBUG
@@ -52,17 +49,13 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
             webView.topAnchor.constraint(equalTo: topAnchor),
             webView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
-
-        loadRenderer()
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
     // MARK: renderer loading
 
-    /// The built Vite bundle: `web/` inside the .app resources, with the
-    /// share/ layout as fallback for running the bare binary and an env
-    /// override for development and harnesses.
+    /// Finds the Vite bundle in development, app, or bare-package layouts.
     static func rendererRoot() -> URL? {
         var candidates: [URL] = []
         if let override = ProcessInfo.processInfo.environment["NOSTR_CHAT_BAR_WEB_ROOT"] {
@@ -79,6 +72,12 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
         }
     }
 
+    func start() {
+        guard !started else { return }
+        started = true
+        loadRenderer()
+    }
+
     private func loadRenderer() {
         guard Self.rendererRoot() != nil else {
             FileHandle.standardError.write(
@@ -89,10 +88,6 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     }
 
     // MARK: native → renderer
-
-    func replaceMessages(_ rows: [Row]) {
-        readyGate.run { call("replaceMessages", ["messages": rows.map(\.webPayload)]) }
-    }
 
     func upsert(_ row: Row) {
         readyGate.run { call("upsertMessage", ["message": row.webPayload]) }
@@ -106,19 +101,8 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
         readyGate.run { call("removeMessage", ["id": id]) }
     }
 
-    func setConnection(streaming: Bool, up: Int, total: Int) {
-        readyGate.run {
-            call(
-                "setConnection",
-                [
-                    "status": [
-                        "streaming": streaming, "relaysUp": up, "relaysTotal": total,
-                    ] as [String: Any]
-                ])
-        }
-    }
-
     func setSearch(query: String) {
+        searchQuery = query
         readyGate.run { call("setSearch", ["query": query]) }
     }
 
@@ -127,12 +111,17 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     }
 
     func closeSearch() {
+        searchQuery = ""
         readyGate.run { call("closeSearch", [:]) }
     }
 
     private func pushSnapshot() {
-        guard let snapshot = snapshotProvider?() else { return }
-        call("replaceMessages", ["messages": snapshot])
+        if let snapshot = snapshotProvider?() {
+            call("replaceMessages", ["messages": snapshot])
+        }
+        if !searchQuery.isEmpty {
+            call("setSearch", ["query": searchQuery])
+        }
     }
 
     /// Structured arguments only — daemon-derived content must never be
@@ -168,11 +157,6 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
 
     // MARK: navigation policy
 
-    /// The page never navigates: only the bundled index.html loads.
-    /// Anchor clicks inside sanitized message HTML surface as
-    /// `open-link` bridge actions, not navigations, but any WebKit-
-    /// initiated navigation attempt is still refused here as defense in
-    /// depth.
     func webView(
         _ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
@@ -185,8 +169,6 @@ final class ChatHistoryView: NSView, WKScriptMessageHandler, WKNavigationDelegat
     }
 
     func webViewWebContentProcessDidTerminate(_: WKWebView) {
-        // Swift state survives WebKit; a fresh load replays it through
-        // the ready → snapshot path.
         readyGate.reset()
         loadRenderer()
     }

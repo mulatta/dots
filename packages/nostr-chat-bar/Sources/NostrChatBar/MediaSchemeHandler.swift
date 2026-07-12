@@ -2,14 +2,8 @@ import Foundation
 import UniformTypeIdentifiers
 import WebKit
 
-/// Authorizes attachment requests. The URL contributes nothing but a
-/// message ID; the file that gets opened always comes from the
-/// canonical row, so JavaScript can never name a filesystem path.
+/// Resolves message IDs to canonical local image files.
 enum MediaAuthorizer {
-    /// id → attachment file, or nil when the request must be refused:
-    /// malformed or unknown IDs, rows without attachments, missing
-    /// files, directories, symlinks that leave a regular file behind,
-    /// and anything that is not an image.
     static func authorize(id: String, resolvePath: (String) -> String?) -> URL? {
         guard WebActionDecoder.isValidMessageId(id),
               let path = resolvePath(id), !path.isEmpty
@@ -28,13 +22,10 @@ enum MediaAuthorizer {
     }
 }
 
-/// Serves `nostr-chat-media://message/<message-id>` from the canonical
-/// message model.
+/// Serves `nostr-chat-media://message/<message-id>` from canonical rows.
 final class MediaSchemeHandler: NSObject, WKURLSchemeHandler {
     static let scheme = "nostr-chat-media"
 
-    /// Looks a message ID up in the canonical rows; returns its local
-    /// attachment path or nil.
     var resolvePath: ((String) -> String?)?
 
     func webView(_: WKWebView, start task: WKURLSchemeTask) {

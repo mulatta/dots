@@ -2,11 +2,8 @@ import Foundation
 import WebKit
 
 // MARK: - Web renderer bridge types
-//
-// Everything the page can ask of the native side arrives here. The
-// renderer is treated as untrusted input: actions carry message IDs and
-// URLs only, never text, paths, or commands, and Swift resolves every
-// side effect against its own canonical model.
+
+// Renderer actions carry IDs or URLs; Swift resolves side effects from canonical state.
 
 enum WebAction: Equatable {
     case ready
@@ -54,10 +51,7 @@ enum WebActionDecoder {
         }
     }
 
-    // Daemon message IDs are Nostr event IDs (lowercase hex), but the
-    // decoder only guarantees "safe to look up": short, printable, and
-    // free of path or quoting characters. The canonical-row lookup is
-    // the real authorization.
+    // Canonical-row lookup authorizes IDs; this only keeps bridge input inert.
     static func isValidMessageId(_ id: String) -> Bool {
         guard !id.isEmpty, id.count <= 256 else { return false }
         return id.unicodeScalars.allSatisfy { scalar in
@@ -82,20 +76,16 @@ enum LinkPolicy {
 
 // MARK: - Readiness
 
-/// Serializes native → renderer traffic around page readiness. Ops sent
-/// before the page posts `ready` are dropped: Swift state is
-/// authoritative and every `ready` is answered with a full snapshot, so
-/// queued increments would only replay content the snapshot already
-/// carries.
+/// Drops incremental updates until a full snapshot can restore page state.
 final class RendererReadyGate {
     private(set) var isReady = false
-    private let onReady: () -> Void
+    var onReady: () -> Void
 
-    init(onReady: @escaping () -> Void) {
+    init(onReady: @escaping () -> Void = {}) {
         self.onReady = onReady
     }
 
-    /// Runs `op` when the renderer can receive it, otherwise drops it.
+    /// Runs `op` only when the renderer can receive it.
     func run(_ op: () -> Void) {
         guard isReady else { return }
         op()
@@ -106,8 +96,6 @@ final class RendererReadyGate {
         onReady()
     }
 
-    /// A reload or WebKit process death invalidates the page; drop back
-    /// to dropping ops until the fresh page says `ready`.
     func reset() {
         isReady = false
     }
@@ -116,6 +104,10 @@ final class RendererReadyGate {
 // MARK: - Payloads
 
 extension Row {
+    var allowsDeliveryAction: Bool {
+        mine && (state == "pending" || tries > 0)
+    }
+
     /// The renderer never sees local paths: attachments surface as
     /// `hasImage` and are fetched back by message ID.
     var webPayload: [String: Any] {
@@ -139,9 +131,9 @@ extension Row {
 /// it the view directly would create a controller → handler → view →
 /// controller cycle.
 final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
-    private weak var delegate: WKScriptMessageHandler?
+    weak var delegate: WKScriptMessageHandler?
 
-    init(delegate: WKScriptMessageHandler) {
+    init(delegate: WKScriptMessageHandler? = nil) {
         self.delegate = delegate
     }
 

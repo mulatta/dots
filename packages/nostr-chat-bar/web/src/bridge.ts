@@ -1,4 +1,4 @@
-import type { ConnectionStatus, Message, MessageStore, SearchStatus } from "./model";
+import type { Message, MessageStore, SearchStatus } from "./model";
 import { scrollToMessage } from "./scroll";
 
 // Renderer → Swift. Actions identify messages by ID only; Swift
@@ -19,7 +19,6 @@ export interface NativeAPI {
   upsertMessage(message: Message): void;
   patchMessage(id: string, patch: Partial<Message>): void;
   removeMessage(id: string): void;
-  setConnection(status: ConnectionStatus): void;
   setSearch(query: string): void;
   stepSearch(direction: -1 | 1): void;
   closeSearch(): void;
@@ -57,15 +56,21 @@ export interface RendererHooks {
 /// answers every `ready` with a full snapshot, so installing the API
 /// is all a fresh or recovered page needs to converge.
 export function installNativeAPI(store: MessageStore, hooks?: RendererHooks): NativeAPI {
-  function reportSearch(status: SearchStatus): void {
+  function reportSearch(status: SearchStatus, scroll = true): void {
     postAction({ type: "search-status", current: status.current, total: status.total });
-    if (status.currentId) scrollToMessage(status.currentId);
+    if (scroll && status.currentId) scrollToMessage(status.currentId);
+  }
+
+  function refreshSearch(): void {
+    const status = store.activeSearchStatus();
+    if (status) reportSearch(status, false);
   }
 
   const api: NativeAPI = {
     replaceMessages: (messages) => {
       store.replace(messages);
       hooks?.onReplace?.();
+      refreshSearch();
     },
     upsertMessage: (message) => {
       // Measure before the DOM grows: whether the reader was at the
@@ -74,10 +79,13 @@ export function installNativeAPI(store: MessageStore, hooks?: RendererHooks): Na
       const wasNearBottom = hooks?.measureNearBottom?.() ?? true;
       store.upsert(message);
       hooks?.onUpsert?.(message, { isNew, wasNearBottom });
+      refreshSearch();
     },
     patchMessage: (id, patch) => store.patch(id, patch),
-    removeMessage: (id) => store.remove(id),
-    setConnection: (status) => store.setConnection(status),
+    removeMessage: (id) => {
+      store.remove(id);
+      refreshSearch();
+    },
     setSearch: (query) => reportSearch(store.setSearch(query)),
     stepSearch: (direction) => reportSearch(store.stepSearch(direction)),
     closeSearch: () => store.closeSearch(),

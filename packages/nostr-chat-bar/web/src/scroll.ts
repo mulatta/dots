@@ -15,9 +15,10 @@ export async function scrollToBottom(): Promise<void> {
 }
 
 export function scrollToMessage(id: string): void {
-  document
-    .querySelector(`[data-message-id="${id}"]`)
-    ?.scrollIntoView?.({ block: "center" });
+  const target = Array.from(document.querySelectorAll<HTMLElement>("[data-message-id]")).find(
+    (element) => element.dataset.messageId === id,
+  );
+  target?.scrollIntoView?.({ block: "center" });
 }
 
 export type InsertBehavior = "stick" | "indicate";
