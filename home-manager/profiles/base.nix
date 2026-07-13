@@ -8,6 +8,7 @@
   imports = [
     ../modules/atuin.nix
     ../modules/bat.nix
+    ../modules/chat.nix
     ../modules/fonts.nix
     ../modules/helix
     ../modules/packages.nix
