@@ -26,6 +26,7 @@
     ./modules/rsshub.nix
     ./modules/tailscale.nix
     ./modules/vikunja.nix
+    ./modules/weechat.nix
   ];
 
   clan.core.networking.targetHost = "root@malt.x";
