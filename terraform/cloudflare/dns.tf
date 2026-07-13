@@ -256,6 +256,16 @@ resource "cloudflare_dns_record" "links_a" {
   comment = "Linkwarden"
 }
 
+resource "cloudflare_dns_record" "chat_a" {
+  zone_id = local.zone_id
+  name    = "chat"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Glowing Bear WeeChat client"
+}
+
 resource "cloudflare_dns_record" "ntfy_a" {
   zone_id = local.zone_id
   name    = "ntfy"
