@@ -166,6 +166,9 @@ in
         homeassistant_users = {
           members = [ "seungwon" ];
         };
+        chat_users = {
+          members = [ "seungwon" ];
+        };
         admins = {
           members = [ "seungwon" ];
         };
@@ -273,6 +276,22 @@ in
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.automation_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
+
+        weechat = {
+          displayName = "WeeChat";
+          originUrl = [
+            "https://chat.${baseDomain}"
+            "https://chat.${baseDomain}/oauth2/callback"
+          ];
+          originLanding = "https://chat.${baseDomain}";
+          public = true;
+          enableLocalhostRedirects = false;
+          scopeMaps.chat_users = [
             "openid"
             "email"
             "profile"
