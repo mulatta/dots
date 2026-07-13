@@ -8,7 +8,7 @@ dots_dir=${DOTS_DIR:-"$HOME/dots"}
 fork_url=${NIXPKGS_FORK_URL:-"git@github.com:mulatta/nixpkgs"}
 upstream_url=${NIXPKGS_UPSTREAM_URL:-"https://github.com/NixOS/nixpkgs.git"}
 fork_branch=${NIXPKGS_FORK_BRANCH:-main}
-upstream_branch=${NIXPKGS_UPSTREAM_BRANCH:-nixpkgs-unstable}
+upstream_branch=${NIXPKGS_UPSTREAM_BRANCH:-nixos-unstable}
 
 run() {
   printf '+ %q' "$@"
