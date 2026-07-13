@@ -38,6 +38,7 @@
     ./nip05.nix
     ./security-txt.nix
     ./vikunja.nix
+    ./weechat.nix
     ./zotero.nix
   ];
 
