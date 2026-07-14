@@ -66,8 +66,8 @@ status is-interactive; and begin
     alias lt 'eza --tree'
 
     # Tool initializations (PATH-based, Mic92 style)
-    if type -q fzf
-        fzf --fish | source
+    if type -q sk
+        sk --shell fish --shell-bindings | source
     end
 
     if type -q nix-your-shell
