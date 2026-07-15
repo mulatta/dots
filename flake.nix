@@ -141,9 +141,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zjstatus.url = "github:dj95/zjstatus";
-    zjstatus.inputs.nixpkgs.follows = "nixpkgs";
-
     zsh-helix-mode.url = "github:Multirious/zsh-helix-mode";
 
     # Agentic tools
