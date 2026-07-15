@@ -33,7 +33,6 @@
       starship
       tmux
       tmuxPlugins.tmux-thumbs
-      zellij
       zoxide
       zsh
       zsh-autopair
@@ -96,7 +95,6 @@
         # External flakes
         inputs.niks3.packages.${system}.niks3
         inputs.flake-fmt.packages.${system}.default
-        inputs.zjstatus.packages.${system}.default
         inputs.zsh-helix-mode.packages.${system}.zsh-helix-mode
         inputs.direnv-instant.packages.${system}.default
       ]
