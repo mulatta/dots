@@ -88,6 +88,7 @@
           miniflux-cli = inputs.skillz.packages.${system}.miniflux-cli;
           vikunja-cli = inputs.skillz.packages.${system}.vikunja-cli;
           biorefs-cli = inputs.skillz.packages.${system}.biorefs-cli;
+          pymol-cli = inputs.skillz.packages.${system}.pymol-cli;
           n8n-hooks = final.n8n-hooks;
           pi = inputs.llm-agents.packages.${system}.pi;
         };
