@@ -47,6 +47,7 @@ in
       "linkwarden-cli"
       "n8n-cli"
       "pexpect-cli"
+      "pymol-cli"
       "vikunja-cli"
     ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ "shortcuts-cli" ];
