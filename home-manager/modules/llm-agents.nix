@@ -70,12 +70,8 @@ in
   home.file.".claude/skills/git-surgeon".source =
     "${aiPkgs.git-surgeon}/share/git-surgeon/skills/git-surgeon";
 
-  # officecli skill for both agents — Claude Code reads ~/.claude/skills,
-  # pi discovers ~/.pi/agent/skills.
+  # Claude Code reads ~/.claude/skills directly; pi loads it via settings.json.
   home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
-  home.file.".pi/agent/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
-
-  # pi also loads ~/.claude/skills via home/.pi/agent/settings.json.
   home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
     "${aiPkgs.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
 
