@@ -75,6 +75,10 @@ in
   home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
   home.file.".pi/agent/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
 
+  # pi also loads ~/.claude/skills via home/.pi/agent/settings.json.
+  home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
+    "${aiPkgs.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
+
   home.file.".claude/skills/zat/SKILL.md".text = ''
     ---
     name: zat
