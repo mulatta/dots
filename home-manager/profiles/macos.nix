@@ -9,7 +9,7 @@
   imports = [
     ../modules/calendar
     ../modules/keyboard
-    ../modules/llm-agents.nix
+    ../modules/llm-agents
     ../modules/mail
     ../modules/nostr-chat.nix
     ../modules/ntfy.nix
