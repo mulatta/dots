@@ -8,6 +8,7 @@
 result
 result-*
 .direnv/
+.pi/agent/node_modules
 
 # ck semantic search
 .ck/
