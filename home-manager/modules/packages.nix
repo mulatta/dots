@@ -69,7 +69,6 @@
       ripgrep
       sd
       sendme
-      sqlit-tui
       stow
       uutils-coreutils-noprefix
       xcp
