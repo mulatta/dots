@@ -3,13 +3,16 @@ updates:
   # Flake inputs only. The nixpkgs fork is rebased on upstream and bumped by
   # home/bin/update-nixpkgs-fork, so Dependabot leaves it alone (no linear
   # commit delta on a force-pushed branch). Vendored package locks under
-  # packages/* are owned by the .#updater scripts, not Dependabot, so no
-  # npm/pip/cargo ecosystems are enabled here.
+  # packages/* are owned by the .#updater scripts, not Dependabot.
   - package-ecosystem: "nix"
     directory: "/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/home/.pi/agent"
     schedule:
       interval: "weekly"
