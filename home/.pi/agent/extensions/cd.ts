@@ -13,7 +13,7 @@ import { isAbsolute, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 
 const COMMAND = "cd";
-const CUSTOM_TYPE = "dots.cd";
+const CUSTOM_TYPE = "session.cd";
 const MAX_COMPLETIONS = 50;
 
 let currentCwdForCompletions = process.cwd();
