@@ -7,9 +7,6 @@ let
   inherit (llmAgents) aiPkgs;
   pi-ext = llmAgents.pi-agent-extensions;
   piAgentDeps = pkgs.callPackage ../../../home/.pi/agent/default.nix { };
-  nostorePreload = pkgs.nostore-preload;
-  nostoreEnvVar = nostorePreload.passthru.envVar;
-  nostoreLib = "${nostorePreload}/lib/libnostore${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
 in
 {
   home.file.".pi/agent/extensions/direnv.ts".source = "${pi-ext}/direnv/index.ts";
@@ -22,9 +19,6 @@ in
 
   home.packages = [
     (pkgs.writeShellScriptBin "pi" ''
-      # Block readdir(/nix/store) for the agent and its children; exported
-      # before pueued so queued tasks inherit it too.
-      export ${nostoreEnvVar}="${nostoreLib}''${${nostoreEnvVar}:+:${"$"}${nostoreEnvVar}}"
       ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
       # Extensions are symlinked from dotfiles, so node walk-up misses
       # their npm deps. NODE_PATH points jiti at the prebuilt node_modules.
