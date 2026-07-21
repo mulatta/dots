@@ -78,7 +78,6 @@
         jellyfin-plugin-sso-auth = prev.callPackage ../packages/jellyfin-plugin-sso-auth { };
         miniflux-sync = prev.callPackage ../packages/miniflux-sync { };
         ntfy-subscribe = prev.callPackage ../packages/ntfy-subscribe { };
-        nostore-preload = prev.callPackage ../packages/nostore-preload { };
         pim = prev.callPackage ../packages/pim {
           calendar-cli = inputs.skillz.packages.${system}.calendar-cli.override {
             msmtp = final.msmtp-with-sent;

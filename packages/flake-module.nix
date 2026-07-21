@@ -25,7 +25,6 @@
           jellyfin-plugin-sso-auth
           miniflux-sync
           ntfy-subscribe
-          nostore-preload
           pim
           updater
           instagram-cli
