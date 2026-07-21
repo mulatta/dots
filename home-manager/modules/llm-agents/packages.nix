@@ -22,6 +22,7 @@ in
 {
   home.packages =
     (with pkgs; [
+      archify-cli # dots overlay
       claude-md # dots overlay
       pim # dots overlay
       pueue

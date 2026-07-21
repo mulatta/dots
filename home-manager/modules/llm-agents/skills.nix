@@ -41,6 +41,8 @@ in
     };
   };
 
+  home.file.".claude/skills/archify".source = "${pkgs.archify-cli}/share/skills/archify";
+
   # git-surgeon ships a skill teaching agents how to use its git primitives.
   home.file.".claude/skills/git-surgeon".source =
     "${aiPkgs.git-surgeon}/share/git-surgeon/skills/git-surgeon";

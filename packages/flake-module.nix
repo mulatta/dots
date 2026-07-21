@@ -13,6 +13,7 @@
           claude-code = inputs.llm-agents.packages.${system}.claude-code;
         };
         inherit (pkgs)
+          archify-cli
           rsshub
           bulwark-webmail
           merge-when-green

@@ -62,6 +62,7 @@
         });
 
         # Custom packages
+        archify-cli = prev.callPackage ../packages/archify { };
         rsshub = prev.callPackage ../packages/rsshub {
           rsshub = prev.rsshub;
         };
