@@ -25,6 +25,7 @@ in
       "calendar-cli"
       "context7-cli"
       "crwl-cli"
+      "drawio-cli"
       "kmap-cli"
       "linkwarden-cli"
       "n8n-cli"

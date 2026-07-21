@@ -30,6 +30,7 @@ in
       claudeCode # custom wrapper, flake package output
       qmd # local binding; CUDA-grafted on GPU hosts
       skillzPkgs.biorefs-cli
+      skillzPkgs.drawio-cli
       aiPkgs.apm
       aiPkgs.ccstatusline
       aiPkgs.codex
