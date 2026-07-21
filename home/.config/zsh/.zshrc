@@ -70,6 +70,7 @@ alias deploy='instant-deploy'
 alias ge='hx $(git ls)'
 alias j='jj'
 alias je='hx $(jj diff --name-only)'
+alias fl='forklift'
 
 # eza aliases
 alias eza='eza --icons always --git --group-directories-first --header --color=always --long --no-filesize --no-time --no-user --no-permissions'

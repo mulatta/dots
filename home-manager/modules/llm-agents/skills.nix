@@ -52,6 +52,54 @@ in
   home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
     "${aiPkgs.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
 
+  home.file.".claude/skills/jj-forklift/SKILL.md".text = ''
+    ---
+    name: jj-forklift
+    description: Use when working with jj-forklift stacked PRs, explaining its 1 jj change = 1 PR model, or running forklift submit/sync/get/merge/pr/unfreeze workflows in a Jujutsu repository.
+    ---
+
+    Use `jj` for stack editing and `forklift` for GitHub PR operations.
+
+    Core model:
+    - One jj change maps to one GitHub PR.
+    - Stacked PR order follows the linear jj change stack from trunk to `@`.
+    - Bottom PR targets trunk; each higher PR targets the branch for the change below it.
+    - Multi-commit PR ranges are not the native model. Put related edits in one jj change or split them into separate changes.
+
+    Before operations:
+    - Run `jj log` or `jj status` to understand current stack.
+    - Run `forklift --help` or subcommand `--help` when flags are unclear.
+    - Ensure `gh` is authenticated when network/GitHub operations are needed.
+    - Before mutating GitHub or trunk, run `forklift status --dry-run --verbose` to verify resolved config, trunk, tracked stack, PR bases, and planned actions.
+    - Prefer `forklift submit --dry-run`, `forklift sync --dry-run --current`, or `forklift merge --dry-run <target>` before the real command.
+
+    Common workflow:
+    ```bash
+    jj new <base>
+    jj describe
+    forklift submit
+    forklift sync
+    forklift merge
+    ```
+
+    Command guidance:
+    - `forklift submit`: create or update PRs for current stack.
+    - `forklift sync`: fetch/rebase tracked stacks onto trunk. Add `--submit` to submit after syncing.
+    - `forklift get <target>`: import an existing stack by PR number, PR URL, branch, or change-id prefix.
+    - `forklift merge`: land stack by fast-forwarding trunk; no merge queue.
+    - `forklift pr`: open current PR.
+    - `forklift status`: show tracked stacks and PR state.
+    - `forklift track <target>`: adopt an existing branch and open PR into forklift tracking.
+    - `forklift repair <target>`: rebuild bookmarks and cache for a stack.
+    - `forklift ui`: open `jjui` filtered to tracked stacks.
+    - `forklift unfreeze <target>`: turn a frozen dependency back into an owned, editable change.
+
+    Conflict/collaboration rules:
+    - Preserve both trunk/collaborator changes and local changes.
+    - Imported or collaborator-owned changes are frozen; do not mutate frozen revisions unless explicitly unfreezing.
+    - If stack shape or ownership is unclear, inspect before acting and ask for guidance before destructive operations.
+  '';
+
   home.file.".claude/skills/zat/SKILL.md".text = ''
     ---
     name: zat

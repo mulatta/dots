@@ -28,6 +28,7 @@
           ntfy-subscribe
           pim
           updater
+          jj-forklift
           instagram-cli
           instant-deploy
           ;

@@ -25,6 +25,7 @@
     in
     [
       myPkgs.instagram-cli
+      myPkgs.jj-forklift
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry
       (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })

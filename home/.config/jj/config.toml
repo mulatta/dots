@@ -27,6 +27,7 @@ fa = ["file", "annotate"]
 fc = ["file", "chmod"]
 fl = ["file", "list"]
 fresh = ["new", "trunk()"]
+focus = ["config", "set", "--repo", "revset-aliases.\"trunk()\""]
 fs = ["file", "show"]
 fx = ["fix"]
 gcl = ["git", "clone"]
@@ -56,17 +57,17 @@ nnb = ["new", "--no-edit", "-B"]
 nx = ["next"]
 ol = ["op", "log"]
 open = ["log", "-r", "open()"]
-pr = ["prev"]
+pv = ["prev"]
 # Rebase every mutable root. Useful for repo-wide cleanup, dangerous in
 # colocated repos with unrelated draft stacks.
-ram = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
+rat = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
 # Safer default: rebase only the current stack.
 restack = ["rebase", "-s", "roots(stack())", "-d", "trunk()"]
 rb = ["rebase"]
 rbd = ["rebase", "-d"]
 rbr = ["rebase", "-r"]
 rbs = ["rebase", "-s"]
-rom = ["rebase", "-d", "trunk()"]
+rot = ["rebase", "-d", "trunk()"]
 rs = ["resolve"]
 rsl = ["resolve", "--list"]
 rsr = ["resolve", "-r"]
@@ -91,6 +92,7 @@ tug = [
   "--to",
   "closest_pushable(@)",
 ]
+unfocus = ["config", "unset", "--repo", "revset-aliases.\"trunk()\""]
 w = ["workspace", "list"]
 
 [git]

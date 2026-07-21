@@ -93,6 +93,7 @@
           pi = inputs.llm-agents.packages.${system}.pi;
         };
         updater = prev.callPackage ../packages/updater { };
+        jj-forklift = prev.callPackage ../packages/jj-forklift { };
         instagram-cli = prev.callPackage ../packages/instagram-cli { };
         instant-deploy = prev.callPackage ../packages/instant-deploy {
           clan-cli = inputs.clan-core.packages.${system}.clan-cli;
