@@ -555,19 +555,19 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1784616187,
-        "narHash": "sha256-LaLDYl5vQXTENdkko7NE2lcUwhfpa5kIl2R7aBdoI/c=",
-        "ref": "main",
-        "rev": "ce1c603a5b78c5b49a3537ddeba778624023670f",
+        "lastModified": 1784432872,
+        "narHash": "sha256-n3gKTBIV4ZA5VQpUakffBe3KGu4+mhPoA34rrqS0GkA=",
+        "ref": "nixos-26.05",
+        "rev": "fd1462031fdee08f65fd0b4c6b64e22239a77870",
         "shallow": true,
         "type": "git",
-        "url": "https://github.com/mulatta/nixpkgs"
+        "url": "https://github.com/NixOS/nixpkgs"
       },
       "original": {
-        "ref": "main",
+        "ref": "nixos-26.05",
         "shallow": true,
         "type": "git",
-        "url": "https://github.com/mulatta/nixpkgs"
+        "url": "https://github.com/NixOS/nixpkgs"
       }
     },
     "nixpkgs_4": {

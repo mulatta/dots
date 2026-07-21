@@ -33,6 +33,18 @@
           ];
         });
 
+        # libfyaml's Darwin pkg-config file can contain literal configure text.
+        # Meson passes those words to clang when linking appstream.
+        libfyaml = prev.libfyaml.overrideAttrs (
+          old:
+          lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
+            postInstall = (old.postInstall or "") + ''
+              substituteInPlace "$dev/lib/pkgconfig/libfyaml.pc" \
+                --replace-fail "none required" ""
+            '';
+          }
+        );
+
         # rust-s3 0.35 signs empty body headers on ranged GET and DELETE.
         # Cloudflare R2 rejects those signatures, breaking JMAP attachment
         # downloads and blob garbage collection. Keep this until rust-s3 merges

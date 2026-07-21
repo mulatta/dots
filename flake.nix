@@ -1,7 +1,7 @@
 {
   inputs = {
     # Shared roots. Other flakes follow these to avoid duplicate lock nodes.
-    nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
+    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-26.05";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
