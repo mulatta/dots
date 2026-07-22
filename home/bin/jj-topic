@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v jj >/dev/null 2>&1; then
+  echo "jj-topic: jj not found in PATH" >&2
+  exit 127
+fi
+
+if [[ $# -ne 1 || -z "${1:-}" ]]; then
+  echo "Usage: jj topic <bookmark-or-revset>" >&2
+  exit 1
+fi
+
+topic=$1
+jj config set --repo scope.topic "$topic"
+jj config set --repo 'revset-aliases."topic()"' "$topic"

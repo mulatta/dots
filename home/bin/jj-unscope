@@ -7,5 +7,6 @@ if ! command -v jj >/dev/null 2>&1; then
 fi
 
 jj config unset --repo 'revset-aliases."trunk()"' 2>/dev/null || true
+jj config unset --repo 'revset-aliases."topic()"' 2>/dev/null || true
 jj config unset --repo scope.cap 2>/dev/null || true
 jj config unset --repo scope.topic 2>/dev/null || true

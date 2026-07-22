@@ -81,12 +81,12 @@ squ = ["squash", "--from", "@", "--into", "@-"]
 ss = ["show", "--summary"]
 stack = ["log", "-r", "stack()"]
 swap = ["rebase", "-r", "@-", "-A", "@"]
-topic = ["config", "set", "--repo", "scope.topic"]
+topic = ["util", "exec", "--", "jj-topic"]
 tug = ["util", "exec", "--", "jj-tug"]
 trunk = ["config", "set", "--repo", "revset-aliases.\"trunk()\""]
 unscope = ["util", "exec", "--", "jj-unscope"]
 uncap = ["config", "unset", "--repo", "scope.cap"]
-untopic = ["config", "unset", "--repo", "scope.topic"]
+untopic = ["util", "exec", "--", "jj-untopic"]
 untrunk = ["config", "unset", "--repo", "revset-aliases.\"trunk()\""]
 unset = ["config", "unset", "--repo"]
 w = ["workspace", "list"]
@@ -139,6 +139,7 @@ content
 
 [ui]
 default-command = ["log", "-r", "trunk() | stack()", "--reversed"]
+movement.edit = true
 pager = "less -FRX"
 
 [user]
