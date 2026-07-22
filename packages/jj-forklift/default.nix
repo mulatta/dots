@@ -12,13 +12,13 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "jj-forklift";
-  version = "0.1.0-unstable-2026-07-10";
+  version = "0-unstable-2026-07-21";
 
   src = fetchFromGitHub {
     owner = "rivet-dev";
     repo = "jj-forklift";
-    rev = "f1d50a5c8af22c42ae17c5a0d10b7db8ee6b2758";
-    hash = "sha256-UPkdgU8l23LS12nVCFGX2b7DUJY95UYFv9xMLnOK1CM=";
+    rev = "8376323159c13d38dc2ddaed863a74864f5a5fa5";
+    hash = "sha256-OTOCjlIw/+v/juaxfNzrTkieHVliHh5xRuKJxMzoC60=";
   };
 
   cargoHash = "sha256-YptPd3AzONuSEECdPg40QY++7U0tNVTROekKQgsJqbI=";
@@ -27,9 +27,9 @@ rustPlatform.buildRustPackage rec {
   VERGEN_GIT_COMMIT_COUNT = "0";
   VERGEN_GIT_COMMIT_DATE = "2026-07-10";
   VERGEN_GIT_COMMIT_TIMESTAMP = "2026-07-10T21:53:10Z";
-  VERGEN_GIT_DESCRIBE = "f1d50a5c8af22c42ae17c5a0d10b7db8ee6b2758";
+  VERGEN_GIT_DESCRIBE = "8376323159c13d38dc2ddaed863a74864f5a5fa5";
   VERGEN_GIT_DIRTY = "false";
-  VERGEN_GIT_SHA = "f1d50a5c8af22c42ae17c5a0d10b7db8ee6b2758";
+  VERGEN_GIT_SHA = "8376323159c13d38dc2ddaed863a74864f5a5fa5";
 
   nativeBuildInputs = [
     pkg-config
