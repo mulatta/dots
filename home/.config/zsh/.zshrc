@@ -521,6 +521,118 @@ if command -v jj &>/dev/null; then
   compdef j=jj
 fi
 
+# Completion mappings for shell wrappers and aliases.
+# fzf-tab only renders matches produced by zsh completion providers.
+(( $+commands[git] )) && compdef g=git
+(( $+commands[home-manager] )) && compdef hm=home-manager
+(( $+commands[khal] )) && compdef cal=khal
+(( $+commands[yazi] )) && compdef y=yazi
+(( $+commands[todo] )) && compdef t=todo
+
+_ntfy() {
+  local -a commands
+  commands=(
+    'publish:Send message via ntfy server'
+    'pub:Alias for publish'
+    'send:Alias for publish'
+    'trigger:Alias for publish'
+    'subscribe:Subscribe to one or more topics'
+    'sub:Alias for subscribe'
+    'access:Grant, revoke, or show topic access'
+    'serve:Run ntfy server'
+    'tier:Manage or show tiers'
+    'token:Create, list, or delete user tokens'
+    'user:Manage or show users'
+    'help:Show help'
+  )
+  _arguments \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '(-v --version)'{-v,--version}'[show version]' \
+    '1:command:_describe -t commands "ntfy command" commands' \
+    '*::arg:_files'
+}
+(( $+commands[ntfy] || $+functions[ntfy] )) && compdef _ntfy ntfy
+
+_forklift() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+  local -a commands global_options submit_options sync_options merge_options get_options repair_options unfreeze_options status_options track_options pr_options ui_options
+
+  commands=(
+    'submit:Push branches and create or update PRs for the current stack'
+    's:Alias for submit'
+    'sync:Fetch, advance trunk, and rebase tracked stacks onto it'
+    'merge:Fast-forward trunk onto an approved, mergeable stack'
+    'm:Alias for merge'
+    'get:Fetch a PR and its stack into a local tracked stack'
+    'g:Alias for get'
+    'repair:Rebuild forklift bookmarks and cache for a stack'
+    'r:Alias for repair'
+    'unfreeze:Turn a frozen dependency back into an owned, editable change'
+    'uf:Alias for unfreeze'
+    'status:Show state of tracked stacks and PRs'
+    'st:Alias for status'
+    'track:Adopt an existing branch and its open PR into tracking'
+    'tr:Alias for track'
+    'pr:Open a pull request in browser'
+    'ui:Open jjui filtered to tracked stacks'
+    'l:Alias for ui'
+    'help:Print help for command or subcommand'
+  )
+  global_options=(
+    '(-v --verbose)'{-v,--verbose}'[show verbose output]'
+    '(-n --dry-run)'{-n,--dry-run}'[preview planned changes]'
+    '(-h --help)'{-h,--help}'[print help]'
+    '(-V --version)'{-V,--version}'[print version]'
+  )
+  submit_options=('--draft[create PRs as draft]' '--ready[mark PRs ready for review]')
+  sync_options=('--submit[submit after syncing]' '--current[only sync current stack]')
+  merge_options=('--delete-branch[delete remote branches after merge]' ':target:')
+  get_options=(':target:')
+  repair_options=(':target:')
+  unfreeze_options=(':target:')
+  status_options=('--json[print JSON output]')
+  track_options=(':target:')
+  pr_options=(':target:')
+  ui_options=('--all[show all tracked stacks]')
+
+  _arguments -C \
+    $global_options \
+    '1:command:->command' \
+    '*::arg:->args' && return
+
+  case $state in
+    command)
+      _describe -t commands 'forklift command' commands
+      ;;
+    args)
+      case ${line[1]} in
+        submit|s) _arguments $global_options $submit_options ;;
+        sync) _arguments $global_options $sync_options ;;
+        merge|m) _arguments $global_options $merge_options ;;
+        get|g) _arguments $global_options $get_options ;;
+        repair|r) _arguments $global_options $repair_options ;;
+        unfreeze|uf) _arguments $global_options $unfreeze_options ;;
+        status|st) _arguments $global_options $status_options ;;
+        track|tr) _arguments $global_options $track_options ;;
+        pr) _arguments $global_options $pr_options ;;
+        ui|l) _arguments $global_options $ui_options ;;
+        help) _describe -t commands 'forklift command' commands ;;
+        *) _files ;;
+      esac
+      ;;
+  esac
+}
+(( $+commands[forklift] )) && compdef _forklift forklift fl
+
+_merge_when_green() {
+  _arguments \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '--no-wait[do not wait for CI checks to complete]' \
+    '(-m --message)'{-m,--message}'[PR title and body separated by newline]:message:'
+}
+(( $+commands[merge-when-green] )) && compdef _merge_when_green merge-when-green mwg
+
 # atuin history
 if command -v atuin &>/dev/null; then
   eval "$(atuin init zsh --disable-up-arrow)"
