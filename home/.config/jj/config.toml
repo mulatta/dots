@@ -10,28 +10,27 @@ br = ["bookmark", "rename"]
 bs = ["bookmark", "set"]
 bt = ["bookmark", "track"]
 c = ["commit"]
+cap = ["config", "set", "--repo", "scope.cap"]
 cm = ["commit", "-m"]
-consume = ["squash", "--from", "@-", "--into", "@"]
 d = ["describe"]
 df = ["diff"]
-dfc = ["diff", "--color-words"]
 dfg = ["diff", "--git"]
 dfn = ["diff", "--name-only"]
 dfs = ["diff", "--stat"]
 dm = ["describe", "-m"]
 e = ["edit"]
-eject = ["squash", "--from", "@", "--into", "@-"]
 el = ["evolog"]
 examine = ["log", "-r", "@", "-p", "--git"]
 fa = ["file", "annotate"]
 fc = ["file", "chmod"]
 fl = ["file", "list"]
+float-cap = ["util", "exec", "--", "jj-float-cap"]
 fresh = ["new", "trunk()"]
-focus = ["config", "set", "--repo", "revset-aliases.\"trunk()\""]
 fs = ["file", "show"]
 fx = ["fix"]
 gcl = ["git", "clone"]
 gf = ["git", "fetch"]
+get = ["config", "get"]
 gp = ["git", "push"]
 gpb = ["git", "push", "--bookmark"]
 gpc = ["git", "push", "--change"]
@@ -56,24 +55,20 @@ nna = ["new", "--no-edit", "-A"]
 nnb = ["new", "--no-edit", "-B"]
 nx = ["next"]
 ol = ["op", "log"]
-open = ["log", "-r", "open()"]
 pv = ["prev"]
-# Rebase every mutable root. Useful for repo-wide cleanup, dangerous in
-# colocated repos with unrelated draft stacks.
-rat = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
-# Safer default: rebase only the current stack.
-restack = ["rebase", "-s", "roots(stack())", "-d", "trunk()"]
 rb = ["rebase"]
 rbd = ["rebase", "-d"]
 rbr = ["rebase", "-r"]
 rbs = ["rebase", "-s"]
-rot = ["rebase", "-d", "trunk()"]
+rc = ["rebase", "-r", "@", "-d", "trunk()"]
+rst = ["rebase", "-s", "roots(stack())", "-d", "trunk()"]
+ra = ["rebase", "-s", "roots(mutable())", "-d", "trunk()"]
 rs = ["resolve"]
 rsl = ["resolve", "--list"]
 rsr = ["resolve", "-r"]
 s = ["show"]
-sandwich = ["rebase", "-r", "@", "-d", "trunk()"]
 sg = ["show", "--git"]
+set = ["config", "set", "--repo"]
 sig = [
   "log",
   "--template",
@@ -81,19 +76,25 @@ sig = [
 ]
 sp = ["split"]
 sq = ["squash"]
+sqd = ["squash", "--from", "@-", "--into", "@"]
+squ = ["squash", "--from", "@", "--into", "@-"]
 ss = ["show", "--summary"]
 stack = ["log", "-r", "stack()"]
 swap = ["rebase", "-r", "@-", "-A", "@"]
-tug = [
-  "bookmark",
-  "move",
-  "--from",
-  "closest_bookmark(@)",
-  "--to",
-  "closest_pushable(@)",
-]
-unfocus = ["config", "unset", "--repo", "revset-aliases.\"trunk()\""]
+topic = ["config", "set", "--repo", "scope.topic"]
+tug = ["util", "exec", "--", "jj-tug"]
+trunk = ["config", "set", "--repo", "revset-aliases.\"trunk()\""]
+unscope = ["util", "exec", "--", "jj-unscope"]
+uncap = ["config", "unset", "--repo", "scope.cap"]
+untopic = ["config", "unset", "--repo", "scope.topic"]
+untrunk = ["config", "unset", "--repo", "revset-aliases.\"trunk()\""]
+unset = ["config", "unset", "--repo"]
 w = ["workspace", "list"]
+ws = ["workspace"]
+wsa = ["workspace", "add"]
+wsl = ["workspace", "list"]
+wsf = ["workspace", "forget"]
+wsu = ["workspace", "update-stale"]
 
 [git]
 sign-on-push = false
@@ -102,16 +103,12 @@ write-change-id-header = false
 [revset-aliases]
 "closest_bookmark(to)" = "heads(::to & bookmarks())"
 "closest_pushable(to)" = "heads(::to & mutable() & ~description(exact:\"\") & (~empty() | merges()))"
-"draft()" = "mutable() ~ ::remote_bookmarks()"
 "immutable_heads()" = "present(trunk()) | tags() | (untracked_remote_bookmarks() ~ untracked_remote_bookmarks(remote='rad') ~ untracked_remote_bookmarks(regex:'^patch(es)/', remote='rad'))"
 "jj_git_junk()" = "heads(mutable() & description(exact:\"\")) ~ (empty() | @ | bookmarks() | remote_bookmarks())"
 "mine()" = "author(exact:\"67085791+mulatta@users.noreply.github.com\")"
-"open()" = "stack() & draft()"
-"ready()" = "heads(stack()) & draft() & ~wip()"
 "stack()" = "trunk()..@"
 "trunk()" = "latest(present(master@rad) | present(main@rad) | present(master@upstream) | present(main@upstream) | present(main@origin) | present(master@origin) | root())"
 "unpushed()" = "remote_bookmarks()..@"
-"wip()" = "description(glob:\"wip:*\") | description(glob:\"WIP:*\")"
 
 [template-aliases]
 "format_short_id(id)" = "id.shortest(8)"
@@ -119,9 +116,26 @@ write-change-id-header = false
 "format_signature_status(sig)" = "if(sig, sig.status(), \"unsigned\")"
 "format_timestamp(timestamp)" = "timestamp.ago()"
 
+[colors]
+"annotate recent commit author timestamp format" = "green"
+"annotate stale commit author timestamp format" = "yellow"
+"annotate old commit author timestamp format" = "red"
+
 [templates]
 draft_commit_description = "concat(\n  builtin_draft_commit_description,\n  \"\\nJJ: ignore-rest\\n\",\n  diff.git(),\n)\n"
-file_annotate = "commit_id.short() ++ \" (\" ++\nauthor.name() ++ \" \" ++\nauthor.timestamp().ago() ++\n\") \"\n"
+file_annotate = '''
+commit.commit_id().short(8) ++ " " ++
+if(
+  commit.author().timestamp().before("3 months ago"),
+  label("annotate old", commit.author().timestamp().format("%Y-%m-%d")),
+  if(
+    commit.author().timestamp().before("1 month ago"),
+    label("annotate stale", commit.author().timestamp().format("%Y-%m-%d")),
+    label("annotate recent", commit.author().timestamp().format("%Y-%m-%d"))
+  )
+) ++ " " ++
+content
+'''
 
 [ui]
 default-command = ["log", "-r", "trunk() | stack()", "--reversed"]

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v jj >/dev/null 2>&1; then
+  echo "jj-tug: jj not found in PATH" >&2
+  exit 127
+fi
+
+topic=$(jj config get scope.topic 2>/dev/null || true)
+if [[ -z "$topic" ]]; then
+  echo "jj-tug: scope.topic not set" >&2
+  echo "Set it with: jj topic <bookmark>" >&2
+  exit 1
+fi
+
+jj bookmark move "exact:$topic" --to 'closest_pushable(@)' "$@"
