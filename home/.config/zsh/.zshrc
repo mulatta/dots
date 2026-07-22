@@ -108,12 +108,13 @@ _github_repo_dir() {
 
 ## Jujutsu GitHub workflows
 rebase() {
-  if (( $# != 0 )); then
-    echo "Usage: rebase" >&2
+  if (( $# > 1 )); then
+    echo "Usage: rebase [remote]" >&2
     return 1
   fi
 
-  jj git fetch --remote origin && jj rebase -s 'roots(mutable())' -d 'trunk()'
+  local remote=${1:-origin}
+  jj git fetch --remote "$remote" && jj rebase -s 'roots(mutable())' -d 'trunk()'
 }
 
 clone() {
