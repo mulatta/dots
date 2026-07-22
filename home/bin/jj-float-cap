@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v jj >/dev/null 2>&1; then
+  echo "jj-float-cap: jj not found in PATH" >&2
+  exit 127
+fi
+
+cap=$(jj config get scope.cap 2>/dev/null || true)
+if [[ -z "$cap" ]]; then
+  echo "jj-float-cap: scope.cap not set" >&2
+  echo "Set it with: jj cap <revset>" >&2
+  exit 1
+fi
+
+jj rebase -r "$cap" -d "heads($cap..@)" "$@"

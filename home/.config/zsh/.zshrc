@@ -518,7 +518,61 @@ fi
 # jujutsu completion (dynamic - includes aliases)
 if command -v jj &>/dev/null; then
   source <(COMPLETE=zsh jj)
-  compdef j=jj
+
+  _jj_bookmark_names() {
+    local -a bookmarks
+    bookmarks=("${(@f)$(command jj bookmark list -T 'name ++ "\n"' 2>/dev/null | sort -u)}")
+    _describe 'bookmarks' bookmarks
+  }
+
+  _jj_dynamic_completion() {
+    local _CLAP_COMPLETE_INDEX=$((CURRENT - 1))
+    local _CLAP_IFS=$'\n'
+    local -a completions dirs other
+    local completion value desc dir_no_slash
+
+    completions=("${(@f)$(
+      _CLAP_IFS="$_CLAP_IFS" \
+        _CLAP_COMPLETE_INDEX="$_CLAP_COMPLETE_INDEX" \
+        COMPLETE="zsh" \
+        command jj -- "${words[@]}" 2>/dev/null
+    )}")
+
+    if [[ -n $completions ]]; then
+      for completion in $completions; do
+        value="${completion%%:*}"
+        if [[ "$value" == */ ]]; then
+          dir_no_slash="${value%/}"
+          if [[ "$completion" == *:* ]]; then
+            desc="${completion#*:}"
+            dirs+=("$dir_no_slash:$desc")
+          else
+            dirs+=("$dir_no_slash")
+          fi
+        else
+          other+=("$completion")
+        fi
+      done
+      [[ -n $dirs ]] && _describe 'values' dirs -S '/' -r '/'
+      [[ -n $other ]] && _describe 'values' other
+    fi
+  }
+
+  _jj_with_scope_aliases() {
+    case "${words[2]}" in
+      cap|topic|trunk)
+        if (( CURRENT == 3 )); then
+          _jj_bookmark_names
+          return
+        fi
+        ;;
+    esac
+
+    _jj_dynamic_completion "$@"
+  }
+
+  compdef _jj_with_scope_aliases jj
+  compdef _jj_with_scope_aliases j
 fi
 
 # atuin history
