@@ -692,11 +692,11 @@
     "pi-agent-extensions": {
       "flake": false,
       "locked": {
-        "lastModified": 1781528793,
-        "narHash": "sha256-sWFbRQ6xa1zpB1/F3RgFN+BcNgBau/5KhYNcHCLpA1E=",
+        "lastModified": 1784648766,
+        "narHash": "sha256-1WE2tW4S6cwEqyijjuSX5IwLqeMjILdg0Ayyd6EW3G4=",
         "owner": "rytswd",
         "repo": "pi-agent-extensions",
-        "rev": "8ab1546585b0ed117ec090675ed2eccdeb19cdca",
+        "rev": "67db726c29c8c9c556caf90fe916ccfb42d3857c",
         "type": "github"
       },
       "original": {
