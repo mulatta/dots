@@ -1,0 +1,106 @@
+# herdr config shaped after ~/.tmux.conf: same prefix, cwd-preserving splits,
+# vim pane navigation, workspace picker, and popup scratch shells.
+
+onboarding = false
+
+[terminal]
+new_cwd = "follow"
+
+[keys]
+prefix = "ctrl+space"
+
+split_horizontal = "prefix+double_quote"
+split_vertical = "prefix+percent"
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+switch_tab = "prefix+1..9"
+
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+close_pane = "prefix+x"
+close_tab = "prefix+q"
+close_workspace = "prefix+shift+d"
+
+copy_mode = "prefix+["
+edit_scrollback = "prefix+e"
+detach = "prefix+d"
+reload_config = "prefix+r"
+zoom = "prefix+z"
+resize_mode = "prefix+alt+r"
+cycle_pane_next = "prefix+o"
+last_pane = "prefix+semicolon"
+cycle_pane_previous = "prefix+shift+o"
+rename_tab = "prefix+shift+t"
+rename_pane = "prefix+shift+p"
+toggle_sidebar = "prefix+b"
+help = "prefix+?"
+
+workspace_picker = "prefix+w"
+new_workspace = "prefix+shift+c"
+open_worktree = "prefix+shift+s"
+switch_workspace = "prefix+shift+1..9"
+
+[[keys.command]]
+key = "prefix+s"
+type = "plugin_action"
+command = "fullerzz.sesh.open-picker"
+description = "sesh picker"
+
+[[keys.command]]
+key = "prefix+shift+l"
+type = "plugin_action"
+command = "fullerzz.sesh.last"
+description = "last sesh workspace"
+
+[[keys.command]]
+key = "prefix+0"
+type = "shell"
+command = "sesh connect --root ."
+description = "root sesh workspace"
+
+[[keys.command]]
+key = "prefix+ctrl+q"
+type = "shell"
+command = "herdr server stop"
+description = "stop herdr server"
+
+[[keys.command]]
+key = "prefix+t"
+type = "popup"
+command = "exec \"${SHELL:-sh}\""
+description = "scratch terminal"
+width = "80%"
+height = "70%"
+
+[[keys.command]]
+key = "prefix+shift+r"
+type = "popup"
+command = "tuicr --no-update-check -w || tuicr --no-update-check"
+description = "tuicr code review"
+width = "90%"
+height = "85%"
+
+[theme]
+name = "catppuccin-macchiato"
+auto_switch = true
+dark_name = "catppuccin-macchiato"
+light_name = "catppuccin-latte"
+
+[ui]
+mouse_capture = true
+copy_on_select = true
+confirm_close = true
+prompt_new_tab_name = false
+
+[ui.toast]
+delivery = "herdr"
+
+[advanced]
+scrollback_limit_bytes = 20000000
+
+[worktrees]
+directory = "~/.herdr/worktrees"
