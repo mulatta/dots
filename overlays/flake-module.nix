@@ -84,7 +84,6 @@
             msmtp = final.msmtp-with-sent;
           };
           crabfit-cli = inputs.skillz.packages.${system}.crabfit-cli;
-          nodePath = "${prev.callPackage ../home/.pi/agent/default.nix { }}/node_modules";
           miniflux-cli = inputs.skillz.packages.${system}.miniflux-cli;
           vikunja-cli = inputs.skillz.packages.${system}.vikunja-cli;
           biorefs-cli = inputs.skillz.packages.${system}.biorefs-cli;

@@ -31,7 +31,6 @@
   util-linux,
   bubblewrap,
   pi,
-  nodePath ? null,
 }:
 
 let
@@ -89,7 +88,6 @@ python3Packages.buildPythonApplication {
       --set PIM_TOOLS_PATH ${lib.escapeShellArg toolsPath} \
       --set PIM_PI_BIN ${pi}/bin/pi \
       --set PIM_SKILL_PATHS ${lib.escapeShellArg "${crabfit-cli}/share/skills/crabfit-cli:${miniflux-cli}/share/skills/miniflux-cli:${vikunja-cli}/share/skills/vikunja-cli:${biorefs-cli}/share/skills/biorefs-cli:${pymol-cli}/share/skills/pymol-cli"} \
-      ${lib.optionalString (nodePath != null) "--set NODE_PATH ${lib.escapeShellArg nodePath} \\"}
       --prefix PATH : ${lib.makeBinPath runtimeDeps}
 
     runHook postInstall
