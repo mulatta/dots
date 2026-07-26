@@ -7,6 +7,7 @@ let
   inherit (llmAgents)
     aiPkgs
     claudeCode
+    herdrPackage
     skillzPkgs
     ;
 
@@ -41,7 +42,7 @@ in
       aiPkgs.jscpd
       aiPkgs.officecli
       aiPkgs.tuicr
-      aiPkgs.workmux
+      herdrPackage
       aiPkgs.zat
     ];
 }

@@ -32,6 +32,8 @@
           instagram-cli
           instant-deploy
           ;
+        herdr-sesh = pkgs.callPackage ./herdr-sesh { };
+        herdr-autoname = pkgs.callPackage ./herdr-autoname { };
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
         inherit (pkgs)
