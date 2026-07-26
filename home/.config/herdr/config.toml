@@ -44,6 +44,12 @@ new_workspace = "prefix+shift+c"
 open_worktree = "prefix+shift+s"
 switch_workspace = "prefix+shift+1..9"
 
+# In sidebar/navigate mode, use vim keys for the spaces list.
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
+navigate_pane_left = "h"
+navigate_pane_right = "l"
+
 [[keys.command]]
 key = "prefix+s"
 type = "plugin_action"
@@ -104,3 +110,9 @@ scrollback_limit_bytes = 20000000
 
 [worktrees]
 directory = "~/.herdr/worktrees"
+
+[experimental]
+# Temporarily switch macOS CJK IME to an ASCII layout while prefix bindings run.
+switch_ascii_input_source_in_prefix = true
+# Keep outer terminal cursor shape unchanged; IME source switching is enough.
+reveal_hidden_cursor_for_cjk_ime = false
