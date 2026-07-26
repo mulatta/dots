@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Open a file:// URI (or plain path) in helix inside a Herdr pane."""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import urllib.parse
+from pathlib import Path
+
+
+def resolve_exe(name: str) -> str:
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        exe = Path(directory) / name
+        if exe.exists() and os.access(exe, os.X_OK):
+            return str(exe)
+    fallback = Path.home() / ".nix-profile" / "bin" / name
+    return str(fallback)
+
+
+def parse_target(raw: str) -> tuple[Path, int | None, int | None]:
+    if raw.startswith("file://"):
+        parsed = urllib.parse.urlparse(raw)
+        path = Path(urllib.parse.unquote(parsed.path))
+        fragment = parsed.fragment
+    else:
+        path_text, sep, fragment = raw.partition("#")
+        path = Path(path_text).expanduser()
+        if not sep:
+            fragment = ""
+
+    line = col = None
+    if fragment:
+        m = re.search(r"(?:line=)?(\d+)(?::(?:column=)?(\d+))?", fragment)
+        if m:
+            line = int(m.group(1))
+            col = int(m.group(2)) if m.group(2) else None
+    return path.resolve(), line, col
+
+
+def editor_command(path: Path, line: int | None, col: int | None) -> str:
+    hx = resolve_exe("hx")
+    target = str(path)
+    if line is not None:
+        target += f":{line}"
+        if col is not None:
+            target += f":{col}"
+    return shlex.join([hx, target])
+
+
+def herdr(*args: str) -> str:
+    proc = subprocess.run(
+        [resolve_exe("herdr"), *args], check=True, capture_output=True, text=True
+    )
+    return proc.stdout.strip()
+
+
+def split_pane(cwd: Path) -> str:
+    args = [
+        "pane",
+        "split",
+        "--direction",
+        "right",
+        "--cwd",
+        str(cwd),
+        "--focus",
+    ]
+    try:
+        out = herdr(*args, "--json")
+        data = json.loads(out)
+        for key in ("pane_id", "id"):
+            if key in data:
+                return str(data[key])
+    except Exception:
+        out = herdr(*args)
+
+    m = re.search(r"\b\d+-\d+\b", out)
+    if not m:
+        raise RuntimeError(f"could not parse herdr pane id from: {out!r}")
+    return m.group(0)
+
+
+def open_in_herdr(path: Path, line: int | None, col: int | None) -> None:
+    pane = split_pane(path.parent)
+    herdr("pane", "run", pane, editor_command(path, line, col))
+
+
+def open_new_terminal(path: Path, line: int | None, col: int | None) -> None:
+    ghostty = resolve_exe("ghostty")
+    cmd = f"cd {shlex.quote(str(path.parent))} && {editor_command(path, line, col)}"
+    os.execv(ghostty, [ghostty, "-e", resolve_exe("sh"), "-lc", cmd])
+
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        sys.exit("usage: herdr-open-file <file-uri-or-path>")
+    path, line, col = parse_target(sys.argv[1])
+    try:
+        open_in_herdr(path, line, col)
+    except Exception:
+        open_new_terminal(path, line, col)
+
+
+if __name__ == "__main__":
+    main()
