@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (llmAgents) aiPkgs skillzPkgs;
+  inherit (llmAgents) aiPkgs herdrPackage skillzPkgs;
 
   # officecli ships its skill text in-source and CI keeps it byte-identical to
   # what the binary emits, so source it from officecli.src instead of vendoring
@@ -51,6 +51,12 @@ in
   home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
   home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
     "${aiPkgs.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
+
+  # herdr's official agent skill teaches agents to spawn panes/worktrees and
+  # wait for their results through the herdr CLI.
+  home.file.".claude/skills/herdr/SKILL.md" = lib.mkIf pkgs.stdenv.isLinux {
+    source = "${herdrPackage.src}/SKILL.md";
+  };
 
   home.file.".claude/skills/jj-forklift/SKILL.md".text = ''
     ---
