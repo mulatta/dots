@@ -8,7 +8,6 @@
 let
   inherit (llmAgents) aiPkgs herdrPackage;
   pi-ext = llmAgents.pi-agent-extensions;
-  piAgentDeps = pkgs.callPackage ../../../home/.pi/agent/default.nix { };
 in
 {
   home.file.".pi/agent/extensions/direnv.ts".source = "${pi-ext}/direnv/index.ts";
@@ -26,21 +25,6 @@ in
   home.file.".pi/agent/extensions/herdr-agent-state.ts" = lib.mkIf pkgs.stdenv.isLinux {
     source = "${herdrPackage.src}/src/integration/assets/pi/herdr-agent-state.ts";
   };
-
-  home.activation.piAgentNodeModules = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    agent_package="$HOME/.pi/agent/package.json"
-    if [ ! -e "$agent_package" ]; then
-      echo "pi: skipping node_modules link; $agent_package does not exist" >&2
-    else
-      agent_dir="$(${pkgs.coreutils}/bin/dirname "$(${pkgs.coreutils}/bin/readlink -f "$agent_package")")"
-      node_modules="$agent_dir/node_modules"
-      if [ -e "$node_modules" ] && [ ! -L "$node_modules" ]; then
-        echo "pi: refusing to replace non-symlink $node_modules" >&2
-        exit 1
-      fi
-      ${pkgs.coreutils}/bin/ln -sfnT ${piAgentDeps}/node_modules "$node_modules"
-    fi
-  '';
 
   home.packages = [
     (pkgs.writeShellScriptBin "pi" ''

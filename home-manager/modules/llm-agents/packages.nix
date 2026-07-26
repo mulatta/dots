@@ -27,6 +27,7 @@ in
       claude-md # dots overlay
       pim # dots overlay
       pueue
+      bun
     ])
     ++ [
       claudeCode # custom wrapper, flake package output
