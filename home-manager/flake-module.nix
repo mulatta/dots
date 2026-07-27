@@ -26,7 +26,7 @@
           modules = [
             {
               imports = extraModules ++ [
-                ./profiles/base.nix
+                ./common.nix
                 inputs.sops-nix.homeManagerModules.sops
                 inputs.nix-index-database.homeModules.nix-index
                 { programs.nix-index-database.comma.enable = true; }
@@ -53,7 +53,7 @@
           declare -A profiles=(
             ["rhesus"]="macos"
             ["psi"]="psi"
-            ["malt"]="base"
+            ["malt"]="malt"
           )
           host=$(hostname -s)
           profile=''${profiles[$host]:-base}
@@ -109,12 +109,13 @@
 
       legacyPackages.homeConfigurations = {
         base = mkHomeConfig { };
+        malt = mkHomeConfig { extraModules = [ ./malt.nix ]; };
       }
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") {
-        macos = mkHomeConfig { extraModules = [ ./profiles/macos.nix ]; };
+        macos = mkHomeConfig { extraModules = [ ./macos.nix ]; };
       }
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
-        psi = mkHomeConfig { extraModules = [ ./profiles/psi.nix ]; };
+        psi = mkHomeConfig { extraModules = [ ./psi.nix ]; };
       };
     };
 }
