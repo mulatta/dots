@@ -67,9 +67,16 @@ diff --git a/internal/integration/webhook/webhook.go b/internal/integration/webh
 index 87afc2e..044d255 100644
 --- a/internal/integration/webhook/webhook.go
 +++ b/internal/integration/webhook/webhook.go
-@@ -25,0 +26 @@ const (
+@@ -17,4 +17,5 @@ import (
+ const (
+ 	NewEntriesEventType = "new_entries"
+ 	SaveEntryEventType  = "save_entry"
 +	StarEntryEventType  = "star_entry"
-@@ -38,2 +39,10 @@ func (c *Client) SendSaveEntryWebhookEvent(entry *model.Entry) error {
+ )
+@@ -35,8 +36,16 @@ func NewClient(webhookURL, webhookSecret string) *Client {
+ }
+ 
+ func (c *Client) SendSaveEntryWebhookEvent(entry *model.Entry) error {
 -	return c.makeRequest(SaveEntryEventType, &WebhookSaveEntryEvent{
 -		EventType: SaveEntryEventType,
 +	return c.sendEntryWebhookEvent(SaveEntryEventType, entry)
@@ -82,6 +89,9 @@ index 87afc2e..044d255 100644
 +func (c *Client) sendEntryWebhookEvent(eventType string, entry *model.Entry) error {
 +	return c.makeRequest(eventType, &WebhookSaveEntryEvent{
 +		EventType: eventType,
+ 		Entry: &WebhookEntry{
+ 			ID:          entry.ID,
+ 			UserID:      entry.UserID,
 diff --git a/internal/ui/entry_toggle_starred.go b/internal/ui/entry_toggle_starred.go
 index af1a72e..98632c9 100644
 --- a/internal/ui/entry_toggle_starred.go
