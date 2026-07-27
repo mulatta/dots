@@ -12,6 +12,7 @@
     ../../nixosModules/disko-zfs.nix
     ../../nixosModules/radicle-mulatta.nix
     ./modules/backup.nix
+    ./modules/hermes
     ./modules/home-assistant.nix
     ./modules/jellyfin
     ./modules/linkwarden.nix
