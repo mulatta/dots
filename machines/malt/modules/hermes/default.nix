@@ -97,14 +97,44 @@ in
         [
           "d ${stateDir} 0750 hermes hermes -"
           "d ${stateDir}/.hermes 0750 hermes hermes -"
+          "d ${stateDir}/.hermes/skills 0750 hermes hermes -"
+          "f ${stateDir}/.hermes/skills/.no-bundled-skills 0640 hermes hermes -"
           "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
         ];
+
+      systemd.services.hermes-skill-policy = {
+        description = "Apply Nelson's declarative skill policy";
+        wantedBy = [ "multi-user.target" ];
+        before = [
+          "hermes.service"
+          "hermes-dashboard.service"
+        ];
+
+        path = runtimePath;
+        environment = runtimeEnv;
+
+        serviceConfig = {
+          Type = "oneshot";
+          User = "hermes";
+          Group = "hermes";
+          WorkingDirectory = stateDir;
+          RemainAfterExit = true;
+          ExecStart = pkgs.writeShellScript "hermes-skill-policy" ''
+            set -euo pipefail
+            exec ${lib.getExe hermesPkg} skills opt-out --remove --yes
+          '';
+        };
+      };
 
       systemd.services.hermes = {
         description = "Hermes Agent Slack gateway";
         wantedBy = [ "multi-user.target" ];
-        after = [ "network-online.target" ];
+        after = [
+          "hermes-skill-policy.service"
+          "network-online.target"
+        ];
         wants = [ "network-online.target" ];
+        requires = [ "hermes-skill-policy.service" ];
 
         path = runtimePath;
         environment = runtimeEnv;
@@ -133,8 +163,12 @@ in
       systemd.services.hermes-dashboard = {
         description = "Hermes Agent web dashboard";
         wantedBy = [ "multi-user.target" ];
-        after = [ "network-online.target" ];
+        after = [
+          "hermes-skill-policy.service"
+          "network-online.target"
+        ];
         wants = [ "network-online.target" ];
+        requires = [ "hermes-skill-policy.service" ];
 
         path = runtimePath;
         environment = runtimeEnv;
