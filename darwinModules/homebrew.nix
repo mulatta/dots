@@ -24,7 +24,6 @@
     "aldente"
     "alt-tab"
     "bitwarden"
-    "chatgpt"
     "claude"
     "cleanshot"
     "codex-app"
