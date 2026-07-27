@@ -1,12 +1,10 @@
 {
-  lib,
   pkgs,
   llmAgents,
-  selfPkgs,
   ...
 }:
 let
-  inherit (llmAgents) aiPkgs herdrPackage;
+  inherit (llmAgents) aiPkgs;
   pi-ext = llmAgents.pi-agent-extensions;
 in
 {
@@ -18,13 +16,6 @@ in
   home.file.".pi/agent/extensions/permission-gate".source = "${pi-ext}/permission-gate";
   home.file.".pi/agent/extensions/stash".source = "${pi-ext}/stash";
   home.file.".pi/agent/extensions/statusline".source = "${pi-ext}/statusline";
-
-  # herdr reports agent state/session to panes through this Pi extension.
-  home.file.".config/herdr/autoname-hook.zsh".source = "${selfPkgs.herdr-autoname}/shell/hook.zsh";
-
-  home.file.".pi/agent/extensions/herdr-agent-state.ts" = lib.mkIf pkgs.stdenv.isLinux {
-    source = "${herdrPackage.src}/src/integration/assets/pi/herdr-agent-state.ts";
-  };
 
   home.packages = [
     (pkgs.writeShellScriptBin "pi" ''
