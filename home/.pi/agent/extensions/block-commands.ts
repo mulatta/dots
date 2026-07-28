@@ -7,7 +7,7 @@
 import {
   type ExtensionAPI,
   isToolCallEventType,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { pipelines, simpleCommands } from "./_shell.ts";
 
 const HOME = process.env.HOME;

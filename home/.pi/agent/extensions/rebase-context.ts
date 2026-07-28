@@ -4,7 +4,7 @@
  * Injects live git context (current branch, status, log) so the agent
  * has full awareness without wasting a tool-call turn.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const REBASE_PROMPT = `
 Rebase the current branch.

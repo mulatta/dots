@@ -1,6 +1,6 @@
 // Keeps lastChangelogVersion stable to avoid noise in dotfiles git history
 // See: https://github.com/badlogic/pi-mono/issues/720
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
