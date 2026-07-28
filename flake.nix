@@ -113,7 +113,7 @@
     };
 
     paneru = {
-      url = "github:karinushka/paneru/v0.4.3";
+      url = "github:karinushka/paneru/v0.4.4";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nix-darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
