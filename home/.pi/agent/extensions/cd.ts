@@ -4,8 +4,8 @@ import {
   type ExtensionCommandContext,
   type SessionEntry,
   type SessionHeader,
-} from "@mariozechner/pi-coding-agent";
-import type { AutocompleteItem } from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-coding-agent";
+import type { AutocompleteItem } from "@earendil-works/pi-tui";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { realpath, readdir, stat, unlink, writeFile } from "node:fs/promises";

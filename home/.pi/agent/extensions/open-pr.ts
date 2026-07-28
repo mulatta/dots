@@ -6,7 +6,7 @@
  * Preloads git diff, log, and status so the agent can write the description
  * without spending tool-call turns gathering context.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { currentBranch, type Exec, git, workmuxBase } from "./_git.ts";

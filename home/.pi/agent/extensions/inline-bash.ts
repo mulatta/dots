@@ -12,7 +12,7 @@
  *
  * Regular !command syntax (whole-line bash) is preserved unchanged.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const PATTERN = /!\{([^}]+)\}/g;
 const TIMEOUT_MS = 30000;

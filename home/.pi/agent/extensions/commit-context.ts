@@ -4,7 +4,7 @@
  * Injects live `git status` and `git log` output so the agent has full
  * context without wasting a tool-call turn.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const COMMIT_PROMPT = `
 Commit the changes using this style:

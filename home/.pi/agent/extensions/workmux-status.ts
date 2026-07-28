@@ -10,7 +10,7 @@
  * "waiting" state when dangerous commands need user approval.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export default function (pi: ExtensionAPI) {
   const setStatus = async (status: "working" | "waiting" | "done") => {

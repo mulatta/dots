@@ -4,7 +4,7 @@
  * Injects live git context (current branch, base branch, status, log)
  * so the agent has full awareness without wasting a tool-call turn.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { currentBranch, localBase } from "./_git.ts";
 
 const MERGE_PROMPT = `

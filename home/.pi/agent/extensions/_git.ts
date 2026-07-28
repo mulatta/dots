@@ -6,7 +6,7 @@
  * them keeps the fallback order consistent and avoids the .code/.exitCode
  * drift that already crept in once.
  */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export type Exec = ExtensionAPI["exec"];
 
