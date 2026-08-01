@@ -141,11 +141,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    treehouse = {
-      url = "github:kunchenguid/treehouse";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     zsh-helix-mode.url = "github:Multirious/zsh-helix-mode";
 
     # Agentic tools
