@@ -3,6 +3,7 @@
   lib,
   self,
   system,
+  inputs,
   ...
 }:
 {
@@ -38,6 +39,7 @@
       pkgs.obsidian
       pkgs.tailscale
       pkgs.typora
+      inputs.treehouse.packages.${system}.default
     ];
 
   services.nostr-chat = {
