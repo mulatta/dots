@@ -32,6 +32,10 @@
       (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
       pkgs.basalt
       pkgs.czkawka-full
+      pkgs.colima
+      pkgs.docker-client
+      pkgs.docker-credential-helpers
+      pkgs.regctl
       pkgs.dorion
       pkgs.google-chrome
       pkgs.mpv
