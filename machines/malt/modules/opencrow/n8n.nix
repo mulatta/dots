@@ -65,9 +65,9 @@ in
   services.opencrow.skills.slack = ./skills/slack;
   services.opencrow.skills.vikunja = ./skills/vikunja;
   services.opencrow.skills.linkwarden = ./skills/linkwarden;
-  services.opencrow.skills.buildbot-pr-check = "${
-    self.inputs.skillz.packages.${system}.buildbot-pr-check
-  }/share/skills/buildbot-pr-check";
+  services.opencrow.skills.nixbot-cli = "${
+    self.inputs.nixbot.packages.${system}.nixbot-cli
+  }/share/skills/nixbot-cli";
 
   services.opencrow.environment = {
     OPENCROW_INSTANCE_ID = "noa";
@@ -75,7 +75,7 @@ in
 
   services.opencrow.extraPackages = [
     self.packages.${system}.n8n-hooks
-    self.inputs.skillz.packages.${system}.buildbot-pr-check
+    self.inputs.nixbot.packages.${system}.nixbot-cli
   ];
 
   containers.opencrow.config.systemd.tmpfiles.rules = [

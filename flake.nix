@@ -150,6 +150,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    nixbot = {
+      url = "git+https://github.com/Mic92/nixbot?shallow=1&ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     pi-agent-extensions = {
       url = "github:rytswd/pi-agent-extensions";
       flake = false;
