@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (llmAgents) aiPkgs skillzPkgs;
+  inherit (llmAgents) aiPkgs skillzPkgs nixbot-cli;
 
   # officecli ships its skill text in-source and CI keeps it byte-identical to
   # what the binary emits, so source it from officecli.src instead of vendoring
@@ -21,7 +21,6 @@ in
     enable = true;
     skills = [
       "biorefs-cli"
-      "buildbot-pr-check"
       "calendar-cli"
       "context7-cli"
       "crwl-cli"
@@ -42,6 +41,9 @@ in
   };
 
   home.file.".claude/skills/archify".source = "${pkgs.archify-cli}/share/skills/archify";
+
+  # nixbot-cli ships its agent skill alongside the binary.
+  home.file.".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
 
   # git-surgeon ships a skill teaching agents how to use its git primitives.
   home.file.".claude/skills/git-surgeon".source =

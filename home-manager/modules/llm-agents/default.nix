@@ -23,6 +23,7 @@ in
     inherit (inputs) pi-agent-extensions;
     inherit aiPkgs;
     skillzPkgs = inputs.skillz.packages.${system};
+    nixbot-cli = inputs.nixbot.packages.${system}.nixbot-cli;
     claudeCode = self.packages.${system}.claude-code;
   };
 }

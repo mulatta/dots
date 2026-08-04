@@ -8,6 +8,7 @@ let
     aiPkgs
     claudeCode
     skillzPkgs
+    nixbot-cli
     ;
 
   # On GPU hosts pkgs is rebuilt with cudaSupport=true (gpu-support.nix); rebuild
@@ -31,6 +32,7 @@ in
     ++ [
       claudeCode # custom wrapper, flake package output
       qmd # local binding; CUDA-grafted on GPU hosts
+      nixbot-cli
       skillzPkgs.biorefs-cli
       skillzPkgs.drawio-cli
       aiPkgs.apm
