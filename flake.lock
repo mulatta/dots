@@ -62,11 +62,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1780794233,
-        "narHash": "sha256-sjiMkmfyNeKhcvlmRIBD79zeovkHcttUffC8gwljb+E=",
+        "lastModified": 1785353042,
+        "narHash": "sha256-mnK0y2/hEG0jL+rjppi/4VMa87D8ihSkA4F99md3ahc=",
         "owner": "electrikmilk",
         "repo": "cherri",
-        "rev": "68f3f3feaf00768f7943f650b2230605355936ed",
+        "rev": "951c0bb3c34ef4e3d6cb2ce9a1bff35071c9a7a2",
         "type": "github"
       },
       "original": {
@@ -843,11 +843,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785175635,
-        "narHash": "sha256-AZGWHrS5zv/ymHeR6uDxZp15u2RDW8q/A90NB/8nOHg=",
+        "lastModified": 1785826167,
+        "narHash": "sha256-4Z7n5poqrgAeD+iWa19opX1BFRDQgty8vlL/wqyCAEk=",
         "owner": "mulatta",
         "repo": "skillz",
-        "rev": "2c74db7a307f2bf2dc45e6330575430f2d729559",
+        "rev": "3f911eb96755d3bdb54dbd66ab03299bdb06609b",
         "type": "github"
       },
       "original": {
