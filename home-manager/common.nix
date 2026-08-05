@@ -79,6 +79,7 @@
     gh-dash
     git
     git-lfs
+    git-absorb
     jujutsu
     mergiraf
 
