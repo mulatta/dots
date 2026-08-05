@@ -162,19 +162,18 @@ def prepare_repository(default_branch: str, upstream_remote: str) -> int:
     run(["git", "submodule", "update", "--init", "--recursive"], check=False)
 
     if not run_format_check():
-        if shutil.which("git-absorb"):
-            print_warning("Attempting to absorb formatting changes...")
-            run(
-                [
-                    "git",
-                    "absorb",
-                    "--force",
-                    "--and-rebase",
-                    "--base",
-                    f"{upstream_remote}/{default_branch}",
-                ],
-                check=False,
-            )
+        print_warning("Attempting to absorb formatting changes...")
+        run(
+            [
+                "git",
+                "absorb",
+                "--force",
+                "--and-rebase",
+                "--base",
+                f"{upstream_remote}/{default_branch}",
+            ],
+            check=False,
+        )
         if sys.stdin.isatty() and sys.stdout.isatty() and shutil.which("lazygit"):
             run(["lazygit"], check=False)
         return 1
