@@ -24,6 +24,13 @@ let
       allowedIPs = [ "10.100.0.1/32" ];
       persistentKeepalive = 25;
     }
+    {
+      # psi wg-admin
+      publicKey = "SracEMBfECbFgCQrFDK1YpsKiKrtEIIhi0jIRelEJT8=";
+      endpoint = "117.16.251.37:51820";
+      allowedIPs = [ "10.100.0.2/32" ];
+      persistentKeepalive = 25;
+    }
   ];
 
   wgQuickWrapper = pkgs.writeShellScript "wg-quick-wireguard-start" ''
