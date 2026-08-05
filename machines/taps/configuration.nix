@@ -37,6 +37,7 @@
     ./modules/backup.nix
     ./modules/nostr-relay.nix
     ./modules/ntfy.nix
+    ./modules/gitea-mq.nix
     ./modules/postgresql.nix
   ];
 
