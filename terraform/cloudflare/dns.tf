@@ -183,6 +183,16 @@ resource "cloudflare_dns_record" "home_a" {
 
 # cache.mulatta.io - managed by cloudflare_r2_custom_domain in r2.tf
 
+resource "cloudflare_dns_record" "mq_a" {
+  zone_id = local.zone_id
+  name    = "mq"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "gitea-mq merge queue"
+}
+
 resource "cloudflare_dns_record" "niks3_a" {
   zone_id = local.zone_id
   name    = "niks3"
