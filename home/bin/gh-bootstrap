@@ -2,9 +2,10 @@
 # gh-bootstrap — One-shot GitHub repo setup for Nix flake projects.
 #
 # Configures GitHub-side state that cannot live in the repository: merge and
-# Actions policy, the build-with-buildbot topic, updater App credentials, and
-# Buildbot branch rulesets. The auto-merge workflow stays in the flake template;
-# this script verifies that it uses github-actions[bot] and that gitea-mq owns
+# Actions policy, Nixbot repository enablement and its marker topic, updater App
+# credentials, and Nixbot branch rulesets. The auto-merge workflow stays in the
+# flake template; this script verifies that it uses github-actions[bot] and that
+# gitea-mq owns
 # the merge queue check.
 #
 # Usage:
@@ -170,7 +171,6 @@ install_updater_secrets() {
     return 0
   fi
 
-  command -v rbw >/dev/null || die "rbw is required to install updater credentials"
   app_id=$(rbw get "$entry" --field username)
   [[ "$app_id" =~ ^[0-9]+$ ]] || die "$entry username must contain the numeric App ID"
 
@@ -299,16 +299,19 @@ echo "    merge enabled; Actions read-only by default and cannot approve PRs"
 echo "==> [3/7] Updater App credentials..."
 install_updater_secrets
 
-echo "==> [4/7] Topics (build-with-buildbot)..."
+echo "==> [4/7] Nixbot..."
 EXISTING_TOPICS=$(gh api "repos/$REPO/topics" --jq '.names | join(",")')
 if grep -qw "build-with-buildbot" <<<"$EXISTING_TOPICS"; then
-  echo "    already present"
+  echo "    topic: already present"
 else
   ALL_TOPICS="$EXISTING_TOPICS,build-with-buildbot"
   TOPIC_JSON=$(tr ',' '\n' <<<"$ALL_TOPICS" | grep -v '^$' | jq -R . | jq -s '{"names": .}')
   gh api "repos/$REPO/topics" --method PUT --silent --input - <<<"$TOPIC_JSON"
-  echo "    added"
+  echo "    topic: added"
 fi
+
+nbo repo enable "github/$REPO" >/dev/null
+echo "    repository: enabled"
 
 echo "==> [5/7] Branch rulesets..."
 REMOTE_BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].name' 2>/dev/null || true)
