@@ -43,6 +43,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-grpc-store = {
+      url = "github:mulatta/nix-grpc-store/fix-darwin-plugin-loader-suffix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     # Package sources

@@ -3,6 +3,11 @@ keys:
   # on rhesus).
   - &rhesus age1730f3cxdyh56zw8xcvlmpa7u2x7353wu4u0e58kyx24rsefgp98sxehm6s
 creation_rules:
+  # Runtime secrets for the rhesus nix-darwin host.
+  - path_regex: sops/rhesus\.yaml
+    key_groups:
+      - age:
+          - *rhesus
   # Terraform deploy-time secrets (opentofu CLI on user laptop).
   - path_regex: terraform/secrets\.yaml
     key_groups:
