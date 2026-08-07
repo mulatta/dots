@@ -557,16 +557,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1786005178,
-        "narHash": "sha256-ANRBgXuqfLWy/uwZBi3HaPNOIoeV5CAEh1pd1iSweYo=",
-        "owner": "mulatta",
+        "lastModified": 1786011329,
+        "narHash": "sha256-BAiQNWvQAsSopEQPN4PVRjlTa+74WSsQkNK4Ct3Dwb4=",
+        "owner": "Mic92",
         "repo": "nix-grpc-store",
-        "rev": "6822335ba0a90c6efc63cf2b04d21cc98fa7c24c",
+        "rev": "cb05da58fcc930468698084d54fb3fab57a669a7",
         "type": "github"
       },
       "original": {
-        "owner": "mulatta",
-        "ref": "fix-darwin-plugin-loader-suffix",
+        "owner": "Mic92",
         "repo": "nix-grpc-store",
         "type": "github"
       }

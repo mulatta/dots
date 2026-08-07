@@ -44,7 +44,7 @@
     };
 
     nix-grpc-store = {
-      url = "github:mulatta/nix-grpc-store/fix-darwin-plugin-loader-suffix";
+      url = "github:Mic92/nix-grpc-store";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
