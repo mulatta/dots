@@ -1,0 +1,4 @@
+{
+  "extensions": ["~/.pi/agent/extensions", "!**/btw.ts"],
+  "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"]
+}

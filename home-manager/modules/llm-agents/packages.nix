@@ -42,6 +42,7 @@ in
       aiPkgs.git-surgeon
       aiPkgs.jscpd
       aiPkgs.officecli
+      aiPkgs.prime-agent
       aiPkgs.tuicr
       aiPkgs.zat
     ];
