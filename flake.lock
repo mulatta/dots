@@ -23,6 +23,29 @@
         "type": "github"
       }
     },
+    "bioinformatics-toolkits": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786267157,
+        "narHash": "sha256-MMrLhY26FU3p6FVw5ruWxj83+sRIMZoM2ThxV8JnFzc=",
+        "owner": "mulatta",
+        "repo": "bioinformatics-toolkits",
+        "rev": "db6b766a05361e6e1fe21ce3962c63aa133962fd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "bioinformatics-toolkits",
+        "type": "github"
+      }
+    },
     "bun2nix": {
       "inputs": {
         "flake-parts": [
@@ -896,6 +919,29 @@
         "type": "github"
       }
     },
+    "research-skills": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786284474,
+        "narHash": "sha256-AQGYi+wJvaZtSVhpjjAXO8ZJn0YSpnQ8bajCqk2Jsaw=",
+        "owner": "mulatta",
+        "repo": "research-skills",
+        "rev": "7f6bcbabb9f992a257eaa3379ce55dd2caf91503",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "research-skills",
+        "type": "github"
+      }
+    },
     "rhwp": {
       "inputs": {
         "nixpkgs": [
@@ -952,6 +998,7 @@
     "root": {
       "inputs": {
         "automation-runtime": "automation-runtime",
+        "bioinformatics-toolkits": "bioinformatics-toolkits",
         "clan-core": "clan-core",
         "direnv-instant": "direnv-instant",
         "disko": "disko",
@@ -974,6 +1021,7 @@
         "opencrow": "opencrow",
         "paneru": "paneru",
         "pi-agent-extensions": "pi-agent-extensions",
+        "research-skills": "research-skills",
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",

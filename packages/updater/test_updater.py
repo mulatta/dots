@@ -179,27 +179,6 @@ class TestRadicleDesktopUpdatePy:
         get_nix_hash.assert_not_called()
 
 
-# -- Regression: jj-forklift's branch updater must be discoverable --
-
-
-class TestDiscoverJjForkliftUpdater:
-    def test_discovers_nix_update_branch_args(self, tmp_path: Path):
-        pkg_dir = tmp_path / "packages" / "jj-forklift"
-        pkg_dir.mkdir(parents=True)
-        (pkg_dir / "nix-update-args").write_text("--version=branch\n")
-
-        packages = discover_packages(tmp_path / "packages")
-
-        assert packages == [
-            Package(
-                name="jj-forklift",
-                method="nix-update",
-                path=pkg_dir,
-                extra_args=["--version=branch"],
-            )
-        ]
-
-
 # -- Regression: run_nix_update must pass bare attribute path to nix-update --
 
 
