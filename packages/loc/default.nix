@@ -6,7 +6,7 @@
 
 rustPlatform.buildRustPackage {
   pname = "loc";
-  version = "0.5.0-unstable-2022-02-20";
+  version = "0.4.1-unstable-2022-02-20";
 
   src = fetchFromGitHub {
     owner = "cgag";
