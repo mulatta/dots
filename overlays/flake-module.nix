@@ -97,6 +97,7 @@
         instant-deploy = prev.callPackage ../packages/instant-deploy {
           clan-cli = inputs.clan-core.packages.${system}.clan-cli;
         };
+        loc = prev.callPackage ../packages/loc { };
         radicle-desktop = prev.callPackage ../packages/radicle-desktop { };
 
         # Tool bundles consumed by the helix/yazi modules.
