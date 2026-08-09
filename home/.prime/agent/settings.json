@@ -1,4 +1,11 @@
 {
-  "extensions": ["~/.pi/agent/extensions", "!**/btw.ts"],
-  "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"]
+  "extensions": ["~/.pi/agent/extensions", "!**/btw.ts", "!custom-footer.ts"],
+  "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"],
+  "prompts": ["~/.pi/agent/prompts"],
+  "theme": "tokyonight",
+  "themes": ["~/.pi/agent/themes"],
+  "hideThinkingBlock": true,
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-sol",
+  "recentModels": ["openai-codex/gpt-5.6-sol"]
 }
