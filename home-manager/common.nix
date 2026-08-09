@@ -136,8 +136,6 @@
   home.sessionVariables = {
     LC_COLLATE = "C.UTF-8";
     NIKS3_SERVER_URL = "https://niks3.mulatta.io";
-    # Fix macOS TMPDIR rotation causing watchman socket mismatch (#5817)
-    WATCHMAN_SOCK = "/tmp/watchman-${config.home.username}";
   };
 
   # rbw: headless default (TTY pinentry, 24h agent cache).
