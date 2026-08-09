@@ -26,7 +26,6 @@
     in
     [
       myPkgs.instagram-cli
-      myPkgs.jj-forklift
       myPkgs.loc
       myPkgs.radicle-desktop
       myPkgs.rbw-pinentry
