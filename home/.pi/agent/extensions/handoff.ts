@@ -187,7 +187,7 @@ export default function (pi: ExtensionAPI) {
         },
       );
 
-      if (result === null) {
+      if (result == null) {
         ctx.ui.notify("Cancelled", "info");
         return;
       }
@@ -207,7 +207,7 @@ export default function (pi: ExtensionAPI) {
           replacementCtx.ui.notify("Handoff ready. Submit when ready.", "info");
         },
       });
-      if (newSession.cancelled) {
+      if (newSession?.cancelled) {
         ctx.ui.notify("New session cancelled", "info");
       }
     },

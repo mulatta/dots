@@ -438,7 +438,7 @@ export default function cdCommand(pi: ExtensionAPI) {
         },
       });
 
-      if (result.cancelled) {
+      if (result?.cancelled) {
         try {
           await removeCreatedSession(relocated.sessionFile);
           ctx.ui.notify(`cd cancelled: ${displayPath(targetCwd)}`, "warning");
