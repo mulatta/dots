@@ -968,9 +968,6 @@
     },
     "rhwp-nextcloud": {
       "inputs": {
-        "flake-parts": [
-          "flake-parts"
-        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -982,11 +979,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782396218,
-        "narHash": "sha256-UrT7lEb/l0hEwg5tkKvJpeCOSU0fBTKxYOL3PQMG7BA=",
+        "lastModified": 1785946208,
+        "narHash": "sha256-ODdoe7mpEaZhjrhj9nJi6WOtnmGu3ghs6z62B8jJ+Zk=",
         "owner": "mulatta",
         "repo": "rhwp-nextcloud",
-        "rev": "fbb94dfe113333aa2024b03ab2cad4221f559d3e",
+        "rev": "f2b3d8de20476f75bfafcb673c111d229585e6b1",
         "type": "github"
       },
       "original": {
