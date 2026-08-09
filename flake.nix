@@ -147,12 +147,6 @@
     zsh-helix-mode.url = "github:Multirious/zsh-helix-mode";
 
     # Agentic tools
-    bioinformatics-toolkits = {
-      url = "github:mulatta/bioinformatics-toolkits";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     research-skills = {
       url = "github:mulatta/research-skills";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -6,7 +6,6 @@
 let
   inherit (llmAgents)
     aiPkgs
-    bioPkgs
     claudeCode
     skillzPkgs
     nixbot-cli
@@ -33,7 +32,6 @@ in
       claudeCode # custom wrapper, flake package output
       qmd # local binding; CUDA-grafted on GPU hosts
       nixbot-cli
-      bioPkgs.biomcp
       skillzPkgs.biorefs-cli
       skillzPkgs.drawio-cli
       aiPkgs.apm
