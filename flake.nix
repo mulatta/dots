@@ -154,6 +154,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    research-skills = {
+      url = "github:mulatta/research-skills";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     skillz = {
       url = "github:mulatta/skillz";
       inputs.nixpkgs.follows = "nixpkgs";

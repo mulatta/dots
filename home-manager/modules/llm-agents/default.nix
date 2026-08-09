@@ -11,6 +11,7 @@ let
 in
 {
   imports = [
+    inputs.research-skills.homeModules.default
     inputs.skillz.homeModules.default
     ./packages.nix
     ./pi.nix

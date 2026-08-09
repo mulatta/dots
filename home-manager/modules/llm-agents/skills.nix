@@ -26,6 +26,11 @@ let
   '';
 in
 {
+  programs.research-skills = {
+    enable = true;
+    skills = [ "pymol-cli" ];
+  };
+
   programs.skillz = {
     enable = true;
     skills = [
@@ -38,7 +43,6 @@ in
       "linkwarden-cli"
       "n8n-cli"
       "pexpect-cli"
-      "pymol-cli"
       "vikunja-cli"
     ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ "shortcuts-cli" ];

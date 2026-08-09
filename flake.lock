@@ -919,6 +919,29 @@
         "type": "github"
       }
     },
+    "research-skills": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786284474,
+        "narHash": "sha256-AQGYi+wJvaZtSVhpjjAXO8ZJn0YSpnQ8bajCqk2Jsaw=",
+        "owner": "mulatta",
+        "repo": "research-skills",
+        "rev": "7f6bcbabb9f992a257eaa3379ce55dd2caf91503",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "research-skills",
+        "type": "github"
+      }
+    },
     "rhwp": {
       "inputs": {
         "nixpkgs": [
@@ -998,6 +1021,7 @@
         "opencrow": "opencrow",
         "paneru": "paneru",
         "pi-agent-extensions": "pi-agent-extensions",
+        "research-skills": "research-skills",
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",
