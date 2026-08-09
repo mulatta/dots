@@ -31,6 +31,7 @@
           jj-forklift
           instagram-cli
           instant-deploy
+          loc
           ;
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
