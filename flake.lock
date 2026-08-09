@@ -23,6 +23,29 @@
         "type": "github"
       }
     },
+    "bioinformatics-toolkits": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786267157,
+        "narHash": "sha256-MMrLhY26FU3p6FVw5ruWxj83+sRIMZoM2ThxV8JnFzc=",
+        "owner": "mulatta",
+        "repo": "bioinformatics-toolkits",
+        "rev": "db6b766a05361e6e1fe21ce3962c63aa133962fd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "bioinformatics-toolkits",
+        "type": "github"
+      }
+    },
     "bun2nix": {
       "inputs": {
         "flake-parts": [
@@ -952,6 +975,7 @@
     "root": {
       "inputs": {
         "automation-runtime": "automation-runtime",
+        "bioinformatics-toolkits": "bioinformatics-toolkits",
         "clan-core": "clan-core",
         "direnv-instant": "direnv-instant",
         "disko": "disko",

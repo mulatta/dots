@@ -5,7 +5,16 @@
   ...
 }:
 let
-  inherit (llmAgents) aiPkgs skillzPkgs nixbot-cli;
+  inherit (llmAgents)
+    aiPkgs
+    bioPkgs
+    skillzPkgs
+    nixbot-cli
+    ;
+
+  biomcpSkill = pkgs.runCommand "biomcp-skill-${bioPkgs.biomcp.version}" { } ''
+    ${bioPkgs.biomcp}/bin/biomcp skill install "$out"
+  '';
 
   # officecli ships its skill text in-source and CI keeps it byte-identical to
   # what the binary emits, so source it from officecli.src instead of vendoring
@@ -50,6 +59,7 @@ in
     "${aiPkgs.git-surgeon}/share/git-surgeon/skills/git-surgeon";
 
   # Claude Code reads ~/.claude/skills directly; pi loads it via settings.json.
+  home.file.".claude/skills/biomcp".source = "${biomcpSkill}/skills/biomcp";
   home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
   home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
     "${aiPkgs.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
