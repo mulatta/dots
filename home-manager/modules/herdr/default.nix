@@ -45,7 +45,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
-    home.file.".claude/skills/herdr/SKILL.md".source = "${herdrSource}/SKILL.md";
+    home.file.".claude/skills/herdr/SKILL.md".source = "${herdrSource}/skills/herdr/SKILL.md";
     home.file.".pi/agent/extensions/herdr-agent-state.ts".source =
       "${herdrSource}/src/integration/assets/pi/herdr-agent-state.ts";
     home.file.".config/herdr/autoname-hook.zsh".source = "${
