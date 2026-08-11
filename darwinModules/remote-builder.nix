@@ -49,5 +49,18 @@ in
         "nixos-test"
       ];
     }
+    {
+      # Fallback path when the grpc dispatcher is unavailable.
+      hostName = "psi";
+      protocol = "ssh-ng";
+      sshUser = "root";
+      systems = [ "x86_64-linux" ];
+      maxJobs = 24;
+      supportedFeatures = [
+        "big-parallel"
+        "kvm"
+        "nixos-test"
+      ];
+    }
   ];
 }
