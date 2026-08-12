@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "prime-agent",
+  "display_name": "Prime Agent history",
+  "version": "0.1.0",
+  "history_sources": [
+    {
+      "id": "default",
+      "provider_key": "prime-agent",
+      "source_id": "default",
+      "source_format": "prime-agent-jsonl-v1",
+      "enabled": true,
+      "refresh": "auto",
+      "command": [
+        "python3",
+        "/home/seungwon/dots/home/.ctx/plugins/prime-agent/export.py"
+      ],
+      "timeout_seconds": 300
+    }
+  ]
+}
