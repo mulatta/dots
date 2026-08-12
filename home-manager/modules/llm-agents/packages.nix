@@ -1,9 +1,11 @@
 {
   pkgs,
   llmAgents,
+  self,
   ...
 }:
 let
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   inherit (llmAgents)
     aiPkgs
     claudeCode
@@ -21,29 +23,28 @@ let
       aiPkgs.qmd;
 in
 {
-  home.packages =
-    (with pkgs; [
-      archify-cli # dots overlay
-      claude-md # dots overlay
-      pim # dots overlay
-      pueue
-    ])
-    ++ [
-      claudeCode # custom wrapper, flake package output
-      qmd # local binding; CUDA-grafted on GPU hosts
-      nixbot-cli
-      skillzPkgs.biorefs-cli
-      skillzPkgs.drawio-cli
-      aiPkgs.apm
-      aiPkgs.ccstatusline
-      aiPkgs.codex
-      aiPkgs.ctx
-      aiPkgs.gemini-cli
-      aiPkgs.git-surgeon
-      aiPkgs.jscpd
-      aiPkgs.officecli
-      aiPkgs.prime-agent
-      aiPkgs.tuicr
-      aiPkgs.zat
-    ];
+  home.packages = [
+    selfPkgs.archify-cli
+    selfPkgs.claude-md
+    selfPkgs.pim
+    pkgs.pueue
+  ]
+  ++ [
+    claudeCode # custom wrapper, flake package output
+    qmd # local binding; CUDA-grafted on GPU hosts
+    nixbot-cli
+    skillzPkgs.biorefs-cli
+    skillzPkgs.drawio-cli
+    aiPkgs.apm
+    aiPkgs.ccstatusline
+    aiPkgs.codex
+    aiPkgs.ctx
+    aiPkgs.gemini-cli
+    aiPkgs.git-surgeon
+    aiPkgs.jscpd
+    aiPkgs.officecli
+    aiPkgs.prime-agent
+    aiPkgs.tuicr
+    aiPkgs.zat
+  ];
 }

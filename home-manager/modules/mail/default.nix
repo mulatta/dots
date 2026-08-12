@@ -3,8 +3,12 @@
   pkgs,
   config,
   lib,
+  self,
   ...
 }:
+let
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
   imports = [
     ./aerc.nix
@@ -14,12 +18,12 @@
   config = lib.mkMerge [
     {
       home.packages = [
-        pkgs.msmtp-with-sent
+        selfPkgs.msmtp-with-sent
       ]
       ++ (with pkgs; [
         afew
         inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system}.crabfit-cli
-        email-sync
+        selfPkgs.email-sync
         gnupg
         isync
         khard
@@ -33,7 +37,7 @@
         Unit.Description = "Mailbox synchronization";
         Service = {
           Type = "oneshot";
-          ExecStart = "${pkgs.email-sync}/bin/email-sync";
+          ExecStart = "${selfPkgs.email-sync}/bin/email-sync";
         };
       };
 
@@ -52,7 +56,7 @@
       launchd.agents.mbsync = {
         enable = true;
         config = {
-          ProgramArguments = [ "${pkgs.email-sync}/bin/email-sync" ];
+          ProgramArguments = [ "${selfPkgs.email-sync}/bin/email-sync" ];
           StartInterval = 300;
           RunAtLoad = true;
           StandardOutPath = "${config.xdg.stateHome}/mbsync.log";

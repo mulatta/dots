@@ -4,6 +4,7 @@
   pkgs,
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -152,7 +153,9 @@ lib.mkMerge [
         StandardErrorPath = "${config.xdg.stateHome}/calendar-sync.err";
         EnvironmentVariables = {
           HOME = config.home.homeDirectory;
-          PATH = "${pkgs.rbw-pinentry}/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
+          PATH = "${
+            self.packages.${pkgs.stdenv.hostPlatform.system}.rbw-pinentry
+          }/bin:${pkgs.rbw}/bin:/usr/bin:/bin";
         };
       };
     };
