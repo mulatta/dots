@@ -11,13 +11,14 @@ in
   imports = [
     ./modules/calendar
     ./modules/chat.nix
+    ./modules/docker.nix
+    ./modules/herdr/open-file.nix
     ./modules/keyboard
     ./modules/llm-agents
     ./modules/mail
     ./modules/nostr-chat.nix
     ./modules/ntfy.nix
     ./modules/paneru.nix
-    ./modules/herdr/open-file.nix
     ./modules/zen.nix
     ./modules/zotero.nix
   ];
@@ -29,10 +30,6 @@ in
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt
     pkgs.czkawka-full
-    pkgs.colima
-    pkgs.docker-client
-    pkgs.docker-credential-helpers
-    pkgs.regctl
     pkgs.dorion
     pkgs.google-chrome
     pkgs.mpv
