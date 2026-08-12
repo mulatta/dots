@@ -116,7 +116,6 @@
     radicle-node
 
     # Custom packages
-    instant-deploy
     merge-when-green
     miniflux-sync
   ])
