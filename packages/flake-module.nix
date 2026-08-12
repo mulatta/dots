@@ -25,7 +25,7 @@
         };
         claude-md = pkgs.callPackage ../packages/claude-md { };
         rbw-pinentry = pkgs.callPackage ../packages/rbw-pinentry { };
-        rhwp = inputs'.rhwp.rhwp-cli;
+        rhwp = inputs'.rhwp.packages.rhwp-cli;
         email-sync = pkgs.callPackage ../packages/email-sync { };
         msmtp-with-sent = pkgs.callPackage ../packages/msmtp-with-sent { };
         n8n-hooks = pkgs.callPackage ../packages/n8n-hooks { };
