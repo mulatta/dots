@@ -23,7 +23,7 @@ let
   ssoStartUrl = "https://${domain}/sso/OID/start/${oidcProvider}";
   ssoLoginLabel = "Login with Kanidm";
 
-  ssoPlugin = pkgs.jellyfin-plugin-sso-auth;
+  ssoPlugin = self.packages.${pkgs.stdenv.hostPlatform.system}.jellyfin-plugin-sso-auth;
   ssoVersion = ssoPlugin.version;
   networkConfig = pkgs.replaceVars ./network.xml {
     inherit portString maltWgIP wgTrustedCidr;

@@ -85,6 +85,7 @@ in
 
     provision = {
       enable = true;
+      package = self.packages.${pkgs.stdenv.hostPlatform.system}.miniflux-sync;
       apiEndpoint = "http://[${maltWgIP}]:${toString port}";
 
       users.seungwon = {

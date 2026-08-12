@@ -51,7 +51,7 @@
     curl
     nixos-rebuild
     python3
-    systemctl-macos
+    self.packages.${pkgs.stdenv.hostPlatform.system}.systemctl-macos
     tree
     wget
   ];

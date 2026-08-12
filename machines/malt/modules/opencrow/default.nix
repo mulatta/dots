@@ -9,6 +9,7 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   skillz = self.inputs.skillz;
   skillzPkgs = skillz.packages.${system};
+  selfPkgs = self.packages.${system};
 
   opencrowModule = import (builtins.toFile "opencrow-module.nix" (
     builtins.replaceStrings [ "pkgs.hostPlatform" ] [ "pkgs.stdenv.hostPlatform" ] (
@@ -95,7 +96,7 @@ let
       libarchive
       poppler-utils
       python3
-      rhwp
+      selfPkgs.rhwp
       ripgrep
       tree
       unzip

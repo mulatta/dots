@@ -2,8 +2,12 @@
   pkgs,
   config,
   lib,
+  self,
   ...
 }:
+let
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
   config = lib.mkMerge [
     # Linux: systemd user service
@@ -11,7 +15,7 @@
       systemd.user.services.ntfy-subscribe = {
         Unit.Description = "ntfy push notification subscriber";
         Service = {
-          ExecStart = "${pkgs.ntfy-subscribe}/bin/ntfy-subscribe";
+          ExecStart = "${selfPkgs.ntfy-subscribe}/bin/ntfy-subscribe";
           Restart = "on-failure";
           RestartSec = 30;
         };
@@ -25,7 +29,7 @@
       launchd.agents.ntfy-subscribe = {
         enable = true;
         config = {
-          ProgramArguments = [ "${pkgs.ntfy-subscribe}/bin/ntfy-subscribe" ];
+          ProgramArguments = [ "${selfPkgs.ntfy-subscribe}/bin/ntfy-subscribe" ];
           RunAtLoad = true;
           KeepAlive = true;
           StandardOutPath = "${config.xdg.stateHome}/ntfy-subscribe.log";

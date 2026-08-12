@@ -3,8 +3,12 @@
   lib,
   config,
   inputs,
+  self,
   ...
 }:
+let
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
   imports = [
     ./modules/atuin.nix
@@ -115,11 +119,13 @@
     # Radicle
     radicle-node
 
-    # Custom packages
-    instant-deploy
-    merge-when-green
-    miniflux-sync
   ])
+  ++ [
+    # Custom packages
+    selfPkgs.loc
+    selfPkgs.merge-when-green
+    selfPkgs.miniflux-sync
+  ]
   ++ (
     let
       system = pkgs.stdenv.hostPlatform.system;

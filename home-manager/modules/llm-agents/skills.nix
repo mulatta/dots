@@ -2,9 +2,11 @@
   lib,
   pkgs,
   llmAgents,
+  self,
   ...
 }:
 let
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   inherit (llmAgents)
     aiPkgs
     skillzPkgs
@@ -46,12 +48,12 @@ in
     ++ lib.optionals pkgs.stdenv.isDarwin [ "shortcuts-cli" ];
     package = skillzPkgs // {
       calendar-cli = skillzPkgs.calendar-cli.override {
-        msmtp = pkgs.msmtp-with-sent;
+        msmtp = selfPkgs.msmtp-with-sent;
       };
     };
   };
 
-  home.file.".claude/skills/archify".source = "${pkgs.archify-cli}/share/skills/archify";
+  home.file.".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify";
 
   # nixbot-cli ships its agent skill alongside the binary.
   home.file.".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
