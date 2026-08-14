@@ -5,7 +5,9 @@
   ...
 }:
 let
-  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+  system = pkgs.stdenv.hostPlatform.system;
+  selfPkgs = self.packages.${system};
+  aiPkgs = self.inputs.llm-agents.packages.${system};
 in
 {
   imports = [
@@ -26,6 +28,7 @@ in
   home.packages = [
     selfPkgs.instagram-cli
     selfPkgs.radicle-desktop
+    aiPkgs.hermes-desktop
     selfPkgs.rbw-pinentry
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt
