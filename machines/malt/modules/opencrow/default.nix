@@ -121,6 +121,18 @@ in
 
   # Apply the same base runtime to the top-level Noa instance and any
   # future named instances under services.opencrow.instances.*.
+  config = {
+    users.users.opencrow = {
+      isSystemUser = true;
+      group = "opencrow";
+      uid = 2000;
+    };
+    users.groups.opencrow.gid = 2000;
+    nix.settings.extra-allowed-users = [ "opencrow" ];
+
+    containers.opencrow.config.imports = [ ../agent-container.nix ];
+  };
+
   options.services.opencrow = lib.mkOption {
     type = lib.types.submodule {
       options.instances = lib.mkOption {
