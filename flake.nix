@@ -52,7 +52,7 @@
 
     # Package sources
     llm-agents = {
-      url = "github:numtide/llm-agents.nix";
+      url = "github:mulatta/llm-agents.nix/kandev-runtimes";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
