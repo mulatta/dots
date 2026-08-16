@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   self,
@@ -22,8 +21,7 @@ let
   port = 38429;
 
   wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
+  tapsWgIP = "${wgPrefix}::1";
 in
 {
   disko.devices.zpool.zroot.datasets.kandev = {
@@ -99,7 +97,9 @@ in
     };
   };
 
-  # Kandev has no authentication boundary. Only trusted WireGuard peers may
-  # reach it until taps provides an authenticated reverse proxy.
-  networking.firewall.interfaces.wireguard.allowedTCPPorts = [ port ];
+  # oauth2-proxy on taps is the authentication boundary. Do not let another
+  # WireGuard peer bypass it by connecting to Kandev directly.
+  networking.firewall.extraInputRules = lib.mkAfter ''
+    iifname "wireguard" ip6 saddr ${tapsWgIP} tcp dport ${toString port} accept comment "Allow Kandev only from taps proxy"
+  '';
 }

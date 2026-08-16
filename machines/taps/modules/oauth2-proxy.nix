@@ -16,9 +16,32 @@ let
   };
   maltWgIP = "${wgPrefix}:${maltSuffix}";
   kanidmDomain = "idm.mulatta.io";
+  kandevDomain = "kandev.mulatta.io";
   n8nDomain = "n8n.mulatta.io";
   restateDomain = "restate.mulatta.io";
   weechatDomain = "chat.mulatta.io";
+
+  kandevOauth2Args = [
+    "--provider=oidc"
+    "--client-id=kandev"
+    "--oidc-issuer-url=https://${kanidmDomain}/oauth2/openid/kandev"
+    "--redirect-url=https://${kandevDomain}/oauth2/callback"
+    "--scope=openid email profile"
+    "--email-domain=mulatta.io"
+    "--code-challenge-method=S256"
+    "--insecure-oidc-allow-unverified-email=true"
+    "--reverse-proxy=true"
+    "--skip-provider-button=true"
+    "--cookie-domain=${kandevDomain}"
+    "--cookie-name=_oauth2_proxy_kandev"
+    "--cookie-secure=true"
+    "--cookie-httponly=true"
+    "--cookie-samesite=lax"
+    "--cookie-refresh=1h"
+    "--cookie-expire=72h"
+    "--upstream=http://[${maltWgIP}]:38429"
+    "--http-address=127.0.0.1:4184"
+  ];
 
   restateOauth2Args = [
     "--provider=oidc"
@@ -94,8 +117,30 @@ in
     wants = [ "kanidm.service" ];
   };
   clan.core.vars.generators.oauth2-proxy = mkOauth2ProxySecret;
+  clan.core.vars.generators.oauth2-proxy-kandev = mkOauth2ProxySecret;
   clan.core.vars.generators.oauth2-proxy-restate = mkOauth2ProxySecret;
   clan.core.vars.generators.oauth2-proxy-weechat = mkOauth2ProxySecret;
+
+  systemd.services.oauth2-proxy-kandev = {
+    description = "OAuth2 Proxy for Kandev";
+    wantedBy = [ "multi-user.target" ];
+    wants = [
+      "kanidm.service"
+      "network-online.target"
+    ];
+    after = [
+      "kanidm.service"
+      "network-online.target"
+    ];
+    restartTriggers = [ config.clan.core.vars.generators.oauth2-proxy-kandev.files."env".path ];
+    serviceConfig = {
+      User = "oauth2-proxy";
+      Group = "oauth2-proxy";
+      EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-kandev.files."env".path;
+      ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs kandevOauth2Args}";
+      Restart = "always";
+    };
+  };
 
   systemd.services.oauth2-proxy-restate = {
     description = "OAuth2 Proxy for Restate";

@@ -108,6 +108,15 @@ resource "cloudflare_dns_record" "minecraft_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "kandev_a" {
+  zone_id = local.zone_id
+  name    = "kandev"
+  content = local.taps_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "n8n_a" {
   zone_id = local.zone_id
   name    = "n8n"
