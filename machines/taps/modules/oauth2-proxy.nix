@@ -215,6 +215,7 @@ in
       pass-access-token = "true";
       pass-authorization-header = "true";
       set-authorization-header = "true";
+      skip-provider-button = "true";
       skip-auth-route = [
         "^/webhook"
         "^/webhook-test"
