@@ -8,7 +8,7 @@ let
   grpcSupported = !lib.hasInfix "pre" config.nix.package.version;
   certs = config.sops.secrets;
   grpcUri =
-    "grpc://10.100.0.2:50051"
+    "grpc://psi:50051"
     + "?ca-cert=${certs.nix-grpc-ca-cert.path}"
     + "&client-cert=${certs.nix-grpc-client-cert.path}"
     + "&client-key=${certs.nix-grpc-client-key.path}";
@@ -41,19 +41,6 @@ in
     {
       hostName = grpcUri;
       protocol = null;
-      systems = [ "x86_64-linux" ];
-      maxJobs = 24;
-      supportedFeatures = [
-        "big-parallel"
-        "kvm"
-        "nixos-test"
-      ];
-    }
-    {
-      # Fallback path when the grpc dispatcher is unavailable.
-      hostName = "psi";
-      protocol = "ssh-ng";
-      sshUser = "root";
       systems = [ "x86_64-linux" ];
       maxJobs = 24;
       supportedFeatures = [
