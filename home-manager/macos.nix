@@ -17,6 +17,14 @@ let
     opencodeSupport = true;
     copilotSupport = true;
     hermesSupport = true;
+    ampSupport = true;
+    cursorSupport = true;
+    droidSupport = true;
+    grokSupport = true;
+    kilocodeSupport = true;
+    kimiSupport = true;
+    qoderSupport = true;
+    qwenSupport = true;
     extraPackages = [ pkgs.gh ];
   };
 in
