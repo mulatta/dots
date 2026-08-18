@@ -38,6 +38,20 @@
       };
 
       instances = {
+        users-root = {
+          module.name = "users";
+          module.input = "clan-core";
+          roles.default.tags.nixos = { };
+          roles.default.settings = {
+            user = "root";
+            prompt = false;
+            groups = [
+              "wheel"
+              "networkmanager"
+            ];
+          };
+        };
+
         # ZeroTier VPN - taps as controller
         zerotier = {
           module.name = "zerotier";
