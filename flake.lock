@@ -23,6 +23,31 @@
         "type": "github"
       }
     },
+    "bioinformatics-toolkits": {
+      "inputs": {
+        "nixpkgs": [
+          "research-skills",
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "research-skills",
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786600939,
+        "narHash": "sha256-t+yyjOhZ6pRAqXPvCL46ZzS1FtAm57TkEfv4Yqz3XCY=",
+        "owner": "SBEE-Lab",
+        "repo": "bioinformatics-toolkits",
+        "rev": "47d4c86b2db74f2ce0e3dd1400db31e99be2c6e1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SBEE-Lab",
+        "repo": "bioinformatics-toolkits",
+        "type": "github"
+      }
+    },
     "bun2nix": {
       "inputs": {
         "flake-parts": [
@@ -898,6 +923,7 @@
     },
     "research-skills": {
       "inputs": {
+        "bioinformatics-toolkits": "bioinformatics-toolkits",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -906,11 +932,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786297940,
-        "narHash": "sha256-R0aotWP13kJjIYCyBzAnAcLITFkAoqkAhzAoIU7ZbUA=",
+        "lastModified": 1786875281,
+        "narHash": "sha256-pzap+K5aardPqTDbFoJ3nHhEPUGk6EW4ypqNOCN8LQs=",
         "owner": "mulatta",
         "repo": "research-skills",
-        "rev": "e319a76ee6064f918aa2333a812b1916f3f68ce7",
+        "rev": "57d08f68ca33cfe3939b2f5556e057ff921ce36c",
         "type": "github"
       },
       "original": {
