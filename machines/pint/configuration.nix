@@ -72,8 +72,6 @@
     };
   };
 
-  clan.core.networking.targetHost = "root@pint.x";
-
   nixpkgs.hostPlatform = "aarch64-linux";
   nixpkgs.config.allowUnfree = true;
 

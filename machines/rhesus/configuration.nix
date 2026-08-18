@@ -21,8 +21,6 @@
     ../../darwinModules/wireguard.nix
     ../../darwinModules/zerotier.nix
   ];
-
-  clan.core.networking.targetHost = "root@rhesus.x";
   system.primaryUser = "seungwon";
 
   networking.hostName = "rhesus";

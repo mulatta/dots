@@ -6,20 +6,36 @@
   };
 
   clan = {
-    meta.name = "seungwon";
+    meta = {
+      name = "seungwon";
+      domain = "clan";
+    };
 
     inventory = {
       tags =
         { config, ... }:
         {
-          nixos = builtins.filter (name: name != "rhesus") config.all;
-          wireguard-peers = builtins.filter (name: name != "taps") config.all;
+          wireguard-peers = builtins.filter (name: name != "taps") (config.nixos ++ config.darwin);
         };
 
-      machines.rhesus.machineClass = "darwin";
-      machines.malt.machineClass = "nixos";
-      machines.taps.machineClass = "nixos";
-      machines.pint.machineClass = "nixos";
+      machines = {
+        rhesus = {
+          machineClass = "darwin";
+          deploy.targetHost = "root@rhesus.x";
+        };
+        malt = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@malt.x";
+        };
+        taps = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@64.176.225.253";
+        };
+        pint = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@pint.x";
+        };
+      };
 
       instances = {
         # ZeroTier VPN - taps as controller

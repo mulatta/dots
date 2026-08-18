@@ -113,7 +113,6 @@
           "nix-darwin"
         ],
         "nix-select": "nix-select",
-        "nixos-facter-modules": "nixos-facter-modules",
         "nixpkgs": "nixpkgs",
         "sops-nix": [
           "sops-nix"
@@ -124,15 +123,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1779116933,
-        "narHash": "sha256-BoSQT4vbuWbGcDbXp4nqBd1I9X8r+dLSPtTbc5yJd28=",
-        "rev": "10d86d5d8291fe5162a5535f433a4d50efc4b2bc",
-        "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/10d86d5d8291fe5162a5535f433a4d50efc4b2bc.tar.gz"
+        "lastModified": 1787047385,
+        "narHash": "sha256-+SfBO9S+70LJItJ2yC2SvQsK0i2IZ5F1z18iF7P7PzA=",
+        "ref": "main",
+        "rev": "93343c186d13a2c5fd51f420cb4cb6b7f0ad8f7b",
+        "revCount": 15163,
+        "type": "git",
+        "url": "https://git.clan.lol/clan/clan-core"
       },
       "original": {
-        "type": "tarball",
-        "url": "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz"
+        "ref": "main",
+        "type": "git",
+        "url": "https://git.clan.lol/clan/clan-core"
       }
     },
     "data-mesher": {
@@ -151,11 +153,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1767582502,
-        "narHash": "sha256-WVcYGWcAlWzVt38OaTC5i5Q3QkIKJKZsJ7LcQZVVxeE=",
-        "rev": "31f2e3ecf207fd2760e3cebf7c2cf3cb7170ea3d",
+        "lastModified": 1786982149,
+        "narHash": "sha256-Yase/4e4aNN9QvUMqPH9ngbAmlcJCqLmFL0zuURdkuA=",
+        "rev": "4a713c5d45123523b14fb4ed39f6ddf26d1a3495",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/31f2e3ecf207fd2760e3cebf7c2cf3cb7170ea3d.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/4a713c5d45123523b14fb4ed39f6ddf26d1a3495.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -675,21 +677,6 @@
         "url": "https://github.com/Mic92/nixbot"
       }
     },
-    "nixos-facter-modules": {
-      "locked": {
-        "lastModified": 1773858690,
-        "narHash": "sha256-oW0/lC0oRG5H5LaK6Rmh9L1wmkn9TbenM4bXwnIEDKA=",
-        "owner": "nix-community",
-        "repo": "nixos-facter-modules",
-        "rev": "139dcef4dfc97009629c445806f197883351ab4a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nixos-facter-modules",
-        "type": "github"
-      }
-    },
     "nixos-hardware": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -710,18 +697,15 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1778003029,
-        "narHash": "sha256-q/nkKLDtHIyLjZpKhWk3cSK5IYsFqtMd6UtXF3ddjgA=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "0c88e1f2bdb93d5999019e99cb0e61e1fe2af4c5",
-        "type": "github"
+        "lastModified": 1786963906,
+        "narHash": "sha256-tkD1h/1jLJ6qZHjG7/TOZT1qqI1ej3VPPCufHQyv1Uo=",
+        "rev": "f4b6996c4e8b9ee06ce147ec344c885f51071b14",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1056542.f4b6996c4e8b/nixexprs.tar.xz"
       },
       "original": {
-        "owner": "nixos",
-        "ref": "nixos-25.11",
-        "repo": "nixpkgs",
-        "type": "github"
+        "type": "tarball",
+        "url": "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz"
       }
     },
     "nixpkgs-23-11": {
@@ -1119,15 +1103,16 @@
     },
     "systems": {
       "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "lastModified": 1774449309,
+        "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
         "owner": "nix-systems",
         "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "rev": "c29398b59d2048c4ab79345812849c9bd15e9150",
         "type": "github"
       },
       "original": {
         "owner": "nix-systems",
+        "ref": "future-26.11",
         "repo": "default",
         "type": "github"
       }
