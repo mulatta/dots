@@ -8,7 +8,7 @@ let
   vars = config.clan.core.vars.generators;
 
   wgPrefix = vars.wireguard-network-wireguard.files.prefix.value;
-  ztNetworkId = vars.zerotier.files.zerotier-network-id.value;
+  ztNetworkId = vars.zerotier-network-zerotier.files.network-id.value;
   ztPrefix = "fd${builtins.substring 0 2 ztNetworkId}:${builtins.substring 2 4 ztNetworkId}:${
     builtins.substring 6 4 ztNetworkId
   }:${builtins.substring 10 4 ztNetworkId}::/64";

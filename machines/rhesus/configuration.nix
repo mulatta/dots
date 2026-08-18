@@ -27,10 +27,7 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
-  clan.core.networking.zerotier = {
-    enable = true;
-    controller.machineName = "taps";
-  };
+  clan.core.networking.zerotier.enable = true;
 
   system.activationScripts.postActivation.text = ''
     # disable fseventsd on /nix volume

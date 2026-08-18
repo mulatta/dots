@@ -6,12 +6,12 @@
 let
   readVarFile = self.lib.readVarFile;
 
-  # Get ZeroTier IPs for .i domain
+  # Get ZeroTier IPs from Clan's shared multi-instance vars
   zerotierIPs = {
-    taps = readVarFile "taps" "zerotier" "zerotier-ip";
-    malt = readVarFile "malt" "zerotier" "zerotier-ip";
-    pint = readVarFile "pint" "zerotier" "zerotier-ip";
-    rhesus = readVarFile "rhesus" "zerotier" "zerotier-ip";
+    taps = readVarFile null "zerotier-ip-taps-zerotier" "ip";
+    malt = readVarFile null "zerotier-ip-malt-zerotier" "ip";
+    pint = readVarFile null "zerotier-ip-pint-zerotier" "ip";
+    rhesus = readVarFile null "zerotier-ip-rhesus-zerotier" "ip";
   };
 
   # Get WireGuard IPs for .x domain
