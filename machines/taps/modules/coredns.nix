@@ -45,11 +45,21 @@ let
 
   # CoreDNS configuration - bind to VPN interfaces only to avoid conflict with systemd-resolved
   corednsConfig = ''
-    # Internal ZeroTier domain (.i) - listen on ZeroTier interface
+    # Keep .i available while clients migrate to the ZeroTier-specific .z suffix.
     i:53 {
       bind ${tapsZerotierIP}
       hosts {
         ${mkHostsEntries zerotierIPs "i"}
+        fallthrough
+      }
+      log
+      errors
+    }
+
+    z:53 {
+      bind ${tapsZerotierIP}
+      hosts {
+        ${mkHostsEntries zerotierIPs "z"}
         fallthrough
       }
       log
@@ -92,8 +102,9 @@ in
 
   # Also add hosts entries locally for fallback
   networking.extraHosts = ''
-    # ZeroTier (.i domain)
+    # ZeroTier migration domains
     ${mkHostsEntries zerotierIPs "i"}
+    ${mkHostsEntries zerotierIPs "z"}
 
     # WireGuard (.x domain)
     ${mkHostsEntries wgIPs "x"}
