@@ -24,7 +24,7 @@
               "maxPathLen": 1
             }
           }
-        ''} "Seungwon Root CA" $out/ca.crt $out/ca.key \
+        ''} "dure root ca" $out/ca.crt $out/ca.key \
           --kty EC --curve P-256 \
           --not-after 87600h \
           --no-password --insecure
@@ -69,13 +69,13 @@
               },
               "nameConstraints": {
                 "critical": true,
-                "permittedDNSDomains": ["x", "z"]
+                "permittedDNSDomains": ["n", "i", "x", "z"]
               }
             }
           ''} \
           --not-after 8760h \
           --no-password --insecure \
-          "Seungwon Intermediate CA" \
+          "dure intermediate ca" \
           $out/intermediate.crt
       '';
     };
