@@ -233,11 +233,11 @@
         "tincr": "tincr"
       },
       "locked": {
-        "lastModified": 1787148646,
-        "narHash": "sha256-ttlwTZ+2nyPyd2TaMj7911Ggs0KczSXUgKV3qGPdFcU=",
+        "lastModified": 1787157170,
+        "narHash": "sha256-U5wA+6OzcoQq8W5BojaX7Rszy+juyZHsXDWR0k++rm4=",
         "owner": "dure-net",
         "repo": "dure",
-        "rev": "55aef7365b38d695152026ef3c5458a2eeffa1f8",
+        "rev": "89770e5ca5cb1765b68c62cb5e5ff62a661082b1",
         "type": "github"
       },
       "original": {
