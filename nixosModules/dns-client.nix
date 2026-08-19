@@ -32,15 +32,11 @@ in
   # overrides networking.nameservers.
   systemd.network.networks."09-zerotier".networkConfig = lib.mkIf (tapsZerotierIP != null) {
     DNS = [ tapsZerotierIP ];
-    Domains = [
-      "~i"
-      "~z"
-    ];
+    Domains = [ "~z" ];
   };
 
   # Add search domains for unqualified internal hostnames.
   networking.search = [
-    "i" # ZeroTier migration alias
     "z" # ZeroTier domain
     "x" # WireGuard domain
   ];

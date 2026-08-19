@@ -91,7 +91,6 @@
           roles.server.tags.nixos = { };
           roles.server.settings = {
             certificate.searchDomains = [
-              "i" # ZeroTier migration alias
               "z" # ZeroTier internal
               "x" # WireGuard mesh
               "local" # mDNS/Bonjour
@@ -100,7 +99,6 @@
           roles.client.tags.all = { };
           roles.client.settings = {
             certificate.searchDomains = [
-              "i" # ZeroTier migration alias
               "z" # ZeroTier internal
               "x" # WireGuard mesh
               "local" # mDNS/Bonjour

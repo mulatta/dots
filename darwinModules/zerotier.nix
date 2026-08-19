@@ -120,19 +120,12 @@ in
     (lib.mkIf config.services.zerotierone.enable {
       environment.systemPackages = [ pkgs.zerotierone ];
 
-      # Keep .i available while clients migrate to the ZeroTier-specific .z suffix.
-      environment.etc."resolver/i" = lib.mkIf (tapsZerotierIP != null) {
-        text = "nameserver ${tapsZerotierIP}\n";
-      };
       environment.etc."resolver/z" = lib.mkIf (tapsZerotierIP != null) {
         text = "nameserver ${tapsZerotierIP}\n";
       };
 
       # /etc/hosts entries via clan-core launchd daemon
-      clan.core.networking.extraHosts.zerotier = lib.concatStringsSep "\n" [
-        (mkHostsEntries zerotierIPs "i")
-        (mkHostsEntries zerotierIPs "z")
-      ];
+      clan.core.networking.extraHosts.zerotier = mkHostsEntries zerotierIPs "z";
 
       # Install identity and join networks on activation
       system.activationScripts.postActivation.text = lib.mkAfter ''

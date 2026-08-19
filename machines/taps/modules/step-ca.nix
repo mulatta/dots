@@ -68,7 +68,7 @@
               },
               "nameConstraints": {
                 "critical": true,
-                "permittedDNSDomains": ["x", "i"]
+                "permittedDNSDomains": ["x", "z"]
               }
             }
           ''} \

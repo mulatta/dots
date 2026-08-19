@@ -1,7 +1,7 @@
 {
   programs.ssh.extraConfig = ''
     # Use certificate-based authentication for mesh networks
-    Host *.x *.i *.z
+    Host *.x *.z
       StrictHostKeyChecking accept-new
   '';
 }

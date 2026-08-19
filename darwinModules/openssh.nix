@@ -7,7 +7,6 @@ in
     certAuthority = true;
     hostNames = [
       "*.x" # WireGuard mesh
-      "*.i" # ZeroTier migration alias
       "*.z" # ZeroTier internal
       "*.local" # mDNS/Bonjour
     ];
@@ -20,7 +19,7 @@ in
       StrictHostKeyChecking accept-new
 
     # ZeroTier internal
-    Host *.i *.z
+    Host *.z
       StrictHostKeyChecking accept-new
 
     # Local network
