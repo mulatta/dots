@@ -24,7 +24,7 @@
               "maxPathLen": 1
             }
           }
-        ''} "Seungwon Root CA" $out/ca.crt $out/ca.key \
+        ''} "dure root ca" $out/ca.crt $out/ca.key \
           --kty EC --curve P-256 \
           --not-after 87600h \
           --no-password --insecure
@@ -59,24 +59,29 @@
           --ca-key $in/step-ca/ca.key \
           --ca-password-file /dev/null \
           --key $in/step-intermediate-key/intermediate.key \
-          --template ${pkgs.writeText "intermediate.tmpl" ''
-            {
-              "subject": {{ toJson .Subject }},
-              "keyUsage": ["certSign", "crlSign"],
-              "basicConstraints": {
-                "isCA": true,
-                "maxPathLen": 0
-              },
-              "nameConstraints": {
-                "critical": true,
-                "permittedDNSDomains": ["x", "z"]
-              }
-            }
-          ''} \
+          --template ${./intermediate.tmpl} \
           --not-after 8760h \
           --no-password --insecure \
-          "Seungwon Intermediate CA" \
+          "dure intermediate ca" \
           $out/intermediate.crt
+      '';
+    };
+
+    # Hercules-style effect secret for scheduled intermediate renewal.
+    "dure-ca-renew-effect-secrets" = {
+      files.secrets.secret = true;
+      dependencies = [
+        "step-ca"
+        "step-intermediate-key"
+      ];
+      runtimeInputs = [ pkgs.jq ];
+      script = ''
+        jq -n \
+          --rawfile ca_crt $in/step-ca/ca.crt \
+          --rawfile ca_key $in/step-ca/ca.key \
+          --rawfile intermediate_key $in/step-intermediate-key/intermediate.key \
+          '{ "dure-ca": { data: { "ca.crt": $ca_crt, "ca.key": $ca_key, "intermediate.key": $intermediate_key }, condition: "isDefaultBranch" } }' \
+          > $out/secrets
       '';
     };
   };

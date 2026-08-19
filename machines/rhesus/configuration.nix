@@ -15,6 +15,9 @@
     ../../darwinModules/karabiner.nix
     ../../darwinModules/nix-daemon.nix
     ../../darwinModules/nix-index.nix
+    ../../darwinModules/naru.nix
+    self.inputs.dure.darwinModules.naru
+    self.inputs.dure.darwinModules.ca
     ../../darwinModules/openssh.nix
     ../../darwinModules/remote-builder.nix
     ../../darwinModules/sudo.nix
