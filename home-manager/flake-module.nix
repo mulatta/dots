@@ -109,13 +109,13 @@
 
       legacyPackages.homeConfigurations = {
         base = mkHomeConfig { };
-        malt = mkHomeConfig { extraModules = [ ./malt.nix ]; };
       }
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") {
         macos = mkHomeConfig { extraModules = [ ./macos.nix ]; };
       }
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
         psi = mkHomeConfig { extraModules = [ ./psi.nix ]; };
+        malt = mkHomeConfig { extraModules = [ ./malt.nix ]; };
       };
     };
 }
