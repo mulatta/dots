@@ -203,5 +203,6 @@
 
       flake.nixosModules.imports = [ ./nixosModules ];
       flake.darwinModules.imports = [ ./darwinModules ];
+      flake.herculesCI = import ./checks/effects.nix { inherit inputs; };
     };
 }
