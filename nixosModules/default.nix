@@ -24,6 +24,10 @@
     ./thermald.nix
     ./users.nix
     ./zerotier.nix
+
+    ./naru.nix
+    self.inputs.dure.nixosModules.naru
+    self.inputs.dure.nixosModules.ca
   ];
 
   srvos.flake = self;

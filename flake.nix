@@ -18,6 +18,11 @@
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
+    dure = {
+      url = "github:dure-net/dure";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Core modules and system integrations.
     clan-core = {
       url = "git+https://git.clan.lol/clan/clan-core?ref=main";

@@ -137,6 +137,21 @@
         "url": "https://git.clan.lol/clan/clan-core"
       }
     },
+    "crane": {
+      "locked": {
+        "lastModified": 1776479158,
+        "narHash": "sha256-P7TLDtRgAxmo0Bdw8fkJrrBpX/8/WhO6Bm/uCfl6jXY=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "3fbd73bdd9eb572209fdf094abad19d9b6d147b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "data-mesher": {
       "inputs": {
         "flake-parts": [
@@ -207,6 +222,27 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "dure": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "tincr": "tincr"
+      },
+      "locked": {
+        "lastModified": 1787148646,
+        "narHash": "sha256-ttlwTZ+2nyPyd2TaMj7911Ggs0KczSXUgKV3qGPdFcU=",
+        "owner": "dure-net",
+        "repo": "dure",
+        "rev": "55aef7365b38d695152026ef3c5458a2eeffa1f8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dure-net",
+        "repo": "dure",
         "type": "github"
       }
     },
@@ -985,6 +1021,7 @@
         "clan-core": "clan-core",
         "direnv-instant": "direnv-instant",
         "disko": "disko",
+        "dure": "dure",
         "fast-nix-gc": "fast-nix-gc",
         "flake-fmt": "flake-fmt",
         "flake-parts": "flake-parts",
@@ -1010,7 +1047,7 @@
         "skillz": "skillz",
         "sops-nix": "sops-nix",
         "srvos": "srvos",
-        "treefmt-nix": "treefmt-nix",
+        "treefmt-nix": "treefmt-nix_2",
         "zen-browser": "zen-browser",
         "zhost": "zhost",
         "zsh-helix-mode": "zsh-helix-mode"
@@ -1162,7 +1199,52 @@
         "type": "github"
       }
     },
+    "tincr": {
+      "inputs": {
+        "crane": "crane",
+        "nixpkgs": [
+          "dure",
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix"
+      },
+      "locked": {
+        "lastModified": 1786953226,
+        "narHash": "sha256-Us4O3IXk6gw/4VZFH43Enew0umXhhpPO1/oKueqvQKk=",
+        "owner": "Mic92",
+        "repo": "tincr",
+        "rev": "46290b12ad1db1e4cfbc234ad037080dbe045487",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "tincr",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "dure",
+          "tincr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773297127,
+        "narHash": "sha256-6E/yhXP7Oy/NbXtf1ktzmU8SdVqJQ09HC/48ebEGBpk=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "71b125cd05fbfd78cab3e070b73544abe24c5016",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
