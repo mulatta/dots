@@ -38,6 +38,30 @@ resource "vultr_firewall_rule" "https" {
   lifecycle { ignore_changes = [source] }
 }
 
+resource "vultr_firewall_rule" "naru_tcp" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+
+  port  = "655"
+  notes = "Naru mesh"
+  lifecycle { ignore_changes = [source] }
+}
+
+resource "vultr_firewall_rule" "naru_udp" {
+  firewall_group_id = vultr_firewall_group.taps.id
+  protocol          = "udp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+
+  port  = "655"
+  notes = "Naru mesh"
+  lifecycle { ignore_changes = [source] }
+}
+
 resource "vultr_firewall_rule" "wireguard_mgnt" {
   firewall_group_id = vultr_firewall_group.taps.id
   protocol          = "udp"
