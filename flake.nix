@@ -18,9 +18,16 @@
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
+    tincr = {
+      url = "github:Mic92/tincr";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     dure = {
       url = "github:dure-net/dure";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.tincr.follows = "tincr";
     };
 
     # Core modules and system integrations.
