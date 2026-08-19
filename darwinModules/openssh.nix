@@ -7,7 +7,7 @@ in
     certAuthority = true;
     hostNames = [
       "*.x" # WireGuard mesh
-      "*.i" # ZeroTier internal
+      "*.z" # ZeroTier internal
       "*.local" # mDNS/Bonjour
     ];
     publicKeyFile = sshCaPubKey;
@@ -19,7 +19,7 @@ in
       StrictHostKeyChecking accept-new
 
     # ZeroTier internal
-    Host *.i
+    Host *.z
       StrictHostKeyChecking accept-new
 
     # Local network

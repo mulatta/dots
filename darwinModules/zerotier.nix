@@ -11,31 +11,32 @@ let
   ztDataDir = "/Library/Application Support/ZeroTier/One";
   ztCli = "/usr/local/bin/zerotier-cli";
   ztIdTool = "${pkgs.zerotierone}/bin/zerotier-idtool";
+  machineName = config.clan.core.settings.machine.name;
+  instanceName = "zerotier";
+  identityGenerator = "zerotier-identity-${machineName}";
+  networkGenerator = "zerotier-network-${instanceName}";
+  ipGenerator = "zerotier-ip-${machineName}-${instanceName}";
+  zerotierTools = config.clan.core.clanPkgs.zerotier-members;
 
   # Access clan-core lib for getPublicValue
   clanLib = self.inputs.clan-core.lib;
 
-  # Get network ID from controller machine's vars
-  getNetworkId =
-    if cfg.controller.machineName != null then
-      clanLib.getPublicValue {
-        flake = config.clan.core.settings.directory;
-        machine = cfg.controller.machineName;
-        generator = "zerotier";
-        file = "zerotier-network-id";
-        default = null;
-      }
-    else
-      null;
+  # Network IDs are shared by all members in Clan's multi-instance layout.
+  getNetworkId = clanLib.getPublicValue {
+    flake = config.clan.core.settings.directory;
+    generator = networkGenerator;
+    file = "network-id";
+    default = null;
+  };
 
   readVarFile = self.lib.readVarFile;
 
-  # ZeroTier IPs for .i domain
+  # ZeroTier IPs from Clan's shared multi-instance vars
   zerotierIPs = {
-    taps = readVarFile "taps" "zerotier" "zerotier-ip";
-    malt = readVarFile "malt" "zerotier" "zerotier-ip";
-    pint = readVarFile "pint" "zerotier" "zerotier-ip";
-    rhesus = readVarFile "rhesus" "zerotier" "zerotier-ip";
+    taps = readVarFile null "zerotier-ip-taps-zerotier" "ip";
+    malt = readVarFile null "zerotier-ip-malt-zerotier" "ip";
+    pint = readVarFile null "zerotier-ip-pint-zerotier" "ip";
+    rhesus = readVarFile null "zerotier-ip-rhesus-zerotier" "ip";
   };
 
   tapsZerotierIP = zerotierIPs.taps;
@@ -58,11 +59,6 @@ in
       description = "ZeroTier network ID (auto-detected from controller if not set)";
     };
 
-    controller.machineName = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = "Name of the machine that acts as ZeroTier controller";
-    };
   };
 
   options.services.zerotierone = {
@@ -83,41 +79,53 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      clan.core.vars.generators.zerotier = {
-        files.zerotier-identity-secret = {
-          secret = true;
+      clan.core.vars.generators = {
+        ${identityGenerator} = {
+          share = true;
+          files.identity-secret = { };
+          runtimeInputs = [ zerotierTools ];
+          script = ''
+            zerotier-generate --mode identity-only --identity-secret "$out/identity-secret"
+          '';
         };
-        files.zerotier-ip = { };
-        script = ''
-          ${pkgs.zerotierone}/bin/zerotier-idtool generate "$out/zerotier-identity-secret"
-          IDENTITY_PUBLIC=$(${pkgs.zerotierone}/bin/zerotier-idtool getpublic "$out/zerotier-identity-secret")
-          NODE_ID=$(echo "$IDENTITY_PUBLIC" | cut -d: -f1)
-          NETWORK_ID="${toString cfg.networkId}"
-          if [ -n "$NETWORK_ID" ]; then
-            PREFIX="fd''${NETWORK_ID:0:2}:''${NETWORK_ID:2:4}:''${NETWORK_ID:6:4}:''${NETWORK_ID:10:4}"
-            SUFFIX="''${NODE_ID:0:2}''${NODE_ID:2:2}:''${NODE_ID:4:4}:''${NODE_ID:6:2}''${NODE_ID:8:2}"
-            echo "$PREFIX:$SUFFIX" > "$out/zerotier-ip"
-          fi
-        '';
+
+        ${ipGenerator} = {
+          share = true;
+          files.ip = {
+            secret = false;
+            deploy = false;
+          };
+          runtimeInputs = [ zerotierTools ];
+          dependencies = [
+            identityGenerator
+            networkGenerator
+          ];
+          script = ''
+            zerotier-generate --mode compute-ip \
+              --identity-secret "$in/${identityGenerator}/identity-secret" \
+              --network-id-file "$in/${networkGenerator}/network-id" \
+              --ip "$out/ip"
+          '';
+        };
       };
 
       services.zerotierone = {
         enable = true;
         joinNetworks = lib.mkIf (cfg.networkId != null) [ cfg.networkId ];
-        identitySecretFile = config.clan.core.vars.generators.zerotier.files.zerotier-identity-secret.path;
+        identitySecretFile =
+          config.clan.core.vars.generators.${identityGenerator}.files.identity-secret.path;
       };
     })
 
     (lib.mkIf config.services.zerotierone.enable {
       environment.systemPackages = [ pkgs.zerotierone ];
 
-      # DNS resolver for .i domain → taps ZeroTier IP
-      environment.etc."resolver/i" = lib.mkIf (tapsZerotierIP != null) {
+      environment.etc."resolver/z" = lib.mkIf (tapsZerotierIP != null) {
         text = "nameserver ${tapsZerotierIP}\n";
       };
 
       # /etc/hosts entries via clan-core launchd daemon
-      clan.core.networking.extraHosts.zerotier = mkHostsEntries zerotierIPs "i";
+      clan.core.networking.extraHosts.zerotier = mkHostsEntries zerotierIPs "z";
 
       # Install identity and join networks on activation
       system.activationScripts.postActivation.text = lib.mkAfter ''

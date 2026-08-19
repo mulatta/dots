@@ -6,22 +6,52 @@
   };
 
   clan = {
-    meta.name = "seungwon";
+    meta = {
+      name = "seungwon";
+      domain = "clan";
+    };
 
     inventory = {
       tags =
         { config, ... }:
         {
-          nixos = builtins.filter (name: name != "rhesus") config.all;
-          wireguard-peers = builtins.filter (name: name != "taps") config.all;
+          wireguard-peers = builtins.filter (name: name != "taps") (config.nixos ++ config.darwin);
         };
 
-      machines.rhesus.machineClass = "darwin";
-      machines.malt.machineClass = "nixos";
-      machines.taps.machineClass = "nixos";
-      machines.pint.machineClass = "nixos";
+      machines = {
+        rhesus = {
+          machineClass = "darwin";
+          deploy.targetHost = "root@rhesus.x";
+        };
+        malt = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@malt.x";
+        };
+        taps = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@64.176.225.253";
+        };
+        pint = {
+          machineClass = "nixos";
+          deploy.targetHost = "root@pint.x";
+        };
+      };
 
       instances = {
+        users-root = {
+          module.name = "users";
+          module.input = "clan-core";
+          roles.default.tags.nixos = { };
+          roles.default.settings = {
+            user = "root";
+            prompt = false;
+            groups = [
+              "wheel"
+              "networkmanager"
+            ];
+          };
+        };
+
         # ZeroTier VPN - taps as controller
         zerotier = {
           module.name = "zerotier";
@@ -61,7 +91,7 @@
           roles.server.tags.nixos = { };
           roles.server.settings = {
             certificate.searchDomains = [
-              "i" # ZeroTier internal
+              "z" # ZeroTier internal
               "x" # WireGuard mesh
               "local" # mDNS/Bonjour
             ];
@@ -69,7 +99,7 @@
           roles.client.tags.all = { };
           roles.client.settings = {
             certificate.searchDomains = [
-              "i" # ZeroTier internal
+              "z" # ZeroTier internal
               "x" # WireGuard mesh
               "local" # mDNS/Bonjour
             ];

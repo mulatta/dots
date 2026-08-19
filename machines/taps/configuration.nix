@@ -41,8 +41,6 @@
     ./modules/postgresql.nix
   ];
 
-  clan.core.networking.targetHost = "root@64.176.225.253";
-
   # Block RFC1918 on ZeroTier to avoid Vultr abuse reports
   services.zerotierone.blockRfc1918Addresses = true;
 

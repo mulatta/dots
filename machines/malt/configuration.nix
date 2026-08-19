@@ -30,8 +30,6 @@
     ./modules/weechat.nix
   ];
 
-  clan.core.networking.targetHost = "root@malt.x";
-
   disko.rootDisk = "/dev/nvme0n1";
 
   networking.hostName = "malt";

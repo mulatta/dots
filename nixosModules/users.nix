@@ -49,15 +49,9 @@ in
   };
 
   users.users.root = {
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-    hashedPasswordFile = config.clan.core.vars.generators.root-password.files.password-hash.path;
     shell = "/run/current-system/sw/bin/bash";
     openssh.authorizedKeys.keys = seungwonKey;
   };
 
-  clan.core.vars.generators.root-password = mkPasswordGenerator;
   clan.core.vars.generators.seungwon-password = mkPasswordGenerator;
 }

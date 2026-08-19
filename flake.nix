@@ -20,7 +20,7 @@
 
     # Core modules and system integrations.
     clan-core = {
-      url = "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz";
+      url = "git+https://git.clan.lol/clan/clan-core?ref=main";
       inputs.disko.follows = "disko";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nix-darwin.follows = "nix-darwin";
