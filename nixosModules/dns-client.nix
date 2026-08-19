@@ -4,12 +4,8 @@
   ...
 }:
 let
-  # Read taps ZeroTier IP for DNS server
-  tapsZerotierIP =
-    let
-      path = self + "/vars/per-machine/taps/zerotier/zerotier-ip/value";
-    in
-    if builtins.pathExists path then lib.strings.trim (builtins.readFile path) else null;
+  # ZeroTier IPs are shared in Clan's multi-instance vars layout.
+  tapsZerotierIP = self.lib.readVarFile null "zerotier-ip-taps-zerotier" "ip";
 
   # Read taps WireGuard IP for DNS server (fallback)
   tapsWireguardPrefix =
@@ -32,9 +28,20 @@ in
     ]
   );
 
-  # Add search domains for internal resolution
+  # Route private ZeroTier suffixes to taps even when host-specific DNS
+  # overrides networking.nameservers.
+  systemd.network.networks."09-zerotier".networkConfig = lib.mkIf (tapsZerotierIP != null) {
+    DNS = [ tapsZerotierIP ];
+    Domains = [
+      "~i"
+      "~z"
+    ];
+  };
+
+  # Add search domains for unqualified internal hostnames.
   networking.search = [
-    "i" # ZeroTier domain
+    "i" # ZeroTier migration alias
+    "z" # ZeroTier domain
     "x" # WireGuard domain
   ];
 
