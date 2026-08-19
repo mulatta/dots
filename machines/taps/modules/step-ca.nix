@@ -26,6 +26,7 @@
           }
         ''} "Seungwon Root CA" $out/ca.crt $out/ca.key \
           --kty EC --curve P-256 \
+          --not-after 87600h \
           --no-password --insecure
       '';
     };
