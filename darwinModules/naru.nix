@@ -13,7 +13,7 @@
     files.private-key = {
       secret = true;
       owner = "root";
-      group = "root";
+      group = "wheel";
       mode = "0400";
     };
     prompts.private-key = {
