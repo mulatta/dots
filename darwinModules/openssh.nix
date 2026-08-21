@@ -8,6 +8,7 @@ in
     hostNames = [
       "*.x" # WireGuard mesh
       "*.z" # ZeroTier internal
+      "*.n" # Tinc mesh
       "*.local" # mDNS/Bonjour
     ];
     publicKeyFile = sshCaPubKey;
@@ -21,6 +22,10 @@ in
     # ZeroTier internal
     Host *.z
       StrictHostKeyChecking accept-new
+
+    # SBEE Tinc mesh
+    Host eta.n psi.n rho.n tau.n
+      Port 10022
 
     # Local network
     Host *.local
