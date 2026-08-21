@@ -8,7 +8,6 @@ in
     hostNames = [
       "*.x" # WireGuard mesh
       "*.z" # ZeroTier internal
-      "*.n" # Tinc mesh
       "*.local" # mDNS/Bonjour
     ];
     publicKeyFile = sshCaPubKey;

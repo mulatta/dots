@@ -93,6 +93,7 @@
             certificate.searchDomains = [
               "z" # ZeroTier internal
               "x" # WireGuard mesh
+              "n" # Tinc mesh
               "local" # mDNS/Bonjour
             ];
           };
@@ -101,6 +102,7 @@
             certificate.searchDomains = [
               "z" # ZeroTier internal
               "x" # WireGuard mesh
+              "n" # Tinc mesh
               "local" # mDNS/Bonjour
             ];
           };
