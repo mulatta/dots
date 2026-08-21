@@ -145,6 +145,9 @@ in
         automation_users = {
           members = [ "seungwon" ];
         };
+        kandev_users = {
+          members = [ "seungwon" ];
+        };
         task_users = {
           members = [ "seungwon" ];
         };
@@ -292,6 +295,24 @@ in
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.chat_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
+
+        # Kandev is a privileged development control plane. Keep its OIDC
+        # audience limited to the dedicated operator group.
+        kandev = {
+          displayName = "Kandev";
+          originUrl = [
+            "https://kandev.${baseDomain}"
+            "https://kandev.${baseDomain}/oauth2/callback"
+          ];
+          originLanding = "https://kandev.${baseDomain}";
+          public = true;
+          enableLocalhostRedirects = false;
+          scopeMaps.kandev_users = [
             "openid"
             "email"
             "profile"

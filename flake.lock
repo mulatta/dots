@@ -504,15 +504,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1786624805,
-        "narHash": "sha256-ae0eUxU8ZiyjcVOY0cEH18SPCjnYtzEkWLcibENxk3c=",
-        "owner": "numtide",
+        "lastModified": 1786947663,
+        "narHash": "sha256-oz7MaSOfdXwvSggZ7OsGe2Bmro/4M6rEcXf3W7iQeUM=",
+        "owner": "mulatta",
         "repo": "llm-agents.nix",
-        "rev": "3bc0b9b42903680a450addcf1dd655b92bc2c54f",
+        "rev": "08c83821a7c143620d49ccb92f77da6057f20640",
         "type": "github"
       },
       "original": {
-        "owner": "numtide",
+        "owner": "mulatta",
+        "ref": "kandev-runtimes",
         "repo": "llm-agents.nix",
         "type": "github"
       }

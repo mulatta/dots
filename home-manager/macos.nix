@@ -8,6 +8,25 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   selfPkgs = self.packages.${system};
   aiPkgs = self.inputs.llm-agents.packages.${system};
+  kandevRuntime = aiPkgs.kandev.override {
+    claudeSupport = true;
+    codexSupport = true;
+    geminiSupport = true;
+    piSupport = true;
+    ompSupport = true;
+    opencodeSupport = true;
+    copilotSupport = true;
+    hermesSupport = true;
+    ampSupport = true;
+    cursorSupport = true;
+    droidSupport = true;
+    grokSupport = true;
+    kilocodeSupport = true;
+    kimiSupport = true;
+    qoderSupport = true;
+    qwenSupport = true;
+    extraPackages = [ pkgs.gh ];
+  };
 in
 {
   imports = [
@@ -29,6 +48,7 @@ in
     selfPkgs.instagram-cli
     selfPkgs.radicle-desktop
     aiPkgs.hermes-desktop
+    (aiPkgs.kandev-desktop.override { inherit kandevRuntime; })
     selfPkgs.rbw-pinentry
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt
