@@ -7,11 +7,9 @@
 let
   grpcSupported = !lib.hasInfix "pre" config.nix.package.version;
   certs = config.sops.secrets;
-  grpcUri =
-    "grpc://psi:50051"
-    + "?ca-cert=${certs.nix-grpc-ca-cert.path}"
-    + "&client-cert=${certs.nix-grpc-client-cert.path}"
-    + "&client-key=${certs.nix-grpc-client-key.path}";
+  # Keep daemon credentials out of the URI. nix-grpc-store discovers the
+  # root-only client pair in /run/nix-grpc-store when nix-daemon opens the store.
+  grpcUri = "grpc://psi:50051?ca-cert=${certs.nix-grpc-ca-cert.path}";
 in
 {
   # nix-grpc-store only ships a NixOS client module, but it only extends
@@ -23,14 +21,17 @@ in
   sops.secrets = {
     nix-grpc-ca-cert = {
       sopsFile = ../sops/rhesus.yaml;
+      path = "/run/nix-grpc-store/ca.crt";
       mode = "0444";
     };
     nix-grpc-client-cert = {
       sopsFile = ../sops/rhesus.yaml;
+      path = "/run/nix-grpc-store/client.crt";
       mode = "0444";
     };
     nix-grpc-client-key = {
       sopsFile = ../sops/rhesus.yaml;
+      path = "/run/nix-grpc-store/client.key";
       mode = "0400";
     };
   };
