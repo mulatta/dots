@@ -10,6 +10,7 @@ in
       "*.z" # ZeroTier internal
       "*.n" # Tinc mesh
       "*.local" # mDNS/Bonjour
+      "*.sjanglab.org"
     ];
     publicKeyFile = sshCaPubKey;
   };
