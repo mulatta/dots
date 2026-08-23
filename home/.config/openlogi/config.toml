@@ -1,0 +1,80 @@
+schema_version = 4
+
+[app_settings]
+launch_at_login = true
+check_for_updates = false
+auto_install_updates = false
+update_prompt_seen = true
+show_in_menu_bar = true
+capture_mouse_events = true
+auto_download_assets = true
+asset_source = "automatic"
+thumbwheel_sensitivity = 14
+appearance = "system"
+
+[devices]
+
+[devices."direct:046d:b034:serial:2418lz50b358"]
+dpi = 1700
+scroll_resolution = "low"
+
+[devices."direct:046d:b034:serial:2418lz50b358".identity]
+display_name = "MX Master 3S"
+codename = "MX Master 3S"
+kind = "mouse"
+
+[devices."direct:046d:b034:serial:2418lz50b358".identity.model_info]
+entity_count = 3
+unit_id = [0, 0, 0, 0]
+model_ids = [45108, 0, 0]
+extended_model_id = 0
+
+[keyboard]
+
+[devices."direct:046d:b034:serial:2418lz50b358".identity.model_info.transports]
+usb = false
+equad = false
+btle = true
+bluetooth = false
+
+[devices."direct:046d:b034:serial:2418lz50b358".disabled_gestures.MiddleClick]
+Up = "MissionControl"
+Down = "ShowDesktop"
+Left = "PrevTab"
+Right = "NextTab"
+Click = "MiddleClick"
+
+[devices."direct:046d:b034:serial:2418lz50b358".bindings.GestureButton]
+Up = "MissionControl"
+Down = "ShowDesktop"
+Left = "None"
+Right = "None"
+Click = "MissionControl"
+
+[devices."direct:046d:b034:serial:2418lz50b358".identity.capabilities]
+buttons = true
+pointer = true
+lighting = false
+scroll_inversion = true
+hires_wheel = true
+thumbwheel = true
+haptic_feedback = false
+haptic_panel = false
+
+[devices."direct:046d:b034:serial:2418lz50b358".bindings]
+DpiToggle = "ShowActionsRing"
+MiddleClick = "MiddleClick"
+
+[devices."direct:046d:b034:serial:2418lz50b358".action_ring]
+enabled = true
+haptics = false
+
+[devices."direct:046d:b034:serial:2418lz50b358".action_ring.default.slots]
+Top = { action = { OpenApplication = { path = "/Users/seungwon/Applications/Home Manager Apps/Zen Browser (Beta).app", display_name = "Zen Browser" } }, icon = "Globe", label = "Browser" }
+TopRight = { action = { OpenApplication = { path = "/Users/seungwon/Applications/Home Manager Apps/Ghostty.app", display_name = "Ghostty" } }, icon = "Terminal", label = "Terminal" }
+Right = { action = { OpenApplication = { path = "~/Downloads", display_name = "Downloads" } }, icon = "Folder", label = "Downloads" }
+BottomRight = { action = { CustomShortcut = "Cmd+Shift+5" }, icon = "Camera", label = "CleanShot" }
+Bottom = { action = "PlayPause", icon = "Play", label = "Play/Pause" }
+BottomLeft = { action = "MuteVolume", icon = "Mute", label = "Mute" }
+Left = { action = { OpenApplication = { path = "/Applications/KakaoTalk.app", display_name = "KakaoTalk" } }, icon = "Applications", label = "KakaoTalk" }
+TopLeft = { action = { OpenApplication = { path = "raycast://extensions/raycast/clipboard-history/clipboard-history", display_name = "Clipboard History" } }, icon = "Paste", label = "Clipboard" }
