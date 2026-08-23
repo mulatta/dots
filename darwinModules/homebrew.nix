@@ -31,7 +31,6 @@
     "gureumkim"
     "hancom-word"
     "hookmark"
-    "logi-options+"
     "microsoft-excel"
     "microsoft-powerpoint"
     "microsoft-word"

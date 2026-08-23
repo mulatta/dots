@@ -27,6 +27,7 @@ in
 
   home.packages = [
     selfPkgs.instagram-cli
+    selfPkgs.openlogi
     selfPkgs.radicle-desktop
     aiPkgs.hermes-desktop
     selfPkgs.rbw-pinentry
