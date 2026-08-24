@@ -114,6 +114,9 @@
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
         nostr-chat-bar = pkgs.callPackage ../packages/nostr-chat-bar { };
+        paneru-app = pkgs.callPackage ../packages/paneru-app {
+          paneru = inputs'.paneru.packages.default;
+        };
         openlogi = pkgs.callPackage ../packages/openlogi { };
         radicle-desktop = pkgs.callPackage ../packages/radicle-desktop { };
         systemctl-macos = pkgs.callPackage ../packages/systemctl { };
