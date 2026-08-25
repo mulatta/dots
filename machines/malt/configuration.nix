@@ -20,6 +20,7 @@
     ./modules/miniflux
     ./modules/n8n
     ./modules/network.nix
+    ./modules/neko
     ./modules/nextcloud.nix
     ./modules/opencrow
     ./modules/paperless.nix
