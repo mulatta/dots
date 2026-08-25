@@ -18,6 +18,11 @@ let
         container = 8080;
       };
       media = 59000;
+      cdp = {
+        host = 9222;
+        chromium = 9222;
+        relay = 9223;
+      };
     };
 
     paths = {

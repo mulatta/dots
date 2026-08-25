@@ -21,6 +21,8 @@ let
       --window-position=0,0
       --display=%(ENV_DISPLAY)s
       --user-data-dir=/home/neko/chrome-profile
+      --remote-debugging-address=127.0.0.1
+      --remote-debugging-port=${toString ports.cdp.chromium}
       --no-first-run
       --start-maximized
       --force-dark-mode
@@ -47,6 +49,18 @@ let
     stdout_logfile_maxbytes=100MB
     stdout_logfile_backups=10
     redirect_stderr=true
+
+    # Chromium ignores remote-debugging-address in this image. Keep it on
+    # loopback and expose full native CDP through a transport-only relay.
+    [program:cdp-relay]
+    command=/usr/local/bin/socat TCP-LISTEN:${toString ports.cdp.relay},fork,reuseaddr TCP:127.0.0.1:${toString ports.cdp.chromium}
+    autorestart=true
+    priority=900
+    user=%(ENV_USER)s
+    stdout_logfile=/var/log/neko/cdp-relay.log
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=2
+    redirect_stderr=true
   '';
 
   chromiumPolicy = pkgs.writeText "neko-chromium-policy.json" (
@@ -62,7 +76,7 @@ let
       DefaultCookiesSetting = 1;
       DefaultNotificationsSetting = 2;
       DefaultPopupsSetting = 2;
-      DeveloperToolsAvailability = 2;
+      DeveloperToolsAvailability = 1;
       DownloadRestrictions = 3;
       EditBookmarksEnabled = false;
       ExtensionInstallBlocklist = [ "*" ];
@@ -102,11 +116,13 @@ in
         "[${wireguardAddress}]:${toString ports.ui.host}:${toString ports.ui.container}/tcp"
         "[${wireguardAddress}]:${toString ports.media}:${toString ports.media}/tcp"
         "[${wireguardAddress}]:${toString ports.media}:${toString ports.media}/udp"
+        "127.0.0.1:${toString ports.cdp.host}:${toString ports.cdp.relay}/tcp"
       ];
       volumes = [
         "${paths.profile}:/home/neko/chrome-profile:rw"
         "${chromiumConfig}:/etc/neko/supervisord/chromium.conf:ro"
         "${chromiumPolicy}:/etc/chromium/policies/managed/policies.json:ro"
+        "${pkgs.pkgsStatic.socat}/bin/socat:/usr/local/bin/socat:ro"
       ];
       extraOptions = [
         "--dns=1.1.1.1"
@@ -122,5 +138,6 @@ in
     chromiumConfig
     chromiumPolicy
     image
+    pkgs.pkgsStatic.socat
   ];
 }
