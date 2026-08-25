@@ -4,6 +4,7 @@
   python3Packages,
   makeWrapper,
   nix-update,
+  nix-prefetch-docker,
   nix-prefetch-git,
   prefetch-npm-deps,
   nix,
@@ -31,6 +32,7 @@ python3Packages.buildPythonApplication {
       --prefix PATH : ${
         lib.makeBinPath [
           nix-update
+          nix-prefetch-docker
           nix-prefetch-git
           prefetch-npm-deps
           nix
