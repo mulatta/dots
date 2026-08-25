@@ -4,6 +4,7 @@
     {
       pkgs,
       lib,
+      system,
       inputs',
       self',
       ...
@@ -111,6 +112,9 @@
 
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
+      }
+      // lib.optionalAttrs (system == "x86_64-linux") {
+        neko-image = pkgs.callPackage ./neko-image { };
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
         nostr-chat-bar = pkgs.callPackage ../packages/nostr-chat-bar { };
