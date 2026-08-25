@@ -12,7 +12,6 @@ from updater.__main__ import (
     PLACEHOLDER_HASH,
     Package,
     create_pr_for_package,
-    discover_packages,
     fix_placeholder_hash,
     run_custom_update,
     run_nix_update,
@@ -177,6 +176,101 @@ class TestRadicleDesktopUpdatePy:
         assert json.loads(srcs_file.read_text()) == current
         mirror_to_github.assert_not_called()
         get_nix_hash.assert_not_called()
+
+
+def load_neko_update_module():
+    update_script = Path(__file__).resolve().parents[1] / "neko-image" / "update.py"
+    spec = importlib.util.spec_from_file_location(
+        "test_neko_image_update", update_script
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class TestNekoImageUpdatePy:
+    """Keep Neko tag, registry digest, and Nix archive hash in sync."""
+
+    def test_updates_all_pull_image_fields(self, tmp_path: Path, monkeypatch):
+        nix_file = tmp_path / "default.nix"
+        nix_file.write_text(
+            "{ dockerTools }:\n"
+            "dockerTools.pullImage {\n"
+            '  imageName = "ghcr.io/m1k1o/neko/chromium";\n'
+            '  imageDigest = "sha256:old";\n'
+            '  hash = "sha256-old";\n'
+            '  finalImageTag = "3.1.5";\n'
+            '  os = "linux";\n'
+            '  arch = "amd64";\n'
+            "}\n"
+        )
+
+        module = load_neko_update_module()
+        module.__file__ = str(tmp_path / "update.py")
+        monkeypatch.setattr(module, "get_latest_version", lambda: "3.2.0")
+        monkeypatch.setattr(
+            module,
+            "prefetch_image",
+            lambda version: {
+                "imageDigest": "sha256:new-digest",
+                "hash": "sha256-new-archive-hash",
+            },
+        )
+
+        module.main()
+
+        result = nix_file.read_text()
+        assert 'finalImageTag = "3.2.0";' in result
+        assert 'imageDigest = "sha256:new-digest";' in result
+        assert 'hash = "sha256-new-archive-hash";' in result
+        assert 'imageName = "ghcr.io/m1k1o/neko/chromium";' in result
+        assert 'arch = "amd64";' in result
+
+    def test_prefetches_linux_amd64_manifest(self):
+        module = load_neko_update_module()
+        output = json.dumps(
+            {
+                "imageName": "ghcr.io/m1k1o/neko/chromium",
+                "imageDigest": "sha256:new-digest",
+                "hash": "sha256-new-archive-hash",
+            }
+        )
+        completed = subprocess.CompletedProcess([], 0, stdout=output, stderr="")
+
+        with patch.object(module.subprocess, "run", return_value=completed) as run:
+            assert module.prefetch_image("3.2.0")["imageDigest"] == "sha256:new-digest"
+
+        command = run.call_args.args[0]
+        assert command[:3] == [
+            "nix-prefetch-docker",
+            "--image-name",
+            "ghcr.io/m1k1o/neko/chromium",
+        ]
+        assert command[command.index("--image-tag") + 1] == "3.2.0"
+        assert command[command.index("--os") + 1] == "linux"
+        assert command[command.index("--arch") + 1] == "amd64"
+        assert "--json" in command
+        assert "--quiet" in command
+
+    def test_skips_prefetch_when_release_is_current(self, tmp_path: Path, monkeypatch):
+        source = (
+            Path(__file__).resolve().parents[1] / "neko-image" / "default.nix"
+        ).read_text()
+        (tmp_path / "default.nix").write_text(source)
+
+        module = load_neko_update_module()
+        module.__file__ = str(tmp_path / "update.py")
+        current = module.get_current_version(tmp_path / "default.nix")
+        prefetch_image = Mock()
+        monkeypatch.setattr(module, "get_latest_version", lambda: current)
+        monkeypatch.setattr(module, "prefetch_image", prefetch_image)
+
+        module.main()
+
+        prefetch_image.assert_not_called()
+        assert (tmp_path / "default.nix").read_text() == source
 
 
 # -- Regression: run_nix_update must pass bare attribute path to nix-update --
