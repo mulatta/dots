@@ -25,6 +25,20 @@ let
       profile = "/var/lib/neko/chrome-profile";
     };
 
+    network = {
+      name = "neko";
+      interface = "neko0";
+      id = "6e656b6f00000000000000000000000000000000000000000000000000000000";
+      ipv4 = {
+        subnet = "10.89.0.0/24";
+        gateway = "10.89.0.1";
+      };
+      ipv6 = {
+        subnet = "fd89:6e65:6b6f::/64";
+        gateway = "fd89:6e65:6b6f::1";
+      };
+    };
+
     image = self.packages.${pkgs.stdenv.hostPlatform.system}.neko-image;
   };
 
@@ -39,7 +53,10 @@ let
   '';
 in
 {
-  imports = [ ./runtime.nix ];
+  imports = [
+    ./network.nix
+    ./runtime.nix
+  ];
 
   _module.args.maltNeko = maltNeko;
 

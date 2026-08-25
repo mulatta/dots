@@ -7,6 +7,7 @@
 let
   inherit (maltNeko)
     image
+    network
     paths
     ports
     wireguardAddress
@@ -85,6 +86,7 @@ in
       imageFile = image;
       pull = "never";
       hostname = "neko";
+      networks = [ network.name ];
       environmentFiles = [ secretEnv ];
       environment = {
         NEKO_DESKTOP_SCREEN = "1920x1080@30";
