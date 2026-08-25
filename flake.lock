@@ -1000,11 +1000,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785937382,
-        "narHash": "sha256-wAWgxdaGBz5UigH6Q0lx56Y9MPHuG89Ks79N0Es5+RI=",
+        "lastModified": 1787207743,
+        "narHash": "sha256-e/hhAe/drjT6+VVU13ItcASG8xksvle79C8JHafWwB4=",
         "owner": "mulatta",
         "repo": "rhwp.nix",
-        "rev": "5847c3306a918158c07b9f04e95f5f0160bbd617",
+        "rev": "b8b3c82f4f9b28df838d6c91266486835f5816b9",
         "type": "github"
       },
       "original": {
@@ -1103,11 +1103,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785907205,
-        "narHash": "sha256-Ds1vTi53af4wDMAveSR/K0JnywDslLwmgwhVIiwnNmY=",
+        "lastModified": 1787194935,
+        "narHash": "sha256-Gt6JpppReMxPGkbPcQhz+1qp+NUUf4oIwzRy+ptJgTk=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "c5cb13481d718fac906aa9cfd85f9b60e1a546cb",
+        "rev": "cb98e96d632d0010a7e56c098c51729cb179cc75",
         "type": "github"
       },
       "original": {
