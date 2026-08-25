@@ -39,7 +39,6 @@ in
     aiPkgs.ccstatusline
     aiPkgs.codex
     aiPkgs.ctx
-    aiPkgs.gemini-cli
     aiPkgs.git-surgeon
     aiPkgs.jscpd
     aiPkgs.officecli
