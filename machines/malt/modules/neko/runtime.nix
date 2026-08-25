@@ -27,8 +27,6 @@ let
       --start-maximized
       --force-dark-mode
       --disable-file-system
-      --disable-gpu
-      --disable-software-rasterizer
       --disable-dev-shm-usage
     stopsignal=INT
     autorestart=true
@@ -125,6 +123,7 @@ in
         "${pkgs.pkgsStatic.socat}/bin/socat:/usr/local/bin/socat:ro"
       ];
       extraOptions = [
+        "--device=/dev/dri/renderD128:/dev/dri/renderD128"
         "--dns=1.1.1.1"
         "--dns=8.8.8.8"
         "--pids-limit=512"
