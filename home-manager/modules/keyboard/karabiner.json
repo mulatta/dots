@@ -18,16 +18,27 @@
             ]
           },
           {
-            "description": "Globe/lang1 → F18 (Gureum toggle)",
+            "description": "Globe → F18 (Gureum toggle)",
             "manipulators": [
               {
                 "from": { "apple_vendor_keyboard_key_code": "language" },
                 "to": [{ "key_code": "f18" }],
                 "type": "basic"
-              },
+              }
+            ]
+          },
+          {
+            "description": "Voyager LANG1 → Apple language key",
+            "manipulators": [
               {
+                "conditions": [
+                  {
+                    "identifiers": [{ "product_id": 6519, "vendor_id": 12951 }],
+                    "type": "device_if"
+                  }
+                ],
                 "from": { "key_code": "lang1" },
-                "to": [{ "key_code": "f18" }],
+                "to": [{ "apple_vendor_keyboard_key_code": "language" }],
                 "type": "basic"
               }
             ]
