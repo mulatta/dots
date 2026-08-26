@@ -23,6 +23,8 @@ let
       aiPkgs.qmd;
 in
 {
+  home.sessionVariables.AI_MEMORY_SERVER_URL = "http://malt.x:49374";
+
   home.packages = [
     selfPkgs.archify-cli
     selfPkgs.claude-md
@@ -35,6 +37,7 @@ in
     nixbot-cli
     skillzPkgs.biorefs-cli
     skillzPkgs.drawio-cli
+    aiPkgs.ai-memory
     aiPkgs.apm
     aiPkgs.ccstatusline
     aiPkgs.codex
