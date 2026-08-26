@@ -15,6 +15,7 @@ let
   serverUrl = "http://[${maltWgIP}]:${toString port}";
   authToken = config.clan.core.vars.generators.ai-memory.files.auth-token.path;
   tokenPepper = config.clan.core.vars.generators.ai-memory.files.token-pepper.path;
+  anthropicApiKey = config.clan.core.vars.generators.ai-memory-anthropic.files.api-key.path;
   configFile = (pkgs.formats.toml { }).generate "ai-memory.toml" {
     bind = "[${maltWgIP}]:${toString port}";
     allowed_hosts = [
@@ -50,7 +51,8 @@ let
     set -euo pipefail
     AI_MEMORY_AUTH_TOKEN=$(< "$CREDENTIALS_DIRECTORY/auth-token")
     AI_MEMORY_AUTH__TOKEN_PEPPER=$(< "$CREDENTIALS_DIRECTORY/token-pepper")
-    export AI_MEMORY_AUTH_TOKEN AI_MEMORY_AUTH__TOKEN_PEPPER
+    ANTHROPIC_API_KEY=$(< "$CREDENTIALS_DIRECTORY/anthropic-api-key")
+    export AI_MEMORY_AUTH_TOKEN AI_MEMORY_AUTH__TOKEN_PEPPER ANTHROPIC_API_KEY
     exec ${lib.getExe aiMemory} \
       --data-dir ${stateDir} \
       --config ${configFile} \
@@ -86,6 +88,28 @@ in
     '';
   };
 
+  clan.core.vars.generators.ai-memory-anthropic = {
+    prompts.api-key = {
+      description = "Anthropic API key for ai-memory consolidation";
+      type = "hidden";
+      persist = false;
+    };
+    files.api-key = {
+      secret = true;
+      owner = "ai-memory";
+      group = "ai-memory";
+    };
+
+    runtimeInputs = [ pkgs.coreutils ];
+    script = ''
+      if [ ! -s "$prompts/api-key" ]; then
+        echo "Anthropic API key must not be empty" >&2
+        exit 1
+      fi
+      install -m 0600 "$prompts/api-key" "$out/api-key"
+    '';
+  };
+
   users.users.ai-memory = {
     isSystemUser = true;
     group = "ai-memory";
@@ -114,6 +138,8 @@ in
       StateDirectoryMode = "0750";
       UMask = "0077";
       Environment = [
+        "AI_MEMORY_LLM_PROVIDER=anthropic"
+        "AI_MEMORY_LLM_MODEL=claude-haiku-4-5"
         "AI_MEMORY_EMBEDDING_PROVIDER=openai-compat"
         "AI_MEMORY_EMBEDDING_BASE_URL=http://psi.n:8201/v1"
         "AI_MEMORY_EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B"
@@ -122,6 +148,7 @@ in
       LoadCredential = [
         "auth-token:${authToken}"
         "token-pepper:${tokenPepper}"
+        "anthropic-api-key:${anthropicApiKey}"
       ];
       ExecStartPre = "${lib.getExe aiMemory} --data-dir ${stateDir} --config ${configFile} init";
       ExecStart = serverCommand;
