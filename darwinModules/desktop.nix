@@ -32,6 +32,10 @@
 
   system.defaults.loginwindow.GuestEnabled = false;
 
+  system.defaults.CustomUserPreferences."com.apple.HIToolbox" = {
+    AppleFnUsageType = 1;
+  };
+
   # finder
   system.defaults.finder = {
     FXPreferredViewStyle = "clmv";
