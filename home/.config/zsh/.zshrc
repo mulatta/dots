@@ -412,6 +412,7 @@ cal() {
 
 # ===== Completion (must be before fzf-tab) =====
 # Add zsh-completions to fpath
+[[ -d ~/.zsh-completions/src ]] && fpath=(~/.zsh-completions/src $fpath)
 [[ -d ~/.nix-profile/share/zsh/site-functions ]] && fpath=(~/.nix-profile/share/zsh/site-functions $fpath)
 
 autoload -Uz compinit
@@ -439,8 +440,8 @@ zstyle ':completion:*' cache-path "$HOME/.cache/zsh/compcache"
 # Load order matters! fzf-tab -> autosuggestions -> autopair -> helix-mode -> syntax-highlighting
 
 # 1. fzf-tab with skim backend (must be after compinit, before autosuggestions)
-if [[ -f ~/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
-  source ~/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh
+if [[ -f ~/.zsh-fzf-tab/fzf-tab.plugin.zsh ]]; then
+  source ~/.zsh-fzf-tab/fzf-tab.plugin.zsh
   zstyle ':fzf-tab:*' fzf-command sk
   # Only show fzf-tab when there are many completions (threshold: 4)
   zstyle ':fzf-tab:*' fzf-min-height 4
@@ -454,12 +455,12 @@ if [[ -f ~/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
 fi
 
 # 2. zsh-autosuggestions
-[[ -f ~/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
-  source ~/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+[[ -f ~/.zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+  source ~/.zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # 3. zsh-autopair
-[[ -f ~/.nix-profile/share/zsh/zsh-autopair/autopair.zsh ]] && {
-  source ~/.nix-profile/share/zsh/zsh-autopair/autopair.zsh
+[[ -f ~/.zsh-autopair/autopair.zsh ]] && {
+  source ~/.zsh-autopair/autopair.zsh
   autopair-init
 }
 
@@ -490,8 +491,8 @@ if [[ -f ~/.nix-profile/share/zsh-helix-mode/zsh-helix-mode.plugin.zsh ]]; then
 fi
 
 # 5. fast-syntax-highlighting (MUST be last among plugins)
-if [[ -f ~/.nix-profile/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
-  source ~/.nix-profile/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+if [[ -f ~/.fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
+  source ~/.fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
   # Hook for helix-mode selection highlighting
   (( $+functions[zhm-add-update-region-highlight-hook] )) && zhm-add-update-region-highlight-hook
 fi

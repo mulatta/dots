@@ -71,11 +71,6 @@ in
     tmuxPlugins.tmux-thumbs
     zoxide
     zsh
-    zsh-autopair
-    zsh-autosuggestions
-    zsh-completions
-    zsh-fast-syntax-highlighting
-    zsh-fzf-tab
     (if stdenv.isDarwin then ghostty-bin else ghostty)
 
     # Git
