@@ -37,7 +37,6 @@ in
     ./modules/calendar
     ./modules/chat.nix
     ./modules/docker.nix
-    ./modules/herdr/open-file.nix
     ./modules/keyboard
     ./modules/ai.nix
     ./modules/mail
