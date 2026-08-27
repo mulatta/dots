@@ -79,7 +79,7 @@ in
       "${aiTools.herdr.src}/src/integration/assets/pi/herdr-agent-state.ts";
 
     # herdr's official skill exposes pane and workspace orchestration to agents.
-    ".claude/skills/herdr/SKILL.md".source = "${aiTools.herdr.src}/SKILL.md";
+    ".claude/skills/herdr/SKILL.md".source = "${aiTools.herdr.src}/skills/herdr/SKILL.md";
 
     # nixbot-cli ships its agent skill alongside the binary.
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
@@ -93,8 +93,7 @@ in
     # binary and keeps the whole source tree out of the profile closure.
     ".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
 
-    ".claude/skills/ctx-agent-history-search/SKILL.md".source =
-      "${aiTools.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
+    ".claude/skills/ctx/SKILL.md".source = "${aiTools.ctx.src}/skills/ctx/SKILL.md";
 
   };
 
