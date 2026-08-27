@@ -1,10 +1,9 @@
 /**
  * Shared git helpers for pi extensions.
  *
- * Several commands (commit/merge/rebase/review/open-pr) need the same
- * "what branch am I on" and "what is my base branch" answers. Centralising
- * them keeps the fallback order consistent and avoids the .code/.exitCode
- * drift that already crept in once.
+ * Git commands need consistent branch/base discovery, ref validation, and
+ * failure handling. Centralising these policies keeps fallback order and
+ * required-operation semantics from drifting between extensions.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
@@ -18,6 +17,24 @@ export async function git(
 ): Promise<string> {
   const r = await exec("git", args, { timeout });
   return r.code === 0 ? r.stdout.trim() : "";
+}
+
+/** Run git and surface failures. Use for mutations and required reads. */
+export async function gitRequired(
+  exec: Exec,
+  args: string[],
+  timeout = 5000,
+): Promise<string> {
+  const r = await exec("git", args, { timeout });
+  if (r.code !== 0) {
+    throw new Error(r.stderr.trim() || `git ${args[0] ?? "command"} failed`);
+  }
+  return r.stdout.trim();
+}
+
+/** Resolve a ref to an immutable commit object ID. */
+export async function resolveCommit(exec: Exec, ref: string): Promise<string> {
+  return gitRequired(exec, ["rev-parse", "--verify", `${ref}^{commit}`]);
 }
 
 export async function currentBranch(exec: Exec): Promise<string> {
