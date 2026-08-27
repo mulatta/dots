@@ -3,6 +3,8 @@
 # ===== Interactive shell only =====
 [[ -o interactive ]] || return
 
+[[ -f ~/.zsh-termsupport ]] && source ~/.zsh-termsupport
+
 # Session variables (from nix-profile if available)
 [[ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]] && source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 
@@ -29,7 +31,6 @@ export XDG_VIDEOS_DIR="$HOME/Videos"
 export NH_FLAKE="$HOME/dots"
 export EDITOR=hx
 export VISUAL=hx
-export ZDOTDIR="$HOME/.config/zsh"
 # Catppuccin Mocha theme for skim
 export SKIM_DEFAULT_OPTIONS="--height=40% --layout=reverse --bind='ctrl-j:down,ctrl-k:up' \
   --color=bg+:#313244,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
