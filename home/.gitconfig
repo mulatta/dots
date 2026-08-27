@@ -1,4 +1,5 @@
 [alias]
+	clone = "clone --recursive"
 	backport = "cherry-pick -x"
 	br = "branch"
 	checkout-pr = "!pr() { git fetch origin pull/$1/head:pr-$1; git checkout pr-$1; }; pr"
