@@ -145,6 +145,9 @@ in
         automation_users = {
           members = [ "seungwon" ];
         };
+        memory_users = {
+          members = [ "seungwon" ];
+        };
         task_users = {
           members = [ "seungwon" ];
         };
@@ -276,6 +279,23 @@ in
           public = true;
           enableLocalhostRedirects = false;
           scopeMaps.automation_users = [
+            "openid"
+            "email"
+            "profile"
+          ];
+        };
+
+        memory = {
+          displayName = "Agent Memory";
+          originUrl = [
+            "https://memory.${baseDomain}"
+            "https://memory.${baseDomain}/oauth2/callback"
+          ];
+          originLanding = "https://memory.${baseDomain}/web/";
+          public = true;
+          enableLocalhostRedirects = false;
+          preferShortUsername = true;
+          scopeMaps.memory_users = [
             "openid"
             "email"
             "profile"
