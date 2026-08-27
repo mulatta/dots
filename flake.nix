@@ -84,6 +84,18 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    nixbot = {
+      url = "git+https://github.com/Mic92/nixbot?shallow=1&ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
+    gitea-mq = {
+      url = "github:Mic92/gitea-mq";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     zhost = {
       url = "github:mulatta/zhost";
       inputs.treefmt-nix.follows = "treefmt-nix";
@@ -167,18 +179,6 @@
 
     skillz = {
       url = "github:mulatta/skillz";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
-    nixbot = {
-      url = "git+https://github.com/Mic92/nixbot?shallow=1&ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
-    gitea-mq = {
-      url = "github:Mic92/gitea-mq";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
