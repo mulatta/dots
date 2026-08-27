@@ -210,9 +210,12 @@ export default function (pi: ExtensionAPI) {
     busy = true;
   });
   pi.on("agent_end", async (_ev, ctx) => {
+    // Do not fireDue() here: isStreaming stays true until every agent_end
+    // listener has settled, so sendMessage would land in the steer queue
+    // with nextFireAt already advanced. The 1s timer picks it up right
+    // after finishRun() instead.
     busy = false;
     ctxRef = ctx;
-    fireDue();
   });
   pi.on("session_start", async (_ev, ctx) => {
     ctxRef = ctx;
@@ -226,6 +229,45 @@ export default function (pi: ExtensionAPI) {
   pi.registerCommand("cron", {
     description:
       "Schedule recurring prompts (/cron 5m <prompt> | list | delete <id> | clear)",
+    getArgumentCompletions: (prefix) => {
+      const del = prefix.match(/^(delete|rm|stop)\s+(\S*)$/);
+      if (del) {
+        // Second word after delete/rm/stop → offer live task IDs.
+        return Array.from(tasks.values())
+          .filter((t) => t.id.startsWith(del[2]))
+          .map((t) => {
+            const p = t.prompt.replace(/\s+/g, " ");
+            return {
+              value: `${del[1]} ${t.id}`,
+              label: t.id,
+              description: `${t.humanLabel} — ${
+                p.length > 60 ? p.slice(0, 57) + "…" : p
+              }`,
+            };
+          });
+      }
+      if (/\s/.test(prefix)) return null; // past first word, free text
+      return [
+        { value: "list", label: "list", description: "show scheduled tasks" },
+        {
+          value: "delete ",
+          label: "delete <id>",
+          description: "cancel a task",
+        },
+        { value: "clear", label: "clear", description: "delete all tasks" },
+        {
+          value: "5m ",
+          label: "5m <prompt>",
+          description: "run every 5 minutes",
+        },
+        {
+          value: "30m ",
+          label: "30m <prompt>",
+          description: "run every 30 minutes",
+        },
+        { value: "1h ", label: "1h <prompt>", description: "run hourly" },
+      ].filter((o) => !prefix || o.value.startsWith(prefix));
+    },
     handler: async (args, ctx) => {
       ctxRef = ctx;
       const s = args.trim();
