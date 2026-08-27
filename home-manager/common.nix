@@ -109,6 +109,7 @@ in
     uutils-coreutils-noprefix
     uv
     xcp
+    xz
     yq-go
 
     # Security
