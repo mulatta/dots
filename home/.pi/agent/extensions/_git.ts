@@ -24,28 +24,38 @@ export async function currentBranch(exec: Exec): Promise<string> {
   return git(exec, ["branch", "--show-current"]);
 }
 
-/** Raw `branch.<cur>.workmux-base` config value, or "". */
-export async function workmuxBase(exec: Exec, cur: string): Promise<string> {
-  if (!cur) return "";
+/** Resolve the remote's configured default branch, or "". */
+export async function remoteDefault(exec: Exec): Promise<string> {
   return git(exec, [
-    "config",
-    "--local",
-    "--get",
-    `branch.${cur}.workmux-base`,
+    "symbolic-ref",
+    "--short",
+    "refs/remotes/origin/HEAD",
   ]);
 }
 
-/**
- * Local base branch for rebase/diff: workmux-base → main → master.
- * Never touches the remote — callers that want origin/* should resolve
- * that themselves (see open-pr).
- */
-export async function localBase(exec: Exec, cur?: string): Promise<string> {
-  const branch = cur ?? (await currentBranch(exec));
-  const wb = await workmuxBase(exec, branch);
-  if (wb) return wb;
-  const hasMain = await git(exec, ["rev-parse", "--verify", "-q", "main"]);
-  return hasMain ? "main" : "master";
+/** Local default branch for rebase/diff: origin/HEAD → main → master. */
+export async function localBase(exec: Exec): Promise<string> {
+  const remote = await remoteDefault(exec);
+  if (remote.startsWith("origin/")) {
+    const local = remote.slice("origin/".length);
+    if (await git(exec, ["rev-parse", "--verify", "-q", local])) return local;
+  }
+
+  for (const branch of ["main", "master"]) {
+    if (await git(exec, ["rev-parse", "--verify", "-q", branch])) return branch;
+  }
+  return "main";
+}
+
+/** Remote default branch for PR diffs, with local branches as a fallback. */
+export async function prBase(exec: Exec): Promise<string> {
+  const remote = await remoteDefault(exec);
+  if (remote) return remote;
+
+  for (const branch of ["origin/main", "origin/master"]) {
+    if (await git(exec, ["rev-parse", "--verify", "-q", branch])) return branch;
+  }
+  return localBase(exec);
 }
 
 // pi's loader treats every *.ts in extensions/ as an extension and errors on
