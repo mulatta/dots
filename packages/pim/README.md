@@ -16,7 +16,6 @@ contacts, RSS/Miniflux, Vikunja, and biomedical reference workflows over local X
 - vdirsyncer config: `~/.config/vdirsyncer/`
 - Miniflux cache: `~/.cache/miniflux-cli/`
 - Miniflux config: `~/.config/miniflux-cli/`
-- Vikunja CLI config: `~/.config/vikunja-cli/`
 - Bio reference CLI config: `~/.config/biorefs-cli/`
 - Bio reference CLI cache: `~/.cache/biorefs-cli/`
 
@@ -24,9 +23,9 @@ contacts, RSS/Miniflux, Vikunja, and biomedical reference workflows over local X
 
 The wrapper provides a restricted PIM tool `PATH` containing `calendar-cli`,
 `crabfit-cli`, `vdirsyncer`, `todoman`, `notmuch`, `afew`, `mrefile`/`mshow`
-from mblaze, `msmtp`, `mbsync`, `email-sync`, `khard`, `miniflux-cli`, `vikunja-cli`,
+from mblaze, `msmtp`, `mbsync`, `email-sync`, `khard`, `miniflux-cli`,
 `biorefs-cli`, `rbw`, and basic shell utilities. It also registers the bundled
-`crabfit-cli`, `miniflux-cli`, `vikunja-cli`, and `biorefs-cli` pi skills with
+`crabfit-cli`, `miniflux-cli`, and `biorefs-cli` pi skills with
 `--skill`, keeping them available for focused PIM sessions without putting them
 in the default pi skill set.
 

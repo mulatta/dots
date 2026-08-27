@@ -38,7 +38,6 @@ let
 
     skills = {
       context7-cli = lib.mkDefault "${skillz}/context7-cli/skills";
-      crwl-cli = lib.mkDefault "${skillz}/crwl-cli/skills";
       pexpect-cli = lib.mkDefault "${skillz}/pexpect-cli/skills";
       http = lib.mkDefault ./skills/http;
       document-reading = lib.mkDefault ./skills/document-reading;
@@ -106,7 +105,6 @@ let
       zstd
       python313Packages.pymupdf
       skillzPkgs.context7-cli
-      skillzPkgs.crwl-cli
       skillzPkgs.pexpect-cli
       # Resolve to the llm-agents build, not pinned nixpkgs.
       officecli

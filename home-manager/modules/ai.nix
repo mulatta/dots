@@ -49,13 +49,11 @@ in
       "biorefs-cli"
       "calendar-cli"
       "context7-cli"
-      "crwl-cli"
-      "drawio-cli"
       "kmap-cli"
       "linkwarden-cli"
       "n8n-cli"
       "pexpect-cli"
-      "vikunja-cli"
+      "queue"
     ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ "shortcuts-cli" ];
     package = skillzPkgs // {
