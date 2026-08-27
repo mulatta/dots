@@ -60,7 +60,6 @@ alias nfu='nix flake update'
 alias nhs='nh home switch -b backup'
 alias tf='tofu'
 alias tg='terragrunt'
-alias tmpd='cd $(mktemp -d)'
 alias tree='eza --tree'
 alias zj='zellij'
 alias zja='zellij attach'
@@ -300,6 +299,14 @@ real-which() {
 hm() {
   nix run "$HOME/dots#hm" -- "$@"
 }
+
+tempdir() {
+  local random_adjective=$(shuf -n 1 "$HOME/.zsh/random-adjective.txt")
+  local random_name=$(shuf -n 1 "$HOME/.zsh/random-name.txt")
+
+  cd "$(mktemp -d "/tmp/$random_adjective-$random_name-XXXXXX")"
+}
+alias tmpd=tempdir
 
 # home-manager generation switcher with skim
 hmg() {
