@@ -1,20 +1,62 @@
 /**
- * permission-gate user rules — argv-based so quoted mentions (e.g.
- * `echo "ssh ..."`) don't trigger them. Built-in duplicates are omitted.
+ * permission-gate user rules — migrated from ~/.pi/agent/permission-gate.json.
+ * All rules are argv-based so quoted mentions (e.g. `echo "ssh ..."`) don't
+ * trigger them. Built-in duplicates (git checkout ., gh repo/release) dropped.
  */
+
+import { homedir } from "node:os";
 
 // Match `cmd sub1 sub2 ...` anywhere in the pipeline. `sub` may be a
 // string (exact) or string[] (any-of).
 const is = (pipe: string[][], cmd: string, ...subs: (string | string[])[]) =>
   pipe.some((argv) =>
     argv[0] === cmd &&
-    subs.every((sub, i) =>
-      Array.isArray(sub) ? sub.includes(argv[i + 1]) : argv[i + 1] === sub,
-    ),
+    subs.every((s, i) =>
+      Array.isArray(s) ? s.includes(argv[i + 1]) : argv[i + 1] === s
+    )
   );
 
-export default {
+// ~/git and ~/src hold too many repos to scan whole-tree; scope to one repo.
+const SLOW_ROOTS = new Set(
+  ["git", "src"].flatMap((d) => [`${homedir()}/${d}`, `~/${d}`, `$HOME/${d}`]),
+);
+const stripSlash = (arg: string) => arg.replace(/\/+\.?$/, "");
+
+export default (helpers: any) => ({
   extraRules: [
+    {
+      label: "scan ~/git or ~/src",
+      group: "scan",
+      action: "block",
+      test: (p: string[][]) =>
+        p.some((argv) =>
+          helpers.searchPaths(argv).some((a: string) =>
+            SLOW_ROOTS.has(stripSlash(a))
+          )
+        ),
+      reason:
+        "find/fd/rg/grep across all of ~/git or ~/src is blocked (too many repos). " +
+        "Scope the search to a specific repository, e.g. rg foo ~/git/nixpkgs.",
+    },
+    {
+      label: "nix --refresh",
+      action: "block",
+      test: (p: string[][]) =>
+        helpers.anyCmd(p, "nix", (a: string[]) => a.includes("--refresh")),
+      reason:
+        "nix --refresh is blocked: cache invalidation is not needed in nix — " +
+        "to trigger a rebuild, alter the derivation instead.",
+    },
+    {
+      // A regex, not an argv test: `sleep` and `queue wait` land in
+      // separate pipelines of an `&&`/`;` list, and rule tests only ever
+      // see one pipeline at a time.
+      label: "sleep before queue wait",
+      action: "block",
+      pattern: /\bsleep\s+\S+\s*(&&|;)\s*queue\s+wait\b/,
+      reason:
+        "Do not sleep before `queue wait` — use `queue wait --timeout SECS` instead.",
+    },
     { label: "ssh", test: (p) => is(p, "ssh") },
     { label: "send email", test: (p) => is(p, "msmtp") },
 
@@ -24,10 +66,10 @@ export default {
       label: "nix forced rebuild",
       test: (p) =>
         p.some(
-          (argv) =>
-            (argv[0] === "nix" && argv.includes("--rebuild")) ||
-            ((argv[0] === "nix-build" || argv[0] === "nix-store") &&
-              argv.includes("--check")),
+          (a) =>
+            (a[0] === "nix" && a.includes("--rebuild")) ||
+            ((a[0] === "nix-build" || a[0] === "nix-store") &&
+              a.includes("--check")),
         ),
     },
     {
@@ -39,11 +81,11 @@ export default {
     {
       label: "git checkout (reset files)",
       test: (p) =>
-        p.some((argv) => {
-          if (argv[0] !== "git") return false;
-          const checkout = argv.indexOf("checkout");
-          const separator = argv.indexOf("--", checkout + 1);
-          return checkout > 0 && separator > checkout && separator < argv.length - 1;
+        p.some((a) => {
+          if (a[0] !== "git") return false;
+          const i = a.indexOf("checkout");
+          const dd = a.indexOf("--", i + 1);
+          return i > 0 && dd > i && dd < a.length - 1;
         }),
     },
 
@@ -59,7 +101,8 @@ export default {
     { label: "create GitHub PR", test: (p) => is(p, "gh", "pr", "create") },
     {
       label: "modify GitHub PR",
-      test: (p) => is(p, "gh", "pr", ["close", "merge", "edit", "comment", "review"]),
+      test: (p) =>
+        is(p, "gh", "pr", ["close", "merge", "edit", "comment", "review"]),
     },
 
     // Gitea
@@ -73,4 +116,4 @@ export default {
     },
     { label: "Gitea comment", test: (p) => is(p, "tea", "comment") },
   ],
-};
+});

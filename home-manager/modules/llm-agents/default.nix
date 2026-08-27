@@ -84,50 +84,39 @@ in
     ];
   };
 
-  home.file.".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify";
+  home.file = {
+    ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify";
 
-  # nixbot-cli ships its agent skill alongside the binary.
-  home.file.".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
+    # nixbot-cli ships its agent skill alongside the binary.
+    ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
 
-  # git-surgeon ships a skill teaching agents how to use its git primitives.
-  home.file.".claude/skills/git-surgeon".source =
-    "${aiTools.git-surgeon}/share/git-surgeon/skills/git-surgeon";
+    # git-surgeon ships a skill teaching agents how to use its git primitives.
+    ".claude/skills/git-surgeon".source = "${aiTools.git-surgeon}/share/git-surgeon/skills/git-surgeon";
 
-  # officecli ships its skill text in-source and CI keeps it byte-identical to
-  # what the binary emits, so source it from officecli.src instead of vendoring
-  # a copy that would drift. Pinning to .src version-locks the skill to the
-  # binary and keeps the whole source tree out of the profile closure.
-  home.file.".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
+    # officecli ships its skill text in-source and CI keeps it byte-identical to
+    # what the binary emits, so source it from officecli.src instead of vendoring
+    # a copy that would drift. Pinning to .src version-locks the skill to the
+    # binary and keeps the whole source tree out of the profile closure.
+    ".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
 
-  home.file.".claude/skills/ctx-agent-history-search/SKILL.md".source =
-    "${aiTools.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
+    ".claude/skills/ctx-agent-history-search/SKILL.md".source =
+      "${aiTools.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
 
-  home.file.".claude/skills/zat/SKILL.md".text = ''
-    ---
-    name: zat
-    description: Code outline viewer showing exported symbol signatures with line numbers. Use when you need signatures, not full implementation.
-    ---
+    ".claude/skills/zat/SKILL.md".text = ''
+      ---
+      name: zat
+      description: Code outline viewer showing exported symbol signatures with line numbers. Use when you need signatures, not full implementation.
+      ---
 
-    Prefer `zat` over `cat`/`Read` when you need signatures, not full implementation. Use the line numbers in the output to `Read(offset, limit)` into specific sections.
+      Prefer `zat` over `cat`/`Read` when you need signatures, not full implementation. Use the line numbers in the output to `Read(offset, limit)` into specific sections.
 
-    Supported languages: C, C++, C#, Go, Haskell, Java, JavaScript, Kotlin, Markdown, Python, Ruby, Rust, Swift, TypeScript/TSX
+      Supported languages: C, C++, C#, Go, Haskell, Java, JavaScript, Kotlin, Markdown, Python, Ruby, Rust, Swift, TypeScript/TSX
 
-    ```
-    zat <FILE>
-    ```
-  '';
-
-  home.file.".pi/agent/extensions/direnv.ts".source = "${inputs.pi-agent-extensions}/direnv/index.ts";
-  home.file.".pi/agent/extensions/questionnaire.ts".source =
-    "${inputs.pi-agent-extensions}/questionnaire/index.ts";
-  home.file.".pi/agent/extensions/slow-mode.ts".source =
-    "${inputs.pi-agent-extensions}/slow-mode/index.ts";
-  home.file.".pi/agent/extensions/notify.ts".source = "${inputs.pi-agent-extensions}/notify/index.ts";
-  home.file.".pi/agent/extensions/fetch".source = "${inputs.pi-agent-extensions}/fetch";
-  home.file.".pi/agent/extensions/permission-gate".source =
-    "${inputs.pi-agent-extensions}/permission-gate";
-  home.file.".pi/agent/extensions/stash".source = "${inputs.pi-agent-extensions}/stash";
-  home.file.".pi/agent/extensions/statusline".source = "${inputs.pi-agent-extensions}/statusline";
+      ```
+      zat <FILE>
+      ```
+    '';
+  };
 
   home.packages = [
     aiMemory

@@ -182,11 +182,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
-
-    pi-agent-extensions = {
-      url = "github:rytswd/pi-agent-extensions";
-      flake = false;
-    };
   };
 
   outputs =

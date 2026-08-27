@@ -1,5 +1,14 @@
 {
-  "extensions": ["~/.pi/agent/extensions", "!**/btw.ts", "!custom-footer.ts"],
+  "extensions": [
+    "!**/btw.ts",
+    "!**/custom-footer.ts",
+    "!**/handoff.ts",
+    "!**/proc-title.ts",
+    "!**/stable-settings.ts",
+    "!**/tuicr.ts",
+    "!**/until.ts",
+    "!**/workmux-status.ts"
+  ],
   "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"],
   "prompts": ["~/.pi/agent/prompts"],
   "theme": "tokyonight",
