@@ -36,6 +36,28 @@
         };
     in
     {
+      apps.stow-dotfiles = {
+        type = "app";
+        program = "${
+          pkgs.writeShellApplication {
+            name = "stow-dotfiles";
+            runtimeInputs = [ pkgs.stow ];
+            text = ''
+              if [[ ! -d "$HOME/dots/home" ]]; then
+                exit 0
+              fi
+
+              exec stow \
+                -d "$HOME/dots" \
+                -t "$HOME" \
+                --restow \
+                --no-folding \
+                home
+            '';
+          }
+        }/bin/stow-dotfiles";
+      };
+
       apps.hm = {
         type = "app";
         program = "${pkgs.writeShellScriptBin "hm" ''
@@ -45,7 +67,6 @@
               pkgs.coreutils
               pkgs.findutils
               pkgs.unixtools.hostname
-              pkgs.stow
               pkgs.nixVersions.latest
               inputs.home-manager.packages.${pkgs.stdenv.hostPlatform.system}.home-manager
             ]
@@ -63,9 +84,9 @@
             exit 0
           fi
 
-          if [[ "''${1:-}" == "switch" ]] && [[ -d "$HOME/dots/home" ]]; then
+          if [[ "''${1:-}" == "switch" ]]; then
             echo "==> Stowing dotfiles..."
-            stow -d "$HOME/dots" -t "$HOME" --restow --no-folding home
+            ${config.apps.stow-dotfiles.program}
           fi
 
           echo "==> Running home-manager with profile: $profile"
@@ -96,7 +117,7 @@
           fi
 
           echo "==> Stowing dotfiles..."
-          stow -d "$HOME/dots" -t "$HOME" --restow --no-folding home
+          ${config.apps.stow-dotfiles.program}
 
           echo "==> Activating home-manager..."
           nix run "$HOME/dots#hm" -- switch
