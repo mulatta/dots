@@ -18,9 +18,15 @@ in
   home.file.".pi/agent/extensions/statusline".source = "${pi-ext}/statusline";
 
   home.packages = [
-    (pkgs.writeShellScriptBin "pi" ''
-      ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
-      exec ${aiPkgs.pi}/bin/pi "$@"
-    '')
+    (pkgs.writeShellApplication {
+      name = "pi";
+      text = ''
+        export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
+        AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-token)"
+        export AI_MEMORY_AUTH_TOKEN
+        ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
+        exec ${aiPkgs.pi}/bin/pi "$@"
+      '';
+    })
   ];
 }

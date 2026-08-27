@@ -21,10 +21,18 @@ let
       aiPkgs.qmd.override { cudaSupport = true; }
     else
       aiPkgs.qmd;
+
+  aiMemory = pkgs.writeShellApplication {
+    name = "ai-memory";
+    text = ''
+      export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
+      AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-token)"
+      export AI_MEMORY_AUTH_TOKEN
+      exec ${aiPkgs.ai-memory}/bin/ai-memory "$@"
+    '';
+  };
 in
 {
-  home.sessionVariables.AI_MEMORY_SERVER_URL = "https://memory-api.mulatta.io";
-
   home.packages = [
     selfPkgs.archify-cli
     selfPkgs.claude-md
@@ -37,7 +45,7 @@ in
     nixbot-cli
     skillzPkgs.biorefs-cli
     skillzPkgs.drawio-cli
-    aiPkgs.ai-memory
+    aiMemory
     aiPkgs.apm
     aiPkgs.ccstatusline
     aiPkgs.codex
