@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Manage CLAUDE.local.md and .claude/ directories across repositories.
+"""Manage local agent configuration files across repositories.
 
-Centralizes project-level Claude Code configurations into a single
-repository for version control, creating symlinks back to each project.
+Centralizes project-level agent configurations into a single repository for
+version control, creating symlinks back to each project.
 """
 
 import argparse
@@ -97,7 +97,7 @@ def handle_path(local: Path, central: Path, central_repo: Path) -> None:
 
     # Both exist — conflict
     if local.exists() and not local.is_symlink() and central.exists():
-        print(f"  conflict: both exist", file=sys.stderr)
+        print("  conflict: both exist", file=sys.stderr)
         if local.is_file() and central.is_file():
             show_diff(local, central)
         sys.exit(1)
@@ -127,7 +127,7 @@ def handle_path(local: Path, central: Path, central_repo: Path) -> None:
 
 
 def add_command(args: argparse.Namespace) -> None:
-    """Centralize CLAUDE.local.md and .claude/ for current repository."""
+    """Centralize supported agent configuration for current repository."""
     repo_root = get_repo_root()
     repo_name = repo_root.name
     central_repo = get_central_repo()
@@ -139,19 +139,18 @@ def add_command(args: argparse.Namespace) -> None:
 
     central_dir = central_repo / repo_name
 
-    # Handle .claude/ directory
-    handle_path(
-        repo_root / ".claude",
-        central_dir / ".claude",
-        central_repo,
-    )
-
-    # Handle CLAUDE.local.md
-    handle_path(
-        repo_root / "CLAUDE.local.md",
-        central_dir / "CLAUDE.local.md",
-        central_repo,
-    )
+    for relative_path in (
+        Path(".claude"),
+        Path("CLAUDE.md"),
+        Path("CLAUDE.local.md"),
+        Path("AGENTS.md"),
+        Path(".ai-memory.toml"),
+    ):
+        handle_path(
+            repo_root / relative_path,
+            central_dir / relative_path,
+            central_repo,
+        )
 
 
 def list_command(args: argparse.Namespace) -> None:
@@ -169,12 +168,12 @@ def list_command(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Manage CLAUDE.local.md files across repositories"
+        description="Manage local agent configuration across repositories"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     subparsers.add_parser(
-        "add", help="Centralize CLAUDE.local.md and .claude/ for current repo"
+        "add", help="Centralize supported agent configuration for current repo"
     )
     subparsers.add_parser("list", help="List all managed repositories")
 
