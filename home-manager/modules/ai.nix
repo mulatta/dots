@@ -49,10 +49,19 @@ in
   imports = [
     inputs.skillz.homeModules.default
     inputs.research-skills.homeModules.default
-    ../herdr
+    ./herdr
   ];
 
-  programs.herdr.enable = true;
+  programs.herdr = {
+    enable = true;
+    package = aiTools.herdr;
+    plugins = [
+      selfPkgs.herdr-sesh
+      selfPkgs.herdr-autoname
+    ];
+  };
+
+  xdg.configFile."herdr/autoname-hook.zsh".source = "${selfPkgs.herdr-autoname}/shell/hook.zsh";
 
   programs.skillz = {
     enable = true;
@@ -87,6 +96,13 @@ in
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify";
 
+    # herdr's Pi integration reports agent state and session metadata.
+    ".pi/agent/extensions/herdr-agent-state.ts".source =
+      "${aiTools.herdr.src}/src/integration/assets/pi/herdr-agent-state.ts";
+
+    # herdr's official skill exposes pane and workspace orchestration to agents.
+    ".claude/skills/herdr/SKILL.md".source = "${aiTools.herdr.src}/SKILL.md";
+
     # nixbot-cli ships its agent skill alongside the binary.
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
 
@@ -102,20 +118,6 @@ in
     ".claude/skills/ctx-agent-history-search/SKILL.md".source =
       "${aiTools.ctx.src}/skills/ctx-agent-history-search/SKILL.md";
 
-    ".claude/skills/zat/SKILL.md".text = ''
-      ---
-      name: zat
-      description: Code outline viewer showing exported symbol signatures with line numbers. Use when you need signatures, not full implementation.
-      ---
-
-      Prefer `zat` over `cat`/`Read` when you need signatures, not full implementation. Use the line numbers in the output to `Read(offset, limit)` into specific sections.
-
-      Supported languages: C, C++, C#, Go, Haskell, Java, JavaScript, Kotlin, Markdown, Python, Ruby, Rust, Swift, TypeScript/TSX
-
-      ```
-      zat <FILE>
-      ```
-    '';
   };
 
   home.packages = [
@@ -143,9 +145,9 @@ in
     aiTools.git-surgeon
     aiTools.jscpd
     aiTools.officecli
+    aiTools.openspec
     aiTools.prime-agent
     aiTools.tuicr
-    aiTools.zat
     nixbot-cli
     pkgs.pueue
   ];

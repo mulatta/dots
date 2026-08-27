@@ -39,7 +39,7 @@ in
     ./modules/docker.nix
     ./modules/herdr/open-file.nix
     ./modules/keyboard
-    ./modules/llm-agents
+    ./modules/ai.nix
     ./modules/mail
     ./modules/nostr-chat.nix
     ./modules/ntfy.nix
