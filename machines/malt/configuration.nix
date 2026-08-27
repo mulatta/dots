@@ -11,7 +11,6 @@
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/disko-zfs.nix
     ../../nixosModules/radicle-mulatta.nix
-    ./modules/ai-memory.nix
     ./modules/backup.nix
     ./modules/hermes
     ./modules/home-assistant.nix

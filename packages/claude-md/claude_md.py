@@ -144,7 +144,6 @@ def add_command(args: argparse.Namespace) -> None:
         Path("CLAUDE.md"),
         Path("CLAUDE.local.md"),
         Path("AGENTS.md"),
-        Path(".ai-memory.toml"),
     ):
         handle_path(
             repo_root / relative_path,

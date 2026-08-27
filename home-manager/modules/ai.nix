@@ -20,26 +20,6 @@ let
     else
       aiTools.qmd;
 
-  aiMemory = pkgs.writeShellApplication {
-    name = "ai-memory";
-    text = ''
-      export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
-      AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-token)"
-      export AI_MEMORY_AUTH_TOKEN
-      exec ${aiTools.ai-memory}/bin/ai-memory "$@"
-    '';
-  };
-
-  aiMemoryAdmin = pkgs.writeShellApplication {
-    name = "ai-memory-admin";
-    text = ''
-      export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
-      AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-admin-token)"
-      export AI_MEMORY_AUTH_TOKEN
-      exec ${aiTools.ai-memory}/bin/ai-memory "$@"
-    '';
-  };
-
   officecliSkill = pkgs.runCommand "officecli-skill-${aiTools.officecli.version}" { } ''
     mkdir -p "$out"
     cp ${aiTools.officecli.src}/SKILL.md "$out/SKILL.md"
@@ -121,8 +101,6 @@ in
   };
 
   home.packages = [
-    aiMemory
-    aiMemoryAdmin
     qmd
     selfPkgs.archify-cli
     selfPkgs.claude-code
@@ -131,9 +109,6 @@ in
     (pkgs.writeShellApplication {
       name = "pi";
       text = ''
-        export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
-        AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-token)"
-        export AI_MEMORY_AUTH_TOKEN
         ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
         exec ${aiTools.pi}/bin/pi "$@"
       '';

@@ -19,7 +19,6 @@ let
   n8nDomain = "n8n.mulatta.io";
   restateDomain = "restate.mulatta.io";
   weechatDomain = "chat.mulatta.io";
-  aiMemoryDomain = "memory.mulatta.io";
 
   restateOauth2Args = [
     "--provider=oidc"
@@ -71,31 +70,6 @@ let
     "--http-address=127.0.0.1:4183"
   ];
 
-  aiMemoryOauth2Args = [
-    "--provider=oidc"
-    "--client-id=memory"
-    "--oidc-issuer-url=https://${kanidmDomain}/oauth2/openid/memory"
-    "--redirect-url=https://${aiMemoryDomain}/oauth2/callback"
-    "--scope=openid email profile"
-    "--email-domain=mulatta.io"
-    "--code-challenge-method=S256"
-    "--insecure-oidc-allow-unverified-email=true"
-    "--set-xauthrequest=true"
-    "--reverse-proxy=true"
-    "--trusted-proxy-ip=127.0.0.1/32"
-    "--trusted-proxy-ip=::1/128"
-    "--skip-provider-button=true"
-    "--cookie-domain=${aiMemoryDomain}"
-    "--cookie-name=_oauth2_proxy_memory"
-    "--cookie-secure=true"
-    "--cookie-httponly=true"
-    "--cookie-samesite=lax"
-    "--cookie-refresh=1h"
-    "--cookie-expire=12h"
-    "--upstream=static://202"
-    "--http-address=127.0.0.1:4184"
-  ];
-
   # These proxies are public OIDC clients, so the only generated secret is the
   # cookie-signing key; the client secret is an unused placeholder.
   mkOauth2ProxySecret = {
@@ -122,7 +96,6 @@ in
   clan.core.vars.generators.oauth2-proxy = mkOauth2ProxySecret;
   clan.core.vars.generators.oauth2-proxy-restate = mkOauth2ProxySecret;
   clan.core.vars.generators.oauth2-proxy-weechat = mkOauth2ProxySecret;
-  clan.core.vars.generators.oauth2-proxy-ai-memory = mkOauth2ProxySecret;
 
   systemd.services.oauth2-proxy-restate = {
     description = "OAuth2 Proxy for Restate";
@@ -162,29 +135,6 @@ in
       Group = "oauth2-proxy";
       EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-weechat.files."env".path;
       ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs weechatOauth2Args}";
-      Restart = "always";
-    };
-  };
-
-  systemd.services.oauth2-proxy-ai-memory = {
-    description = "OAuth2 Proxy for ai-memory";
-    wantedBy = [ "multi-user.target" ];
-    wants = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    after = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    restartTriggers = [
-      config.clan.core.vars.generators.oauth2-proxy-ai-memory.files."env".path
-    ];
-    serviceConfig = {
-      User = "oauth2-proxy";
-      Group = "oauth2-proxy";
-      EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-ai-memory.files."env".path;
-      ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs aiMemoryOauth2Args}";
       Restart = "always";
     };
   };
