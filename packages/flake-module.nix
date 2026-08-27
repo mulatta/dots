@@ -11,6 +11,7 @@
     }:
     let
       skillz = inputs'.skillz.packages;
+      researchSkills = inputs'.research-skills.packages;
       llmAgents = inputs'.llm-agents.packages;
       packages = {
         claude-code = pkgs.callPackage ../packages/claude-code {
@@ -40,9 +41,8 @@
           };
           crabfit-cli = skillz.crabfit-cli;
           miniflux-cli = skillz.miniflux-cli;
-          vikunja-cli = skillz.vikunja-cli;
           biorefs-cli = skillz.biorefs-cli;
-          pymol-cli = skillz.pymol-cli;
+          pymol-cli = researchSkills.pymol-cli;
           pi = llmAgents.pi;
         };
         updater = pkgs.callPackage ../packages/updater { };
