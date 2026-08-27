@@ -41,6 +41,32 @@ let
     };
 in
 {
+  onSchedule.update-submodules = {
+    when = {
+      hour = 2;
+      minute = 51;
+    };
+    outputs.effects.update-submodules = mkRepoEffect "update-submodules" { checkout = true; } ''
+      git submodule update --init --recursive
+      git submodule update --recursive --remote
+      if git diff --quiet; then
+        echo "no submodule changes"
+        exit 0
+      fi
+
+      branch=update-submodules
+      git checkout -b "$branch"
+      git commit -am "Update submodules"
+      git push -f origin "$branch"
+      if ! gh pr view "$branch" >/dev/null 2>&1; then
+        gh pr create --head "$branch" \
+          --title "Update submodules" \
+          --body "Update pinned upstream submodules." \
+          --label auto-merge
+      fi
+    '';
+  };
+
   onSchedule.renew-step-intermediate = {
     when = {
       dayOfMonth = [ 1 ];
