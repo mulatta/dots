@@ -12,15 +12,19 @@ let
   port = 49374;
   maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
   maltWgIP = "${self.lib.wgPrefix}:${maltSuffix}";
+  tapsWgIP = "${self.lib.wgPrefix}::1";
   serverUrl = "http://[${maltWgIP}]:${toString port}";
   authToken = config.clan.core.vars.generators.ai-memory.files.auth-token.path;
   tokenPepper = config.clan.core.vars.generators.ai-memory.files.token-pepper.path;
   anthropicApiKey = config.clan.core.vars.generators.ai-memory-anthropic.files.api-key.path;
+  actorProxyToken = config.clan.core.vars.generators.ai-memory-actor-proxy.files.token.path;
   configFile = (pkgs.formats.toml { }).generate "ai-memory.toml" {
     bind = "[${maltWgIP}]:${toString port}";
     allowed_hosts = [
       "malt.x"
       "malt"
+      "memory.mulatta.io"
+      "memory-api.mulatta.io"
       maltWgIP
     ];
 
@@ -32,7 +36,10 @@ let
     # enabled later; zero-LLM operation ignores this queue setting.
     auto_improve.require_approval = true;
 
-    auth.root_username = "seungwon";
+    auth = {
+      root_username = "seungwon";
+      secure_cookie = true;
+    };
   };
   backupCommand = pkgs.writeShellScript "ai-memory-backup" ''
     set -euo pipefail
@@ -51,8 +58,10 @@ let
     set -euo pipefail
     AI_MEMORY_AUTH_TOKEN=$(< "$CREDENTIALS_DIRECTORY/auth-token")
     AI_MEMORY_AUTH__TOKEN_PEPPER=$(< "$CREDENTIALS_DIRECTORY/token-pepper")
+    AI_MEMORY_AUTH__ACTOR_PROXY_BEARER_TOKEN=$(< "$CREDENTIALS_DIRECTORY/actor-proxy-token")
     ANTHROPIC_API_KEY=$(< "$CREDENTIALS_DIRECTORY/anthropic-api-key")
-    export AI_MEMORY_AUTH_TOKEN AI_MEMORY_AUTH__TOKEN_PEPPER ANTHROPIC_API_KEY
+    export AI_MEMORY_AUTH_TOKEN AI_MEMORY_AUTH__TOKEN_PEPPER \
+      AI_MEMORY_AUTH__ACTOR_PROXY_BEARER_TOKEN ANTHROPIC_API_KEY
     exec ${lib.getExe aiMemory} \
       --data-dir ${stateDir} \
       --config ${configFile} \
@@ -85,6 +94,26 @@ in
     script = ''
       openssl rand -hex 32 > "$out/auth-token"
       openssl rand -hex 32 > "$out/token-pepper"
+    '';
+  };
+
+  clan.core.vars.generators.ai-memory-actor-proxy = {
+    share = true;
+    files.token = {
+      secret = true;
+      owner = "ai-memory";
+      group = "ai-memory";
+      restartUnits = [ "ai-memory.service" ];
+    };
+    # taps includes this generated directive at nginx runtime, keeping the
+    # trusted-proxy bearer outside the Nix store.
+    files.nginx-config.secret = true;
+
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      token=$(openssl rand -hex 32)
+      printf '%s\n' "$token" > "$out/token"
+      printf 'proxy_set_header Authorization "Bearer %s";\n' "$token" > "$out/nginx-config"
     '';
   };
 
@@ -148,6 +177,7 @@ in
       LoadCredential = [
         "auth-token:${authToken}"
         "token-pepper:${tokenPepper}"
+        "actor-proxy-token:${actorProxyToken}"
         "anthropic-api-key:${anthropicApiKey}"
       ];
       ExecStartPre = "${lib.getExe aiMemory} --data-dir ${stateDir} --config ${configFile} init";
@@ -177,7 +207,10 @@ in
     };
   };
 
-  networking.firewall.interfaces.wireguard.allowedTCPPorts = [ port ];
+  # Proxy identity is trustworthy only when no other peer can bypass taps.
+  networking.firewall.extraInputRules = lib.mkAfter ''
+    iifname "wireguard" ip6 saddr ${tapsWgIP} tcp dport ${toString port} accept comment "Allow ai-memory only from taps ingress"
+  '';
 
   services.rustic.backups.commands.ai-memory = {
     command = toString backupCommand;
@@ -195,7 +228,13 @@ in
   assertions = [
     {
       assertion = !(lib.elem port config.networking.firewall.allowedTCPPorts);
-      message = "ai-memory must not expose its bearer-authenticated HTTP port outside WireGuard.";
+      message = "ai-memory must not expose its HTTP port globally.";
+    }
+    {
+      assertion = lib.all (interface: !(lib.elem port interface.allowedTCPPorts)) (
+        lib.attrValues config.networking.firewall.interfaces
+      );
+      message = "ai-memory must use a source-restricted taps firewall rule.";
     }
   ];
 }

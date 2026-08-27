@@ -15,6 +15,7 @@
   # nginx enablement, recommended settings, and public 80/443 firewall
   # opening come from srvos.nixosModules.mixins-nginx in taps/configuration.nix.
   imports = [
+    ./ai-memory.nix
     ./atuin.nix
     ./blog.nix
     ./headscale.nix

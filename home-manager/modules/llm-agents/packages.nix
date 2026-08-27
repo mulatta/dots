@@ -23,7 +23,7 @@ let
       aiPkgs.qmd;
 in
 {
-  home.sessionVariables.AI_MEMORY_SERVER_URL = "http://malt.x:49374";
+  home.sessionVariables.AI_MEMORY_SERVER_URL = "https://memory-api.mulatta.io";
 
   home.packages = [
     selfPkgs.archify-cli
