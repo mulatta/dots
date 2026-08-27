@@ -1,15 +1,13 @@
 /**
  * /open-pr command — write a PR description and open it in the browser.
  *
- * Adapted from https://github.com/raine/workmux/blob/main/skills/open-pr/SKILL.md
- *
  * Preloads git diff, log, and status so the agent can write the description
  * without spending tool-call turns gathering context.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { currentBranch, type Exec, git, workmuxBase } from "./_git.ts";
+import { currentBranch, git, prBase } from "./_git.ts";
 
 const OPEN_PR_PROMPT = `
 Write a PR description using the conversation context and open PR creation in
@@ -94,39 +92,6 @@ function findPrTemplate(
   return undefined;
 }
 
-/**
- * Pick the diff base. Prefer remote-tracking refs over local branch names —
- * local main is often weeks behind on long-lived feature branches, which
- * makes the diff useless (see the 209-commit case that prompted this).
- *
- *   1. origin/<workmux-base>  if workmux set a base and origin has it
- *   2. origin/HEAD            (whatever the remote calls its default)
- *   3. <workmux-base>         local fallback if origin is unreachable
- *   4. main                   last resort
- */
-async function resolveBase(exec: Exec, cur: string): Promise<string> {
-  const wb = await workmuxBase(exec, cur);
-
-  if (wb) {
-    const remote = await git(exec, [
-      "rev-parse",
-      "--verify",
-      "-q",
-      `origin/${wb}`,
-    ]);
-    if (remote) return `origin/${wb}`;
-  }
-
-  const originHead = await git(exec, [
-    "symbolic-ref",
-    "--short",
-    "refs/remotes/origin/HEAD",
-  ]);
-  if (originHead) return originHead;
-
-  return wb || "main";
-}
-
 export default function (pi: ExtensionAPI) {
   pi.registerCommand("open-pr", {
     description: "Write a PR description and open PR creation in browser",
@@ -135,7 +100,7 @@ export default function (pi: ExtensionAPI) {
         currentBranch(pi.exec),
         git(pi.exec, ["rev-parse", "--show-toplevel"]),
       ]);
-      const baseBranch = await resolveBase(pi.exec, cur);
+      const baseBranch = await prBase(pi.exec);
 
       const [status, log, diff] = await Promise.all([
         pi.exec("git", ["status"], { timeout: 5000 }),

@@ -6,8 +6,7 @@
     "!**/proc-title.ts",
     "!**/stable-settings.ts",
     "!**/tuicr.ts",
-    "!**/until.ts",
-    "!**/workmux-status.ts"
+    "!**/until.ts"
   ],
   "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"],
   "prompts": ["~/.pi/agent/prompts"],
