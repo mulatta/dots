@@ -17,6 +17,8 @@ result-*
 # CLAUDE.md
 CLAUDE.md
 CLAUDE.local.md
+AGENTS.md
+.ai-memory.toml
 
 
 **/.claude/settings.local.json

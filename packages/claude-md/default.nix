@@ -9,7 +9,7 @@ python3Packages.buildPythonApplication {
   pyproject = true;
   build-system = [ python3Packages.hatchling ];
   meta = {
-    description = "CLI tool to manage CLAUDE.local.md files across repositories";
+    description = "CLI tool to manage local agent configuration across repositories";
     mainProgram = "claude-md";
   };
 }
