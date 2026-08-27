@@ -3,6 +3,6 @@
   imports = [
     ./modules/docker.nix
     ./modules/gpu-support.nix
-    ./modules/llm-agents
+    ./modules/ai.nix
   ];
 }
