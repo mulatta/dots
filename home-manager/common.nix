@@ -15,6 +15,7 @@ in
     ./modules/bat.nix
     ./modules/fonts.nix
     ./modules/helix
+    ./modules/stow.nix
     ./modules/yazi
   ];
 
