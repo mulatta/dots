@@ -138,10 +138,10 @@ in
     enableACME = true;
     extraConfig = securityHeadersConfig;
 
-    locations."~ ^/(?:mcp(?:/|$)|hook(?:/|$)|handoff$|workstream(?:/|$)|api/v1(?:/|$))" =
+    locations."~ ^/(?:admin(?:/|$)|mcp(?:/|$)|hook(?:/|$)|handoff$|workstream(?:/|$)|api/v1(?:/|$))" =
       proxyLocation apiProxyConfig;
 
-    # Root administration and browser cookies remain on private WireGuard.
+    # Browser cookies remain on the OIDC-protected hostname.
     locations."/".return = "404";
   };
 

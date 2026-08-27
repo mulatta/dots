@@ -31,6 +31,16 @@ let
       exec ${aiPkgs.ai-memory}/bin/ai-memory "$@"
     '';
   };
+
+  aiMemoryAdmin = pkgs.writeShellApplication {
+    name = "ai-memory-admin";
+    text = ''
+      export AI_MEMORY_SERVER_URL=https://memory-api.mulatta.io
+      AI_MEMORY_AUTH_TOKEN="$(${pkgs.rbw}/bin/rbw get ai-memory-admin-token)"
+      export AI_MEMORY_AUTH_TOKEN
+      exec ${aiPkgs.ai-memory}/bin/ai-memory "$@"
+    '';
+  };
 in
 {
   home.packages = [
@@ -46,6 +56,7 @@ in
     skillzPkgs.biorefs-cli
     skillzPkgs.drawio-cli
     aiMemory
+    aiMemoryAdmin
     aiPkgs.apm
     aiPkgs.ccstatusline
     aiPkgs.codex

@@ -37,7 +37,7 @@ let
     auto_improve.require_approval = true;
 
     auth = {
-      root_username = "seungwon";
+      root_username = "seungwon-admin";
       secure_cookie = true;
     };
   };
