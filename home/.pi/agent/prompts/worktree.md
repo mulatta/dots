@@ -1,35 +1,21 @@
 ---
-description: Launch tasks in new git worktrees using workmux
+description: Launch tasks in Herdr-managed git worktrees
+argument-hint: "<task> [additional tasks...]"
 ---
 
-Launch one or more tasks in new git worktrees using workmux.
+Launch tasks in separate Herdr-managed git worktrees.
 
 Tasks: $ARGUMENTS
 
-## Instructions
+Use the Herdr skill for all worktree, workspace, pane, and agent operations.
+Treat invocation of this template as explicit authorization to create
+worktrees. Stop with a clear explanation unless the current session satisfies
+the Herdr skill's operating requirements.
 
-Note: The tasks above may reference something discussed earlier in the
-conversation (e.g., "do option 2", "implement the fix we discussed"). Include
-all relevant context from the conversation in each prompt you write.
+The tasks may reference earlier discussion (for example, "do option 2"). Include
+all relevant conversation context in each self-contained agent prompt, and
+re-read any referenced plan or specification first.
 
-If tasks reference a markdown file (e.g., a plan or spec), re-read the file to
-ensure you have the latest version before writing prompts.
-
-For each task:
-
-1. Generate a short, descriptive worktree name (2-4 words, kebab-case)
-2. Write a detailed implementation prompt to a temp file
-3. Run `workmux add <worktree-name> -b -P <temp-file>` to create the worktree
-
-The prompt file should:
-
-- Include the full task description
-- Use RELATIVE paths only (never absolute paths, since each worktree has its own
-  root directory)
-- Be specific about what the agent should accomplish
-
-## Workflow
-
-Write ALL temp files first, THEN run all workmux commands in parallel.
-
-After creating the worktrees, inform the user which branches were created.
+Run independent tasks concurrently, preserve user focus, and report created
+branches, workspaces, agent names, and final states. Do not answer approval
+prompts on the user's behalf.
