@@ -46,7 +46,7 @@ let
   '';
 in
 {
-  # DNS resolver for .x domain -> taps WireGuard IP
+  # Resolve infrastructure-only .x names through taps; web services use public DNS.
   environment.etc."resolver/x" = lib.mkIf (tapsWireguardIP != null) {
     text = "nameserver ${tapsWireguardIP}\n";
   };

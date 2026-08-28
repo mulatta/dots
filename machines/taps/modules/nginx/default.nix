@@ -20,6 +20,7 @@
     ./headscale.nix
     ./home-assistant.nix
     ./jellyfin.nix
+    ./kandev.nix
     ./linkwarden.nix
     ./miniflux.nix
     ./mulatta-io.nix

@@ -15,6 +15,7 @@
     ./modules/hermes
     ./modules/home-assistant.nix
     ./modules/jellyfin
+    ./modules/kandev.nix
     ./modules/linkwarden.nix
     ./modules/minecraft.nix
     ./modules/miniflux
