@@ -208,8 +208,7 @@
         inputs.home-manager.flakeModules.home-manager
       ];
 
-      flake.nixosModules.imports = [ ./nixosModules ];
-      flake.darwinModules.imports = [ ./darwinModules ];
+      flake.nixosModules.default = ./nixosModules;
       flake.herculesCI = import ./checks/effects.nix { inherit inputs; };
     };
 }
