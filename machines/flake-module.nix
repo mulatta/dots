@@ -1,10 +1,4 @@
 {
-  flake.nixosModules = {
-    default = ../nixosModules/default.nix;
-    bulwark-webmail = ../nixosModules/bulwark-webmail;
-    restate = ../nixosModules/restate;
-  };
-
   clan = {
     meta = {
       name = "seungwon";
@@ -15,7 +9,7 @@
       tags =
         { config, ... }:
         {
-          wireguard-peers = builtins.filter (name: name != "cask") (config.nixos ++ config.darwin);
+          wireguard-peers = builtins.filter (name: name != "cask") config.nixos;
         };
 
       machines = {
@@ -71,18 +65,14 @@
           # independent recovery path instead of maintaining a second public IP.
           roles.peer.settings.controller = "cask";
           roles.peer.tags.wireguard-peers = { };
+          roles.peer.machines.rhesus.settings.controller = "cask";
         };
 
         # SSH certificate-based authentication
         sshd = {
           module.name = "sshd";
           module.input = "clan-core";
-          roles.server.machines = {
-            taps = { };
-            cask = { };
-            malt = { };
-            pint = { };
-          };
+          roles.server.tags.nixos = { };
           roles.server.settings = {
             certificate.searchDomains = [
               "x" # WireGuard mesh
@@ -90,13 +80,7 @@
               "local" # mDNS/Bonjour
             ];
           };
-          roles.client.machines = {
-            rhesus = { };
-            malt = { };
-            taps = { };
-            cask = { };
-            pint = { };
-          };
+          roles.client.tags.nixos = { };
           roles.client.settings = {
             certificate.searchDomains = [
               "x" # WireGuard mesh
