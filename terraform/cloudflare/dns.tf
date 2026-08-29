@@ -25,9 +25,37 @@ data "terraform_remote_state" "vultr" {
 locals {
   zone_id         = data.cloudflare_zones.mulatta_io.result[0].id
   service_ip      = data.terraform_remote_state.vultr.outputs.service_ipv4
+  service_ipv6    = cidrhost("${data.terraform_remote_state.vultr.outputs.service_ipv6}/128", 0)
   mail_domain     = "mail.mulatta.io"
   stalwart_domain = "stalwart.mulatta.io"
   base_domain     = "mulatta.io"
+}
+
+resource "cloudflare_dns_record" "ns1_a" {
+  zone_id = local.zone_id
+  name    = "ns1"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Cask authoritative DNS primary"
+}
+
+resource "cloudflare_dns_record" "ns1_aaaa" {
+  zone_id = local.zone_id
+  name    = "ns1"
+  content = local.service_ipv6
+  type    = "AAAA"
+  ttl     = 300
+  proxied = false
+  comment = "Cask authoritative DNS primary"
+
+  lifecycle {
+    precondition {
+      condition     = local.service_ipv6 != ""
+      error_message = "Apply the Vultr stack after IPv6 assignment before publishing ns1 AAAA."
+    }
+  }
 }
 
 resource "cloudflare_dns_record" "mail_a" {
