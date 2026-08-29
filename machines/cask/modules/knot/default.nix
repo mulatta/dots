@@ -5,10 +5,12 @@
   ...
 }:
 let
-  durePackages = self.inputs.dure.packages.${pkgs.stdenv.hostPlatform.system};
   ipv4 = config.networking.cask.ipv4.address;
+  ipv6 = config.networking.cask.ipv6.address;
   publicZone = pkgs.writeText "mulatta.io.zone" (
-    builtins.replaceStrings [ "@SERVICE_IP@" ] [ ipv4 ] (builtins.readFile ./mulatta.io.zone)
+    builtins.replaceStrings [ "@SERVICE_IPV4@" "@SERVICE_IPV6@" ] [ ipv4 ipv6 ] (
+      builtins.readFile ./mulatta.io.zone
+    )
   );
 in
 {
@@ -21,7 +23,10 @@ in
     enable = true;
     keyFiles = [ config.sops.secrets."knot-keys.conf".path ];
     settings = {
-      server.listen = [ "${ipv4}@53" ];
+      server.listen = [
+        "${ipv4}@53"
+        "${ipv6}@53"
+      ];
 
       remote = [
         {
@@ -60,11 +65,11 @@ in
       zone = [
         {
           domain = "n";
-          file = "${durePackages.n-zone}";
+          file = "${self.inputs.dure.packages.${pkgs.stdenv.hostPlatform.system}.n-zone}";
         }
         {
           domain = "i";
-          file = "${durePackages.i-zone}";
+          file = "${self.inputs.dure.packages.${pkgs.stdenv.hostPlatform.system}.i-zone}";
         }
         {
           domain = "mulatta.io";
