@@ -96,9 +96,11 @@
   };
 
   services.nginx.virtualHosts = {
-    # Keep this HTTP-only until cache.mulatta.io leaves the R2 custom domain;
-    # ACME HTTP validation cannot reach cask before that DNS cutover.
-    "cache.mulatta.io".locations."/".proxyPass = "http://127.0.0.1:5751";
+    "cache.mulatta.io" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/".proxyPass = "http://127.0.0.1:5751";
+    };
 
     # Large authenticated uploads must stream instead of buffering on cask.
     "niks3.mulatta.io".locations."/".extraConfig = ''
