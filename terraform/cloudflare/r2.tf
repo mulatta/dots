@@ -58,40 +58,6 @@ resource "cloudflare_r2_bucket_lifecycle" "backup" {
   }]
 }
 
-# quarry - file serving via quarry.mulatta.io
-
-resource "cloudflare_r2_bucket" "quarry" {
-  account_id = local.account_id
-  name       = "quarry"
-  location   = "APAC"
-}
-
-resource "cloudflare_r2_bucket_lifecycle" "quarry" {
-  account_id  = local.account_id
-  bucket_name = cloudflare_r2_bucket.quarry.name
-  rules = [{
-    id      = "abort-incomplete-multipart-uploads"
-    enabled = true
-    conditions = {
-      prefix = ""
-    }
-    abort_multipart_uploads_transition = {
-      condition = {
-        max_age = 86400 # 1 day in seconds
-        type    = "Age"
-      }
-    }
-  }]
-}
-
-resource "cloudflare_r2_custom_domain" "quarry" {
-  account_id  = local.account_id
-  bucket_name = cloudflare_r2_bucket.quarry.name
-  domain      = "quarry.mulatta.io"
-  zone_id     = local.zone_id
-  enabled     = true
-}
-
 # zotero - zhost attachment storage (private; served via zhost presigned URLs)
 
 resource "cloudflare_r2_bucket" "zotero" {
