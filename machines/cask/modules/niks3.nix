@@ -95,9 +95,15 @@
     cacheUrl = "https://cache.mulatta.io";
   };
 
-  # Additional nginx tuning for niks3 (large NAR uploads)
-  services.nginx.virtualHosts."niks3.mulatta.io".locations."/".extraConfig = ''
-    proxy_buffering off;
-    proxy_request_buffering off;
-  '';
+  services.nginx.virtualHosts = {
+    # Keep this HTTP-only until cache.mulatta.io leaves the R2 custom domain;
+    # ACME HTTP validation cannot reach cask before that DNS cutover.
+    "cache.mulatta.io".locations."/".proxyPass = "http://127.0.0.1:5751";
+
+    # Large authenticated uploads must stream instead of buffering on cask.
+    "niks3.mulatta.io".locations."/".extraConfig = ''
+      proxy_buffering off;
+      proxy_request_buffering off;
+    '';
+  };
 }
