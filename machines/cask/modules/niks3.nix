@@ -71,6 +71,7 @@
     };
 
     database.createLocally = true;
+    readProxy.enable = true;
 
     apiTokenFile = config.clan.core.vars.generators.niks3.files.api-token.path;
     signKeyFiles = [ config.clan.core.vars.generators.niks3.files.signing-key.path ];
