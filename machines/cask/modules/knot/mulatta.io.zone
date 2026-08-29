@@ -1,0 +1,68 @@
+$ORIGIN mulatta.io.
+$TTL 300
+
+@ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. (
+  2026083001 ; serial
+  3600       ; refresh
+  600        ; retry
+  604800     ; expire
+  300        ; negative ttl
+)
+
+@   IN NS ns1.mulatta.io.
+@   IN NS ns2.he.net.
+@   IN NS ns3.he.net.
+@   IN NS ns4.he.net.
+@   IN NS ns5.he.net.
+ns1 IN A  @SERVICE_IP@
+
+@             IN A @SERVICE_IP@
+mail          IN A @SERVICE_IP@
+webmail       IN A @SERVICE_IP@
+stalwart      IN A @SERVICE_IP@
+mta-sts       IN A @SERVICE_IP@
+idm           IN A @SERVICE_IP@
+vaultwarden   IN A @SERVICE_IP@
+headscale     IN A @SERVICE_IP@
+n8n           IN A @SERVICE_IP@
+n8n-api       IN A @SERVICE_IP@
+rss           IN A @SERVICE_IP@
+paperless     IN A @SERVICE_IP@
+paperless-api IN A @SERVICE_IP@
+cloud         IN A @SERVICE_IP@
+video         IN A @SERVICE_IP@
+home          IN A @SERVICE_IP@
+cache         IN A @SERVICE_IP@
+mq            IN A @SERVICE_IP@
+niks3         IN A @SERVICE_IP@
+atuin         IN A @SERVICE_IP@
+upterm        IN A @SERVICE_IP@
+rad           IN A @SERVICE_IP@
+blog          IN A @SERVICE_IP@
+links         IN A @SERVICE_IP@
+chat          IN A @SERVICE_IP@
+ntfy          IN A @SERVICE_IP@
+relay         IN A @SERVICE_IP@
+blossom       IN A @SERVICE_IP@
+tasks         IN A @SERVICE_IP@
+restate       IN A @SERVICE_IP@
+restate-api   IN A @SERVICE_IP@
+zotero        IN A @SERVICE_IP@
+minecraft     IN A 100.64.0.1
+
+www          IN CNAME mulatta.io.
+autodiscover IN CNAME mail.mulatta.io.
+autoconfig   IN CNAME mail.mulatta.io.
+
+@    IN MX 10 mail.mulatta.io.
+send IN MX 10 feedback-smtp.ap-northeast-1.amazonses.com.
+
+@                 IN TXT "v=spf1 include:amazonses.com mx ~all"
+_dmarc            IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@mulatta.io"
+resend._domainkey IN TXT "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZhMdIzvq/fPFBHZ+Cn7uJij3gNXbBKulXcMm6n2OhA3iGuNJbjAAqDUiB5TxktsOrGNLE66sszpSZsC/JBbtLnMuMpHDnf6QwomDnj1ngwQnivJB6CF5vphgHWb2qRKkbNTNKITwuEWR6LPePATHJ3oFzxQIU3gGeu4261HqpHwIDAQAB"
+send              IN TXT "v=spf1 include:amazonses.com ~all"
+_mta-sts          IN TXT "v=STSv1; id=20250106"
+_smtp._tls        IN TXT "v=TLSRPTv1; rua=mailto:tls-reports@mulatta.io"
+
+_caldavs._tcp  IN SRV 0 1 443 stalwart.mulatta.io.
+_carddavs._tcp IN SRV 0 1 443 stalwart.mulatta.io.
