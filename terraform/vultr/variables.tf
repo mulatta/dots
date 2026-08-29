@@ -1,3 +1,5 @@
+# Re-enable when reprovisioning taps under issue #424.
+/*
 variable "taps_plan" {
   description = "Vultr plan ID for the taps standby instance"
   type        = string
@@ -14,6 +16,7 @@ variable "taps_hostname" {
   type        = string
   default     = "taps"
 }
+*/
 
 variable "cask_plan" {
   description = "Vultr plan ID for the cask production instance"
