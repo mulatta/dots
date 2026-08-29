@@ -14,11 +14,11 @@
     in
     if value == null then null else lib.strings.trim value;
 
-  # Shared WireGuard /64 prefix from the taps controller. Callers build their
+  # Shared WireGuard /64 prefix from the cask controller. Callers build their
   # own address as "${wgPrefix}:${suffix}", so only this read is centralized.
   flake.lib.wgPrefix = self.inputs.clan-core.lib.getPublicValue {
     flake = self;
-    machine = "taps";
+    machine = "cask";
     generator = "wireguard-network-wireguard";
     file = "prefix";
   };

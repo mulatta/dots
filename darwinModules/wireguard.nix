@@ -8,9 +8,9 @@
 let
   readVarFile = self.lib.readVarFile;
 
-  # DNS resolver target: taps WireGuard IP
-  wgPrefix = readVarFile "taps" "wireguard-network-wireguard" "prefix";
-  tapsWireguardIP = if wgPrefix != null then "${wgPrefix}::1" else null;
+  # DNS resolver target: cask WireGuard controller IP
+  wgPrefix = readVarFile "cask" "wireguard-network-wireguard" "prefix";
+  caskWireguardIP = if wgPrefix != null then "${wgPrefix}::1" else null;
 
   # Sops-managed private key path (clan vars generator)
   secretPath = config.clan.core.vars.generators.wireguard-keys-wireguard.files.privatekey.path;
@@ -34,21 +34,25 @@ let
   ];
 
   wgQuickWrapper = pkgs.writeShellScript "wg-quick-wireguard-start" ''
+    runtimeConfig=/var/run/wireguard-config/wireguard.conf
     /bin/wait4path "${secretPath}"
-    ${pkgs.wireguard-tools}/bin/wg-quick down wireguard 2>/dev/null || true
+    /bin/mkdir -p "$(/usr/bin/dirname "$runtimeConfig")"
+    /bin/cp /etc/wireguard/wireguard.conf "$runtimeConfig"
+    /bin/chmod 600 "$runtimeConfig"
+    ${pkgs.wireguard-tools}/bin/wg-quick down "$runtimeConfig" 2>/dev/null || true
     # Kill stale processes from previous runs that AbandonProcessGroup kept alive.
     # Without this, old route-monitor manages routes for a dead utun interface
     # while the new wg-quick creates a fresh utun without routes.
     pkill -f 'wireguard-go utun' 2>/dev/null || true
     pkill -f 'route -n monitor' 2>/dev/null || true
     rm -rf /var/run/wireguard 2>/dev/null || true
-    ${pkgs.wireguard-tools}/bin/wg-quick up wireguard
+    ${pkgs.wireguard-tools}/bin/wg-quick up "$runtimeConfig"
   '';
 in
 {
-  # DNS resolver for .x domain -> taps WireGuard IP
-  environment.etc."resolver/x" = lib.mkIf (tapsWireguardIP != null) {
-    text = "nameserver ${tapsWireguardIP}\n";
+  # DNS resolver for .x domain -> cask WireGuard IP
+  environment.etc."resolver/x" = lib.mkIf (caskWireguardIP != null) {
+    text = "nameserver ${caskWireguardIP}\n";
   };
 
   # Extend the existing clan host WireGuard identity with the SBEE admin
