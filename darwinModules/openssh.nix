@@ -6,6 +6,7 @@ in
   programs.ssh.knownHosts.ssh-ca = {
     certAuthority = true;
     hostNames = [
+      "*.i" # Internet bootstrap
       "*.x" # WireGuard mesh
       "*.n" # Tinc mesh
       "*.local" # mDNS/Bonjour
