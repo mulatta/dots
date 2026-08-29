@@ -22,15 +22,12 @@
     ../../darwinModules/remote-builder.nix
     ../../darwinModules/sudo.nix
     ../../darwinModules/wireguard.nix
-    ../../darwinModules/zerotier.nix
   ];
   system.primaryUser = "seungwon";
 
   networking.hostName = "rhesus";
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
-
-  clan.core.networking.zerotier.enable = true;
 
   system.activationScripts.postActivation.text = ''
     # disable fseventsd on /nix volume
