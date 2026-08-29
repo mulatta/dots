@@ -24,7 +24,7 @@
         taps.machineClass = "nixos";
         cask = {
           machineClass = "nixos";
-          deploy.targetHost = "root@64.176.225.253";
+          deploy.targetHost = "root@cask.i";
         };
         pint = {
           machineClass = "nixos";
@@ -57,7 +57,7 @@
 
           roles.controller.machines.cask = {
             settings = {
-              endpoint = "64.176.225.253";
+              endpoint = "cask.i";
               port = 51820;
             };
           };
