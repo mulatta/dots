@@ -68,6 +68,13 @@
           roles.peer.machines.rhesus.settings.controller = "cask";
         };
 
+        # Internet-reachable bootstrap identities
+        internet = {
+          module.name = "internet";
+          module.input = "clan-core";
+          roles.default.machines.cask.settings.host = "cask.i";
+        };
+
         # SSH certificate-based authentication
         sshd = {
           module.name = "sshd";
@@ -75,6 +82,7 @@
           roles.server.tags.nixos = { };
           roles.server.settings = {
             certificate.searchDomains = [
+              "i" # Internet bootstrap
               "x" # WireGuard mesh
               "n" # Tinc mesh
               "local" # mDNS/Bonjour
@@ -83,6 +91,7 @@
           roles.client.tags.nixos = { };
           roles.client.settings = {
             certificate.searchDomains = [
+              "i" # Internet bootstrap
               "x" # WireGuard mesh
               "n" # Tinc mesh
               "local" # mDNS/Bonjour
