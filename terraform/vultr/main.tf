@@ -5,12 +5,16 @@ data "vultr_region" "selected" {
   }
 }
 
+# Retain old taps provisioning for issue #424. Keep disabled until srvos
+# supports reinstalling taps with ZFS root.
+/*
 data "vultr_plan" "taps" {
   filter {
     name   = "id"
     values = [var.taps_plan]
   }
 }
+*/
 
 data "vultr_plan" "cask" {
   filter {
@@ -29,6 +33,7 @@ resource "vultr_ssh_key" "provisioning" {
 }
 
 # Provision with Ubuntu before installing NixOS through Clan.
+/*
 resource "vultr_instance" "taps" {
   hostname = var.taps_hostname
   label    = var.taps_hostname
@@ -50,6 +55,7 @@ resource "vultr_instance" "taps" {
     ignore_changes = [ssh_key_ids]
   }
 }
+*/
 
 resource "vultr_instance" "cask" {
   hostname = var.cask_hostname

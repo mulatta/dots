@@ -2,6 +2,8 @@ resource "vultr_firewall_group" "cask" {
   description = "Production firewall rules for cask"
 }
 
+# Re-enable with the taps instance after issue #424 gains srvos ZFS support.
+/*
 resource "vultr_firewall_group" "taps_standby" {
   description = "Standby firewall rules for taps"
 }
@@ -41,6 +43,7 @@ resource "vultr_firewall_rule" "taps_naru_udp" {
   notes = "Naru mesh"
   lifecycle { ignore_changes = [source] }
 }
+*/
 
 resource "vultr_firewall_rule" "ssh" {
   firewall_group_id = vultr_firewall_group.cask.id

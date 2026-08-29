@@ -1,3 +1,5 @@
+# Re-enable with taps provisioning under issue #424.
+/*
 output "taps" {
   description = "Taps standby instance and provider-reported network information"
   value = {
@@ -20,6 +22,7 @@ output "taps" {
     console_url = "https://my.vultr.com/subs/?id=${vultr_instance.taps.id}"
   }
 }
+*/
 
 output "cask" {
   description = "Cask production instance and network information"
