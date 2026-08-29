@@ -1,41 +1,57 @@
-output "instance_info" {
+output "taps" {
+  description = "Taps standby instance and provider-reported network information"
   value = {
-    id       = vultr_instance.taps.id
-    hostname = vultr_instance.taps.hostname
-    region   = vultr_instance.taps.region
-    plan     = vultr_instance.taps.plan
-    status   = vultr_instance.taps.status
+    instance = {
+      id       = vultr_instance.taps.id
+      hostname = vultr_instance.taps.hostname
+      region   = vultr_instance.taps.region
+      plan     = vultr_instance.taps.plan
+      status   = vultr_instance.taps.status
+    }
+    network = {
+      main_ipv4 = vultr_instance.taps.main_ip
+      gateway   = vultr_instance.taps.gateway_v4
+      netmask   = vultr_instance.taps.netmask_v4
+    }
+    firewall = {
+      id          = vultr_firewall_group.taps_standby.id
+      description = vultr_firewall_group.taps_standby.description
+    }
+    console_url = "https://my.vultr.com/subs/?id=${vultr_instance.taps.id}"
   }
 }
 
-output "network_info" {
-  description = "Network information from Vultr API"
+output "cask" {
+  description = "Cask production instance and network information"
   value = {
-    main_ip    = vultr_instance.taps.main_ip
-    gateway_v4 = vultr_instance.taps.gateway_v4
-    netmask_v4 = vultr_instance.taps.netmask_v4
+    instance = {
+      id       = vultr_instance.cask.id
+      hostname = vultr_instance.cask.hostname
+      region   = vultr_instance.cask.region
+      plan     = vultr_instance.cask.plan
+      status   = vultr_instance.cask.status
+    }
+    network = {
+      main_ipv4     = vultr_instance.cask.main_ip
+      reserved_ipv4 = vultr_reserved_ip.service.subnet
+      gateway       = vultr_instance.cask.gateway_v4
+      netmask       = vultr_instance.cask.netmask_v4
+    }
+    firewall = {
+      id          = vultr_firewall_group.cask.id
+      description = vultr_firewall_group.cask.description
+    }
+    console_url = "https://my.vultr.com/subs/?id=${vultr_instance.cask.id}"
   }
 }
 
-output "ssh_command" {
-  description = "SSH command to connect to the instance"
-  value       = "ssh root@${vultr_instance.taps.main_ip}"
-}
-
-output "clan_commands" {
-  description = "Clan commands for provisioning"
-  value = {
-    install = "clan machines install taps --target-host root@${vultr_instance.taps.main_ip}"
-  }
-}
-
-output "console_url" {
-  description = "Vultr console (click 'View Console' for VNC)"
-  value       = "https://my.vultr.com/subs/?id=${vultr_instance.taps.id}"
+output "service_ipv4" {
+  description = "Reserved IPv4 consumed by production DNS records"
+  value       = vultr_reserved_ip.service.subnet
 }
 
 output "ptr_record" {
-  description = "PTR record for mail server"
+  description = "PTR record for the production mail endpoint"
   value = {
     ip      = vultr_reverse_ipv4.mail.ip
     reverse = vultr_reverse_ipv4.mail.reverse

@@ -10,13 +10,9 @@
         packages = [
           pkgs.sops
           pkgs.terragrunt
-          pkgs.hurl
           pkgs.jq
           pkgs.yq-go
-          pkgs.just
           pkgs.vultr-cli
-          pkgs.jtbl
-          pkgs.glow
           config.packages.terraform
         ];
       };

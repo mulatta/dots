@@ -1,0 +1,79 @@
+{
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+  };
+
+  disko.devices = {
+    disk.system = {
+      device = "/dev/vda";
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          boot = {
+            type = "EF02";
+            size = "1M";
+          };
+          ESP = {
+            type = "EF00";
+            size = "1G";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot";
+              mountOptions = [
+                "defaults"
+                "umask=0077"
+              ];
+            };
+          };
+          zfs = {
+            size = "100%";
+            content = {
+              type = "zfs";
+              pool = "zroot";
+            };
+          };
+        };
+      };
+    };
+
+    zpool.zroot = {
+      type = "zpool";
+      rootFsOptions = {
+        compression = "lz4";
+        xattr = "sa";
+        atime = "off";
+        acltype = "posixacl";
+        "com.sun:auto-snapshot" = "false";
+      };
+      options.ashift = "12";
+      datasets = {
+        "docker".type = "zfs_fs";
+        "root".type = "zfs_fs";
+        "root/nixos" = {
+          type = "zfs_fs";
+          mountpoint = "/";
+          options."com.sun:auto-snapshot" = "true";
+        };
+        "root/nix" = {
+          type = "zfs_fs";
+          mountpoint = "/nix";
+          options."com.sun:auto-snapshot" = "false";
+        };
+        "root/tmp" = {
+          type = "zfs_fs";
+          mountpoint = "/tmp";
+          options.sync = "disabled";
+        };
+        "root/var/lib" = {
+          type = "zfs_fs";
+          mountpoint = "/var/lib";
+          options."com.sun:auto-snapshot" = "true";
+        };
+      };
+    };
+  };
+}

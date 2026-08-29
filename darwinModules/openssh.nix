@@ -7,7 +7,6 @@ in
     certAuthority = true;
     hostNames = [
       "*.x" # WireGuard mesh
-      "*.z" # ZeroTier internal
       "*.n" # Tinc mesh
       "*.local" # mDNS/Bonjour
       "*.sjanglab.org"
@@ -18,10 +17,6 @@ in
   environment.etc."ssh/ssh_config.d/mesh.conf".text = ''
     # WireGuard mesh
     Host *.x
-      StrictHostKeyChecking accept-new
-
-    # ZeroTier internal
-    Host *.z
       StrictHostKeyChecking accept-new
 
     # SBEE Tinc mesh

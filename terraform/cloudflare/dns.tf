@@ -24,7 +24,7 @@ data "terraform_remote_state" "vultr" {
 
 locals {
   zone_id         = data.cloudflare_zones.mulatta_io.result[0].id
-  taps_ip         = data.terraform_remote_state.vultr.outputs.network_info.main_ip
+  service_ip      = data.terraform_remote_state.vultr.outputs.service_ipv4
   mail_domain     = "mail.mulatta.io"
   stalwart_domain = "stalwart.mulatta.io"
   base_domain     = "mulatta.io"
@@ -33,7 +33,7 @@ locals {
 resource "cloudflare_dns_record" "mail_a" {
   zone_id = local.zone_id
   name    = "mail"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -42,7 +42,7 @@ resource "cloudflare_dns_record" "mail_a" {
 resource "cloudflare_dns_record" "webmail_a" {
   zone_id = local.zone_id
   name    = "webmail"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -51,7 +51,7 @@ resource "cloudflare_dns_record" "webmail_a" {
 resource "cloudflare_dns_record" "stalwart_a" {
   zone_id = local.zone_id
   name    = "stalwart"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -60,7 +60,7 @@ resource "cloudflare_dns_record" "stalwart_a" {
 resource "cloudflare_dns_record" "mta_sts_a" {
   zone_id = local.zone_id
   name    = "mta-sts"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -69,7 +69,7 @@ resource "cloudflare_dns_record" "mta_sts_a" {
 resource "cloudflare_dns_record" "idm_a" {
   zone_id = local.zone_id
   name    = "idm"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -78,7 +78,7 @@ resource "cloudflare_dns_record" "idm_a" {
 resource "cloudflare_dns_record" "vaultwarden_a" {
   zone_id = local.zone_id
   name    = "vaultwarden"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -89,7 +89,7 @@ resource "cloudflare_dns_record" "vaultwarden_a" {
 resource "cloudflare_dns_record" "headscale_a" {
   zone_id = local.zone_id
   name    = "headscale"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -111,7 +111,7 @@ resource "cloudflare_dns_record" "minecraft_a" {
 resource "cloudflare_dns_record" "n8n_a" {
   zone_id = local.zone_id
   name    = "n8n"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -120,7 +120,7 @@ resource "cloudflare_dns_record" "n8n_a" {
 resource "cloudflare_dns_record" "n8n_api_a" {
   zone_id = local.zone_id
   name    = "n8n-api"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -129,7 +129,7 @@ resource "cloudflare_dns_record" "n8n_api_a" {
 resource "cloudflare_dns_record" "rss_a" {
   zone_id = local.zone_id
   name    = "rss"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -138,7 +138,7 @@ resource "cloudflare_dns_record" "rss_a" {
 resource "cloudflare_dns_record" "paperless_a" {
   zone_id = local.zone_id
   name    = "paperless"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -147,7 +147,7 @@ resource "cloudflare_dns_record" "paperless_a" {
 resource "cloudflare_dns_record" "paperless_api_a" {
   zone_id = local.zone_id
   name    = "paperless-api"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -156,7 +156,7 @@ resource "cloudflare_dns_record" "paperless_api_a" {
 resource "cloudflare_dns_record" "cloud_a" {
   zone_id = local.zone_id
   name    = "cloud"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -165,7 +165,7 @@ resource "cloudflare_dns_record" "cloud_a" {
 resource "cloudflare_dns_record" "video_a" {
   zone_id = local.zone_id
   name    = "video"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -174,7 +174,7 @@ resource "cloudflare_dns_record" "video_a" {
 resource "cloudflare_dns_record" "home_a" {
   zone_id = local.zone_id
   name    = "home"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -186,7 +186,7 @@ resource "cloudflare_dns_record" "home_a" {
 resource "cloudflare_dns_record" "mq_a" {
   zone_id = local.zone_id
   name    = "mq"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -196,7 +196,7 @@ resource "cloudflare_dns_record" "mq_a" {
 resource "cloudflare_dns_record" "niks3_a" {
   zone_id = local.zone_id
   name    = "niks3"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -205,7 +205,7 @@ resource "cloudflare_dns_record" "niks3_a" {
 resource "cloudflare_dns_record" "atuin_a" {
   zone_id = local.zone_id
   name    = "atuin"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -214,7 +214,7 @@ resource "cloudflare_dns_record" "atuin_a" {
 resource "cloudflare_dns_record" "upterm_a" {
   zone_id = local.zone_id
   name    = "upterm"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -223,7 +223,7 @@ resource "cloudflare_dns_record" "upterm_a" {
 resource "cloudflare_dns_record" "rad_a" {
   zone_id = local.zone_id
   name    = "rad"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -232,7 +232,7 @@ resource "cloudflare_dns_record" "rad_a" {
 resource "cloudflare_dns_record" "apex_a" {
   zone_id = local.zone_id
   name    = "@"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -250,7 +250,7 @@ resource "cloudflare_dns_record" "www_cname" {
 resource "cloudflare_dns_record" "blog_a" {
   zone_id = local.zone_id
   name    = "blog"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -259,7 +259,7 @@ resource "cloudflare_dns_record" "blog_a" {
 resource "cloudflare_dns_record" "links_a" {
   zone_id = local.zone_id
   name    = "links"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -269,7 +269,7 @@ resource "cloudflare_dns_record" "links_a" {
 resource "cloudflare_dns_record" "chat_a" {
   zone_id = local.zone_id
   name    = "chat"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -279,7 +279,7 @@ resource "cloudflare_dns_record" "chat_a" {
 resource "cloudflare_dns_record" "ntfy_a" {
   zone_id = local.zone_id
   name    = "ntfy"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -288,7 +288,7 @@ resource "cloudflare_dns_record" "ntfy_a" {
 resource "cloudflare_dns_record" "relay_a" {
   zone_id = local.zone_id
   name    = "relay"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -297,7 +297,7 @@ resource "cloudflare_dns_record" "relay_a" {
 resource "cloudflare_dns_record" "blossom_a" {
   zone_id = local.zone_id
   name    = "blossom"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -306,7 +306,7 @@ resource "cloudflare_dns_record" "blossom_a" {
 resource "cloudflare_dns_record" "tasks_a" {
   zone_id = local.zone_id
   name    = "tasks"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -315,7 +315,7 @@ resource "cloudflare_dns_record" "tasks_a" {
 resource "cloudflare_dns_record" "restate_a" {
   zone_id = local.zone_id
   name    = "restate"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -324,7 +324,7 @@ resource "cloudflare_dns_record" "restate_a" {
 resource "cloudflare_dns_record" "restate_api_a" {
   zone_id = local.zone_id
   name    = "restate-api"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -333,7 +333,7 @@ resource "cloudflare_dns_record" "restate_api_a" {
 resource "cloudflare_dns_record" "zotero_a" {
   zone_id = local.zone_id
   name    = "zotero"
-  content = local.taps_ip
+  content = local.service_ip
   type    = "A"
   ttl     = 300
   proxied = false
@@ -482,6 +482,6 @@ resource "cloudflare_dns_record" "carddav_srv" {
 output "mail_dns" {
   value = {
     mail_server = local.mail_domain
-    ip          = local.taps_ip
+    ip          = local.service_ip
   }
 }

@@ -18,7 +18,7 @@
     ];
 
     # Personal nodes to connect
-    # NAT-behind nodes (malt, pint) use ZeroTier addresses since they have no public DNS
+    # NAT-behind nodes use WireGuard addresses since they have no public DNS.
     connectNodes = [
       "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776"
       "z6MkqRXPuCo1ykP1korSc2sMKjTQxyHcvuSG3D2CQ17ZmFgd@malt.x:8776"

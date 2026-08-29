@@ -39,7 +39,6 @@
     "raycast"
     "secretive"
     "slack"
-    "zerotier-one"
     "zoom"
     # zotero: removed — replaced by the zhost-patched build via home-manager
     # (programs.zotero), which points the client at zotero.mulatta.io. Keeping

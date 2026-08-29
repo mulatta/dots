@@ -9,9 +9,9 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/auto-upgrade.nix
-    ../../nixosModules/disko-zfs.nix
     ../../nixosModules/radicle-mulatta.nix
     ./modules/backup.nix
+    ./modules/disko.nix
     ./modules/hermes
     ./modules/home-assistant.nix
     ./modules/jellyfin
@@ -31,16 +31,10 @@
     ./modules/weechat.nix
   ];
 
-  disko.rootDisk = "/dev/nvme0n1";
-
   networking.hostName = "malt";
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [ self.overlays.dots ];
-
-  # UEFI boot
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # Enable aarch64 emulation for building Raspberry Pi images
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];

@@ -15,7 +15,7 @@
       tags =
         { config, ... }:
         {
-          wireguard-peers = builtins.filter (name: name != "taps") (config.nixos ++ config.darwin);
+          wireguard-peers = builtins.filter (name: name != "cask") (config.nixos ++ config.darwin);
         };
 
       machines = {
@@ -27,7 +27,8 @@
           machineClass = "nixos";
           deploy.targetHost = "root@malt.x";
         };
-        taps = {
+        taps.machineClass = "nixos";
+        cask = {
           machineClass = "nixos";
           deploy.targetHost = "root@64.176.225.253";
         };
@@ -52,35 +53,23 @@
           };
         };
 
-        # ZeroTier VPN - taps as controller
-        zerotier = {
-          module.name = "zerotier";
-          module.input = "clan-core";
-          roles.controller.machines.taps = { };
-          roles.moon.machines.taps.settings = {
-            stableEndpoints = [ "64.176.225.253" ];
-          };
-          roles.peer.tags.nixos = { };
-          # Darwin machines need explicit peer role (not in nixos tag)
-          roles.peer.machines.rhesus = { };
-        };
-
-        # WireGuard VPN - taps as controller
+        # WireGuard VPN - cask is the production controller
         wireguard = {
           module.name = "wireguard";
           module.input = "clan-core";
 
-          # Domain suffix for .x resolution
           roles.controller.settings.domain = "x";
           roles.peer.settings.domain = "x";
 
-          # taps is the controller with public endpoint
-          roles.controller.machines.taps = {
+          roles.controller.machines.cask = {
             settings = {
               endpoint = "64.176.225.253";
               port = 51820;
             };
           };
+          # Recreated taps joins as an ordinary peer. Naru remains the
+          # independent recovery path instead of maintaining a second public IP.
+          roles.peer.settings.controller = "cask";
           roles.peer.tags.wireguard-peers = { };
         };
 
@@ -88,19 +77,28 @@
         sshd = {
           module.name = "sshd";
           module.input = "clan-core";
-          roles.server.tags.nixos = { };
+          roles.server.machines = {
+            taps = { };
+            cask = { };
+            malt = { };
+            pint = { };
+          };
           roles.server.settings = {
             certificate.searchDomains = [
-              "z" # ZeroTier internal
               "x" # WireGuard mesh
               "n" # Tinc mesh
               "local" # mDNS/Bonjour
             ];
           };
-          roles.client.tags.all = { };
+          roles.client.machines = {
+            rhesus = { };
+            malt = { };
+            taps = { };
+            cask = { };
+            pint = { };
+          };
           roles.client.settings = {
             certificate.searchDomains = [
-              "z" # ZeroTier internal
               "x" # WireGuard mesh
               "n" # Tinc mesh
               "local" # mDNS/Bonjour
