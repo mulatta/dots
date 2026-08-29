@@ -105,6 +105,30 @@ resource "vultr_firewall_rule" "dns_udp" {
   lifecycle { ignore_changes = [source] }
 }
 
+resource "vultr_firewall_rule" "dns_tcp_ipv6" {
+  firewall_group_id = vultr_firewall_group.cask.id
+  protocol          = "tcp"
+  ip_type           = "v6"
+  subnet            = "::"
+  subnet_size       = 0
+
+  port  = "53"
+  notes = "Authoritative DNS over TCP IPv6"
+  lifecycle { ignore_changes = [source] }
+}
+
+resource "vultr_firewall_rule" "dns_udp_ipv6" {
+  firewall_group_id = vultr_firewall_group.cask.id
+  protocol          = "udp"
+  ip_type           = "v6"
+  subnet            = "::"
+  subnet_size       = 0
+
+  port  = "53"
+  notes = "Authoritative DNS over UDP IPv6"
+  lifecycle { ignore_changes = [source] }
+}
+
 resource "vultr_firewall_rule" "naru_tcp" {
   firewall_group_id = vultr_firewall_group.cask.id
   protocol          = "tcp"

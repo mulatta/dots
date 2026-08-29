@@ -39,6 +39,9 @@ output "cask" {
       reserved_ipv4 = vultr_reserved_ip.service.subnet
       gateway       = vultr_instance.cask.gateway_v4
       netmask       = vultr_instance.cask.netmask_v4
+      ipv6          = vultr_instance.cask.v6_main_ip
+      ipv6_network  = vultr_instance.cask.v6_network
+      ipv6_size     = vultr_instance.cask.v6_network_size
     }
     firewall = {
       id          = vultr_firewall_group.cask.id
@@ -51,6 +54,11 @@ output "cask" {
 output "service_ipv4" {
   description = "Reserved IPv4 consumed by production DNS records"
   value       = vultr_reserved_ip.service.subnet
+}
+
+output "service_ipv6" {
+  description = "Stable IPv6 consumed by authoritative DNS records"
+  value       = vultr_instance.cask.v6_main_ip
 }
 
 output "ptr_record" {

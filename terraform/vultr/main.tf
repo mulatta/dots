@@ -66,7 +66,7 @@ resource "vultr_instance" "cask" {
 
   ssh_key_ids = [vultr_ssh_key.provisioning.id]
 
-  enable_ipv6 = false
+  enable_ipv6 = true
   backups     = "disabled"
 
   firewall_group_id = vultr_firewall_group.cask.id
