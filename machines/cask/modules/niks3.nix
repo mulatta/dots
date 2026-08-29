@@ -71,7 +71,10 @@
     };
 
     database.createLocally = true;
-    readProxy.enable = true;
+    readProxy = {
+      enable = true;
+      redirectTTL = "15m";
+    };
 
     apiTokenFile = config.clan.core.vars.generators.niks3.files.api-token.path;
     signKeyFiles = [ config.clan.core.vars.generators.niks3.files.signing-key.path ];
