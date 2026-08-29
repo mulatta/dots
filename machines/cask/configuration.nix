@@ -28,7 +28,7 @@
     ./modules/gitea-mq.nix
     ./modules/headscale.nix
     ./modules/kanidm
-    ./modules/knot.nix
+    ./modules/knot
     ./modules/network.nix
     ./modules/nginx
     ./modules/niks3.nix
