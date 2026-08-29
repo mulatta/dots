@@ -2,19 +2,23 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 {
-  config = lib.mkIf config.boot.zfs.enabled {
-    clan.core.vars.generators.hostId = {
-      files.id.secret = false;
-      runtimeInputs = [ pkgs.coreutils ];
-      script = ''
-        head -c4 /dev/urandom | od -A none -t x4 | tr -d ' \n' > "$out"/id
-      '';
-    };
+  imports = [ self.inputs.srvos.nixosModules.mixins-latest-zfs-kernel ];
 
-    networking.hostId = builtins.readFile config.clan.core.vars.generators.hostId.files.id.path;
-    boot.zfs.forceImportRoot = false;
+  config = lib.mkIf config.boot.zfs.enabled {
+    environment.systemPackages = [
+      pkgs.zfs-prune-snapshots
+    ];
+
+    boot.zfs.package = pkgs.zfs_unstable;
+
+    # Local pools cannot be imported concurrently by another machine, so
+    # recovery environments must not make the next boot fail on hostId drift.
+    boot.zfs.forceImportRoot = true;
+
+    services.zfs.autoSnapshot.enable = true;
   };
 }
