@@ -1,7 +1,7 @@
 # headscale: self-hosted Tailscale control plane.
 #
 # Purpose: give external Minecraft players a private overlay onto malt
-# instead of exposing a public game port. taps runs the control plane;
+# instead of exposing a public game port. cask runs the control plane;
 # malt and the players join as nodes and reach each other over WireGuard
 # (see machines/malt/modules/tailscale.nix). nginx terminates TLS for
 # headscale.mulatta.io and proxies to the loopback listener below.

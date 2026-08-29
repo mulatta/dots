@@ -1,3 +1,4 @@
+# Nostr blob storage server implementing Blossom and NIP-96.
 {
   config,
   pkgs,
@@ -154,6 +155,7 @@ in
   services.mysql = {
     enable = true;
     package = pkgs.mariadb;
+    settings.mysqld.bind-address = "127.0.0.1";
     ensureDatabases = [ "route96" ];
     ensureUsers = [
       {

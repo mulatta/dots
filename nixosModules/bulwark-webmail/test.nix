@@ -6,7 +6,7 @@ let
       system = pkgs.stdenv.hostPlatform.system;
       modules = [
         ./default.nix
-        ../../machines/taps/modules/bulwark-webmail.nix
+        ../../machines/cask/modules/bulwark-webmail.nix
         (
           { lib, pkgs, ... }:
           {

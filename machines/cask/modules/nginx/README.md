@@ -1,6 +1,6 @@
-# taps nginx vhosts
+# cask nginx vhosts
 
-Public-facing reverse-proxy and static-site vhosts on `taps`. This
+Public-facing reverse-proxy and static-site vhosts on `cask`. This
 directory is a NixOS module tree: `default.nix` wires the shared nginx
 service settings, imports every per-vhost file, and injects shared
 `_module.args` that vhosts consume.
@@ -56,7 +56,7 @@ reverse proxy. Examples: `atuin.nix`, `ntfy.nix`, `vaultwarden.nix`.
 
 ### B. WG-proxied app (on another machine)
 
-For services that run on `malt` (or any non-gateway peer) and taps
+For services that run on `malt` (or any non-gateway peer) and cask
 fronts them over WireGuard. Example: `nextcloud.nix`.
 
 ```nix

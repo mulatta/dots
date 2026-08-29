@@ -1,4 +1,4 @@
-# Seed node configuration for taps
+# Seed node configuration for cask
 # Public-facing node with httpd web UI
 { ... }:
 {

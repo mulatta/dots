@@ -101,7 +101,7 @@ in
             --ca-key "$ca/ca.key" \
             --ca-password-file /dev/null \
             --key "$ca/intermediate.key" \
-            --template machines/taps/modules/intermediate.tmpl \
+            --template machines/cask/modules/intermediate.tmpl \
             --not-after 8760h \
             --no-password --insecure --force \
             "dure intermediate ca" \

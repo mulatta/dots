@@ -16,7 +16,7 @@ let
   # that must be tied to an identity, so the proxy authenticates the browser
   # against kanidm and forwards X-Auth-Request-Email, which zhost matches against
   # loginAuthorizedUser. Mirrors the restate proxy in oauth2-proxy.nix; the
-  # upstream is local because zhost runs on taps.
+  # upstream is local because zhost runs on cask.
   zhostOauth2Args = [
     "--provider=oidc"
     "--client-id=zhost"
@@ -113,7 +113,7 @@ in
     bind = "127.0.0.1:8189";
     publicUrl = "https://${domain}";
     # Local PostgreSQL over the peer socket; createLocalDatabase (default true)
-    # provisions the zhost database and role on taps's postgres.
+    # provisions the zhost database and role on cask's postgres.
     loginAuthorizedUser = "seungwon@mulatta.io";
 
     apiKeyFile = config.clan.core.vars.generators.zhost.files.api-key.path;

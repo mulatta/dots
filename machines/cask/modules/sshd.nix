@@ -1,17 +1,12 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
   sshPort = toString (lib.head (config.services.openssh.ports or [ 22 ]));
-  vars = config.clan.core.vars.generators;
-
-  wgPrefix = vars.wireguard-network-wireguard.files.prefix.value;
-  ztNetworkId = vars.zerotier-network-zerotier.files.network-id.value;
-  ztPrefix = "fd${builtins.substring 0 2 ztNetworkId}:${builtins.substring 2 4 ztNetworkId}:${
-    builtins.substring 6 4 ztNetworkId
-  }:${builtins.substring 10 4 ztNetworkId}::/64";
+  wgPrefix = self.lib.wgPrefix;
 in
 {
   services.openssh.settings = {
@@ -49,10 +44,6 @@ in
         PermitRootLogin prohibit-password
         AllowTcpForwarding yes
 
-    # ZeroTier network
-    Match Address ${ztPrefix}
-        PermitRootLogin prohibit-password
-        AllowTcpForwarding yes
   '';
 
   # Fail2ban for VPS protection
@@ -66,7 +57,6 @@ in
       "127.0.0.1/8"
       "::1/128"
       "${wgPrefix}::/64"
-      ztPrefix
     ];
 
     jails = {

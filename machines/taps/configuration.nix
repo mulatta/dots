@@ -14,35 +14,9 @@
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/users.nix
-    ../../nixosModules/zerotier.nix
-    ./modules/radicle.nix
-    ./modules/radicle-ci.nix
-    ./modules/blossom.nix
-    ./modules/bulwark-webmail.nix
-    # DNS records managed by terraform/cloudflare/dns.tf
-    ./modules/kanidm
-    ./modules/coredns.nix
-    ./modules/headscale.nix
+    ../../nixosModules/vultr.nix
     ./modules/disko-vps.nix
-    ./modules/network.nix
-    ./modules/nginx
-    ./modules/niks3.nix
-    ./modules/oauth2-proxy.nix
-    ./modules/zhost.nix
-    ./modules/sshd.nix
-    ./modules/stalwart-mail.nix
-    ./modules/step-ca.nix
-    ./modules/vaultwarden.nix
-    ./modules/atuin.nix
-    ./modules/backup.nix
-    ./modules/nostr-relay.nix
-    ./modules/ntfy.nix
-    ./modules/gitea-mq.nix
-    ./modules/postgresql.nix
   ];
-
-  # Block RFC1918 on ZeroTier to avoid Vultr abuse reports
-  services.zerotierone.blockRfc1918Addresses = true;
 
   disko.rootDisk = "/dev/vda";
 

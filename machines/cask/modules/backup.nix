@@ -89,7 +89,7 @@
         repository = "rclone:r2:backup/taps";
         password-file = config.clan.core.vars.generators.rustic.files."password.txt".path;
       };
-      backup.host = "taps";
+      backup.host = "cask";
     };
 
     backups = {

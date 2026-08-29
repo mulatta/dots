@@ -12,8 +12,7 @@
     if ($block_dotted) { return 404; }
   '';
 
-  # nginx enablement, recommended settings, and public 80/443 firewall
-  # opening come from srvos.nixosModules.mixins-nginx in taps/configuration.nix.
+  # srvos mixins-nginx provides nginx defaults and public ingress.
   imports = [
     ./atuin.nix
     ./blog.nix

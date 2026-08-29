@@ -1,4 +1,4 @@
-# WireGuard helper for taps nginx vhosts.
+# WireGuard helper for cask nginx vhosts.
 #
 # Exposes `wgHost <machine>` which resolves the peer's WG IPv6 from
 # clan's shared prefix + the per-machine suffix that clan publishes
@@ -7,7 +7,7 @@
 { self, config }:
 let
   clanLib = self.inputs.clan-core.lib;
-  wgPrefix = config.clan.core.vars.generators.wireguard-network-wireguard.files.prefix.value;
+  wgPrefix = self.lib.wgPrefix;
 in
 {
   wgHost =
