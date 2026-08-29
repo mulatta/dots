@@ -181,7 +181,15 @@ resource "cloudflare_dns_record" "home_a" {
   comment = "Home Assistant"
 }
 
-# cache.mulatta.io - managed by cloudflare_r2_custom_domain in r2.tf
+resource "cloudflare_dns_record" "cache_a" {
+  zone_id = local.zone_id
+  name    = "cache"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "niks3 read endpoint"
+}
 
 resource "cloudflare_dns_record" "mq_a" {
   zone_id = local.zone_id
