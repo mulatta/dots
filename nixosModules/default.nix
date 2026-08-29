@@ -23,7 +23,7 @@
     ./nix-daemon.nix
     ./thermald.nix
     ./users.nix
-    ./zerotier.nix
+    ./zfs.nix
 
     ./naru.nix
     self.inputs.dure.nixosModules.naru
