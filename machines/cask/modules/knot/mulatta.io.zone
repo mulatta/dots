@@ -2,7 +2,7 @@ $ORIGIN mulatta.io.
 $TTL 300
 
 @ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. (
-  2026083001 ; serial
+  2026083002 ; serial
   3600       ; refresh
   600        ; retry
   604800     ; expire
@@ -14,40 +14,41 @@ $TTL 300
 @   IN NS ns3.he.net.
 @   IN NS ns4.he.net.
 @   IN NS ns5.he.net.
-ns1 IN A  @SERVICE_IP@
+ns1 IN A    @SERVICE_IPV4@
+ns1 IN AAAA @SERVICE_IPV6@
 
-@             IN A @SERVICE_IP@
-mail          IN A @SERVICE_IP@
-webmail       IN A @SERVICE_IP@
-stalwart      IN A @SERVICE_IP@
-mta-sts       IN A @SERVICE_IP@
-idm           IN A @SERVICE_IP@
-vaultwarden   IN A @SERVICE_IP@
-headscale     IN A @SERVICE_IP@
-n8n           IN A @SERVICE_IP@
-n8n-api       IN A @SERVICE_IP@
-rss           IN A @SERVICE_IP@
-paperless     IN A @SERVICE_IP@
-paperless-api IN A @SERVICE_IP@
-cloud         IN A @SERVICE_IP@
-video         IN A @SERVICE_IP@
-home          IN A @SERVICE_IP@
-cache         IN A @SERVICE_IP@
-mq            IN A @SERVICE_IP@
-niks3         IN A @SERVICE_IP@
-atuin         IN A @SERVICE_IP@
-upterm        IN A @SERVICE_IP@
-rad           IN A @SERVICE_IP@
-blog          IN A @SERVICE_IP@
-links         IN A @SERVICE_IP@
-chat          IN A @SERVICE_IP@
-ntfy          IN A @SERVICE_IP@
-relay         IN A @SERVICE_IP@
-blossom       IN A @SERVICE_IP@
-tasks         IN A @SERVICE_IP@
-restate       IN A @SERVICE_IP@
-restate-api   IN A @SERVICE_IP@
-zotero        IN A @SERVICE_IP@
+@             IN A @SERVICE_IPV4@
+mail          IN A @SERVICE_IPV4@
+webmail       IN A @SERVICE_IPV4@
+stalwart      IN A @SERVICE_IPV4@
+mta-sts       IN A @SERVICE_IPV4@
+idm           IN A @SERVICE_IPV4@
+vaultwarden   IN A @SERVICE_IPV4@
+headscale     IN A @SERVICE_IPV4@
+n8n           IN A @SERVICE_IPV4@
+n8n-api       IN A @SERVICE_IPV4@
+rss           IN A @SERVICE_IPV4@
+paperless     IN A @SERVICE_IPV4@
+paperless-api IN A @SERVICE_IPV4@
+cloud         IN A @SERVICE_IPV4@
+video         IN A @SERVICE_IPV4@
+home          IN A @SERVICE_IPV4@
+cache         IN A @SERVICE_IPV4@
+mq            IN A @SERVICE_IPV4@
+niks3         IN A @SERVICE_IPV4@
+atuin         IN A @SERVICE_IPV4@
+upterm        IN A @SERVICE_IPV4@
+rad           IN A @SERVICE_IPV4@
+blog          IN A @SERVICE_IPV4@
+links         IN A @SERVICE_IPV4@
+chat          IN A @SERVICE_IPV4@
+ntfy          IN A @SERVICE_IPV4@
+relay         IN A @SERVICE_IPV4@
+blossom       IN A @SERVICE_IPV4@
+tasks         IN A @SERVICE_IPV4@
+restate       IN A @SERVICE_IPV4@
+restate-api   IN A @SERVICE_IPV4@
+zotero        IN A @SERVICE_IPV4@
 minecraft     IN A 100.64.0.1
 
 www          IN CNAME mulatta.io.
