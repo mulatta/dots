@@ -20,17 +20,14 @@ in
 
   sops.secrets = {
     nix-grpc-ca-cert = {
-      sopsFile = ../sops/rhesus.yaml;
       path = "/run/nix-grpc-store/ca.crt";
       mode = "0444";
     };
     nix-grpc-client-cert = {
-      sopsFile = ../sops/rhesus.yaml;
       path = "/run/nix-grpc-store/client.crt";
       mode = "0444";
     };
     nix-grpc-client-key = {
-      sopsFile = ../sops/rhesus.yaml;
       path = "/run/nix-grpc-store/client.key";
       mode = "0400";
     };
