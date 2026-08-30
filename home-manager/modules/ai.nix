@@ -113,6 +113,26 @@ in
         exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
+    (pkgs.writeShellApplication {
+      name = "bd";
+      text = ''
+        # Callers that inject the password themselves skip the vault lookup.
+        if [[ -z "''${BEADS_DOLT_PASSWORD:-}" ]]; then
+          BEADS_DOLT_PASSWORD="$(${pkgs.rbw}/bin/rbw get dolt-client-password)"
+          export BEADS_DOLT_PASSWORD
+        fi
+        export BEADS_DOLT_SERVER_HOST=cask.n
+        export BEADS_DOLT_SERVER_PORT=3307
+        export BEADS_DOLT_SERVER_USER=beads
+
+        # bd init reads the user only from --server-user, not the environment.
+        if [[ "''${1:-}" == init ]]; then
+          set -- "$@" --server-user "$BEADS_DOLT_SERVER_USER"
+        fi
+
+        exec ${aiPkgs.beads}/bin/bd "$@"
+      '';
+    })
     aiPkgs.agent-slack
     aiPkgs.ccstatusline
     aiPkgs.codex
