@@ -13,6 +13,7 @@
     ./acme.nix
     ./bulwark-webmail
     ./dns-client.nix
+    ./dolt.nix
     ./i18n.nix
     ./minimal-docs.nix
     ./miniflux
