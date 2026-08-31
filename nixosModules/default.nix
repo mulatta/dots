@@ -14,6 +14,7 @@
     ./bulwark-webmail
     ./buzz-agents
     ./dns-client.nix
+    ./dolt.nix
     ./i18n.nix
     ./minimal-docs.nix
     ./nginx.nix
