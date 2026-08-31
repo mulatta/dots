@@ -25,6 +25,7 @@
     ./modules/bulwark-webmail.nix
     ./modules/coredns.nix
     ./modules/disko.nix
+    ./modules/beads.nix
     ./modules/gitea-mq.nix
     ./modules/headscale.nix
     ./modules/kanidm
