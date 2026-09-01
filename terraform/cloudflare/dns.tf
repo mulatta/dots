@@ -57,6 +57,16 @@ resource "cloudflare_dns_record" "stalwart_a" {
   proxied = false
 }
 
+# MySQL wire protocol requires direct DNS; Cloudflare's HTTP proxy cannot carry it.
+resource "cloudflare_dns_record" "dolt_a" {
+  zone_id = local.zone_id
+  name    = "dolt"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "mta_sts_a" {
   zone_id = local.zone_id
   name    = "mta-sts"

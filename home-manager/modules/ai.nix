@@ -10,6 +10,14 @@ let
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   nixbot-cli = inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli;
+  beads = aiTools.beads.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      (pkgs.fetchpatch {
+        url = "https://github.com/gastownhall/beads/commit/0b1d451f634f2bab8a20548b9da41b7a13dcde8b.patch";
+        hash = "sha256-Bn2Y6OpGNr0vZe92Qg4zDflnS0O2uYWh42cW1KfOxR8=";
+      })
+    ];
+  });
 
   # On GPU hosts pkgs is rebuilt with cudaSupport=true (gpu-support.nix); rebuild
   # qmd with CUDA there, otherwise take the cached upstream build. qmd sources
@@ -108,6 +116,24 @@ in
       text = ''
         ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
         exec ${aiTools.pi}/bin/pi "$@"
+      '';
+    })
+    (pkgs.writeShellApplication {
+      name = "bd";
+      text = ''
+        BEADS_DOLT_PASSWORD="$(${pkgs.rbw}/bin/rbw get dolt-client-password)"
+        export BEADS_DOLT_PASSWORD
+        export BEADS_DOLT_SERVER_HOST=dolt.mulatta.io
+        export BEADS_DOLT_SERVER_PORT=3307
+        export BEADS_DOLT_SERVER_TLS=true
+        export BEADS_DOLT_SERVER_USER=beads
+
+        # v1.2.2 init bypasses the environment-backed user resolver.
+        if [[ "''${1:-}" == init ]]; then
+          set -- "$@" --server-user "$BEADS_DOLT_SERVER_USER"
+        fi
+
+        exec ${beads}/bin/bd "$@"
       '';
     })
     aiTools.apm
