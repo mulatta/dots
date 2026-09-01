@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784571150,
-        "narHash": "sha256-pmkjmWQthmfJsK294ZJgyx6jSPZTQV3tnoY+mbRdSvU=",
+        "lastModified": 1787854006,
+        "narHash": "sha256-uTK2g0xREXsJwkjJRV9j0nsXoGlW2Oh7XKpdVyEJof4=",
         "owner": "mulatta",
         "repo": "automation-runtime",
-        "rev": "d3f1902d7991bf27798c0e97be43ce3eeffcde5a",
+        "rev": "71f8397c8c7cb8d2bcdbe33f95efe04ca6a82335",
         "type": "github"
       },
       "original": {
