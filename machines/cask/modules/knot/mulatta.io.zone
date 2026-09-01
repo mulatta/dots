@@ -2,7 +2,7 @@ $ORIGIN mulatta.io.
 $TTL 300
 
 @ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. (
-  2026083002 ; serial
+  2026083006 ; serial
   3600       ; refresh
   600        ; retry
   604800     ; expire
