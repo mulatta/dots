@@ -27,6 +27,7 @@
     ./uptermd.nix
     ./nextcloud.nix
     ./paperless.nix
+    ./radicle-mirror.nix
     ./radicle.nix
     ./restate.nix
     ./stalwart.nix

@@ -949,6 +949,29 @@
         "type": "github"
       }
     },
+    "radicle-mirror": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787471423,
+        "narHash": "sha256-6XEP0obkZ+RXYnUtwcYqkvrtGshzClNb+44gFmBYgyg=",
+        "owner": "Mic92",
+        "repo": "radicle-mirror",
+        "rev": "062f78dfca6db930ddef5d172c403134240731e5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "radicle-mirror",
+        "type": "github"
+      }
+    },
     "research-skills": {
       "inputs": {
         "bioinformatics-toolkits": "bioinformatics-toolkits",
@@ -1048,6 +1071,7 @@
         "noctalia-plugins": "noctalia-plugins",
         "opencrow": "opencrow",
         "paneru": "paneru",
+        "radicle-mirror": "radicle-mirror",
         "research-skills": "research-skills",
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
