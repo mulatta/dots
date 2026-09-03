@@ -9,7 +9,7 @@ let
   certs = config.sops.secrets;
   # Keep daemon credentials out of the URI. nix-grpc-store discovers the
   # root-only client pair in /run/nix-grpc-store when nix-daemon opens the store.
-  grpcUri = "grpc://psi:50051?ca-cert=${certs.nix-grpc-ca-cert.path}";
+  grpcUri = "grpc://psi.sjanglab.org:50051?ca-cert=${certs.nix-grpc-ca-cert.path}";
 in
 {
   # nix-grpc-store only ships a NixOS client module, but it only extends
