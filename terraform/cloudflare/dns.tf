@@ -265,6 +265,15 @@ resource "cloudflare_dns_record" "rad_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "radicle_mirror_a" {
+  zone_id = local.zone_id
+  name    = "radicle-mirror"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "apex_a" {
   zone_id = local.zone_id
   name    = "@"
