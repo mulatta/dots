@@ -15,7 +15,6 @@
   # srvos mixins-nginx provides nginx defaults and public ingress.
   imports = [
     ./atuin.nix
-    ./blog.nix
     ./headscale.nix
     ./home-assistant.nix
     ./jellyfin.nix
