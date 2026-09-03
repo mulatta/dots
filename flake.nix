@@ -96,6 +96,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    radicle-mirror = {
+      url = "github:Mic92/radicle-mirror";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     zhost = {
       url = "github:mulatta/zhost";
       inputs.treefmt-nix.follows = "treefmt-nix";

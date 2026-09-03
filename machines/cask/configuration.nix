@@ -36,8 +36,8 @@
     ./modules/ntfy.nix
     ./modules/oauth2-proxy.nix
     ./modules/postgresql.nix
-    ./modules/radicle-ci.nix
     ./modules/radicle.nix
+    ./modules/radicle-mirror.nix
     ./modules/route96.nix
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix

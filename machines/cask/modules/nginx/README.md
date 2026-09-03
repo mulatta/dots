@@ -101,46 +101,6 @@ in
 }
 ```
 
-### D. Static content site
-
-For Hugo/Zola output served from `/var/lib/radicle-ci/<site>/current`.
-Examples: `blog.nix`, `mulatta-io.nix`.
-
-```nix
-{ securityTxtFile, openpgpkeyDir, ... }:
-{
-  services.nginx.virtualHosts."foo.mulatta.io" = {
-    forceSSL = true;
-    enableACME = true;
-    root = "/var/lib/radicle-ci/foo/current";
-    extraConfig = ''
-      if ($block_dotted) { return 404; }
-    '';
-    locations."= /robots.txt".extraConfig = ''
-      add_header Cache-Control "public, max-age=3600";
-    '';
-    locations."= /.well-known/security.txt" = {
-      alias = "${securityTxtFile}";
-      extraConfig = ''
-        default_type "text/plain; charset=utf-8";
-      '';
-    };
-    locations."^~ /.well-known/openpgpkey/" = {
-      alias = "${openpgpkeyDir}/";
-      extraConfig = ''
-        default_type "application/octet-stream";
-      '';
-    };
-    locations."/" = {
-      tryFiles = "$uri $uri/ /index.html =404";
-      extraConfig = ''
-        if ($block_ai) { return 403; }
-      '';
-    };
-  };
-}
-```
-
 Finally, add the new file to the `imports` list in `default.nix`.
 
 ## Gotchas
@@ -166,8 +126,7 @@ Finally, add the new file to the `imports` list in `default.nix`.
 
 ## Renewal points
 
-| What                   | When                             | Where                                                                                                                  |
-| ---------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `security.txt` Expires | Before `2027-04-22`              | `security-txt.nix` (`expires` binding). Bump, redeploy, update the Vikunja reminder.                                   |
-| `ai-robots-txt` lock   | Quarterly or on crawler outbreak | `~/git/blog` and `~/git/homepage` — `nix flake update ai-robots-txt`                                                   |
-| WKD key publication    | When a PGP key exists            | Drop the binary into `openpgpkeyDir`'s `hu/<z-base32-sha1(localpart)>`, then bump `Encryption:` in `security-txt.nix`. |
+| What                   | When                  | Where                                                                                                                  |
+| ---------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `security.txt` Expires | Before `2027-04-22`   | `security-txt.nix` (`expires` binding). Bump, redeploy, update the Vikunja reminder.                                   |
+| WKD key publication    | When a PGP key exists | Drop the binary into `openpgpkeyDir`'s `hu/<z-base32-sha1(localpart)>`, then bump `Encryption:` in `security-txt.nix`. |

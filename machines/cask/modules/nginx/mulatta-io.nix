@@ -9,15 +9,6 @@
     "mulatta.io" = {
       forceSSL = true;
       enableACME = true;
-      root = "/var/lib/radicle-ci/homepage/current";
-      extraConfig = ''
-        if ($block_dotted) { return 404; }
-      '';
-      # /robots.txt is exempt from the AI UA block so even blocked agents
-      # can still read our advisory (Content Signals + Disallow list).
-      locations."= /robots.txt".extraConfig = ''
-        add_header Cache-Control "public, max-age=3600";
-      '';
       locations."= /.well-known/security.txt" = {
         alias = "${securityTxtFile}";
         extraConfig = ''
@@ -30,25 +21,6 @@
         alias = "${openpgpkeyDir}/";
         extraConfig = ''
           default_type "application/octet-stream";
-        '';
-      };
-      locations."/" = {
-        tryFiles = "$uri $uri/ /index.html =404";
-        extraConfig = ''
-          if ($block_ai) {
-            return 403;
-          }
-          add_header Cache-Control "public, max-age=3600";
-        '';
-      };
-      locations."= /cv.pdf" = {
-        alias = "/var/lib/radicle-ci/cv/current/cv.pdf";
-        extraConfig = ''
-          if ($block_ai) {
-            return 403;
-          }
-          add_header Cache-Control "public, max-age=3600";
-          add_header Content-Disposition 'inline; filename="SeungwonLee-CV.pdf"';
         '';
       };
       # NIP-05: served from nix-generated file (nip05.nix) so adding an
