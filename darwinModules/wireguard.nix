@@ -2,16 +2,9 @@
   config,
   lib,
   pkgs,
-  self,
   ...
 }:
 let
-  readVarFile = self.lib.readVarFile;
-
-  # DNS resolver target: cask WireGuard controller IP
-  wgPrefix = readVarFile "cask" "wireguard-network-wireguard" "prefix";
-  caskWireguardIP = if wgPrefix != null then "${wgPrefix}::1" else null;
-
   # Sops-managed private key path (clan vars generator)
   secretPath = config.clan.core.vars.generators.wireguard-keys-wireguard.files.privatekey.path;
 
@@ -50,11 +43,6 @@ let
   '';
 in
 {
-  # DNS resolver for .x domain -> cask WireGuard IP
-  environment.etc."resolver/x" = lib.mkIf (caskWireguardIP != null) {
-    text = "nameserver ${caskWireguardIP}\n";
-  };
-
   # Extend the existing clan host WireGuard identity with the SBEE admin
   # network. infra registers rhesus' clan public key, so no second Darwin
   # WireGuard identity is needed.

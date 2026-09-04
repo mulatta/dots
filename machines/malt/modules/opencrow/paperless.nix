@@ -1,14 +1,10 @@
 {
   config,
   pkgs,
-  self,
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  paperlessUrl = "http://[${maltWgIP}]:${toString config.services.paperless.port}";
+  paperlessUrl = "http://malt.n:${toString config.services.paperless.port}";
   paperlessCliConfig = (pkgs.formats.json { }).generate "paperless-cli-config.json" {
     url = paperlessUrl;
     base_url = paperlessUrl;

@@ -1,12 +1,10 @@
 {
   config,
   lib,
-  self,
   ...
 }:
 let
   sshPort = toString (lib.head (config.services.openssh.ports or [ 22 ]));
-  wgPrefix = self.lib.wgPrefix;
 in
 {
   services.openssh.settings = {
@@ -40,7 +38,7 @@ in
   # Allow root login and TCP forwarding from internal networks only
   services.openssh.extraConfig = ''
     # WireGuard mesh network
-    Match Address ${wgPrefix}::/64
+    Match Address fdec:ca5f::/32
         PermitRootLogin prohibit-password
         AllowTcpForwarding yes
 
@@ -56,7 +54,7 @@ in
     ignoreIP = [
       "127.0.0.1/8"
       "::1/128"
-      "${wgPrefix}::/64"
+      "fdec:ca5f::/32"
     ];
 
     jails = {

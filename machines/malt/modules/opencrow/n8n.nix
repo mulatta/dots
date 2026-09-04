@@ -7,10 +7,7 @@
 let
   system = pkgs.stdenv.hostPlatform.system;
 
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  n8nApiUrl = "http://[${maltWgIP}]:5678";
+  n8nApiUrl = "http://malt.n:5678";
 
   n8nHooksConfig = pkgs.writeText "n8n-hooks-config.json" (
     builtins.toJSON {
