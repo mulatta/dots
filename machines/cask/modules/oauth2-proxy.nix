@@ -10,7 +10,6 @@ let
   n8nApiDomain = "n8n-api.mulatta.io";
   restateDomain = "restate.mulatta.io";
   restateApiDomain = "restate-api.mulatta.io";
-  weechatDomain = "chat.mulatta.io";
 
   restateOauth2Args = [
     "--provider=oidc"
@@ -35,31 +34,6 @@ let
     "--cookie-expire=72h"
     "--upstream=http://malt.n:9070"
     "--http-address=127.0.0.1:4181"
-  ];
-
-  weechatOauth2Args = [
-    "--provider=oidc"
-    "--client-id=weechat"
-    "--oidc-issuer-url=https://${kanidmDomain}/oauth2/openid/weechat"
-    "--redirect-url=https://${weechatDomain}/oauth2/callback"
-    "--scope=openid email profile"
-    "--email-domain=mulatta.io"
-    "--code-challenge-method=S256"
-    "--insecure-oidc-allow-unverified-email=true"
-    "--set-xauthrequest=true"
-    "--pass-access-token=true"
-    "--pass-authorization-header=true"
-    "--set-authorization-header=true"
-    "--reverse-proxy=true"
-    "--skip-provider-button=true"
-    "--cookie-domain=${weechatDomain}"
-    "--cookie-name=_oauth2_proxy_weechat"
-    "--cookie-secure=true"
-    "--cookie-httponly=true"
-    "--cookie-refresh=1h"
-    "--cookie-expire=72h"
-    "--upstream=static://202"
-    "--http-address=127.0.0.1:4183"
   ];
 
   # These proxies are public OIDC clients, so the only generated secret is the
@@ -87,7 +61,6 @@ in
   };
   clan.core.vars.generators.oauth2-proxy = mkOauth2ProxySecret;
   clan.core.vars.generators.oauth2-proxy-restate = mkOauth2ProxySecret;
-  clan.core.vars.generators.oauth2-proxy-weechat = mkOauth2ProxySecret;
 
   systemd.services.oauth2-proxy-restate = {
     description = "OAuth2 Proxy for Restate";
@@ -106,27 +79,6 @@ in
       Group = "oauth2-proxy";
       EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-restate.files."env".path;
       ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs restateOauth2Args}";
-      Restart = "always";
-    };
-  };
-
-  systemd.services.oauth2-proxy-weechat = {
-    description = "OAuth2 Proxy for WeeChat";
-    wantedBy = [ "multi-user.target" ];
-    wants = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    after = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    restartTriggers = [ config.clan.core.vars.generators.oauth2-proxy-weechat.files."env".path ];
-    serviceConfig = {
-      User = "oauth2-proxy";
-      Group = "oauth2-proxy";
-      EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-weechat.files."env".path;
-      ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs weechatOauth2Args}";
       Restart = "always";
     };
   };
@@ -235,55 +187,5 @@ in
       locations."/".return = "404";
     };
 
-    ${weechatDomain} = {
-      useACMEHost = "mulatta.io";
-      forceSSL = true;
-      mulatta.securityHeaders = "deny";
-      extraConfig = ''
-        auth_request /oauth2/auth;
-        error_page 401 = @redirectToOauth2ProxyLogin;
-
-        auth_request_set $user $upstream_http_x_auth_request_user;
-        auth_request_set $email $upstream_http_x_auth_request_email;
-        auth_request_set $auth_cookie $upstream_http_set_cookie;
-        add_header Set-Cookie $auth_cookie;
-      '';
-      locations = {
-        "/oauth2/" = {
-          proxyPass = "http://127.0.0.1:4183";
-          extraConfig = ''
-            auth_request off;
-            proxy_set_header X-Scheme $scheme;
-            proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
-          '';
-        };
-        "= /oauth2/auth" = {
-          proxyPass = "http://127.0.0.1:4183/oauth2/auth";
-          extraConfig = ''
-            auth_request off;
-            proxy_set_header X-Scheme $scheme;
-            proxy_set_header Content-Length "";
-            proxy_pass_request_body off;
-          '';
-        };
-        "@redirectToOauth2ProxyLogin" = {
-          return = "307 https://${weechatDomain}/oauth2/start?rd=$scheme://$host$request_uri";
-          extraConfig = ''
-            auth_request off;
-          '';
-        };
-        "^~ /weechat" = {
-          proxyPass = "http://malt.n:4242";
-          proxyWebsockets = true;
-          extraConfig = ''
-            proxy_set_header X-User $user;
-            proxy_set_header X-Email $email;
-            proxy_read_timeout 3600s;
-            proxy_send_timeout 3600s;
-          '';
-        };
-        "/".root = pkgs.glowing-bear;
-      };
-    };
   };
 }

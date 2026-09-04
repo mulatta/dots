@@ -38,13 +38,6 @@ let
       }
       {
         kind = "httpHeaderAuth";
-        name = "vikunja-api";
-        tokenFile = "vikunja-api-token";
-        allowedHttpRequestDomains = "domains";
-        allowedDomains = "tasks.mulatta.io";
-      }
-      {
-        kind = "httpHeaderAuth";
         name = "linkwarden-api";
         tokenFile = "linkwarden-api-token";
         allowedHttpRequestDomains = "domains";
@@ -165,19 +158,6 @@ in
     '';
   };
 
-  clan.core.vars.generators.opencrow-n8n-vikunja-api = {
-    files.vikunja-api-token.secret = true;
-
-    prompts.vikunja-api-token = {
-      description = "Vikunja API token for n8n task workflows";
-      type = "hidden";
-    };
-
-    script = ''
-      cp "$prompts/vikunja-api-token" "$out/vikunja-api-token"
-    '';
-  };
-
   clan.core.vars.generators.opencrow-n8n-linkwarden-api = {
     files.linkwarden-api-token.secret = true;
 
@@ -228,7 +208,6 @@ in
         "n8n-hooks-token:${config.clan.core.vars.generators.opencrow-n8n-hooks.files.n8n-hooks-token.path}"
         "miniflux-webhook-basic-password:${config.clan.core.vars.generators.miniflux-webhook.files.n8n-basic-password.path}"
         "miniflux-api-token:${config.clan.core.vars.generators.miniflux-seungwon.files.api-token.path}"
-        "vikunja-api-token:${config.clan.core.vars.generators.opencrow-n8n-vikunja-api.files.vikunja-api-token.path}"
         "linkwarden-api-token:${config.clan.core.vars.generators.opencrow-n8n-linkwarden-api.files.linkwarden-api-token.path}"
       ];
     };
