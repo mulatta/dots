@@ -1,7 +1,5 @@
-{ wgLib, ... }:
+{ ... }:
 let
-  malt = wgLib.wgHost "malt";
-
   domain = "video.mulatta.io";
   port = 8096;
 
@@ -16,8 +14,8 @@ let
 in
 {
   services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
 
     extraConfig = securityHeadersConfig + ''
       if ($block_dotted) { return 404; }
@@ -25,7 +23,7 @@ in
     '';
 
     locations."/" = {
-      proxyPass = "http://${malt.url}:${toString port}";
+      proxyPass = "http://malt.n:${toString port}";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_buffering off;

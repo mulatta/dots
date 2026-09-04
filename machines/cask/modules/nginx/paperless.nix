@@ -1,7 +1,10 @@
-{ wgLib, securityHeadersConfig, ... }:
+{ ... }:
 let
-  malt = wgLib.wgHost "malt";
-
+  securityHeadersConfig = ''
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  '';
   uiDomain = "paperless.mulatta.io";
   apiDomain = "paperless-api.mulatta.io";
   port = 28981;
@@ -11,8 +14,8 @@ in
   # proxy so SSO state stays in Paperless/django-allauth instead of trusting
   # reverse-proxy auth headers.
   services.nginx.virtualHosts.${uiDomain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
 
     extraConfig = securityHeadersConfig + ''
       if ($block_dotted) { return 404; }
@@ -20,7 +23,7 @@ in
     '';
 
     locations."/" = {
-      proxyPass = "http://${malt.url}:${toString port}";
+      proxyPass = "http://malt.n:${toString port}";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_read_timeout 3600s;
@@ -33,8 +36,8 @@ in
   # vhost: Paperless REST endpoints live under /api/, including document
   # download/preview endpoints used by clients after token authentication.
   services.nginx.virtualHosts.${apiDomain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
 
     extraConfig = securityHeadersConfig + ''
       if ($block_dotted) { return 404; }
@@ -42,7 +45,7 @@ in
     '';
 
     locations."~ ^/api/" = {
-      proxyPass = "http://${malt.url}:${toString port}";
+      proxyPass = "http://malt.n:${toString port}";
       proxyWebsockets = true;
       extraConfig = ''
         # SECURITY: prevent auth header injection from sibling SSO setups.

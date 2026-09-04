@@ -1,11 +1,8 @@
-{ wgLib, ... }:
-let
-  malt = wgLib.wgHost "malt";
-in
+{ ... }:
 {
   services.nginx.virtualHosts."cloud.mulatta.io" = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
 
     extraConfig = ''
       client_max_body_size 16G;
@@ -16,7 +13,7 @@ in
     '';
 
     locations."/" = {
-      proxyPass = "http://${malt.url}:80";
+      proxyPass = "http://malt.n:80";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_buffering off;
