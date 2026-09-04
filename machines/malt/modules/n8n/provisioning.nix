@@ -5,10 +5,8 @@
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltWgIP = "${wgPrefix}:${config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value}";
-  n8nApiUrl = "http://[${maltWgIP}]:5678";
-  restateIngressUrl = "http://[${maltWgIP}]:8081";
+  n8nApiUrl = "http://malt.n:5678";
+  restateIngressUrl = "http://malt.n:8081";
 
   system = pkgs.stdenv.hostPlatform.system;
 
