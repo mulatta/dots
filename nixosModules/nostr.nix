@@ -1,11 +1,4 @@
-{
-  self,
-  lib,
-  ...
-}:
-let
-  readVarFile = self.lib.readVarFile;
-in
+{ lib, ... }:
 {
   options.mulatta.nostr = {
     identities = lib.mkOption {
@@ -40,7 +33,7 @@ in
     mulatta.nostr = {
       identities = {
         mulatta.pubkey = lib.mkDefault "562c307c7e0d56d818e50c7c6b9a5dd6aa353ccbe087f7ee68c61c12674098aa";
-        noa.pubkey = lib.mkDefault (readVarFile "malt" "opencrow" "nostr-public-key");
+        noa.pubkey = lib.mkDefault "f7ffee11168b6713d44497806970c6bb8219c5bae2dbce8c4dc2217d1b1e7c15";
       };
 
       dmRelays = lib.mkDefault [
