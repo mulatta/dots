@@ -55,12 +55,6 @@ let
   };
 in
 {
-  disko.devices.zpool.zroot.datasets.hermes = {
-    type = "zfs_fs";
-    mountpoint = stateDir;
-    options."com.sun:auto-snapshot" = "true";
-  };
-
   clan.core.vars.generators.hermes = {
     files.slack-bot-token.secret = true;
     files.slack-app-token.secret = true;

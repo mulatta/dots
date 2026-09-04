@@ -167,17 +167,7 @@ in
     '';
   };
 
-  # Browser cookies are credentials, so this dataset intentionally stays out
-  # of automatic snapshots and offsite backup.
-  disko.devices.zpool.zroot.datasets.neko = {
-    type = "zfs_fs";
-    mountpoint = state;
-    options = {
-      compression = "lz4";
-      "com.sun:auto-snapshot" = "false";
-    };
-  };
-
+  # Browser credentials stay local; offsite backup sources exclude this path.
   systemd.tmpfiles.rules = [
     "d ${state} 0700 1000 1000 -"
     "d ${profile} 0700 1000 1000 -"
@@ -231,10 +221,6 @@ in
     after = [ "systemd-tmpfiles-setup.service" ];
     # OCI pre-start removes the old container before persistent process locks are cleared.
     serviceConfig.ExecStartPre = lib.mkAfter [ clearStaleChromiumProcessLocks ];
-    unitConfig = {
-      AssertPathIsMountPoint = state;
-      RequiresMountsFor = [ state ];
-    };
     restartTriggers = [
       podmanNetworkConfig
       chromiumConfig

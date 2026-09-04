@@ -10,12 +10,6 @@ let
   kanidmDomain = "idm.mulatta.io";
 in
 {
-  disko.devices.zpool.zroot.datasets."paperless" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/paperless";
-    options."com.sun:auto-snapshot" = "true";
-  };
-
   clan.core.vars.generators.kanidm-paperless-oidc = {
     share = true;
     files.secret.secret = true;

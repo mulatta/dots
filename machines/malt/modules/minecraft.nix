@@ -32,16 +32,6 @@ in
   imports = [ self.inputs.nix-minecraft.nixosModules.minecraft-servers ];
   nixpkgs.overlays = [ self.inputs.nix-minecraft.overlay ];
 
-  disko.devices.zpool.zroot.datasets."minecraft" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/minecraft";
-    options = {
-      compression = "lz4";
-      recordsize = "128K";
-      "com.sun:auto-snapshot" = "true";
-    };
-  };
-
   services.minecraft-servers = {
     enable = true;
     eula = true;
