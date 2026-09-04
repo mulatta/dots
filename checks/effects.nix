@@ -58,7 +58,7 @@ in
       git checkout -b "$branch"
       git commit -am "Update submodules"
       git push -f origin "$branch"
-      if ! gh pr view "$branch" >/dev/null 2>&1; then
+      if [ "$(gh pr list --head "$branch" --state open --json number --jq length)" -eq 0 ]; then
         gh pr create --head "$branch" \
           --title "Update submodules" \
           --body "Update pinned upstream submodules." \
@@ -111,7 +111,7 @@ in
           git checkout -b "$branch"
           git commit -am "step-ca: renew intermediate certificate"
           git push -f origin "$branch"
-          if ! gh pr view "$branch" >/dev/null 2>&1; then
+          if [ "$(gh pr list --head "$branch" --state open --json number --jq length)" -eq 0 ]; then
             gh pr create --head "$branch" \
               --title "step-ca: renew intermediate certificate" \
               --body "renew the dure intermediate certificate before its expiry window." \
