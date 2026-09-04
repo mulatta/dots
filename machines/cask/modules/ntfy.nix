@@ -39,4 +39,12 @@
       enable-login = true;
     };
   };
+  services.nginx.virtualHosts."ntfy.mulatta.io" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:2586";
+      proxyWebsockets = true;
+    };
+  };
 }

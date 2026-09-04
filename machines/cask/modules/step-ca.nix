@@ -128,4 +128,13 @@
       };
     };
   };
+  security.acme.certs."ca.x".server = "https://ca.x:1443/acme/acme/directory";
+
+  services.nginx.virtualHosts."ca.x" = {
+    addSSL = true;
+    enableACME = true;
+    locations."/".proxyPass = "https://localhost:1443";
+    locations."= /ca.crt".alias =
+      config.clan.core.vars.generators.step-intermediate-cert.files."intermediate.crt".path;
+  };
 }

@@ -14,31 +14,16 @@
 
   # srvos mixins-nginx provides nginx defaults and public ingress.
   imports = [
-    ./atuin.nix
-    ./headscale.nix
     ./home-assistant.nix
     ./jellyfin.nix
     ./linkwarden.nix
     ./miniflux.nix
     ./mulatta-io.nix
-    ./mta-sts.nix
-    ./ntfy.nix
-    ./n8n.nix
-    ./uptermd.nix
     ./nextcloud.nix
     ./paperless.nix
-    ./radicle-mirror.nix
-    ./radicle.nix
-    ./restate.nix
-    ./stalwart.nix
-    ./step-ca.nix
-    ./vaultwarden.nix
-    ./nostr.nix
     ./nip05.nix
     ./security-txt.nix
     ./vikunja.nix
-    ./weechat.nix
-    ./zotero.nix
   ];
 
   services.nginx = {

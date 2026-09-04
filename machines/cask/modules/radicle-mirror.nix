@@ -77,4 +77,14 @@ in
   };
 
   networking.firewall.allowedTCPPorts = [ 8776 ];
+  services.nginx.virtualHosts."radicle-mirror.mulatta.io" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    # Signature validation happens in radicle-mirror; expose no admin surface.
+    locations."= /github" = {
+      proxyPass = "http://127.0.0.1:4128";
+      recommendedProxySettings = true;
+    };
+    locations."/".return = "404";
+  };
 }

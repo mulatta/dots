@@ -1,23 +1,20 @@
 {
-  self,
   config,
   lib,
   pkgs,
   ...
 }:
 let
-  clanLib = self.inputs.clan-core.lib;
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = clanLib.getPublicValue {
-    flake = config.clan.core.settings.directory;
-    machine = "malt";
-    generator = "wireguard-network-wireguard";
-    file = "suffix";
-  };
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
+  securityHeadersConfig = ''
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  '';
   kanidmDomain = "idm.mulatta.io";
   n8nDomain = "n8n.mulatta.io";
+  n8nApiDomain = "n8n-api.mulatta.io";
   restateDomain = "restate.mulatta.io";
+  restateApiDomain = "restate-api.mulatta.io";
   weechatDomain = "chat.mulatta.io";
 
   restateOauth2Args = [
@@ -41,7 +38,7 @@ let
     "--cookie-httponly=true"
     "--cookie-refresh=1h"
     "--cookie-expire=72h"
-    "--upstream=http://[${maltWgIP}]:9070"
+    "--upstream=http://malt.n:9070"
     "--http-address=127.0.0.1:4181"
   ];
 
@@ -176,11 +173,121 @@ in
         "^/webhook-test"
         "^/healthz"
       ];
-      upstream = "http://[${maltWgIP}]:5678";
+      upstream = "http://malt.n:5678";
       http-address = "127.0.0.1:4180";
       email-domain = "mulatta.io";
       code-challenge-method = "S256";
       insecure-oidc-allow-unverified-email = "true";
+    };
+  };
+  services.nginx.virtualHosts = {
+    ${n8nDomain} = {
+      useACMEHost = "mulatta.io";
+      forceSSL = true;
+      extraConfig = securityHeadersConfig;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:4180";
+        proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 50M;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+        '';
+      };
+    };
+
+    ${n8nApiDomain} = {
+      useACMEHost = "mulatta.io";
+      forceSSL = true;
+      extraConfig = securityHeadersConfig;
+      locations."~ ^/(webhook(-test)?|healthz)" = {
+        proxyPass = "http://malt.n:5678";
+        proxyWebsockets = true;
+        extraConfig = ''
+          # SECURITY: Prevent header injection - clear all auth headers
+          proxy_set_header X-Email "";
+          proxy_set_header X-Auth-Request-Email "";
+          proxy_set_header X-Auth-Request-User "";
+          proxy_set_header X-Access-Token "";
+
+          client_max_body_size 50M;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+        '';
+      };
+      locations."/".return = "404";
+    };
+
+    ${restateDomain} = {
+      useACMEHost = "mulatta.io";
+      forceSSL = true;
+      extraConfig = securityHeadersConfig;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:4181";
+        proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 50M;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+        '';
+      };
+    };
+
+    ${restateApiDomain} = {
+      useACMEHost = "mulatta.io";
+      forceSSL = true;
+      extraConfig = securityHeadersConfig;
+      locations."/".return = "404";
+    };
+
+    ${weechatDomain} = {
+      useACMEHost = "mulatta.io";
+      forceSSL = true;
+      extraConfig = securityHeadersConfig + ''
+        auth_request /oauth2/auth;
+        error_page 401 = @redirectToOauth2ProxyLogin;
+
+        auth_request_set $user $upstream_http_x_auth_request_user;
+        auth_request_set $email $upstream_http_x_auth_request_email;
+        auth_request_set $auth_cookie $upstream_http_set_cookie;
+        add_header Set-Cookie $auth_cookie;
+      '';
+      locations = {
+        "/oauth2/" = {
+          proxyPass = "http://127.0.0.1:4183";
+          extraConfig = ''
+            auth_request off;
+            proxy_set_header X-Scheme $scheme;
+            proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+          '';
+        };
+        "= /oauth2/auth" = {
+          proxyPass = "http://127.0.0.1:4183/oauth2/auth";
+          extraConfig = ''
+            auth_request off;
+            proxy_set_header X-Scheme $scheme;
+            proxy_set_header Content-Length "";
+            proxy_pass_request_body off;
+          '';
+        };
+        "@redirectToOauth2ProxyLogin" = {
+          return = "307 https://${weechatDomain}/oauth2/start?rd=$scheme://$host$request_uri";
+          extraConfig = ''
+            auth_request off;
+          '';
+        };
+        "^~ /weechat" = {
+          proxyPass = "http://malt.n:4242";
+          proxyWebsockets = true;
+          extraConfig = ''
+            proxy_set_header X-User $user;
+            proxy_set_header X-Email $email;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+          '';
+        };
+        "/".root = pkgs.glowing-bear;
+      };
     };
   };
 }

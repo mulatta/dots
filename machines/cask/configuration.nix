@@ -42,6 +42,7 @@
     ./modules/sshd.nix
     ./modules/stalwart-mail.nix
     ./modules/step-ca.nix
+    ./modules/uptermd
     ./modules/vaultwarden.nix
     ./modules/zhost.nix
   ];

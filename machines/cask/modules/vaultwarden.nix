@@ -44,4 +44,15 @@
       DATABASE_MIN_CONNS = 1;
     };
   };
+  services.nginx.virtualHosts."vaultwarden.mulatta.io" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    extraConfig = ''
+      client_max_body_size 128M;
+    '';
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8222";
+      proxyWebsockets = true;
+    };
+  };
 }
