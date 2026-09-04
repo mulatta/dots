@@ -22,7 +22,6 @@ let
   ssoVersion = ssoPlugin.version;
   networkConfig = pkgs.replaceVars ./network.xml {
     inherit portString;
-    maltWgIP = "::";
     naruTrustedCidr = "fdec:ca5f::/32";
   };
   brandingConfig = pkgs.replaceVars ./branding.xml {
