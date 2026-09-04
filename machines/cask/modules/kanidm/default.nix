@@ -498,6 +498,7 @@ in
   # ACME certificate for Kanidm
   security.acme.certs.${domain} = {
     group = "nginx";
+    webroot = "/var/lib/acme/acme-challenge";
     reloadServices = [
       "kanidm.service"
       "nginx.service"
@@ -523,8 +524,8 @@ in
 
   # Public nginx vhost; reverse-proxies all traffic to the kanidm listener.
   services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
     locations."/" = {
       proxyPass = "https://${bindAddress}:${toString port}";
       proxyWebsockets = true;

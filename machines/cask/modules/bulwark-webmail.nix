@@ -38,38 +38,40 @@ in
     nginx = {
       enable = true;
       hostName = domain;
-      enableACME = true;
       forceSSL = true;
     };
   };
 
-  services.nginx.virtualHosts.${domain}.locations = {
-    "= /.well-known/oauth-authorization-server" = stalwartProxyLocation;
-    "= /.well-known/openid-configuration" = stalwartProxyLocation;
-    "= /.well-known/caldav" = stalwartProxyLocation;
-    "= /.well-known/carddav" = stalwartProxyLocation;
-    "= /.well-known/jmap" = stalwartProxyLocation // {
-      proxyPass = "${stalwartProxyPass}/jmap/session";
-      extraConfig = stalwartProxyExtraConfig + ''
-        proxy_set_header Accept-Encoding "";
-        sub_filter "https://${stalwartDomain}/" "https://${domain}/";
-        sub_filter_once off;
-        sub_filter_types application/json;
-      '';
-    };
-    "/dav/" = stalwartProxyLocation;
-    "/jmap/" = stalwartProxyLocation // {
-      proxyWebsockets = true;
-      extraConfig = stalwartProxyExtraConfig + ''
-        client_max_body_size 50M;
-        proxy_read_timeout 3600s;
-        proxy_send_timeout 3600s;
-      '';
+  services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
+    locations = {
+      "= /.well-known/oauth-authorization-server" = stalwartProxyLocation;
+      "= /.well-known/openid-configuration" = stalwartProxyLocation;
+      "= /.well-known/caldav" = stalwartProxyLocation;
+      "= /.well-known/carddav" = stalwartProxyLocation;
+      "= /.well-known/jmap" = stalwartProxyLocation // {
+        proxyPass = "${stalwartProxyPass}/jmap/session";
+        extraConfig = stalwartProxyExtraConfig + ''
+          proxy_set_header Accept-Encoding "";
+          sub_filter "https://${stalwartDomain}/" "https://${domain}/";
+          sub_filter_once off;
+          sub_filter_types application/json;
+        '';
+      };
+      "/dav/" = stalwartProxyLocation;
+      "/jmap/" = stalwartProxyLocation // {
+        proxyWebsockets = true;
+        extraConfig = stalwartProxyExtraConfig + ''
+          client_max_body_size 50M;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+        '';
+      };
     };
   };
 
   services.nginx.virtualHosts.${oldDomain} = {
-    enableACME = true;
+    useACMEHost = "mulatta.io";
     forceSSL = true;
     globalRedirect = domain;
   };

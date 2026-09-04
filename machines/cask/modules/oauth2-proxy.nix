@@ -5,11 +5,6 @@
   ...
 }:
 let
-  securityHeadersConfig = ''
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
   kanidmDomain = "idm.mulatta.io";
   n8nDomain = "n8n.mulatta.io";
   n8nApiDomain = "n8n-api.mulatta.io";
@@ -184,7 +179,7 @@ in
     ${n8nDomain} = {
       useACMEHost = "mulatta.io";
       forceSSL = true;
-      extraConfig = securityHeadersConfig;
+      mulatta.securityHeaders = "deny";
       locations."/" = {
         proxyPass = "http://127.0.0.1:4180";
         proxyWebsockets = true;
@@ -199,7 +194,7 @@ in
     ${n8nApiDomain} = {
       useACMEHost = "mulatta.io";
       forceSSL = true;
-      extraConfig = securityHeadersConfig;
+      mulatta.securityHeaders = "deny";
       locations."~ ^/(webhook(-test)?|healthz)" = {
         proxyPass = "http://malt.n:5678";
         proxyWebsockets = true;
@@ -221,7 +216,7 @@ in
     ${restateDomain} = {
       useACMEHost = "mulatta.io";
       forceSSL = true;
-      extraConfig = securityHeadersConfig;
+      mulatta.securityHeaders = "deny";
       locations."/" = {
         proxyPass = "http://127.0.0.1:4181";
         proxyWebsockets = true;
@@ -236,14 +231,15 @@ in
     ${restateApiDomain} = {
       useACMEHost = "mulatta.io";
       forceSSL = true;
-      extraConfig = securityHeadersConfig;
+      mulatta.securityHeaders = "deny";
       locations."/".return = "404";
     };
 
     ${weechatDomain} = {
       useACMEHost = "mulatta.io";
       forceSSL = true;
-      extraConfig = securityHeadersConfig + ''
+      mulatta.securityHeaders = "deny";
+      extraConfig = ''
         auth_request /oauth2/auth;
         error_page 401 = @redirectToOauth2ProxyLogin;
 

@@ -1,6 +1,7 @@
 {
   self,
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -88,8 +89,6 @@
     nginx = {
       enable = true;
       domain = "niks3.mulatta.io";
-      enableACME = true;
-      forceSSL = true;
     };
 
     cacheUrl = "https://cache.mulatta.io";
@@ -97,12 +96,18 @@
 
   services.nginx.virtualHosts = {
     "cache.mulatta.io" = {
-      enableACME = true;
+      useACMEHost = "mulatta.io";
       forceSSL = true;
       locations."/".proxyPass = "http://127.0.0.1:5751";
     };
 
     # Large authenticated uploads must stream instead of buffering on cask.
+    "niks3.mulatta.io" = {
+      enableACME = lib.mkForce false;
+      useACMEHost = "mulatta.io";
+      forceSSL = lib.mkForce true;
+    };
+
     "niks3.mulatta.io".locations."/".extraConfig = ''
       proxy_buffering off;
       proxy_request_buffering off;

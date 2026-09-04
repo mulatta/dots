@@ -52,8 +52,8 @@ in
   };
 
   services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
     locations."/".extraConfig = ''
       proxy_pass http://127.0.0.1:${toString port};
       proxy_set_header Host $host;

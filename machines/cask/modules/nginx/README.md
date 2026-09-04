@@ -1,51 +1,45 @@
 # cask nginx vhosts
 
 Public-facing reverse-proxy and static-site vhosts on `cask`. This
-directory is a NixOS module tree: `default.nix` wires the shared nginx
-service settings, imports every per-vhost file, and injects shared
-`_module.args` that vhosts consume.
+directory contains shared edge policy and routes owned by nginx itself.
+Service modules keep their own vhosts beside service lifecycle configuration.
+`default.nix` owns cask listeners, the shared public certificate, firewall, and
+shared HTTP maps. Generic `.n` access policy lives in `nixosModules/nginx.nix`.
 
 ## Layout
 
-| File               | Role                                                                             |
-| ------------------ | -------------------------------------------------------------------------------- |
-| `default.nix`      | nginx core config, shared HTTP maps, catch-all 444 vhost, ACME defaults, imports |
-| `lib/wg.nix`       | WireGuard peer-address helper (`wgHost`)                                         |
-| `security-txt.nix` | RFC 9116 `security.txt`, WKD stub, `appWellKnownLocations` fragment              |
-| `<service>.nix`    | One file per public hostname                                                     |
+| File               | Role                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| `default.nix`      | nginx core config, listeners, shared HTTP maps and certificate, catch-all vhost, firewall, imports |
+| `mulatta-io.nix`   | apex vhost and `www` redirect                                                                      |
+| `nip05.nix`        | apex NIP-05 response                                                                               |
+| `security-txt.nix` | RFC 9116 `security.txt`, WKD stub, and shared well-known locations                                 |
+| `<route>.nix`      | Static, redirect, or cross-host ingress owned by nginx                                             |
 
-## Shared helpers (`_module.args`)
+Local services declare their routes in the sibling `../<service>.nix` module.
 
-| Arg                      | Exposed by                   | What it is                                                                                                                  |
-| ------------------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `wgLib`                  | `default.nix` → `lib/wg.nix` | `wgLib.wgHost "malt"` → `{ ip, url }` where `url` is bracketed for IPv6                                                     |
-| `securityTxtFile`        | `security-txt.nix`           | Nix-store path of the rendered security.txt; alias into vhosts                                                              |
-| `openpgpkeyDir`          | `security-txt.nix`           | WKD stub directory (`policy` file + empty `hu/`); alias under `^~ /.well-known/openpgpkey/`                                 |
-| `appWellKnownLocations`  | `security-txt.nix`           | Ready-to-merge `locations` attr: security.txt alias + regex 404 fallback for all other `/.well-known/*`                     |
-| `securityHeadersConfig`  | `security-txt.nix`           | Pre-rendered `add_header` block (X-Frame-Options, X-Content-Type-Options, Referrer-Policy); concat into vhost `extraConfig` |
-| `blockDottedPathsConfig` | `default.nix`                | Pre-rendered `if ($block_dotted) { return 404; }` block for app vhosts that should hide dot-prefixed paths                  |
+## Shared HTTP map (`default.nix` `appendHttpConfig`)
 
-## Shared HTTP maps (`default.nix` `appendHttpConfig`)
+Vhosts opt in explicitly:
 
-Both opt-in per vhost:
-
-| Variable        | Truthy when…                                | How to opt in                                   |
-| --------------- | ------------------------------------------- | ----------------------------------------------- |
-| `$block_ai`     | UA matches the AI-crawler list              | `if ($block_ai) { return 403; }`                |
-| `$block_dotted` | URI starts with `/.` except `/.well-known/` | `blockDottedPathsConfig` in vhost `extraConfig` |
+| Variable        | Truthy when…                                | How to opt in                        |
+| --------------- | ------------------------------------------- | ------------------------------------ |
+| `$block_dotted` | URI starts with `/.` except `/.well-known/` | `if ($block_dotted) { return 404; }` |
 
 ## Adding a new vhost
 
 ### A. Simple localhost proxy
 
-For services that bind to `127.0.0.1` and need nothing more than TLS +
-reverse proxy. Examples: `atuin.nix`, `ntfy.nix`, `vaultwarden.nix`.
+For services that bind to `127.0.0.1`, put the vhost in the sibling service
+module beside its lifecycle configuration. Examples: `../atuin.nix`,
+`../ntfy.nix`, `../vaultwarden.nix`.
 
 ```nix
 {
   services.nginx.virtualHosts."foo.mulatta.io" = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
+
     locations."/" = {
       proxyPass = "http://127.0.0.1:1234";
       proxyWebsockets = true;   # only if needed
@@ -54,72 +48,72 @@ reverse proxy. Examples: `atuin.nix`, `ntfy.nix`, `vaultwarden.nix`.
 }
 ```
 
-### B. WG-proxied app (on another machine)
+### B. Naru-proxied app (on another machine)
 
 For services that run on `malt` (or any non-gateway peer) and cask
-fronts them over WireGuard. Example: `nextcloud.nix`.
+fronts them over Naru. Example: `nextcloud.nix`.
 
 ```nix
-{ wgLib, ... }:
-let
-  malt = wgLib.wgHost "malt";
-in
 {
   services.nginx.virtualHosts."foo.mulatta.io" = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
-    locations."/".proxyPass = "http://${malt.url}:1234";
+
+    locations."/".proxyPass = "http://malt.n:1234";
   };
 }
 ```
 
 ### C. SPA / proxied app with default-deny `.well-known`
 
-Same as B, but the upstream is an SPA that would otherwise return
-`index.html` for unknown `/.well-known/*` probes. Examples:
-`vikunja.nix`, `nostr.nix`.
+Keep service-specific routes in the owner module. `security-txt.nix` adds the
+shared security endpoint and well-known fallback to participating vhosts.
+Security headers stay explicit because applications such as Jellyfin require
+different frame policies.
 
 ```nix
-{ wgLib, appWellKnownLocations, securityHeadersConfig, ... }:
-let
-  malt = wgLib.wgHost "malt";
-in
 {
   services.nginx.virtualHosts."foo.mulatta.io" = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
-    extraConfig = securityHeadersConfig + ''
+
+    extraConfig = ''
+      add_header X-Frame-Options "DENY" always;
       if ($block_dotted) { return 404; }
     '';
-    locations = appWellKnownLocations // {
-      "/" = {
-        proxyPass = "http://${malt.url}:1234";
-        proxyWebsockets = true;
-      };
+    locations."/" = {
+      proxyPass = "http://malt.n:1234";
+      proxyWebsockets = true;
     };
   };
 }
 ```
 
-Finally, add the new file to the `imports` list in `default.nix`.
+Add nginx-owned route files to `default.nix`. Sibling service modules are
+already imported by `machines/cask/configuration.nix`; do not import them from
+nginx as well.
 
 ## Gotchas
 
-1. **`locations` merge conflicts.** Mixing `locations = someAttr;` with
-   `locations."x" = ...;` in the same module raises a nix merge
-   conflict. When pulling in `appWellKnownLocations`, always spread it
-   with `//`: `locations = appWellKnownLocations // { "/" = ...; };`.
+1. **`locations` merge conflicts.** Shared well-known routes are merged from
+   `security-txt.nix`; do not redefine the same location in a service module.
 2. **Location match precedence.** `= /path` (exact) > `^~ /prefix/`
    (non-regex prefix) > `~ regex` / `~* regex` > `/prefix` (prefix
    fallback). Use `^~` when a prefix block must shadow a later regex
    (e.g. WKD dir vs. `.well-known` default-deny).
-3. **ACME HTTP-01.** `enableACME` wires `/.well-known/acme-challenge/`
-   automatically; never add a conflicting location for that path.
-4. **`$block_dotted` already allow-lists `/.well-known/`.** SPA
-   fallbacks still need pattern C (per-vhost regex 404), because
-   allow-listing only stops the shared map — it does not stop the
-   upstream from answering.
-5. **Nix-store secret leaks.** Never inline a secret into
+3. **Ingress policy.** `default.nix` gives every vhost loopback, Naru, and
+   public listeners plus HTTP/3. Each public owner must explicitly set
+   `useACMEHost = "mulatta.io"` and `forceSSL = true`; `_` and `ca.x` keep
+   explicit TLS behavior. Generic `.n` vhosts allow only Naru source ranges
+   through `nixosModules/nginx.nix`.
+4. **QUIC firewall parity.** HTTP/3 needs UDP 443 in both the NixOS firewall and
+   the Vultr firewall. Keep those rules with the shared nginx policy.
+5. **Shared certificate.** Every public vhost name becomes an HTTP-01 SAN on
+   `mulatta.io`. After Knot becomes public authority, replace this with its
+   RFC2136 wildcard certificate.
+6. **`$block_dotted` already allow-lists `/.well-known/`.** Add shared
+   well-known fallbacks in `security-txt.nix` for SPA vhosts.
+7. **Nix-store secret leaks.** Never inline a secret into
    `services.nginx.virtualHosts.<h>.extraConfig` — it lands in the
    world-readable store. Use `alias` to a path produced by a
    secret-aware derivation, or fetch at runtime via `LoadCredential`.

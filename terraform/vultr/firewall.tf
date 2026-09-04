@@ -81,6 +81,18 @@ resource "vultr_firewall_rule" "https" {
   lifecycle { ignore_changes = [source] }
 }
 
+resource "vultr_firewall_rule" "https_quic" {
+  firewall_group_id = vultr_firewall_group.cask.id
+  protocol          = "udp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+
+  port  = "443"
+  notes = "HTTPS over QUIC access"
+  lifecycle { ignore_changes = [source] }
+}
+
 resource "vultr_firewall_rule" "dns_tcp" {
   firewall_group_id = vultr_firewall_group.cask.id
   protocol          = "tcp"

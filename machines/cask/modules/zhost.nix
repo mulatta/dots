@@ -6,11 +6,6 @@
   ...
 }:
 let
-  securityHeadersConfig = ''
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
   domain = "zotero.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
   # zhost's internal listen address (kept off the public interface; nginx fronts it).
@@ -157,7 +152,7 @@ in
   services.nginx.virtualHosts.${domain} = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
-    extraConfig = securityHeadersConfig;
+    mulatta.securityHeaders = "deny";
     locations = {
       "/login" = {
         proxyPass = "http://127.0.0.1:4182";

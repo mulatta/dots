@@ -90,6 +90,7 @@ in
   services.nginx.virtualHosts."rad.mulatta.io" = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
+    mulatta.securityHeaders = "deny";
     root = lib.mkForce "${pkgs.radicle-explorer.withConfig {
       preferredSeeds = [
         {
