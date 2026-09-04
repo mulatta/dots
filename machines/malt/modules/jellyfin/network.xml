@@ -11,13 +11,11 @@
   <PublicHttpsPort>8920</PublicHttpsPort>
   <AutoDiscovery>false</AutoDiscovery>
   <EnableUPnP>false</EnableUPnP>
-  <EnableIPv4>false</EnableIPv4>
+  <EnableIPv4>true</EnableIPv4>
   <EnableIPv6>true</EnableIPv6>
   <EnableRemoteAccess>true</EnableRemoteAccess>
   <LocalNetworkSubnets />
-  <LocalNetworkAddresses>
-    <string>@maltWgIP@</string>
-  </LocalNetworkAddresses>
+  <LocalNetworkAddresses />
   <KnownProxies>
     <string>@naruTrustedCidr@</string>
   </KnownProxies>
