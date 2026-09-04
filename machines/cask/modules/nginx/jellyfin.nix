@@ -3,21 +3,15 @@ let
   domain = "video.mulatta.io";
   port = 8096;
 
-  # The SSO-Auth plugin bootstraps Jellyfin Web localStorage through a
-  # same-origin iframe. DENY breaks that flow and leaves the browser on
-  # the "Logging in..." handoff page.
-  securityHeadersConfig = ''
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
 in
 {
   services.nginx.virtualHosts.${domain} = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
 
-    extraConfig = securityHeadersConfig + ''
+    # The SSO handoff bootstraps Jellyfin Web localStorage through a same-origin iframe.
+    mulatta.securityHeaders = "sameorigin";
+    extraConfig = ''
       if ($block_dotted) { return 404; }
       client_max_body_size 20G;
     '';

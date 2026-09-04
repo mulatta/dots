@@ -651,6 +651,7 @@ in
   services.nginx.virtualHosts.${publicDomain} = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
+    mulatta.securityHeaders = "deny";
     locations."/" = {
       proxyPass = "http://127.0.0.1:8080";
       proxyWebsockets = true;

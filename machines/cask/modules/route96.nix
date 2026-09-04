@@ -289,8 +289,8 @@ in
   '';
 
   services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
     forceSSL = true;
-    enableACME = true;
 
     locations = {
       "/" = {

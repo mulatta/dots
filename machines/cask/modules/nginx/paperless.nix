@@ -1,10 +1,5 @@
 { ... }:
 let
-  securityHeadersConfig = ''
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
   uiDomain = "paperless.mulatta.io";
   apiDomain = "paperless-api.mulatta.io";
   port = 28981;
@@ -17,7 +12,8 @@ in
     useACMEHost = "mulatta.io";
     forceSSL = true;
 
-    extraConfig = securityHeadersConfig + ''
+    mulatta.securityHeaders = "deny";
+    extraConfig = ''
       if ($block_dotted) { return 404; }
       client_max_body_size 256M;
     '';
@@ -39,7 +35,8 @@ in
     useACMEHost = "mulatta.io";
     forceSSL = true;
 
-    extraConfig = securityHeadersConfig + ''
+    mulatta.securityHeaders = "deny";
+    extraConfig = ''
       if ($block_dotted) { return 404; }
       client_max_body_size 256M;
     '';

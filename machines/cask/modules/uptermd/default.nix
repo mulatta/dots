@@ -16,6 +16,7 @@ in
   services.nginx.virtualHosts.${domain} = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
+    mulatta.securityHeaders = "deny";
     locations."/".root = ./.;
   };
 }

@@ -1,18 +1,11 @@
+{ config, lib, ... }:
+let
+  publicDomain = "mulatta.io";
+  publicVhostNames = lib.filter (
+    name: name == publicDomain || lib.hasSuffix ".${publicDomain}" name
+  ) (builtins.attrNames config.services.nginx.virtualHosts);
+in
 {
-  self,
-  config,
-  ...
-}:
-{
-  _module.args.wgLib = import ./lib/wg.nix { inherit self config; };
-
-  # Shared scanner noise filter for app vhosts. Keep this near the
-  # $block_dotted map so the helper and its nginx variable stay together.
-  _module.args.blockDottedPathsConfig = ''
-    if ($block_dotted) { return 404; }
-  '';
-
-  # srvos mixins-nginx provides nginx defaults and public ingress.
   imports = [
     ./home-assistant.nix
     ./jellyfin.nix
@@ -26,52 +19,104 @@
     ./vikunja.nix
   ];
 
-  services.nginx = {
-    # Fix "could not build optimal proxy_headers_hash" warning
-    proxyTimeout = "3600s";
-    appendHttpConfig = ''
-      proxy_headers_hash_max_size 1024;
-      proxy_headers_hash_bucket_size 128;
-
-      # Shared AI crawler user-agent map. Virtual hosts opt in by
-      # returning 403 when $block_ai is truthy. The list focuses on
-      # agents that are either well-known for ignoring robots.txt or
-      # whose training usage we want to refuse regardless of declared
-      # intent. Cloudflare bot features are unavailable because
-      # mulatta.io runs DNS-only.
-      map $http_user_agent $block_ai {
-        default 0;
-        "~*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|Claude-User|anthropic-ai|CCBot|Bytespider|Amazonbot|Google-Extended|Applebot-Extended|PerplexityBot|Meta-ExternalAgent|Meta-ExternalFetcher|DuckAssistBot|cohere-ai|cohere-training-data-crawler|AI2Bot|Diffbot|ImagesiftBot|Omgilibot|YouBot|Bravebot)" 1;
+  options.services.nginx.virtualHosts = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        config.quic = true;
+        config.listen = lib.mkDefault [
+          {
+            addr = "[::1]";
+            port = 443;
+            ssl = true;
+          }
+          {
+            addr = config.networking.naru.ipv4;
+            port = 80;
+          }
+          {
+            addr = config.networking.naru.ipv4;
+            port = 443;
+            ssl = true;
+          }
+          {
+            addr = "[${config.networking.naru.ipv6}]";
+            port = 80;
+          }
+          {
+            addr = "[${config.networking.naru.ipv6}]";
+            port = 443;
+            ssl = true;
+          }
+          {
+            addr = "[${config.networking.cask.ipv6.address}]";
+            port = 80;
+          }
+          {
+            addr = "[${config.networking.cask.ipv6.address}]";
+            port = 443;
+            ssl = true;
+          }
+          {
+            addr = "0.0.0.0";
+            port = 80;
+          }
+          {
+            addr = "0.0.0.0";
+            port = 443;
+            ssl = true;
+          }
+        ];
       }
-
-      # Shared dotted-path scanner map. Opt-in per vhost by returning 404
-      # when $block_dotted is truthy. /.well-known/ is always allowed so
-      # ACME challenges, CalDAV/WebFinger/NIP-05 continue to work.
-      map $request_uri $block_dotted {
-        default 0;
-        "~^/\.well-known/" 0;
-        "~^/\."            1;
-      }
-    '';
-
-    commonHttpConfig = ''
-      add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
-    '';
-
-    # Reject unknown hosts
-    virtualHosts."_" = {
-      default = true;
-      rejectSSL = true;
-      locations."/".return = "444";
-    };
+    );
   };
 
-  security.acme = {
-    acceptTerms = true;
-    defaults = {
-      email = "acme@mulatta.io";
-      # Use Let's Encrypt production server instead of minica
-      server = "https://acme-v02.api.letsencrypt.org/directory";
+  config = {
+    services.nginx = {
+      proxyTimeout = "3600s";
+      appendHttpConfig = ''
+        proxy_headers_hash_max_size 1024;
+        proxy_headers_hash_bucket_size 128;
+
+        map $request_uri $block_dotted {
+          default 0;
+          "~^/\.well-known/" 0;
+          "~^/\."            1;
+        }
+      '';
+      commonHttpConfig = ''
+        add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
+      '';
+      virtualHosts."_" = {
+        default = true;
+        rejectSSL = true;
+        locations."/".return = "444";
+      };
+    };
+
+    services.logrotate.enable = true;
+
+    networking.firewall = {
+      allowedTCPPorts = [
+        80
+        443
+      ];
+      allowedUDPPorts = [ 443 ];
+    };
+
+    security.acme = {
+      acceptTerms = true;
+      defaults = {
+        email = "acme@mulatta.io";
+        server = "https://acme-v02.api.letsencrypt.org/directory";
+      };
+      certs.${publicDomain} = {
+        domain = publicDomain;
+        extraDomainNames = lib.sort builtins.lessThan (lib.remove publicDomain publicVhostNames);
+        group = "nginx";
+        keyType = "ec384";
+        webroot = "/var/lib/acme/acme-challenge";
+        postRun = "systemctl --no-block reload nginx.service";
+      };
     };
   };
 }

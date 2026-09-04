@@ -2,11 +2,6 @@
   ...
 }:
 let
-  securityHeadersConfig = ''
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
   domain = "tasks.mulatta.io";
   port = 3456;
 in
@@ -15,7 +10,8 @@ in
     useACMEHost = "mulatta.io";
     forceSSL = true;
 
-    extraConfig = securityHeadersConfig + ''
+    mulatta.securityHeaders = "deny";
+    extraConfig = ''
       if ($block_dotted) { return 404; }
     '';
 

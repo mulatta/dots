@@ -15,6 +15,7 @@
     ./dns-client.nix
     ./i18n.nix
     ./minimal-docs.nix
+    ./nginx.nix
     ./miniflux
     ./nftables.nix
     ./nostr.nix
