@@ -1,8 +1,7 @@
 { pkgs, ... }:
 let
   # RFC 9116 security.txt. Must be refreshed before the Expires date —
-  # bump this string and redeploy. A Vikunja reminder task should anchor
-  # the renewal schedule.
+  # bump this string and redeploy before it expires.
   expires = "2027-04-22T00:00:00Z";
 
   # WKD (Web Key Directory, RFC 7929) stub directory. Serves a minimal
@@ -27,10 +26,6 @@ in
       "~ ^/\.well-known/".extraConfig = "return 404;";
     };
     "relay.mulatta.io".locations = {
-      "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
-      "~ ^/\.well-known/".extraConfig = "return 404;";
-    };
-    "tasks.mulatta.io".locations = {
       "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
       "~ ^/\.well-known/".extraConfig = "return 404;";
     };

@@ -27,8 +27,6 @@
     ./modules/restate.nix
     ./modules/rsshub.nix
     ./modules/tailscale.nix
-    ./modules/vikunja.nix
-    ./modules/weechat.nix
   ];
 
   networking.hostName = "malt";

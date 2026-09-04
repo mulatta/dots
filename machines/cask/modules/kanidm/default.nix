@@ -71,13 +71,6 @@ let
       hash = "sha256-X8ujVAT/zYmU1hXfCWU8AIEvK01lOetRHfT5481PjFo=";
     };
 
-    # Vikunja - from simple-icons repo (pinned commit)
-    vikunja = pkgs.fetchurl {
-      name = "vikunja.svg";
-      url = "https://raw.githubusercontent.com/simple-icons/simple-icons/faa4f93283a90f0196f3d320968bd38972a27894/icons/vikunja.svg";
-      hash = "sha256-1H4T2rBSBVFcqZfw4z1rVwsBUX5PkwBD5YAK+Phg+Vw=";
-    };
-
     # Linkwarden 2.14.0 - from official repo
     linkwarden = pkgs.fetchurl {
       name = "linkwarden.png";
@@ -282,22 +275,6 @@ in
           ];
         };
 
-        weechat = {
-          displayName = "WeeChat";
-          originUrl = [
-            "https://chat.${baseDomain}"
-            "https://chat.${baseDomain}/oauth2/callback"
-          ];
-          originLanding = "https://chat.${baseDomain}";
-          public = true;
-          enableLocalhostRedirects = false;
-          scopeMaps.chat_users = [
-            "openid"
-            "email"
-            "profile"
-          ];
-        };
-
         # Restate admin UI/API via oauth2-proxy. Runtime ingress stays on
         # a separate vhost so public invocations can use workload-specific auth.
         restate = {
@@ -449,29 +426,6 @@ in
           };
         };
 
-        # Vikunja - confidential client. Vikunja's OIDC implementation
-        # follows the Authorization Code Flow and the upstream docs only
-        # describe confidential clients, so we use basicSecretFile here.
-        # Vikunja 2.3 does not send a PKCE code_challenge, so we disable
-        # kanidm's enforced PKCE mode for this client. The confidential
-        # client_secret still protects the token exchange.
-        vikunja = {
-          displayName = "Vikunja";
-          imageFile = icons.vikunja;
-          originUrl = "https://tasks.${baseDomain}/auth/openid/kanidm";
-          originLanding = "https://tasks.${baseDomain}";
-          public = false;
-          enableLocalhostRedirects = false;
-          allowInsecureClientDisablePkce = true;
-          preferShortUsername = true;
-          basicSecretFile = config.clan.core.vars.generators.kanidm-vikunja-oidc.files.secret.path;
-          scopeMaps.task_users = [
-            "openid"
-            "email"
-            "profile"
-          ];
-        };
-
         bulwark-webmail = {
           displayName = "Bulwark Webmail";
           imageFile = icons.bulwark;
@@ -615,22 +569,6 @@ in
     '';
   };
   clan.core.vars.generators.kanidm-jellyfin-oidc = {
-    share = true;
-    files.secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 > "$out/secret"
-    '';
-  };
-
-  # Shared OIDC client secret for the Vikunja relying party on malt.
-  # `share = true` makes clan distribute the same value to both machines,
-  # so kanidm provisions the client with basicSecretFile and vikunja reads
-  # the identical secret via LoadCredential at preStart.
-  clan.core.vars.generators.kanidm-vikunja-oidc = {
     share = true;
     files.secret = {
       secret = true;
