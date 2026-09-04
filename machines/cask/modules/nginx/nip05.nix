@@ -26,5 +26,12 @@ let
   nostrJsonFile = pkgs.writeText "nostr.json" (builtins.toJSON nostrJson);
 in
 {
-  _module.args.nostrJsonFile = nostrJsonFile;
+  services.nginx.virtualHosts."mulatta.io".locations."= /.well-known/nostr.json" = {
+    alias = nostrJsonFile;
+    extraConfig = ''
+      add_header Access-Control-Allow-Origin "*" always;
+      add_header Cache-Control "public, max-age=3600";
+      default_type application/json;
+    '';
+  };
 }

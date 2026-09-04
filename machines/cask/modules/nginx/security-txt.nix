@@ -21,37 +21,32 @@ let
   '';
 in
 {
-  # Operator-level security policy, not per-site content — every vhost
-  # serves the same file and points Canonical at mulatta.io.
-  # Vhosts wire this in via locations."= /.well-known/security.txt".
-  _module.args.securityTxtFile = securityTxtFile;
-
-  _module.args.openpgpkeyDir = openpgpkeyDir;
-
-  # Baseline security response headers for app/SPA vhosts. Concatenated
-  # into the vhost's `extraConfig` so nginx's "one add_header at any
-  # level suppresses inherited ones" rule does not bite; HSTS is
-  # already emitted via recommendedTlsSettings.
-  _module.args.securityHeadersConfig = ''
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  '';
-
-  # Ready-to-merge locations for app/SPA vhosts: serve the shared
-  # security.txt at the canonical path and 404 every other /.well-known/
-  # probe so upstream SPA fallbacks can't pretend to answer arbitrary
-  # well-known paths. Vhost merges this into its own `locations` attr
-  # with `//` to keep any vhost-specific entries.
-  _module.args.appWellKnownLocations = {
-    "= /.well-known/security.txt" = {
-      alias = "${securityTxtFile}";
-      extraConfig = ''
-        default_type "text/plain; charset=utf-8";
-      '';
+  services.nginx.virtualHosts = {
+    "home.mulatta.io".locations = {
+      "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
+      "~ ^/\.well-known/".extraConfig = "return 404;";
     };
-    "~ ^/\\.well-known/".extraConfig = ''
-      return 404;
-    '';
+    "relay.mulatta.io".locations = {
+      "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
+      "~ ^/\.well-known/".extraConfig = "return 404;";
+    };
+    "tasks.mulatta.io".locations = {
+      "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
+      "~ ^/\.well-known/".extraConfig = "return 404;";
+    };
+    "mulatta.io".locations = {
+      "= /.well-known/security.txt" = {
+        alias = securityTxtFile;
+        extraConfig = ''
+          default_type "text/plain; charset=utf-8";
+        '';
+      };
+      "^~ /.well-known/openpgpkey/" = {
+        alias = "${openpgpkeyDir}/";
+        extraConfig = ''
+          default_type "application/octet-stream";
+        '';
+      };
+    };
   };
 }
