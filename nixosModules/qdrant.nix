@@ -1,15 +1,10 @@
 {
-  self,
   config,
   lib,
   ...
 }:
 let
   cfg = config.services.qdrant;
-
-  wgPrefix = self.lib.wgPrefix;
-  localSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  localWgIP = "${wgPrefix}:${localSuffix}";
 in
 {
   config = lib.mkIf cfg.enable {
@@ -36,9 +31,9 @@ in
 
     services.qdrant = {
       settings = {
-        # Network: bind to WireGuard IP only
         service = {
-          host = localWgIP;
+          # Reachability is restricted by the Naru interface firewall below.
+          host = "::";
           http_port = 6333;
           grpc_port = 6334;
           # Performance settings
@@ -76,7 +71,7 @@ in
       "Z /var/lib/qdrant 0750 qdrant qdrant -"
     ];
 
-    networking.firewall.interfaces."wireguard".allowedTCPPorts = [
+    networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [
       6333 # HTTP API
       6334 # gRPC API
     ];

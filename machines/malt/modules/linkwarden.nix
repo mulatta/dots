@@ -1,14 +1,9 @@
 {
-  self,
   config,
   pkgs,
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-
   port = 3000;
   domain = "links.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
@@ -51,7 +46,7 @@ in
 
   services.linkwarden = {
     enable = true;
-    host = maltWgIP;
+    host = "::";
     inherit port;
     openFirewall = false;
     enableRegistration = false;
@@ -92,5 +87,5 @@ in
     unitConfig.RequiresMountsFor = [ "/var/lib/linkwarden" ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 }

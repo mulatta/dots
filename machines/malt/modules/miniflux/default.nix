@@ -5,14 +5,6 @@
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-
-  # taps terminates TLS for rss.mulatta.io and reverse-proxies to us over the
-  # WireGuard mesh. As the ln endpoint it holds the gateway host part (::1).
-  tapsWgIP = "${wgPrefix}::1";
-
   domain = "rss.mulatta.io";
   port = 8080;
 in
@@ -54,7 +46,7 @@ in
     createDatabaseLocally = true;
     adminCredentialsFile = config.clan.core.vars.generators.kanidm-miniflux-oidc.files.env.path;
     config = {
-      LISTEN_ADDR = "[${maltWgIP}]:${toString port}";
+      LISTEN_ADDR = "[::]:${toString port}";
       BASE_URL = "https://${domain}";
       HTTPS = 1;
       CREATE_ADMIN = 0;
@@ -86,7 +78,7 @@ in
     provision = {
       enable = true;
       package = self.packages.${pkgs.stdenv.hostPlatform.system}.miniflux-sync;
-      apiEndpoint = "http://[${maltWgIP}]:${toString port}";
+      apiEndpoint = "http://[::1]:${toString port}";
 
       users.seungwon = {
         username = "seungwon";
@@ -192,14 +184,12 @@ in
     IPAddressAllow = [
       "127.0.0.1/32"
       "::1/128"
-      # The fc00::/7 deny below also covers the WireGuard mesh, which would
-      # drop both the taps reverse-proxy ingress that serves the site and our
-      # own provisioning client (Miniflux binds only maltWgIP, so apiEndpoint
-      # and the provisioning units reach it over the mesh, never loopback).
-      # Allow wins over Deny: re-permit just taps and ourselves, not the whole
-      # mesh, so the SSRF egress guard still blocks every other internal peer.
-      "${tapsWgIP}/128"
-      "${maltWgIP}/128"
+      # The fc00::/7 deny below also covers the Naru mesh, which would
+      # drop both the cask reverse-proxy ingress that serves the site and our
+      # local provisioning reaches the wildcard listener over loopback.
+      # Allow wins over Deny: re-permit the authenticated Naru mesh while the
+      # SSRF egress guard still blocks other private networks.
+      "fdec:ca5f::/32"
     ];
     IPAddressDeny = [
       "10.0.0.0/8"
@@ -212,5 +202,5 @@ in
     ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 }

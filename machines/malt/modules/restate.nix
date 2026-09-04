@@ -5,10 +5,6 @@
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  tapsWgIP = "${wgPrefix}::1";
   requestIdentity = config.clan.core.vars.generators.restate-request-identity;
 in
 {
@@ -66,8 +62,8 @@ in
 
   services.restate = {
     enable = true;
-    ingressBindAddress = "[${maltWgIP}]:8081";
-    adminBindAddress = "[${maltWgIP}]:9070";
+    ingressBindAddress = "[::]:8081";
+    adminBindAddress = "[::]:9070";
     settings = {
       cluster-name = "opencrow";
       disable-telemetry = true;
@@ -80,7 +76,7 @@ in
     package =
       self.inputs.automation-runtime.packages.${pkgs.stdenv.hostPlatform.system}.url-media-archive;
     group = "media";
-    restateAdminUrl = "http://[${maltWgIP}]:9070";
+    restateAdminUrl = "http://[::1]:9070";
     endpointUrl = "http://127.0.0.1:9080";
     archiveRoot = "/srv/media/videos/url-media-archive/A";
     cookiePath = "/var/lib/url-media-archive/cookies/browser.netscape.txt";
@@ -102,11 +98,8 @@ in
     "/srv/media"
   ];
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [
     8081 # HTTP ingress
+    9070 # Admin API
   ];
-
-  networking.firewall.extraInputRules = ''
-    iifname "wireguard" ip6 saddr ${tapsWgIP} tcp dport 9070 accept comment "Allow Restate Admin only from taps proxy"
-  '';
 }

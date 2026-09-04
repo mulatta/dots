@@ -9,9 +9,7 @@ let
   kanidmDomain = "idm.mulatta.io";
   kanidmIssuer = "https://${kanidmDomain}/oauth2/openid/nextcloud";
 
-  wgPrefix = self.lib.wgPrefix;
-  # taps is the WireGuard controller (::1); it fronts nextcloud as reverse proxy
-  tapsWgIP = "${wgPrefix}::1";
+  # cask fronts Nextcloud as the public reverse proxy.
 in
 {
   disko.devices.zpool.zroot.datasets."nextcloud" = {
@@ -51,7 +49,7 @@ in
 
     settings = {
       overwriteprotocol = "https";
-      trusted_proxies = [ tapsWgIP ];
+      trusted_proxies = [ "fdec:ca5f::/32" ];
       default_phone_region = "KR";
       maintenance_window_start = 3; # 3 AM UTC
       files_external_allow_create_new_local = true;
@@ -112,5 +110,5 @@ in
   };
 
   # Allow access from WireGuard interface
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 80 ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ 80 ];
 }

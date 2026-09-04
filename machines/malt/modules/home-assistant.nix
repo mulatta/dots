@@ -1,14 +1,9 @@
 {
-  self,
   config,
   pkgs,
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  tapsWgIP = "${wgPrefix}::1";
   secretsYaml = config.clan.core.vars.generators.home-assistant.files."secrets.yaml".path;
 
   domain = "home.mulatta.io";
@@ -48,10 +43,10 @@ in
       };
 
       http = {
-        server_host = maltWgIP;
+        server_host = "::";
         server_port = port;
         use_x_forwarded_for = true;
-        trusted_proxies = [ tapsWgIP ];
+        trusted_proxies = [ "fdec:ca5f::/32" ];
         ip_ban_enabled = true;
         login_attempts_threshold = 5;
       };
@@ -121,5 +116,5 @@ in
     unitConfig.RequiresMountsFor = [ "/var/lib/hass" ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 }

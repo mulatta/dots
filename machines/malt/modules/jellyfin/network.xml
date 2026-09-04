@@ -19,7 +19,7 @@
     <string>@maltWgIP@</string>
   </LocalNetworkAddresses>
   <KnownProxies>
-    <string>@wgTrustedCidr@</string>
+    <string>@naruTrustedCidr@</string>
   </KnownProxies>
   <IgnoreVirtualInterfaces>true</IgnoreVirtualInterfaces>
   <VirtualInterfaceNames>
