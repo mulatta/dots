@@ -594,7 +594,10 @@ in
   users.users.stalwart-mail.extraGroups = [ "nginx" ];
 
   # Reload stalwart when certs are renewed
-  security.acme.certs.${mailDomain}.reloadServices = [ "stalwart.service" ];
+  security.acme.certs.${mailDomain} = {
+    webroot = "/var/lib/acme/acme-challenge";
+    reloadServices = [ "stalwart.service" ];
+  };
 
   systemd.services = {
     stalwart = {
@@ -644,5 +647,33 @@ in
         ExecStart = "${opencrowMailAcl}/bin/stalwart-opencrow-mail-acl";
       };
     };
+  };
+  services.nginx.virtualHosts.${publicDomain} = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8080";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 50M;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+      '';
+    };
+  };
+
+  services.nginx.virtualHosts."mta-sts.${baseDomain}" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    locations."=/.well-known/mta-sts.txt".alias = pkgs.writeText "mta-sts.txt" ''
+      version: STSv1
+      mode: enforce
+      mx: ${mailDomain}
+      max_age: 86400
+    '';
   };
 }

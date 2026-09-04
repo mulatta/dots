@@ -1,5 +1,10 @@
 # Web frontend for radicle-mirror: explorer, API, and search index.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   meiliUrl = "http://127.0.0.1:${toString config.services.meilisearch.listenPort}";
   mirrorStateDirectory = "/var/lib/radicle-mirror";
@@ -80,6 +85,31 @@ in
         "RAD_HOME=${mirrorStateDirectory}/rad"
         "RADICLE_SEARCH_URL=${meiliUrl}"
       ];
+    };
+  };
+  services.nginx.virtualHosts."rad.mulatta.io" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    root = lib.mkForce "${pkgs.radicle-explorer.withConfig {
+      preferredSeeds = [
+        {
+          hostname = "rad.mulatta.io";
+          port = 443;
+          scheme = "https";
+        }
+      ];
+    }}";
+
+    locations."/" = {
+      tryFiles = "$uri $uri/ /index.html";
+      extraConfig = ''
+        add_header Cache-Control "public, max-age=3600";
+      '';
+    };
+
+    locations."/api/" = {
+      proxyPass = "http://127.0.0.1:8889";
+      proxyWebsockets = true;
     };
   };
 }

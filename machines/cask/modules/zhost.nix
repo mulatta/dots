@@ -6,6 +6,11 @@
   ...
 }:
 let
+  securityHeadersConfig = ''
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  '';
   domain = "zotero.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
   # zhost's internal listen address (kept off the public interface; nginx fronts it).
@@ -147,6 +152,28 @@ in
       EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-zhost.files.env.path;
       ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs zhostOauth2Args}";
       Restart = "always";
+    };
+  };
+  services.nginx.virtualHosts.${domain} = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    extraConfig = securityHeadersConfig;
+    locations = {
+      "/login" = {
+        proxyPass = "http://127.0.0.1:4182";
+        proxyWebsockets = true;
+      };
+      "/oauth2/".proxyPass = "http://127.0.0.1:4182";
+      "/" = {
+        proxyPass = zhostUpstream;
+        proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 512M;
+          proxy_request_buffering off;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+        '';
+      };
     };
   };
 }

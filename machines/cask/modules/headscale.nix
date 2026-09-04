@@ -80,4 +80,19 @@ in
       };
     };
   };
+  # Keep long-lived Noise and DERP streams unbuffered.
+  services.nginx.virtualHosts."headscale.mulatta.io" = {
+    useACMEHost = "mulatta.io";
+    forceSSL = true;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8089";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_buffering off;
+        proxy_request_buffering off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+      '';
+    };
+  };
 }
