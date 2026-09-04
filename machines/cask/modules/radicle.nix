@@ -104,7 +104,7 @@ in
     locations."/" = {
       tryFiles = "$uri $uri/ /index.html";
       extraConfig = ''
-        add_header Cache-Control "public, max-age=3600";
+        expires 1h;
       '';
     };
 
