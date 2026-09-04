@@ -12,14 +12,6 @@ let
   # cask fronts Nextcloud as the public reverse proxy.
 in
 {
-  disko.devices.zpool.zroot.datasets."nextcloud" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/nextcloud";
-    options = {
-      "com.sun:auto-snapshot" = "true";
-    };
-  };
-
   clan.core.vars.generators.nextcloud = {
     files.admin-password = {
       secret = true;

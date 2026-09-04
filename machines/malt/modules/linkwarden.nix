@@ -9,16 +9,6 @@ let
   kanidmDomain = "idm.mulatta.io";
 in
 {
-  disko.devices.zpool.zroot.datasets."linkwarden" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/linkwarden";
-    options = {
-      compression = "lz4";
-      recordsize = "128K";
-      "com.sun:auto-snapshot" = "true";
-    };
-  };
-
   clan.core.vars.generators.linkwarden = {
     files.nextauth-secret = {
       secret = true;
