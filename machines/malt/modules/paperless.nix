@@ -1,14 +1,9 @@
 {
-  self,
   config,
   pkgs,
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-
   port = 28981;
   uiDomain = "paperless.mulatta.io";
   apiDomain = "paperless-api.mulatta.io";
@@ -76,7 +71,7 @@ in
     dataDir = "/var/lib/paperless";
     mediaDir = "/var/lib/paperless/media";
     consumptionDir = "/var/lib/paperless/consume";
-    address = maltWgIP;
+    address = "::";
     inherit port;
     passwordFile = config.clan.core.vars.generators.paperless.files.admin-password.path;
     environmentFile = config.clan.core.vars.generators.paperless.files.env.path;
@@ -86,7 +81,7 @@ in
       PAPERLESS_URL = "https://${uiDomain}";
       PAPERLESS_OCR_LANGUAGE = "kor+eng";
       PAPERLESS_TIME_ZONE = "Asia/Seoul";
-      PAPERLESS_ALLOWED_HOSTS = "${uiDomain},${apiDomain},[${maltWgIP}]";
+      PAPERLESS_ALLOWED_HOSTS = "${uiDomain},${apiDomain}";
       PAPERLESS_CSRF_TRUSTED_ORIGINS = "https://${uiDomain},https://${apiDomain}";
       PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
       PAPERLESS_DISABLE_REGULAR_LOGIN = true;
@@ -104,5 +99,5 @@ in
     requires = [ "postgresql.service" ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 }

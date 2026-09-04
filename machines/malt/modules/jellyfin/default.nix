@@ -6,11 +6,6 @@
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  wgTrustedCidr = "${wgPrefix}::/64";
-
   port = 8096;
   portString = toString port;
   domain = "video.mulatta.io";
@@ -26,7 +21,9 @@ let
   ssoPlugin = self.packages.${pkgs.stdenv.hostPlatform.system}.jellyfin-plugin-sso-auth;
   ssoVersion = ssoPlugin.version;
   networkConfig = pkgs.replaceVars ./network.xml {
-    inherit portString maltWgIP wgTrustedCidr;
+    inherit portString;
+    maltWgIP = "::";
+    naruTrustedCidr = "fdec:ca5f::/32";
   };
   brandingConfig = pkgs.replaceVars ./branding.xml {
     inherit ssoStartUrl ssoLoginLabel;
@@ -237,5 +234,5 @@ in
     ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 }

@@ -5,10 +5,6 @@
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-
   n8nDomain = "n8n.mulatta.io";
   n8nApiDomain = "n8n-api.mulatta.io";
 
@@ -102,7 +98,8 @@ in
     openFirewall = false;
     customNodes = builtins.attrValues self.inputs.n8n-nodes.packages.${pkgs.stdenv.hostPlatform.system};
     environment = {
-      N8N_HOST = maltWgIP;
+      N8N_HOST = n8nDomain;
+      N8N_LISTEN_ADDRESS = "::";
       N8N_EDITOR_BASE_URL = "https://${n8nDomain}";
       WEBHOOK_URL = "https://${n8nApiDomain}";
 
@@ -166,5 +163,5 @@ in
     ];
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ 5678 ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ 5678 ];
 }

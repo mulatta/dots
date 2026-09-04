@@ -1,15 +1,10 @@
 {
-  self,
   config,
   lib,
   ...
 }:
 let
   cfg = config.services.neo4j;
-
-  wgPrefix = self.lib.wgPrefix;
-  localSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  localWgIP = "${wgPrefix}:${localSuffix}";
 in
 {
   config = lib.mkIf cfg.enable {
@@ -49,20 +44,20 @@ in
         db.logs.query.threshold=1s
       '';
 
-      # Network: bind to WireGuard IP only
-      defaultListenAddress = localWgIP;
+      # Reachability is restricted by the Naru interface firewall below.
+      defaultListenAddress = "::";
 
       # Bolt protocol (for drivers)
       bolt = {
         enable = true;
-        listenAddress = "${localWgIP}:7687";
+        listenAddress = "[::]:7687";
         tlsLevel = "DISABLED"; # Internal network, TLS not needed
       };
 
       # HTTP API
       http = {
         enable = true;
-        listenAddress = "${localWgIP}:7474";
+        listenAddress = "[::]:7474";
       };
 
       # Disable HTTPS (internal network)
@@ -74,7 +69,7 @@ in
       "Z /var/lib/neo4j 0750 neo4j neo4j -"
     ];
 
-    networking.firewall.interfaces."wireguard".allowedTCPPorts = [
+    networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [
       7474 # HTTP
       7687 # Bolt
     ];

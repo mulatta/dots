@@ -1,21 +1,11 @@
 {
-  self,
   config,
   pkgs,
   ...
 }:
 let
-  wgPrefix = self.lib.wgPrefix;
-  maltSuffix = config.clan.core.vars.generators.wireguard-network-wireguard.files.suffix.value;
-  maltWgIP = "${wgPrefix}:${maltSuffix}";
-  # Taps has no public suffix (it's the WG gateway), so trust the whole
-  # WG /64 as reverse-proxy range. The network itself is encrypted and
-  # locked to configured peers, so this is not a wider trust boundary
-  # than trusting the taps peer alone.
-  wgTrustedCidr = "${wgPrefix}::/64";
-  # Go net.Listen / URL parsing require brackets around IPv6 hosts.
-  maltWgHost = "[${maltWgIP}]";
-
+  # Naru is encrypted and restricted to configured peers, so its fixed
+  # network prefix is the reverse-proxy trust boundary.
   port = 3456;
   domain = "tasks.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
@@ -62,7 +52,7 @@ in
     enable = true;
     frontendScheme = "https";
     frontendHostname = domain;
-    address = maltWgHost;
+    address = "::";
     inherit port;
     environmentFiles = [
       config.clan.core.vars.generators.vikunja.files.env.path
@@ -77,11 +67,11 @@ in
       service = {
         enableregistration = false;
         timezone = "Asia/Seoul";
-        # Vikunja sits behind nginx on taps (WG-tunneled). Extract the real
+        # Vikunja sits behind nginx on cask over Naru. Extract the real
         # client IP from X-Forwarded-For, but only trust that header when
-        # the connection comes from the taps reverse proxy.
+        # the connection comes from the cask reverse proxy.
         ipextractionmethod = "xff";
-        trustedproxies = wgTrustedCidr;
+        trustedproxies = "fdec:ca5f::/32";
       };
       auth = {
         # OIDC-only: local accounts disabled. Emergency-admin recovery path
@@ -150,12 +140,12 @@ in
       '';
   };
 
-  networking.firewall.interfaces."wireguard".allowedTCPPorts = [ port ];
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
 
   # First-time admin setup (after kanidm oauth2.vikunja is provisioned and
   # user has logged in via OIDC at least once):
   #
-  #   ssh malt.x sudo systemd-run --pipe --wait \
+  #   ssh malt.n sudo systemd-run --pipe --wait \
   #     --property=DynamicUser=true \
   #     --property=StateDirectory=vikunja \
   #     --property=User=vikunja \
