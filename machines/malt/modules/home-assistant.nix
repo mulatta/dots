@@ -10,12 +10,6 @@ let
   port = 8123;
 in
 {
-  disko.devices.zpool.zroot.datasets."home-assistant" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/hass";
-    options."com.sun:auto-snapshot" = "true";
-  };
-
   services.home-assistant = {
     enable = true;
     configDir = "/var/lib/hass";

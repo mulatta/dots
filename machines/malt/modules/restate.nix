@@ -12,15 +12,6 @@ in
     self.inputs.automation-runtime.nixosModules.url-media-archive
   ];
 
-  disko.devices.zpool.zroot.datasets."restate" = {
-    type = "zfs_fs";
-    mountpoint = "/var/lib/restate";
-    options = {
-      compression = "lz4";
-      "com.sun:auto-snapshot" = "true";
-    };
-  };
-
   clan.core.vars.generators.restate-request-identity = {
     files."private-key.pem" = {
       secret = true;

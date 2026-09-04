@@ -68,11 +68,6 @@
           mountpoint = "/tmp";
           options.sync = "disabled";
         };
-        "root/var/lib" = {
-          type = "zfs_fs";
-          mountpoint = "/var/lib";
-          options."com.sun:auto-snapshot" = "true";
-        };
       };
     };
   };
