@@ -32,8 +32,8 @@ let
         export NIX_CONFIG="experimental-features = nix-command flakes"
         token=$(jq -r '.git.data.token' "$HERCULES_CI_SECRETS_JSON")
         export GH_TOKEN="$token"
-        git config --global user.name "dots-bot"
-        git config --global user.email "dots-bot@users.noreply.github.com"
+        git config --global user.name "dots-nixbot"
+        git config --global user.email "dots-nixbot@users.noreply.github.com"
         git config --global safe.directory '*'
         ${if checkout then ''cd "$NIXBOT_EFFECT_CHECKOUT"'' else "exit 1"}
         ${script}
