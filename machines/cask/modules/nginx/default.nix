@@ -86,10 +86,25 @@ in
       commonHttpConfig = ''
         add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
       '';
-      virtualHosts."_" = {
-        default = true;
-        rejectSSL = true;
-        locations."/".return = "444";
+      virtualHosts = {
+        "_" = {
+          default = true;
+          rejectSSL = true;
+          locations."/".return = "444";
+        };
+        localhost = {
+          quic = false;
+          listen = [
+            {
+              addr = "127.0.0.1";
+              port = 80;
+            }
+            {
+              addr = "[::1]";
+              port = 80;
+            }
+          ];
+        };
       };
     };
 
