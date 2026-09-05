@@ -596,6 +596,7 @@ in
   # Reload stalwart when certs are renewed
   security.acme.certs.${mailDomain} = {
     webroot = "/var/lib/acme/acme-challenge";
+    group = "nginx";
     reloadServices = [ "stalwart.service" ];
   };
 
