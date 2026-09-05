@@ -18,6 +18,7 @@
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/minimal-docs.nix
     ../../nixosModules/nix-daemon.nix
+    ../../nixosModules/postgresql.nix
     ../../nixosModules/users.nix
     ../../nixosModules/vultr.nix
     ./modules/atuin.nix

@@ -10,6 +10,7 @@
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/docker-zfs.nix
+    ../../nixosModules/postgresql.nix
     ../../nixosModules/radicle-mulatta.nix
     ./modules/backup.nix
     ./modules/disko.nix
