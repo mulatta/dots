@@ -3,6 +3,19 @@
   pkgs,
   ...
 }:
+let
+  snapshotName = job: "rustic-${job}";
+  snapshotPath = job: path: "/.zfs/snapshot/${snapshotName job}${path}";
+  snapshotHooks = job: {
+    ExecStartPre = [
+      "-${pkgs.zfs}/bin/zfs destroy zroot/root/nixos@${snapshotName job}"
+      "${pkgs.zfs}/bin/zfs snapshot zroot/root/nixos@${snapshotName job}"
+    ];
+    ExecStartPost = [
+      "-${pkgs.zfs}/bin/zfs destroy zroot/root/nixos@${snapshotName job}"
+    ];
+  };
+in
 {
   imports = [ ../../../nixosModules/rustic ];
   # Rustic password secret generator (per-machine, different repos)
@@ -45,7 +58,7 @@
       # consistent point-in-time rather than a live mid-write copy. ZFS
       # auto-snapshots still cover local recovery; this is the offsite copy.
       files.minecraft = {
-        sources = [ "/var/lib/minecraft/.zfs/snapshot/rustic" ];
+        sources = [ (snapshotPath "minecraft" "/var/lib/minecraft") ];
         asPath = "/var/lib/minecraft"; # store under the real path, not the snapshot path
         startAt = "*-*-* 04:00:00";
         useProfiles = [ "rustic" ];
@@ -55,7 +68,7 @@
       # point-in-time. The Nextcloud database is already covered by the
       # postgres backup above; this adds the data files.
       files.nextcloud = {
-        sources = [ "/var/lib/nextcloud/.zfs/snapshot/rustic" ];
+        sources = [ (snapshotPath "nextcloud" "/var/lib/nextcloud") ];
         asPath = "/var/lib/nextcloud";
         startAt = "*-*-* 04:30:00";
         useProfiles = [ "rustic" ];
@@ -75,22 +88,9 @@
     };
   };
 
-  # Take a fresh ZFS snapshot right before the Minecraft backup so rustic reads
-  # a consistent point-in-time, and drop it afterwards. The leading "-" on the
-  # destroy steps ignores a missing snapshot (e.g. a previous crashed run).
-  systemd.services."rustic-backup-files-minecraft".serviceConfig = {
-    ExecStartPre = [
-      "-${pkgs.zfs}/bin/zfs destroy zroot/minecraft@rustic"
-      "${pkgs.zfs}/bin/zfs snapshot zroot/minecraft@rustic"
-    ];
-    ExecStartPost = "-${pkgs.zfs}/bin/zfs destroy zroot/minecraft@rustic";
-  };
+  # Distinct names prevent overlapping jobs from replacing each other's root
+  # snapshot after unification. Leading "-" tolerates cleanup after a crash.
+  systemd.services."rustic-backup-files-minecraft".serviceConfig = snapshotHooks "minecraft";
 
-  systemd.services."rustic-backup-files-nextcloud".serviceConfig = {
-    ExecStartPre = [
-      "-${pkgs.zfs}/bin/zfs destroy zroot/nextcloud@rustic"
-      "${pkgs.zfs}/bin/zfs snapshot zroot/nextcloud@rustic"
-    ];
-    ExecStartPost = "-${pkgs.zfs}/bin/zfs destroy zroot/nextcloud@rustic";
-  };
+  systemd.services."rustic-backup-files-nextcloud".serviceConfig = snapshotHooks "nextcloud";
 }

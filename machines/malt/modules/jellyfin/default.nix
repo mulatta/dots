@@ -82,21 +82,10 @@ let
   };
 in
 {
-  # Declared for NixOS mounts, not for automatic post-provisioning changes.
-  # Create these datasets manually on existing malt before switching:
-  #   zfs create -o mountpoint=/var/lib/jellyfin -o com.sun:auto-snapshot=true zroot/jellyfin
-  #   zfs create -o mountpoint=/srv/media -o com.sun:auto-snapshot=false zroot/media
-  disko.devices.zpool.zroot.datasets = {
-    "jellyfin" = {
-      type = "zfs_fs";
-      mountpoint = "/var/lib/jellyfin";
-      options."com.sun:auto-snapshot" = "true";
-    };
-    "media" = {
-      type = "zfs_fs";
-      mountpoint = "/srv/media";
-      options."com.sun:auto-snapshot" = "false";
-    };
+  disko.devices.zpool.zroot.datasets."media" = {
+    type = "zfs_fs";
+    mountpoint = "/srv/media";
+    options."com.sun:auto-snapshot" = "false";
   };
 
   clan.core.vars.generators.kanidm-jellyfin-oidc = {
