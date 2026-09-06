@@ -80,13 +80,13 @@ in
     after = [
       "kanidm.service"
       "stalwart.service"
-      "stalwart-bulwark-oauth-client.service"
+      "stalwart-provision.service"
     ];
     wants = [
       "kanidm.service"
       "stalwart.service"
-      "stalwart-bulwark-oauth-client.service"
     ];
+    requires = [ "stalwart-provision.service" ];
     serviceConfig = {
       MemoryHigh = "256M";
       MemoryMax = "512M";
