@@ -10,208 +10,10 @@ let
 
   kanidmTokenFile = "/var/lib/stalwart-mail/kanidm-token";
 
-  bulwarkOauthClient = pkgs.writeShellApplication {
-    name = "stalwart-bulwark-oauth-client";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.curl
-      pkgs.jq
-    ];
-    text = ''
-      admin_password_file=${config.clan.core.vars.generators.stalwart-admin.files."password".path}
-      api_url=http://127.0.0.1:8080/api/principal
-
-      auth=$(printf 'admin:%s' "$(cat "$admin_password_file")" | base64 --wrap=0)
-
-      curl_api() {
-        curl \
-          --fail \
-          --silent \
-          --show-error \
-          --retry 30 \
-          --retry-connrefused \
-          --retry-delay 1 \
-          --retry-all-errors \
-          --header "Authorization: Basic $auth" \
-          "$@"
-      }
-
-      redirects=$(jq --compact-output --null-input '{
-        list: [
-          "cs", "en", "fr", "de", "es", "it", "ja", "ko",
-          "lv", "nl", "pl", "pt", "ru", "tr", "uk", "zh"
-        ] | map("https://mail.mulatta.io/" + . + "/auth/callback")
-      } | .list')
-
-      register_client() {
-        local client_id=$1
-        local description=$2
-        local urls=$3
-        local current body
-
-        current=$(curl_api "$api_url/$client_id")
-        if jq --exit-status '.error == "notFound"' <<<"$current" >/dev/null; then
-          body=$(jq --compact-output --null-input \
-            --arg client "$client_id" \
-            --arg description "$description" \
-            --argjson urls "$urls" \
-            '{type: "oauthClient", name: $client, description: $description, urls: $urls}')
-          curl_api \
-            --header 'Content-Type: application/json' \
-            --data "$body" \
-            "$api_url" >/dev/null
-        else
-          body=$(jq --compact-output --null-input \
-            --arg description "$description" \
-            --argjson urls "$urls" \
-            '[
-              {action: "set", field: "description", value: $description},
-              {action: "set", field: "urls", value: $urls}
-            ]')
-          curl_api \
-            --request PATCH \
-            --header 'Content-Type: application/json' \
-            --data "$body" \
-            "$api_url/$client_id" >/dev/null
-        fi
-      }
-
-      register_client bulwark-webmail "Bulwark Webmail" "$redirects"
-      register_client webadmin "Stalwart Webadmin" '["stalwart://auth"]'
-
-      echo "stalwart-bulwark-oauth-client: registered Stalwart OAuth clients"
-    '';
-  };
-
-  opencrowMailAcl = pkgs.writeShellApplication {
-    name = "stalwart-opencrow-mail-acl";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.curl
-      pkgs.jq
-    ];
-    text = ''
-      admin_password_file=${config.clan.core.vars.generators.stalwart-admin.files."password".path}
-      session_url=http://127.0.0.1:8080/.well-known/jmap
-      jmap_url=http://127.0.0.1:8080/jmap/
-      core=urn:ietf:params:jmap:core
-      mail=urn:ietf:params:jmap:mail
-      principals=urn:ietf:params:jmap:principals
-
-      auth=$(printf 'admin:%s' "$(cat "$admin_password_file")" | base64 --wrap=0)
-
-      curl_jmap() {
-        curl \
-          --fail \
-          --silent \
-          --show-error \
-          --retry 30 \
-          --retry-delay 1 \
-          --retry-all-errors \
-          --header "Authorization: Basic $auth" \
-          --header 'Content-Type: application/json' \
-          "$jmap_url" \
-          --data "$1"
-      }
-
-      session=$(curl \
-        --fail \
-        --location \
-        --silent \
-        --show-error \
-        --retry 30 \
-        --retry-delay 1 \
-        --retry-all-errors \
-        --header "Authorization: Basic $auth" \
-        --header 'Accept: application/json' \
-        "$session_url")
-      admin_account_id=$(jq --raw-output --exit-status --arg principals "$principals" '.primaryAccounts[$principals]' <<<"$session")
-
-      principal_id() {
-        local name=$1
-        local request response
-        request=$(jq --compact-output --null-input \
-          --arg core "$core" \
-          --arg principals "$principals" \
-          --arg account "$admin_account_id" \
-          --arg name "$name" \
-          '{
-            using: [$core, $principals],
-            methodCalls: [
-              ["Principal/query", {accountId: $account, filter: {text: $name}, limit: 20}, "query"],
-              ["Principal/get", {accountId: $account, "#ids": {resultOf: "query", name: "Principal/query", path: "/ids"}, properties: ["id", "name"]}, "get"]
-            ]
-          }')
-        response=$(curl_jmap "$request")
-        jq --raw-output --exit-status --arg name "$name" '
-          .methodResponses[]
-          | select(.[0] == "Principal/get")
-          | .[1].list[]
-          | select(.name == $name)
-          | .id
-        ' <<<"$response" | head --lines=1
-      }
-
-      seungwon_id=$(principal_id seungwon)
-      noa_id=$(principal_id noa)
-
-      request=$(jq --compact-output --null-input \
-        --arg core "$core" \
-        --arg mail "$mail" \
-        --arg account "$seungwon_id" \
-        '{
-          using: [$core, $mail],
-          methodCalls: [["Mailbox/get", {accountId: $account, ids: null, properties: ["id", "name", "role", "shareWith"]}, "mailboxes"]]
-        }')
-      response=$(curl_jmap "$request")
-      inbox_id=$(jq --raw-output --exit-status '
-        .methodResponses[0][1].list[]
-        | select(.role == "inbox")
-        | .id
-      ' <<<"$response" | head --lines=1)
-
-      if jq --exit-status --arg inbox "$inbox_id" --arg noa "$noa_id" '
-        .methodResponses[0][1].list[]
-        | select(.id == $inbox)
-        | ((.shareWith[$noa].mayReadItems // false) and (.shareWith[$noa].maySetKeywords // false))
-      ' <<<"$response" >/dev/null; then
-        echo "stalwart-opencrow-mail-acl: seungwon Inbox already grants Noa readItems+setKeywords"
-        exit 0
-      fi
-
-      request=$(jq --compact-output --null-input \
-        --arg core "$core" \
-        --arg mail "$mail" \
-        --arg account "$seungwon_id" \
-        --arg inbox "$inbox_id" \
-        --arg noa "$noa_id" \
-        '{
-          using: [$core, $mail],
-          methodCalls: [[
-            "Mailbox/set",
-            {
-              accountId: $account,
-              update: {
-                ($inbox): {
-                  ("shareWith/" + $noa + "/mayReadItems"): true,
-                  ("shareWith/" + $noa + "/maySetKeywords"): true
-                }
-              }
-            },
-            "set"
-          ]]
-        }')
-      response=$(curl_jmap "$request")
-      jq --exit-status --arg inbox "$inbox_id" '
-        .methodResponses[0][0] == "Mailbox/set"
-        and (.methodResponses[0][1].updated[$inbox] == null)
-        and (((.methodResponses[0][1].notUpdated // {}) | has($inbox)) | not)
-      ' <<<"$response" >/dev/null
-      echo "stalwart-opencrow-mail-acl: granted Noa readItems+setKeywords on seungwon Inbox"
-    '';
-  };
 in
 {
+  imports = [ ./provision ];
+
   clan.core.vars.generators = {
     resend = {
       files."api-key" = {
@@ -251,6 +53,7 @@ in
         "store.*"
         "storage.*"
         "directory.*"
+        "email.*"
         "certificate.*"
         "server.*"
         "authentication.*"
@@ -578,34 +381,6 @@ in
       };
     };
 
-    stalwart-bulwark-oauth-client = {
-      description = "Register Bulwark Webmail OAuth client in Stalwart";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "stalwart.service" ];
-      wants = [ "stalwart.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "stalwart-mail";
-        Group = "stalwart-mail";
-        ExecStart = "${bulwarkOauthClient}/bin/stalwart-bulwark-oauth-client";
-      };
-    };
-
-    stalwart-opencrow-mail-acl = {
-      description = "Grant Noa keyword rights on seungwon Inbox";
-      wantedBy = [ "multi-user.target" ];
-      after = [
-        "kanidm.service"
-        "stalwart.service"
-      ];
-      wants = [ "stalwart.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "stalwart-mail";
-        Group = "stalwart-mail";
-        ExecStart = "${opencrowMailAcl}/bin/stalwart-opencrow-mail-acl";
-      };
-    };
   };
   services.nginx.virtualHosts.${publicDomain} = {
     useACMEHost = "mulatta.io";
