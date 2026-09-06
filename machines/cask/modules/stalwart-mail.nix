@@ -238,32 +238,6 @@ in
       '';
     };
 
-    # Scoped R2 credentials for the mail-blobs bucket (Object Read & Write on
-    # that bucket only), kept separate from the account-wide rustic R2 keys so
-    # a Stalwart compromise can't reach the backup bucket. Stalwart reads them
-    # by file path via %{file:...}% in the blob store config.
-    stalwart-r2 = {
-      files."access-key-id" = {
-        secret = true;
-        owner = "stalwart-mail";
-      };
-      files."secret-access-key" = {
-        secret = true;
-        owner = "stalwart-mail";
-      };
-      prompts."access-key-id" = {
-        description = "R2 access key ID for the mail-blobs bucket";
-        type = "hidden";
-      };
-      prompts."secret-access-key" = {
-        description = "R2 secret access key for the mail-blobs bucket";
-        type = "hidden";
-      };
-      script = ''
-        cp "$prompts/access-key-id" "$out/access-key-id"
-        cp "$prompts/secret-access-key" "$out/secret-access-key"
-      '';
-    };
   };
 
   services.stalwart = {
@@ -366,10 +340,9 @@ in
       storage = {
         data = "postgresql";
         fts = "postgresql";
-        # Blobs (message bodies/attachments) live in R2, not PostgreSQL: it
-        # keeps the DB and its pg_dump small while a separate append-only R2
-        # copy handles recovery from accidental or malicious blob deletion.
-        blob = "mail-blobs";
+        # Keep all durable mail state in one PostgreSQL database so pg_dump
+        # captures metadata and referenced message content at one MVCC point.
+        blob = "postgresql";
         lookup = "postgresql";
         directory = "kanidm";
       };
@@ -386,21 +359,6 @@ in
         timeout = "15s";
         tls.enable = false;
         pool.max-connections = 3;
-      };
-
-      # Blob store on Cloudflare R2 (S3-compatible). The account_id in the
-      # endpoint is an identifier, not a credential (it grants no access on its
-      # own), so it is inlined like the other R2 endpoints in this repo; only
-      # the scoped access/secret keys are secrets, read by file path.
-      store.mail-blobs = {
-        type = "s3";
-        region = "auto";
-        bucket = "mail-blobs";
-        endpoint = "https://a36871be6860124304dfb5c3b3eb8c1a.r2.cloudflarestorage.com";
-        access-key = "%{file:${config.clan.core.vars.generators.stalwart-r2.files."access-key-id".path}}%";
-        secret-key = "%{file:${
-          config.clan.core.vars.generators.stalwart-r2.files."secret-access-key".path
-        }}%";
       };
 
       # Kanidm LDAP directory
