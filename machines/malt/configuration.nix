@@ -12,7 +12,6 @@
     ../../nixosModules/docker-zfs.nix
     ../../nixosModules/postgresql.nix
     ../../nixosModules/radicle-mulatta.nix
-    ./modules/backup.nix
     ./modules/disko.nix
     ./modules/hermes
     ./modules/home-assistant.nix

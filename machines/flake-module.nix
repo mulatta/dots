@@ -9,6 +9,7 @@
       tags =
         { config, ... }:
         {
+          backup = builtins.filter (name: name != "pint") config.nixos;
           wireguard-peers = builtins.filter (name: name != "cask") config.nixos;
         };
 
@@ -73,6 +74,14 @@
           module.name = "internet";
           module.input = "clan-core";
           roles.default.machines.cask.settings.host = "cask.i";
+        };
+
+        rustic-r2 = {
+          module.name = "rustic";
+          module.input = "self";
+          roles.client.settings.bucket = "backup";
+          roles.client.tags.backup = { };
+          roles.client.extraModules = [ ../nixosModules/rustic ];
         };
 
         # SSH certificate-based authentication

@@ -200,6 +200,7 @@
       ];
       imports = [
         ./checks/flake-module.nix
+        ./clanServices/flake-module.nix
         ./formatter/flake-module.nix
         ./home-manager/flake-module.nix
         ./home-manager/modules/helix/flake-module.nix
