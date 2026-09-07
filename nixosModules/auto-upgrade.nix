@@ -6,9 +6,6 @@
 {
   system.autoUpgrade.enable = lib.mkDefault true;
   system.autoUpgrade.flake = "github:mulatta/dots";
-  # Live switches can race with Clan deployments and restart stateful services twice.
-  # Install upgrades for next boot; auto-reboot controls activation separately.
-  system.autoUpgrade.operation = "boot";
   system.autoUpgrade.flags = [
     "--option"
     "accept-flake-config"
