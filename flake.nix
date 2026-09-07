@@ -3,6 +3,11 @@
     # Shared roots. Other flakes follow these to avoid duplicate lock nodes.
     nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
 
+    systems.url = "github:nix-systems/default";
+
+    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils.inputs.systems.follows = "systems";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
 
@@ -36,7 +41,9 @@
       inputs.disko.follows = "disko";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nix-darwin.follows = "nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.sops-nix.follows = "sops-nix";
+      inputs.systems.follows = "systems";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
@@ -60,13 +67,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Package sources
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
@@ -156,6 +167,7 @@
     nix-minecraft = {
       url = "github:Infinidoge/nix-minecraft";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
     };
 
     noctalia-plugins = {
@@ -171,10 +183,14 @@
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
+      inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zsh-helix-mode.url = "github:Multirious/zsh-helix-mode";
+    zsh-helix-mode = {
+      url = "github:Multirious/zsh-helix-mode";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Agentic tools
     research-skills = {
@@ -183,8 +199,15 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    cherri = {
+      url = "github:electrikmilk/cherri";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     skillz = {
       url = "github:mulatta/skillz";
+      inputs.cherri.follows = "cherri";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
