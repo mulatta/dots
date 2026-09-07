@@ -54,11 +54,86 @@
         nixosModule =
           {
             config,
+            lib,
             pkgs,
             ...
           }:
           let
+            cfg = config.services.rustic;
             backendEnvironmentFile = "/etc/rustic/opendal.env";
+            systemBackup = cfg.backups.system;
+            stateFolders = lib.unique (
+              lib.flatten (map (state: state.folders or [ ]) (lib.attrValues config.clan.core.state))
+            );
+            mkProfileArgs =
+              profiles: lib.concatMapStrings (profile: " -P ${lib.escapeShellArg profile}") profiles;
+            clanRusticArgs = "${mkProfileArgs systemBackup.useProfiles} --cache-dir ${lib.escapeShellArg "${cfg.cacheBaseDir}/root"}";
+            allowedFolderCases = lib.concatMapStringsSep "\n" (
+              folder: "${lib.escapeShellArg (toString folder)}) ;;"
+            ) stateFolders;
+
+            clanList = pkgs.writeShellApplication {
+              name = "rustic-clan-list";
+              runtimeInputs = [
+                cfg.package
+                pkgs.jq
+              ];
+              text = ''
+                set -a
+                # shellcheck source=/dev/null
+                source ${backendEnvironmentFile}
+                set +a
+                rustic snapshots --json${clanRusticArgs} \
+                  | jq --compact-output '[.[].snapshots[] | {name: .id, job_name: "system"}]'
+              '';
+            };
+
+            clanCreate = pkgs.writeShellApplication {
+              name = "rustic-clan-create";
+              runtimeInputs = [ config.systemd.package ];
+              text = ''
+                systemctl start ${lib.escapeShellArg systemBackup.unitName}.service
+              '';
+            };
+
+            clanRestore = pkgs.writeShellApplication {
+              name = "rustic-clan-restore";
+              runtimeInputs = [
+                cfg.package
+                pkgs.coreutils
+              ];
+              text = ''
+                if [[ -z "''${NAME:-}" ]]; then
+                  echo "No Rustic snapshot given via NAME" >&2
+                  exit 1
+                fi
+                if [[ ! "$NAME" =~ ^[0-9a-f]{64}$ ]]; then
+                  echo "Invalid Rustic snapshot ID: $NAME" >&2
+                  exit 1
+                fi
+                if [[ -z "''${FOLDERS:-}" ]]; then
+                  echo "No state folders given via FOLDERS" >&2
+                  exit 1
+                fi
+
+                set -a
+                # shellcheck source=/dev/null
+                source ${backendEnvironmentFile}
+                set +a
+                IFS=: read -r -a folders <<<"$FOLDERS"
+                for folder in "''${folders[@]}"; do
+                  case "$folder" in
+                    ${allowedFolderCases}
+                    *)
+                      echo "Refusing to restore unregistered state folder: $folder" >&2
+                      exit 1
+                      ;;
+                  esac
+                  mkdir -p "$folder"
+                  rustic restore "$NAME:$folder" "$folder"${clanRusticArgs}
+                done
+              '';
+            };
           in
           {
             clan.core = {
@@ -125,6 +200,12 @@
                   '';
                 };
               };
+
+              backups.providers.rustic = {
+                list = "rustic-clan-list";
+                create = "rustic-clan-create";
+                restore = "rustic-clan-restore";
+              };
             };
 
             services.rustic = {
@@ -159,8 +240,15 @@
               };
             };
 
-            environment.etc."rustic/opendal.env".source =
-              config.clan.core.vars.generators.rustic-r2.files."opendal.env".path;
+            environment = {
+              etc."rustic/opendal.env".source =
+                config.clan.core.vars.generators.rustic-r2.files."opendal.env".path;
+              systemPackages = [
+                clanList
+                clanCreate
+                clanRestore
+              ];
+            };
           };
       };
   };
