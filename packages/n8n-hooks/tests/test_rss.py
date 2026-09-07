@@ -6,7 +6,7 @@ import argparse
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
-from typing import Any
+from typing import Any, ClassVar
 
 import pytest
 
@@ -69,7 +69,7 @@ def test_show_entry_payload() -> None:
 class _FakeRssWebhookHandler(BaseHTTPRequestHandler):
     """Captures the last POST body and replies with RSS-like JSON."""
 
-    last_payload: dict[str, Any] = {}
+    last_payload: ClassVar[dict[str, Any]] = {}
 
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", 0))

@@ -8,7 +8,7 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Thread
-from typing import Any
+from typing import Any, ClassVar
 
 import pytest
 
@@ -111,7 +111,7 @@ def test_write_download(tmp_path: Path) -> None:
 class _FakeSlackWebhookHandler(BaseHTTPRequestHandler):
     """Captures the last POST body and replies with Slack-like result."""
 
-    last_payload: dict[str, Any] = {}
+    last_payload: ClassVar[dict[str, Any]] = {}
 
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", 0))

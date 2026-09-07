@@ -7,7 +7,7 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Thread
-from typing import Any
+from typing import Any, ClassVar
 
 import pytest
 
@@ -75,7 +75,7 @@ def test_create_link_rejects_status_tags() -> None:
 
 
 class _FakeWebhookHandler(BaseHTTPRequestHandler):
-    last_payload: dict[str, Any] = {}
+    last_payload: ClassVar[dict[str, Any]] = {}
 
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", 0))
