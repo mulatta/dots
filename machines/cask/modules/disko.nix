@@ -51,7 +51,6 @@
       };
       options.ashift = "12";
       datasets = {
-        "docker".type = "zfs_fs";
         "root".type = "zfs_fs";
         "root/nixos" = {
           type = "zfs_fs";
