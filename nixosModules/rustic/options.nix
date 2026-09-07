@@ -37,8 +37,6 @@ let
   };
 
   commonBackupOptions = scheduleOptions // rusticCommandOptions // backupUserOptions;
-
-  postgresBackupOptions = scheduleOptions // rusticCommandOptions;
 in
 {
   options.services.rustic = {
@@ -59,6 +57,12 @@ in
       '';
     };
 
+    environmentFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Environment file loaded by every Rustic service";
+    };
+
     profiles = lib.mkOption {
       type = lib.types.attrsOf tomlFormat.type;
       default = { };
@@ -76,7 +80,11 @@ in
         {
           rustic = {
             repository = {
-              repository = "rclone:r2:backup";
+              repository = "opendal:s3";
+              options = {
+                bucket = "backup";
+                root = "/hostname";
+              };
             };
             forget = {
               keep-daily = 7;
@@ -88,11 +96,18 @@ in
       '';
     };
 
-    backups = {
-      files = lib.mkOption {
-        type = lib.types.attrsOf (
-          lib.types.submodule {
+    backups = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule (
+          { config, name, ... }:
+          {
             options = commonBackupOptions // {
+              unitName = lib.mkOption {
+                type = lib.types.str;
+                default = "rustic-backup-files-${name}";
+                description = "Systemd service and timer base name";
+              };
+
               sources = lib.mkOption {
                 type = lib.types.listOf lib.types.path;
                 description = "Paths to backup";
@@ -103,82 +118,30 @@ in
                 default = null;
                 description = "Override the backup path in snapshot";
               };
-            };
-          }
-        );
-        default = { };
-        description = "File-based backups";
-      };
 
-      commands = lib.mkOption {
-        type = lib.types.attrsOf (
-          lib.types.submodule {
-            options = commonBackupOptions // {
-              command = lib.mkOption {
-                type = lib.types.str;
-                description = "Command whose output will be backed up";
+              _resolvedSources = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = map toString config.sources;
+                internal = true;
               };
 
-              filename = lib.mkOption {
+              _resolvedAsPath = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
-                default = null;
-                description = "Filename to use in the backup";
+                default = config.asPath;
+                internal = true;
               };
-            };
-          }
-        );
-        default = { };
-        description = "Command output backups";
-      };
 
-      postgres = lib.mkOption {
-        type = lib.types.attrsOf (
-          lib.types.submodule {
-            options = postgresBackupOptions // {
-              prefix = lib.mkOption {
-                type = lib.types.str;
-                default = "/postgres";
-                description = "Path prefix for dumps in the backup";
-              };
-              excludeDatabases = lib.mkOption {
+              _commandPrefix = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
                 default = [ ];
-                example = [ "stalwart-mail" ];
-                description = "Databases to skip (e.g. backed up another way).";
+                internal = true;
               };
             };
           }
-        );
-        default = { };
-        description = "PostgreSQL database backups (all databases)";
-      };
-
-      sqlite = lib.mkOption {
-        type = lib.types.attrsOf (
-          lib.types.submodule {
-            options = commonBackupOptions // {
-              database = lib.mkOption {
-                type = lib.types.path;
-                description = "Path to the SQLite database file";
-              };
-
-              backupName = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
-                default = null;
-                description = "Name for the backup file (defaults to database filename)";
-              };
-
-              tempPath = lib.mkOption {
-                type = lib.types.path;
-                default = "/tmp";
-                description = "Temporary path for the backup file before uploading";
-              };
-            };
-          }
-        );
-        default = { };
-        description = "SQLite database backups";
-      };
+        )
+      );
+      default = { };
+      description = "File-based backups";
     };
 
     prune = {
