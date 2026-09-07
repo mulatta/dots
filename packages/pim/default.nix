@@ -60,12 +60,12 @@ let
       bash
       ncurses
     ]
-    ++ lib.optionals stdenv.isLinux [
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       util-linux
     ]
   );
 
-  runtimeDeps = lib.optionals stdenv.isLinux [ bubblewrap ];
+  runtimeDeps = lib.optionals stdenv.hostPlatform.isLinux [ bubblewrap ];
 in
 python3Packages.buildPythonApplication {
   pname = "pim";

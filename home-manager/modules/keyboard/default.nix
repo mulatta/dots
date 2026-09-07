@@ -4,7 +4,7 @@
 
   # Karabiner replaces symlinks with regular files at runtime,
   # so we copy instead of symlinking and reload after.
-  home.activation.karabiner = lib.mkIf pkgs.stdenv.isDarwin (
+  home.activation.karabiner = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       karabiner_dir="$HOME/.config/karabiner"
       target="$karabiner_dir/karabiner.json"

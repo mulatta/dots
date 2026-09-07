@@ -32,7 +32,10 @@ in
   home.username = lib.mkDefault "seungwon";
   home.stateVersion = "25.05";
   home.homeDirectory =
-    if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "/Users/${config.home.username}"
+    else
+      "/home/${config.home.username}";
 
   programs.home-manager.enable = true;
 
@@ -72,7 +75,7 @@ in
     tmuxPlugins.tmux-thumbs
     zoxide
     zsh
-    (if stdenv.isDarwin then ghostty-bin else ghostty)
+    (if stdenv.hostPlatform.isDarwin then ghostty-bin else ghostty)
 
     # Git
     gh

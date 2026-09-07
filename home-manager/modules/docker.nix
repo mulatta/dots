@@ -9,5 +9,5 @@
     pkgs.docker-credential-helpers
     pkgs.regctl
   ]
-  ++ lib.optionals pkgs.stdenv.isDarwin [ pkgs.colima ];
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.colima ];
 }

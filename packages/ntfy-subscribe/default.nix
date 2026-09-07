@@ -16,8 +16,8 @@ writeShellApplication {
     ntfy-sh
     rbw
   ]
-  ++ lib.optionals stdenv.isDarwin [ terminal-notifier ]
-  ++ lib.optionals stdenv.isLinux [ libnotify ];
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [ terminal-notifier ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [ libnotify ];
 
   text = ''
     STATE_DIR="''${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"

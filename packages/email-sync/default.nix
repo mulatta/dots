@@ -29,8 +29,8 @@ writeShellApplication {
     w3m
     khard
   ]
-  ++ lib.optionals stdenv.isLinux [ libnotify ]
-  ++ lib.optionals stdenv.isDarwin [ terminal-notifier ];
+  ++ lib.optionals stdenv.hostPlatform.isLinux [ libnotify ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [ terminal-notifier ];
 
   text = ''
     NOTMUCH_CONFIG="''${NOTMUCH_CONFIG:-$HOME/.config/notmuch/default/config}"
@@ -102,7 +102,7 @@ writeShellApplication {
       summary="''${summary:-New messages}"
   ''
   + (
-    if stdenv.isDarwin then
+    if stdenv.hostPlatform.isDarwin then
       ''
         # Pipe message via stdin to avoid terminal-notifier argument parsing issues
         # (subjects starting with [ or - break -message flag)

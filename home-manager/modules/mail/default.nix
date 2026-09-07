@@ -32,7 +32,7 @@ in
       ]);
     }
 
-    (lib.mkIf pkgs.stdenv.isLinux {
+    (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       systemd.user.services.mbsync = {
         Unit.Description = "Mailbox synchronization";
         Service = {
@@ -51,7 +51,7 @@ in
       };
     })
 
-    (lib.mkIf pkgs.stdenv.isDarwin {
+    (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       launchd.enable = true;
       launchd.agents.mbsync = {
         enable = true;

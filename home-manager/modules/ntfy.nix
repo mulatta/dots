@@ -11,7 +11,7 @@ in
 {
   config = lib.mkMerge [
     # Linux: systemd user service
-    (lib.mkIf pkgs.stdenv.isLinux {
+    (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       systemd.user.services.ntfy-subscribe = {
         Unit.Description = "ntfy push notification subscriber";
         Service = {
@@ -24,7 +24,7 @@ in
     })
 
     # macOS: launchd agent
-    (lib.mkIf pkgs.stdenv.isDarwin {
+    (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       launchd.enable = true;
       launchd.agents.ntfy-subscribe = {
         enable = true;

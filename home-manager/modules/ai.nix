@@ -55,7 +55,7 @@ in
       "pexpect-cli"
       "queue"
     ]
-    ++ lib.optionals pkgs.stdenv.isDarwin [ "shortcuts-cli" ];
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "shortcuts-cli" ];
     package = skillzPkgs // {
       calendar-cli = skillzPkgs.calendar-cli.override {
         msmtp = selfPkgs.msmtp-with-sent;

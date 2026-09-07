@@ -116,7 +116,7 @@
       // lib.optionalAttrs (system == "x86_64-linux") {
         neko-image = pkgs.callPackage ./neko-image { };
       }
-      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         nostr-chat-bar = pkgs.callPackage ../packages/nostr-chat-bar { };
         paneru-app = pkgs.callPackage ../packages/paneru-app {
           paneru = inputs'.paneru.packages.default;

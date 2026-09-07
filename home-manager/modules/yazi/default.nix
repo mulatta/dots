@@ -16,7 +16,7 @@ in
       yazi
       selfPkgs.yazi-preview-tools
     ]
-    ++ lib.optionals (!pkgs.stdenv.isDarwin) [ pkgs.fontpreview ];
+    ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.fontpreview ];
 
   # Plugins only - config files managed by stow
   xdg.configFile."yazi/plugins".source = "${selfPkgs.yazi-plugins}/share/yazi/plugins";

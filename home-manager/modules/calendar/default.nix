@@ -18,7 +18,7 @@ let
 
   calendarNotifyScript = pkgs.writeShellScriptBin "calendar-notify" ''
     #!/usr/bin/env bash
-    ${lib.optionalString pkgs.stdenv.isLinux ''export PATH="${pkgs.libnotify}/bin:$PATH"''}
+    ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''export PATH="${pkgs.libnotify}/bin:$PATH"''}
     exec ${pythonEnv}/bin/python ${./calendar-notify.py}
   '';
 
@@ -93,7 +93,7 @@ lib.mkMerge [
   }
 
   # Linux: systemd user services
-  (lib.mkIf pkgs.stdenv.isLinux {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     systemd.user.services.calendar-sync = {
       Unit = {
         Description = "Sync calendars with vdirsyncer";
@@ -136,7 +136,7 @@ lib.mkMerge [
   })
 
   # macOS: launchd agents
-  (lib.mkIf pkgs.stdenv.isDarwin {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     launchd.enable = true;
     launchd.agents.calendar-sync = {
       enable = true;

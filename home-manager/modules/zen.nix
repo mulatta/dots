@@ -155,7 +155,7 @@
   # launchd session level. Without it each new install hash spawns a fresh random
   # profile under Profiles/<rand>.Default; LegacyProfiles policy alone is not
   # enough on macOS in practice.
-  home.activation.zenLegacyProfiles = lib.mkIf pkgs.stdenv.isDarwin (
+  home.activation.zenLegacyProfiles = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       /bin/launchctl setenv MOZ_LEGACY_PROFILES 1 2>/dev/null || true
     ''
@@ -164,13 +164,13 @@
   # macOS: zen-browser wrapper doesn't set up native messaging hosts,
   # so register the manifest manually where Firefox-based browsers look for it
   home.file."Library/Application Support/Mozilla/NativeMessagingHosts/ff2mpv.json" =
-    pkgs.lib.mkIf pkgs.stdenv.isDarwin
+    pkgs.lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
       {
         source = "${pkgs.ff2mpv-rust}/lib/mozilla/native-messaging-hosts/ff2mpv.json";
       };
 
   # macOS GUI apps don't inherit shell PATH; point ff2mpv-rust to mpv via config
-  xdg.configFile."ff2mpv-rust.json" = pkgs.lib.mkIf pkgs.stdenv.isDarwin {
+  xdg.configFile."ff2mpv-rust.json" = pkgs.lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     text = builtins.toJSON {
       player_command = "${pkgs.mpv}/bin/mpv";
       player_args = [

@@ -129,7 +129,7 @@ in
     };
   };
 
-  config = lib.mkIf (pkgs.stdenv.isDarwin && cfg.enable) {
+  config = lib.mkIf (pkgs.stdenv.hostPlatform.isDarwin && cfg.enable) {
     home.packages = [
       cfg.package
       cfg.barPackage
