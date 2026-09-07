@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Sync Miniflux assets and feed configuration from a JSON manifest.
 
 Read/star history is preserved by:

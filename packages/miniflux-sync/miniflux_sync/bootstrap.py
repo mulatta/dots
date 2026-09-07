@@ -41,25 +41,27 @@ def ensure_user_and_api_key(request: BootstrapRequest) -> int:
     if not request.api_key_description:
         raise BootstrapError("api key description must not be empty")
 
-    with psycopg.connect(request.database_url, row_factory=dict_row) as conn:
-        with conn.transaction():
-            with conn.cursor() as cur:
-                user_id = _ensure_user(cur, request.username, request.openid_connect_id)
-                _ensure_default_rows(cur, user_id)
-                _ensure_api_key(
-                    cur,
-                    user_id,
-                    request.api_token,
-                    request.api_key_description,
-                )
-                _ensure_webhook_integration(
-                    cur,
-                    user_id,
-                    enabled=request.webhook_enabled,
-                    url=request.webhook_url,
-                    secret=request.webhook_secret,
-                )
-                return user_id
+    with (
+        psycopg.connect(request.database_url, row_factory=dict_row) as conn,
+        conn.transaction(),
+        conn.cursor() as cur,
+    ):
+        user_id = _ensure_user(cur, request.username, request.openid_connect_id)
+        _ensure_default_rows(cur, user_id)
+        _ensure_api_key(
+            cur,
+            user_id,
+            request.api_token,
+            request.api_key_description,
+        )
+        _ensure_webhook_integration(
+            cur,
+            user_id,
+            enabled=request.webhook_enabled,
+            url=request.webhook_url,
+            secret=request.webhook_secret,
+        )
+        return user_id
 
 
 def _ensure_user(
