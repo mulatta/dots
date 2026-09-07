@@ -1,0 +1,4 @@
+{ ... }:
+{
+  clan.modules.rustic = ./rustic;
+}

@@ -22,7 +22,6 @@
     ../../nixosModules/users.nix
     ../../nixosModules/vultr.nix
     ./modules/atuin.nix
-    ./modules/backup.nix
     ./modules/bulwark-webmail.nix
     ./modules/disko.nix
     ./modules/gitea-mq.nix
