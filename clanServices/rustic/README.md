@@ -13,3 +13,5 @@ rustic-r2 = {
 ```
 
 Each client uses its machine name as an OpenDAL S3 prefix in configured R2 bucket. Backups run daily at 04:00, pruning runs Sunday at 05:00, and repository checks run monthly at 06:30 unless role settings override those defaults.
+
+The module registers Rustic as a Clan backup provider. `clan backups list` reports full Rustic snapshot IDs, `clan backups create` starts the aggregate system job, and `clan backups restore` restores only folders registered through `clan.core.state`.
