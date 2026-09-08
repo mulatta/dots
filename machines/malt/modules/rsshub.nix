@@ -1,6 +1,8 @@
 {
+  self,
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -64,7 +66,8 @@ in
   # required them moved to publisher RSS + the on-demand paperfetch-cli path.
   services.rsshub = {
     enable = true;
-    secretFiles = [ rsshubGithubEnv ];
+    package = self.packages.${pkgs.stdenv.hostPlatform.system}.rsshub;
+    secretFiles = [ config.clan.core.vars.generators.rsshub-github.files.env.path ];
     redis.enable = true;
     settings = {
       PORT = 1200;
