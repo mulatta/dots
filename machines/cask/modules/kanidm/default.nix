@@ -84,7 +84,7 @@ in
   services.kanidm = {
     server.enable = true;
     client.enable = true;
-    package = pkgs.kanidmWithSecretProvisioning_1_10;
+    package = pkgs.kanidmWithSecretProvisioning_1_11;
 
     # Used by the stalwart token script (kanidm CLI).
     client.settings = {
