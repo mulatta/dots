@@ -96,7 +96,7 @@
     };
 
     nixbot = {
-      url = "git+https://github.com/Mic92/nixbot?shallow=1&ref=main";
+      url = "github:Mic92/nixbot";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
