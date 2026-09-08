@@ -13,7 +13,6 @@ in
   services.home-assistant = {
     enable = true;
     configDir = "/var/lib/hass";
-    openFirewall = false;
 
     customComponents = [
       pkgs.home-assistant-custom-components.auth_oidc
