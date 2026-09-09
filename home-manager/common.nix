@@ -80,6 +80,7 @@ in
     # Git
     gh
     gh-dash
+    tea
     git
     git-lfs
     git-absorb
