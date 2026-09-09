@@ -18,10 +18,10 @@ in
     Compression = false;
 
     MaxAuthTries = 3;
-    MaxSessions = 5;
+    MaxSessions = 20;
     LoginGraceTime = 15;
     MaxStartups = "50:30:100";
-    PerSourceMaxStartups = 3;
+    PerSourceMaxStartups = 10;
     ClientAliveInterval = 300;
     ClientAliveCountMax = 2;
 
@@ -39,8 +39,8 @@ in
 
   # Allow root login and TCP forwarding from internal networks only
   services.openssh.extraConfig = ''
-    # WireGuard mesh network
-    Match Address fdec:ca5f::/32
+    # Private mesh networks
+    Match Address 10.208.0.0/12,fdec:ca5f::/32
         PermitRootLogin prohibit-password
         AllowTcpForwarding yes
 
@@ -56,6 +56,7 @@ in
     ignoreIP = [
       "127.0.0.1/8"
       "::1/128"
+      "10.208.0.0/12"
       "fdec:ca5f::/32"
     ];
 
