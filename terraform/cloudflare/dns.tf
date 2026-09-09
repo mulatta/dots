@@ -229,6 +229,16 @@ resource "cloudflare_dns_record" "mq_a" {
   comment = "gitea-mq merge queue"
 }
 
+resource "cloudflare_dns_record" "git_a" {
+  zone_id = local.zone_id
+  name    = "git"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Gitea"
+}
+
 resource "cloudflare_dns_record" "niks3_a" {
   zone_id = local.zone_id
   name    = "niks3"

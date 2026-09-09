@@ -2,7 +2,7 @@ $ORIGIN mulatta.io.
 $TTL 300
 
 @ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. (
-  2026083007 ; serial
+  2026090701 ; serial
   3600       ; refresh
   600        ; retry
   604800     ; expire
@@ -35,6 +35,7 @@ video         IN A @SERVICE_IPV4@
 home          IN A @SERVICE_IPV4@
 cache         IN A @SERVICE_IPV4@
 mq            IN A @SERVICE_IPV4@
+git           IN A @SERVICE_IPV4@
 niks3         IN A @SERVICE_IPV4@
 atuin         IN A @SERVICE_IPV4@
 upterm        IN A @SERVICE_IPV4@
