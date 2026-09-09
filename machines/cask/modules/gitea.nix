@@ -114,11 +114,14 @@ in
         # Kanidm's groups scope includes UUIDs and SPNs. groups_name keeps
         # authorization checks on stable short names such as git_users.
         --scopes groups_name
+        # Kanidm remains the source of truth for user SSH keys.
+        --scopes ssh_publickeys
         --skip-local-2fa
         --required-claim-name groups
         --required-claim-value git_users
         --group-claim-name groups
         --admin-group admins
+        --ssh-public-key-claim-name ssh_publickeys
         --full-name-claim-name name
       )
 

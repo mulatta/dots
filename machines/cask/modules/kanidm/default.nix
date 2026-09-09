@@ -266,12 +266,14 @@ in
               "email"
               "profile"
               "groups_name"
+              "ssh_publickeys"
             ];
             git_users = [
               "openid"
               "email"
               "profile"
               "groups_name"
+              "ssh_publickeys"
             ];
           };
         };
