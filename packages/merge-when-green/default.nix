@@ -1,24 +1,28 @@
 {
-  python3Packages,
+  python3,
   openssh,
   gitMinimal,
-  flake-fmt,
+  nixVersions,
   gh,
+  tea,
   coreutils,
   lib,
   makeWrapper,
+  flake-fmt,
 }:
 let
   runtimeDeps = [
-    flake-fmt
-    gitMinimal
+    gitMinimal # for git flakes
+    nixVersions.latest
     coreutils
-    gh
+    gh # for GitHub
+    tea # for Gitea
+    flake-fmt # for formatting checks
   ];
 in
-python3Packages.buildPythonApplication {
+python3.pkgs.buildPythonApplication {
   pname = "merge-when-green";
-  version = "0.4.0";
+  version = "0.3.0";
   src = ./.;
   format = "other";
 
@@ -27,13 +31,14 @@ python3Packages.buildPythonApplication {
   installPhase = ''
     install -D -m 0755 merge-when-green.py $out/bin/merge-when-green
 
+    # We prefer the system's openssh over our own, since it might come with features not present in ours:
+    # https://github.com/nix-community/nixos-anywhere/issues/62
     wrapProgram $out/bin/merge-when-green \
-      --prefix PATH : ${lib.makeBinPath runtimeDeps} \
-      --suffix PATH : ${lib.makeBinPath [ openssh ]}
+      --prefix PATH : ${lib.makeBinPath runtimeDeps} --suffix PATH : ${lib.makeBinPath [ openssh ]}
   '';
 
   meta = with lib; {
-    description = "Merge a GitHub PR when CI is green";
+    description = "Merge a PR when the CI is green (supports GitHub and Gitea)";
     license = licenses.mit;
     platforms = platforms.all;
     mainProgram = "merge-when-green";
