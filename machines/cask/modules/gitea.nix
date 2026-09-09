@@ -9,9 +9,25 @@ let
   port = 3002;
 in
 {
+  clan.core.vars.generators.gitea-mail = {
+    files.password = {
+      secret = true;
+      owner = "gitea";
+    };
+    prompts.password = {
+      description = "Kanidm POSIX password for the gitea_notify SMTP identity";
+      type = "hidden";
+      persist = true;
+    };
+    script = ''
+      cp "$prompts/password" "$out/password"
+    '';
+  };
+
   services.gitea = {
     enable = true;
     database.type = "postgres";
+    mailerPasswordFile = config.clan.core.vars.generators.gitea-mail.files.password.path;
     settings = {
       server = {
         DOMAIN = domain;
@@ -31,12 +47,22 @@ in
         SHOW_REGISTRATION_BUTTON = false;
         ENABLE_PASSWORD_SIGNIN_FORM = false;
         ENABLE_BASIC_AUTHENTICATION = false;
+        ENABLE_NOTIFY_MAIL = true;
       };
 
       oauth2_client = {
         ENABLE_AUTO_REGISTRATION = true;
         USERNAME = "preferred_username";
         UPDATE_AVATAR = true;
+      };
+
+      mailer = {
+        ENABLED = true;
+        PROTOCOL = "smtps";
+        SMTP_ADDR = "mail.mulatta.io";
+        SMTP_PORT = 465;
+        FROM = "Gitea <git@mulatta.io>";
+        USER = "gitea_notify";
       };
 
       security = {

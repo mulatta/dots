@@ -126,6 +126,7 @@ in
           members = [
             "seungwon"
             "n8n_notify"
+            "gitea_notify"
             "noa"
           ];
         };
@@ -202,6 +203,12 @@ in
         n8n_notify = {
           displayName = "n8n notify";
           mailAddresses = [ "n8n@${baseDomain}" ];
+        };
+        # SMTP-only identity. Keep it outside git_users so mail credentials
+        # cannot be used for interactive Gitea login.
+        gitea_notify = {
+          displayName = "Gitea notifications";
+          mailAddresses = [ "git@${baseDomain}" ];
         };
         # n8n automation bot. OIDC into Nextcloud once to provision the
         # downstream user; thereafter n8n authenticates via a Nextcloud
