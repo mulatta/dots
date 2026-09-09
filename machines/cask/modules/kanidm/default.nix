@@ -150,6 +150,9 @@ in
         bookmark_users = {
           members = [ "seungwon" ];
         };
+        git_users = {
+          members = [ "seungwon" ];
+        };
         zotero_users = {
           members = [ "seungwon" ];
         };
@@ -233,6 +236,37 @@ in
             "email"
             "profile"
           ];
+        };
+
+        # Gitea - confidential client. Kanidm scope maps are the login
+        # allow-list; Gitea maps the admins claim on every OIDC login.
+        gitea = {
+          displayName = "Gitea";
+          originUrl = [
+            "https://git.${baseDomain}"
+            "https://git.${baseDomain}/user/oauth2/kanidm/callback"
+          ];
+          originLanding = "https://git.${baseDomain}";
+          public = false;
+          enableLocalhostRedirects = false;
+          # Gitea's confidential OIDC client does not send a PKCE challenge.
+          allowInsecureClientDisablePkce = true;
+          preferShortUsername = true;
+          basicSecretFile = config.clan.core.vars.generators.kanidm-gitea-oidc.files.kanidm-secret.path;
+          scopeMaps = {
+            admins = [
+              "openid"
+              "email"
+              "profile"
+              "groups_name"
+            ];
+            git_users = [
+              "openid"
+              "email"
+              "profile"
+              "groups_name"
+            ];
+          };
         };
 
         # Nextcloud - public client with PKCE
@@ -527,6 +561,25 @@ in
       RemainAfterExit = true;
       User = "root";
     };
+  };
+
+  clan.core.vars.generators.kanidm-gitea-oidc = {
+    share = true;
+    files = {
+      kanidm-secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      gitea-secret = {
+        secret = true;
+        owner = "gitea";
+      };
+    };
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      openssl rand -hex 32 | tr -d '\n' > "$out/kanidm-secret"
+      cp "$out/kanidm-secret" "$out/gitea-secret"
+    '';
   };
 
   clan.core.vars.generators.kanidm-miniflux-oidc = {
