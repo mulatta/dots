@@ -19,7 +19,9 @@ in
 
     MaxAuthTries = 3;
     MaxSessions = 5;
-    LoginGraceTime = 30;
+    LoginGraceTime = 15;
+    MaxStartups = "50:30:100";
+    PerSourceMaxStartups = 3;
     ClientAliveInterval = 300;
     ClientAliveCountMax = 2;
 
@@ -58,28 +60,18 @@ in
     ];
 
     jails = {
-      sshd = {
-        settings = {
-          enabled = true;
-          port = sshPort;
-          filter = "sshd";
-          maxretry = 3;
-          findtime = 600;
-          bantime = 86400;
-          backend = "systemd";
-        };
-      };
+      sshd.settings.enabled = false;
 
-      sshd-aggressive = {
-        settings = {
-          enabled = true;
-          port = sshPort;
-          filter = "sshd[mode=aggressive]";
-          maxretry = 3;
-          findtime = 3600;
-          bantime = 86400;
-          backend = "systemd";
-        };
+      sshd-aggressive.settings = {
+        enabled = true;
+        port = sshPort;
+        filter = "sshd[mode=aggressive]";
+        maxretry = 3;
+        findtime = 3600;
+        bantime = 86400;
+        # Restrict the reader to the system journal so user-journal file
+        # descriptors cannot mask a lost system journal after rotation.
+        backend = "systemd[journalflags=4]";
       };
     };
   };
