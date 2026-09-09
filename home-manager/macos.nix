@@ -61,6 +61,7 @@ in
     pkgs.czkawka-full
     pkgs.dorion
     pkgs.google-chrome
+    pkgs.kanidm_1_11
     pkgs.mpv
     pkgs.obsidian
     pkgs.tailscale
