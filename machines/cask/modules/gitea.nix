@@ -9,6 +9,25 @@ let
   port = 3002;
 in
 {
+  clan.core.vars.generators.kanidm-gitea-oidc = {
+    share = true;
+    files = {
+      kanidm-secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      gitea-secret = {
+        secret = true;
+        owner = "gitea";
+      };
+    };
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      openssl rand -hex 32 | tr -d '\n' > "$out/kanidm-secret"
+      cp "$out/kanidm-secret" "$out/gitea-secret"
+    '';
+  };
+
   clan.core.vars.generators.gitea-mail = {
     files.password = {
       secret = true;

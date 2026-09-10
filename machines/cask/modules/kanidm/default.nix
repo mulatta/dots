@@ -9,11 +9,10 @@ let
   bindAddress = "127.0.0.1";
   port = 8443;
   stalwartTokenFile = "/var/lib/stalwart-mail/kanidm-token";
-  # OAuth2 client logos (pinned to package versions)
+
   oauth2 = import ./oauth2.nix {
     inherit pkgs config baseDomain;
   };
-
 in
 {
   services.kanidm = {
@@ -248,85 +247,5 @@ in
     };
   };
 
-  clan.core.vars.generators.kanidm-gitea-oidc = {
-    share = true;
-    files = {
-      kanidm-secret = {
-        secret = true;
-        owner = "kanidm";
-      };
-      gitea-secret = {
-        secret = true;
-        owner = "gitea";
-      };
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 | tr -d '\n' > "$out/kanidm-secret"
-      cp "$out/kanidm-secret" "$out/gitea-secret"
-    '';
-  };
-
-  clan.core.vars.generators.kanidm-miniflux-oidc = {
-    share = true;
-    files.client-secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    files.env.secret = true;
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      client_secret=$(openssl rand -hex 32 | tr -d '\n')
-
-      printf '%s' "$client_secret" > "$out/client-secret"
-      printf 'OAUTH2_CLIENT_SECRET=%s\n' "$client_secret" > "$out/env"
-    '';
-  };
-
-  clan.core.vars.generators.kanidm-paperless-oidc = {
-    share = true;
-    files.secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 > "$out/secret"
-    '';
-  };
-
-  clan.core.vars.generators.kanidm-linkwarden-oidc = {
-    share = true;
-    files.secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 > "$out/secret"
-    '';
-  };
-  clan.core.vars.generators.kanidm-jellyfin-oidc = {
-    share = true;
-    files.secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 > "$out/secret"
-    '';
-  };
-
-  clan.core.vars.generators.kanidm-bulwark-webmail-oidc = {
-    share = true;
-    files.secret = {
-      secret = true;
-      owner = "kanidm";
-    };
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      openssl rand -hex 32 > "$out/secret"
-    '';
-  };
+  clan.core.vars.generators = oauth2.generators;
 }

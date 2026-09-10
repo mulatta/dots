@@ -93,6 +93,18 @@ in
     };
   };
 
+  clan.core.vars.generators.kanidm-bulwark-webmail-oidc = {
+    share = true;
+    files.secret = {
+      secret = true;
+      owner = "kanidm";
+    };
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      openssl rand -hex 32 > "$out/secret"
+    '';
+  };
+
   clan.core.vars.generators.bulwark-webmail = {
     files.session-secret.secret = true;
     runtimeInputs = [ pkgs.openssl ];

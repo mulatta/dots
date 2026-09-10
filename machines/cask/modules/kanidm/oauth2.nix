@@ -313,4 +313,59 @@ in
       ];
     };
   };
+
+  generators = {
+    kanidm-miniflux-oidc = {
+      share = true;
+      files.client-secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      files.env.secret = true;
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        client_secret=$(openssl rand -hex 32 | tr -d '\n')
+
+        printf '%s' "$client_secret" > "$out/client-secret"
+        printf 'OAUTH2_CLIENT_SECRET=%s\n' "$client_secret" > "$out/env"
+      '';
+    };
+
+    kanidm-paperless-oidc = {
+      share = true;
+      files.secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 > "$out/secret"
+      '';
+    };
+
+    kanidm-linkwarden-oidc = {
+      share = true;
+      files.secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 > "$out/secret"
+      '';
+    };
+
+    kanidm-jellyfin-oidc = {
+      share = true;
+      files.secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 > "$out/secret"
+      '';
+    };
+
+  };
 }
