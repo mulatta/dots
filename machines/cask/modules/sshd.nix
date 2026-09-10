@@ -5,6 +5,12 @@
 }:
 let
   sshPort = toString (lib.head (config.services.openssh.ports or [ 22 ]));
+  privateMeshCidrs = [
+    "10.208.0.0/12"
+    "fdec:ca5f::/32"
+    "fd28:387a::/40"
+  ];
+  privateMeshMatch = lib.concatStringsSep "," privateMeshCidrs;
 in
 {
   services.openssh.settings = {
@@ -22,6 +28,7 @@ in
     LoginGraceTime = 15;
     MaxStartups = "50:30:100";
     PerSourceMaxStartups = 10;
+    PerSourcePenaltyExemptList = privateMeshMatch;
     ClientAliveInterval = 300;
     ClientAliveCountMax = 2;
 
@@ -40,7 +47,7 @@ in
   # Allow root login and TCP forwarding from internal networks only
   services.openssh.extraConfig = ''
     # Private mesh networks
-    Match Address 10.208.0.0/12,fdec:ca5f::/32
+    Match Address ${privateMeshMatch}
         PermitRootLogin prohibit-password
         AllowTcpForwarding yes
 
@@ -56,9 +63,8 @@ in
     ignoreIP = [
       "127.0.0.1/8"
       "::1/128"
-      "10.208.0.0/12"
-      "fdec:ca5f::/32"
-    ];
+    ]
+    ++ privateMeshCidrs;
 
     jails = {
       sshd.settings.enabled = false;
