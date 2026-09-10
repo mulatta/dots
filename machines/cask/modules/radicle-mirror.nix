@@ -18,10 +18,6 @@ in
     addr = "127.0.0.1:4128";
     ghAppId = 4741113;
     allowedOwners = [ "mulatta" ];
-    mirroredForks = [
-      "mulatta/nixpkgs"
-      "mulatta/noctalia-plugins"
-    ];
     delegates = [ "did:key:z6MkkGbVHDVLst7JZgrH8iTCK6YGg4GJKAuEoPEcrokykNkk" ];
     workers = 1;
 
