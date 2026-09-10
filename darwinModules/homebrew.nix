@@ -26,7 +26,6 @@
     "bitwarden"
     "claude"
     "cleanshot"
-    "codex-app"
     "devonthink"
     "gureumkim"
     "hancom-word"

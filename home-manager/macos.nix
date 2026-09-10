@@ -51,6 +51,7 @@ in
     selfPkgs.instagram-cli
     selfPkgs.openlogi
     selfPkgs.radicle-desktop
+    pkgs.chatgpt
     aiPkgs.hermes-desktop
     (aiPkgs.kandev-desktop.override {
       inherit kandevRuntime;

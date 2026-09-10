@@ -24,7 +24,6 @@ AGENTS.md
 **/.claude/settings.local.json
 
 .codex/*
-!.codex/config.toml
 
 .agents/**
 skills-lock.json
