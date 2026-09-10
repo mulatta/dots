@@ -1,6 +1,7 @@
 {
   lib,
   buildNpmPackage,
+  fetchzip,
   jq,
   swiftPackages,
   swift,
@@ -8,6 +9,12 @@
 
 let
   targetTriple = "${swift.swiftArch}-apple-macosx14.0";
+
+  appAssets = fetchzip {
+    url = "https://github.com/mulatta/dots/releases/download/nostr-chat-bar-assets-v1/nostr-chat-bar-assets-v1.zip";
+    hash = "sha256-8zXvFHwaRZ6uZM8eFZ2NoUAqOyoxf5DqzmG6CTvAUrE=";
+    stripRoot = false;
+  };
 
   webAssets = buildNpmPackage {
     pname = "nostr-chat-bar-web";
@@ -76,8 +83,8 @@ swiftPackages.stdenv.mkDerivation {
     install -m 755 nostr-chat-bar $out/bin/nostr-chat-bar
     install -m 755 nostr-chat-shot.sh $out/bin/nostr-chat-shot
     substituteInPlace $out/bin/nostr-chat-shot --replace-fail "@jq@" ${lib.getExe jq}
-    install -m 644 NostrChatBar.icns $out/share/nostr-chat-bar/NostrChatBar.icns
-    install -m 644 NoaMenuBarTemplate.png $out/share/nostr-chat-bar/NoaMenuBarTemplate.png
+    install -m 644 ${appAssets}/NostrChatBar.icns $out/share/nostr-chat-bar/NostrChatBar.icns
+    install -m 644 ${appAssets}/NoaMenuBarTemplate.png $out/share/nostr-chat-bar/NoaMenuBarTemplate.png
     cp -R ${webAssets}/dist/. $out/share/nostr-chat-bar/web/
     runHook postInstall
   '';
