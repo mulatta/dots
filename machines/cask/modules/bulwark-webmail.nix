@@ -2,7 +2,6 @@
 let
   baseDomain = "mulatta.io";
   domain = "mail.${baseDomain}";
-  oldDomain = "webmail.${baseDomain}";
   stalwartDomain = "stalwart.${baseDomain}";
   stalwartProxyPass = "http://127.0.0.1:8080";
   stalwartProxyExtraConfig = ''
@@ -68,12 +67,6 @@ in
         '';
       };
     };
-  };
-
-  services.nginx.virtualHosts.${oldDomain} = {
-    useACMEHost = "mulatta.io";
-    forceSSL = true;
-    globalRedirect = domain;
   };
 
   systemd.services.bulwark-webmail = {
