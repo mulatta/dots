@@ -75,43 +75,6 @@
           rsshub = pkgs.rsshub;
         };
         updater = pkgs.callPackage ./updater { };
-
-        yazi-plugins =
-          let
-            plugins = with pkgs.yaziPlugins; {
-              inherit
-                chmod
-                full-border
-                toggle-pane
-                diff
-                rsync
-                miller
-                starship
-                glow
-                git
-                piper
-                ;
-            };
-          in
-          pkgs.runCommand "yazi-plugins" { } ''
-            mkdir -p $out/share/yazi/plugins
-            ${lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (name: pkg: ''
-                ln -s ${pkg} $out/share/yazi/plugins/${name}.yazi
-              '') plugins
-            )}
-          '';
-
-        yazi-preview-tools = pkgs.buildEnv {
-          name = "yazi-preview-tools";
-          paths = with pkgs; [
-            imagemagick
-            ffmpegthumbnailer
-            unar
-            poppler
-            glow
-          ];
-        };
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         nostr-chat-bar = pkgs.callPackage ./nostr-chat-bar { };
