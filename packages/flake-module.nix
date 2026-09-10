@@ -22,30 +22,6 @@
         claude-md = pkgs.callPackage ./claude-md { };
         email-sync = pkgs.callPackage ./email-sync { };
 
-        helix-lsp-tools = pkgs.buildEnv {
-          name = "helix-lsp-tools";
-          paths = with pkgs; [
-            bash-language-server
-            harper
-            marksman
-            nil
-            nixd
-            pyright
-            ruff
-            rust-analyzer
-            taplo
-            tinymist
-            yaml-language-server
-            vscode-langservers-extracted
-            nixfmt
-            prettier
-            rustfmt
-            shfmt
-            typstyle
-            yamlfmt
-          ];
-        };
-
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
         instagram-cli = pkgs.callPackage ./instagram-cli { };

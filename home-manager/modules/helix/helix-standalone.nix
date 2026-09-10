@@ -1,38 +1,45 @@
 {
-  writeShellScriptBin,
-  symlinkJoin,
+  buildEnv,
   helix,
-  helix-lsp-tools,
+  helix-lsp-packages,
+  symlinkJoin,
+  uutils-coreutils-noprefix,
+  writeShellApplication,
   helix-config ? ../../../home/.config/helix,
 }:
 let
-  hxWrapper = writeShellScriptBin "hx" ''
-    set -efu
+  lspEnv = buildEnv {
+    name = "helix-lsp-tools";
+    paths = helix-lsp-packages;
+  };
+  hxWrapper = writeShellApplication {
+    name = "hx";
+    runtimeInputs = [ uutils-coreutils-noprefix ];
+    text = ''
+      export PATH=${lspEnv}/bin:${helix}/bin:$PATH
 
-    export PATH=${helix-lsp-tools}/bin:${helix}/bin:$PATH
+      # --config does not relocate languages.toml, so isolate Helix through XDG_CONFIG_HOME.
+      HELIX_STANDALONE_XDG="''${XDG_CONFIG_HOME:-$HOME/.config}/helix-standalone"
+      HELIX_STANDALONE="$HELIX_STANDALONE_XDG/helix"
 
-    # --config does not relocate languages.toml, so isolate Helix through XDG_CONFIG_HOME.
-    HELIX_STANDALONE_XDG="$HOME/.config/helix-standalone"
-    HELIX_STANDALONE="$HELIX_STANDALONE_XDG/helix"
+      # Fresh copy each run so the isolated config cannot drift from its source.
+      rm -rf "$HELIX_STANDALONE_XDG"
+      mkdir -p "$HELIX_STANDALONE"
+      cp -arfT '${helix-config}'/ "$HELIX_STANDALONE"
+      chmod -R u+w "$HELIX_STANDALONE_XDG"
+      export XDG_CONFIG_HOME="$HELIX_STANDALONE_XDG"
 
-    # Fresh copy each run so the isolated config can't drift from source.
-    rm -rf "$HELIX_STANDALONE_XDG"
-    mkdir -p "$HELIX_STANDALONE"
-    cp -arfT '${helix-config}'/ "$HELIX_STANDALONE"
-    chmod -R u+w "$HELIX_STANDALONE_XDG"
-    export XDG_CONFIG_HOME="$HELIX_STANDALONE_XDG"
-
-    exec hx "$@"
-  '';
+      exec hx "$@"
+    '';
+  };
 in
 symlinkJoin {
   name = "hx";
   paths = [
     hxWrapper
-    # Include helix's share directory for zsh completions
+    # Preserve Helix completions while replacing its hx binary with the wrapper.
     "${helix}"
   ];
-  # Only take bin from wrapper, share from helix
   postBuild = ''
     rm -rf $out/bin/hx
     cp ${hxWrapper}/bin/hx $out/bin/hx

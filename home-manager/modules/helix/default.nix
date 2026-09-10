@@ -1,13 +1,14 @@
-# Helix editor - configs managed by stow (home/.config/helix/)
-# Standalone is for `nix run .#helix` only
+# Helix editor with config managed by Stow under home/.config/helix/.
 {
   pkgs,
   self,
   ...
 }:
+let
+  system = pkgs.stdenv.hostPlatform.system;
+  inherit (self.packages.${system}) helix;
+  inherit (self.legacyPackages.${system}) helix-lsp-packages;
+in
 {
-  home.packages = [
-    pkgs.helix
-    self.packages.${pkgs.stdenv.hostPlatform.system}.helix-lsp-tools
-  ];
+  home.packages = helix-lsp-packages ++ [ helix ];
 }
