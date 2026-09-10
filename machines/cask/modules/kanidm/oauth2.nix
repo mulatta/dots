@@ -24,55 +24,29 @@ let
     "zh"
   ];
 
-  icons = {
-    # Nextcloud 32.0.3 - pinned to nextcloud.com repo commit
-    nextcloud = pkgs.fetchurl {
-      name = "nextcloud.svg";
-      url = "https://raw.githubusercontent.com/nextcloud/nextcloud.com/35505202100647f0363b3e12efd66a19bf060d6f/assets/img/logo/logo_nextcloud_blue.svg";
-      hash = "sha256-vKr7ILKaS1emP3/TcoctglXugvFP+hEQthXS4cGRXzY=";
-    };
-    # Stalwart 0.14.1
-    stalwart = pkgs.fetchurl {
-      name = "stalwart.svg";
-      url = "https://raw.githubusercontent.com/stalwartlabs/mail-server/v0.14.1/img/logo-red.svg";
-      hash = "sha256-SUwYWRjKZPaB8QcIFtc2c0YJEVIsZsCPXAuhgx8bUPA=";
-    };
-    # n8n 1.120.4 - from simple-icons repo (pinned commit)
-    n8n = pkgs.fetchurl {
-      name = "n8n.svg";
-      url = "https://raw.githubusercontent.com/simple-icons/simple-icons/faa4f93283a90f0196f3d320968bd38972a27894/icons/n8n.svg";
-      hash = "sha256-9aYGGIx4vxNP59ha49ExD29Le+r80dL73vKvAskiQKg=";
-    };
+  # Keep runtime closures small while tying logos to package source revisions.
 
-    # Bulwark Webmail - from official branding assets
-    bulwark = pkgs.fetchurl {
-      name = "bulwark.svg";
-      url = "https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/branding/Bulwark_Logo_with_Lettering_Dark_Color.svg";
-      hash = "sha256-5T3qz1QAqoMkfTXxln4ThSU/16QgV1/DwlIf8QVCaVo=";
-    };
-
-    # Paperless-ngx (client branding) - from simple-icons repo (pinned commit)
-    paperless = pkgs.fetchurl {
-      name = "paperlessngx.svg";
-      url = "https://raw.githubusercontent.com/simple-icons/simple-icons/faa4f93283a90f0196f3d320968bd38972a27894/icons/paperlessngx.svg";
-      hash = "sha256-biWHNSGTTOHM1EyVWNXR5mNxCC9XallZCNfCHDUC6GM=";
-    };
-
-    # Miniflux - from official project static icons
-    miniflux = pkgs.fetchurl {
-      name = "miniflux.png";
-      url = "https://raw.githubusercontent.com/miniflux/v2/main/internal/ui/static/bin/icon-512.png";
-      hash = "sha256-X8ujVAT/zYmU1hXfCWU8AIEvK01lOetRHfT5481PjFo=";
-    };
-
-    # Linkwarden 2.14.0 - from official repo
-    linkwarden = pkgs.fetchurl {
-      name = "linkwarden.png";
-      url = "https://raw.githubusercontent.com/linkwarden/linkwarden/v2.14.0/assets/logo.png";
-      hash = "sha256-zCaHvIYW0HV+z5mJquAPvNbKBgirYFTyXN1qD+K9Ayw=";
-    };
-
+  iconBundle = pkgs.fetchzip {
+    url = "https://github.com/mulatta/dots/releases/download/oauth-icons-v1/kanidm-oauth-icons-v1.zip";
+    hash = "sha256-DZppoLkWXApmcliJT5RZjji2KrVKxthT5r8byNGZ9GA=";
+    stripRoot = false;
   };
+
+  icons = {
+    bulwark = "${iconBundle}/bulwark.svg";
+    gitea = "${iconBundle}/gitea.svg";
+    homeassistant = "${iconBundle}/homeassistant.svg";
+    jellyfin = "${iconBundle}/jellyfin.svg";
+    linkwarden = "${iconBundle}/linkwarden.png";
+    miniflux = "${iconBundle}/miniflux.svg";
+    n8n = "${iconBundle}/n8n.svg";
+    nextcloud = "${iconBundle}/nextcloud.svg";
+    paperless = "${iconBundle}/paperless.svg";
+    restate = "${iconBundle}/restate.svg";
+    stalwart = "${iconBundle}/stalwart.png";
+    zotero = "${iconBundle}/zotero.svg";
+  };
+
 in
 {
   clients = {
@@ -95,6 +69,7 @@ in
     # allow-list; Gitea maps the admins claim on every OIDC login.
     gitea = {
       displayName = "Gitea";
+      imageFile = icons.gitea;
       originUrl = [
         "https://git.${baseDomain}"
         "https://git.${baseDomain}/user/oauth2/kanidm/callback"
@@ -168,6 +143,7 @@ in
     # a separate vhost so public invocations can use workload-specific auth.
     restate = {
       displayName = "Restate Orchestration";
+      imageFile = icons.restate;
       originUrl = [
         "https://restate.${baseDomain}"
         "https://restate.${baseDomain}/oauth2/callback"
@@ -186,6 +162,7 @@ in
     # via oauth2-proxy; the sync API itself is public + API-key-authed.
     zhost = {
       displayName = "Zotero (zhost)";
+      imageFile = icons.zotero;
       originUrl = [
         "https://zotero.${baseDomain}"
         "https://zotero.${baseDomain}/oauth2/callback"
@@ -262,6 +239,7 @@ in
     };
     jellyfin = {
       displayName = "Jellyfin";
+      imageFile = icons.jellyfin;
       originUrl = [
         "https://video.${baseDomain}"
         "https://video.${baseDomain}/sso/OID/redirect/kanidm"
@@ -290,6 +268,7 @@ in
 
     homeassistant = {
       displayName = "Home Assistant";
+      imageFile = icons.homeassistant;
       originUrl = [
         "https://home.${baseDomain}/auth/oidc/welcome"
         "https://home.${baseDomain}/auth/oidc/callback"
@@ -333,6 +312,5 @@ in
         "profile"
       ];
     };
-
   };
 }
