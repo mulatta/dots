@@ -13,7 +13,7 @@ in
   ];
 
   nixpkgs.overlays = [
-    self.overlays.dots
+    self.overlays.default
   ];
 
   # this extends srvos's common settings

@@ -25,7 +25,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
-    self.overlays.dots
+    self.overlays.default
   ];
 
   boot.loader.grub = {

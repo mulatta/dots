@@ -72,7 +72,7 @@
   nixpkgs = {
     hostPlatform = "x86_64-linux";
     config.allowUnfree = true;
-    overlays = [ self.overlays.dots ];
+    overlays = [ self.overlays.default ];
   };
 
   environment.systemPackages = with pkgs; [

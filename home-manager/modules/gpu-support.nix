@@ -17,7 +17,7 @@
         cudaSupport = true;
       };
       overlays = [
-        self.overlays.dots
+        self.overlays.default
       ];
     }
   );

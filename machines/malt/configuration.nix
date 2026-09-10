@@ -33,7 +33,7 @@
   networking.hostName = "malt";
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [ self.overlays.dots ];
+  nixpkgs.overlays = [ self.overlays.default ];
 
   # Enable aarch64 emulation for building Raspberry Pi images
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];

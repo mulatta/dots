@@ -8,19 +8,6 @@
 let
   meiliUrl = "http://127.0.0.1:${toString config.services.meilisearch.listenPort}";
   mirrorStateDirectory = "/var/lib/radicle-mirror";
-  radicle-httpd = pkgs.radicle-httpd.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [
-      ./radicle-search-debounce.patch
-      ./radicle-httpd-zstd-archive.patch
-      ./radicle-httpd-archive-404.patch
-    ];
-    nativeCheckInputs = (old.nativeCheckInputs or [ ]) ++ [ pkgs.zstd ];
-    postFixup = (old.postFixup or "") + ''
-      for program in $out/bin/*; do
-        wrapProgram "$program" --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.zstd ]}
-      done
-    '';
-  });
   sharedServiceConfig = {
     Restart = "on-failure";
     RestartSec = 5;
@@ -67,7 +54,7 @@ in
     ];
     wants = [ "meilisearch.service" ];
     serviceConfig = sharedServiceConfig // {
-      ExecStart = "${radicle-httpd}/bin/radicle-search";
+      ExecStart = "${pkgs.radicle-httpd}/bin/radicle-search";
       Environment = [
         "RAD_HOME=${mirrorStateDirectory}/rad"
         "RADICLE_SEARCH_MEILI_URL=${meiliUrl}"
@@ -80,7 +67,7 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "radicle-mirror.service" ];
     serviceConfig = sharedServiceConfig // {
-      ExecStart = "${radicle-httpd}/bin/radicle-httpd --listen 127.0.0.1:8889";
+      ExecStart = "${pkgs.radicle-httpd}/bin/radicle-httpd --listen 127.0.0.1:8889";
       Environment = [
         "RAD_HOME=${mirrorStateDirectory}/rad"
         "RADICLE_SEARCH_URL=${meiliUrl}"
