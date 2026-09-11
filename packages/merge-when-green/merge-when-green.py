@@ -304,7 +304,7 @@ def gitea_enable_automerge(pr_index: str) -> None:
     gitea_api(
         f"/pulls/{pr_index}/merge",
         {
-            "do": "merge",
+            "do": "rebase",
             "head_commit_id": sha,
             "merge_when_checks_succeed": True,
             "delete_branch_after_merge": True,

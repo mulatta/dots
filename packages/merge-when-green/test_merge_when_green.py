@@ -182,7 +182,7 @@ class GiteaProtocolTest(unittest.TestCase):
             {"head": "topic", "base": "main", "title": "Title", "body": "Body"},
         )
         self.assertTrue(self.requests[2][2]["merge_when_checks_succeed"])
-        self.assertEqual(self.requests[2][2]["do"], "merge")
+        self.assertEqual(self.requests[2][2]["do"], "rebase")
         self.assertEqual(self.requests[2][2]["head_commit_id"], "abc")
 
     def test_merge_error_propagates(self) -> None:
