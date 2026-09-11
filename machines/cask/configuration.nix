@@ -24,7 +24,7 @@
     ./modules/atuin.nix
     ./modules/bulwark-webmail.nix
     ./modules/disko.nix
-    ./modules/gitea.nix
+    ./modules/gitea
     ./modules/gitea-mq.nix
     ./modules/headscale.nix
     ./modules/kanidm

@@ -9,6 +9,8 @@ let
   port = 3002;
 in
 {
+  imports = [ ./publication.nix ];
+
   clan.core.vars.generators.kanidm-gitea-oidc = {
     share = true;
     files = {
@@ -162,7 +164,7 @@ in
     '';
     locations = {
       "= /metrics".return = "404";
-      "= /robots.txt".alias = ./gitea/robots.txt;
+      "= /robots.txt".alias = ./robots.txt;
       "/" = {
         proxyPass = "http://127.0.0.1:${toString port}";
         proxyWebsockets = true;
