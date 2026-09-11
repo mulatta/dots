@@ -17,6 +17,9 @@ import urllib.request
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlsplit
+
+_gitea_api_url: str | None = None
 
 
 class Colors:
@@ -66,18 +69,60 @@ def run(
 
 
 def detect_platform() -> Platform:
-    result = run(["gh", "repo", "view", "--json", "name"], check=False, capture=True)
-    if result.returncode == 0:
+    api_url, _, _ = get_repo_info()
+    host = urlsplit(api_url).hostname
+    if host == "github.com":
         print_subtle("Detected GitHub")
         return Platform.GITHUB
 
-    result = run(["tea", "repos", "list", "--limit", "1"], check=False, capture=True)
-    if result.returncode == 0:
-        print_subtle("Detected Gitea")
-        return Platform.GITEA
+    try:
+        result = run(["tea", "logins", "list", "-o", "json"], check=False, capture=True)
+    except FileNotFoundError:
+        raise RuntimeError(f"No tea client available to identify {host}") from None
+    if result.returncode != 0:
+        raise RuntimeError("Could not read tea logins")
+    remote = run(["git", "remote", "get-url", "origin"], capture=True).stdout.strip()
+    global _gitea_api_url
+    try:
+        _gitea_api_url = select_gitea_url(
+            json.loads(result.stdout),
+            api_url,
+            remote.startswith(("http://", "https://")),
+        )
+    except (ValueError, KeyError, TypeError, AttributeError):
+        raise RuntimeError("Could not parse tea logins") from None
+    print_subtle(f"Detected Gitea ({host})")
+    return Platform.GITEA
 
-    print_warning("Could not detect platform, defaulting to GitHub")
-    return Platform.GITHUB
+
+def select_gitea_url(
+    logins: list[dict[str, Any]], api_url: str, http_remote: bool
+) -> str:
+    """HTTP origins identify instances; SSH hosts map through tea configuration."""
+    origin = urlsplit(api_url)
+    urls = set()
+    for login in logins:
+        url = login["url"].rstrip("/")
+        parsed = urlsplit(url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            raise RuntimeError("Invalid tea login URL")
+        if http_remote:
+            matches = (
+                origin.scheme == parsed.scheme
+                and origin.hostname == parsed.hostname
+                and (origin.port or (443 if origin.scheme == "https" else 80))
+                == (parsed.port or (443 if parsed.scheme == "https" else 80))
+                and origin.path == parsed.path
+            )
+        else:
+            matches = origin.hostname in (parsed.hostname, login.get("ssh_host"))
+        if matches:
+            urls.add(url)
+    if len(urls) != 1:
+        raise RuntimeError(
+            f"Remote host {origin.hostname!r} needs an unambiguous tea login"
+        )
+    return urls.pop()
 
 
 def get_default_branch(platform: Platform) -> str:
@@ -96,33 +141,103 @@ def get_default_branch(platform: Platform) -> str:
         )
         return result.stdout.strip()
 
-    result = run(
-        ["git", "symbolic-ref", "refs/remotes/origin/HEAD"], check=False, capture=True
-    )
-    if result.returncode == 0:
-        return result.stdout.strip().split("/")[-1]
-    return "main"
+    branch = gitea_api("").get("default_branch")
+    if not isinstance(branch, str) or not branch:
+        raise RuntimeError("Gitea API returned no default branch")
+    return branch
 
 
 def get_repo_info() -> tuple[str, str, str]:
-    """Parse git remote to get API URL, owner, repo."""
-    result = run(["git", "remote", "get-url", "origin"], capture=True)
-    remote_url = result.stdout.strip()
+    """Parse origin; SSH ports are not HTTP API ports."""
+    remote = run(["git", "remote", "get-url", "origin"], capture=True).stdout.strip()
+    if "://" not in remote:
+        match = re.fullmatch(r"(?:[^@/:]+@)?([^/:]+):(.+)", remote)
+        if not match:
+            raise RuntimeError(f"Could not parse remote URL: {remote}")
+        host, path = match.groups()
+        api_url = f"https://{host.lower()}"
+    else:
+        parsed = urlsplit(remote)
+        if parsed.scheme not in ("http", "https", "ssh") or not parsed.hostname:
+            raise RuntimeError("Unsupported origin URL")
+        host = parsed.hostname
+        authority = f"[{host}]" if ":" in host else host
+        if parsed.scheme != "ssh" and parsed.port:
+            authority += f":{parsed.port}"
+        api_url = (
+            f"{'https' if parsed.scheme == 'ssh' else parsed.scheme}://{authority}"
+        )
+        path = parsed.path.lstrip("/")
+    parts = path.removesuffix(".git").split("/")
+    if len(parts) != 2 or not all(parts):
+        raise RuntimeError("Origin must specify owner/repository")
+    return api_url, parts[0], parts[1]
 
-    # SSH: git@host:owner/repo.git or HTTPS: https://host/owner/repo.git
-    match = re.match(
-        r"(?:https?://|git@)([^/:]+)[:/]([^/]+)/(.+?)(?:\.git)?$", remote_url
+
+class NoRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str
+    ) -> None:
+        # Never forward repository credentials to a redirected origin.
+        return None
+
+
+def gitea_api(
+    path: str, data: dict[str, Any] | None = None, *, expect_list: bool = False
+) -> Any:
+    """Use REST objects rather than tea's display-oriented PR output."""
+    api_url, owner, repo = get_repo_info()
+    token = os.environ.get("GITEA_TOKEN")
+    if not token:
+        raise RuntimeError("GITEA_TOKEN is required for Gitea")
+    url = f"{_gitea_api_url or api_url}/api/v1/repos/{quote(owner, safe='')}/{quote(repo, safe='')}{path}"
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode() if data is not None else None,
+        headers={"Authorization": f"token {token}", "Content-Type": "application/json"},
     )
-    if not match:
-        msg = f"Could not parse remote URL: {remote_url}"
-        raise RuntimeError(msg)
+    try:
+        with urllib.request.build_opener(NoRedirects()).open(
+            request, timeout=10
+        ) as response:
+            body = response.read()
+            if not body and data is not None and path.endswith("/merge"):
+                return None
+            value = json.loads(body)
+            if not isinstance(value, list if expect_list else dict):
+                raise TypeError("Unexpected response type")
+            if expect_list and any(not isinstance(item, dict) for item in value):
+                raise TypeError("Unexpected list entry")
+            return value
+    except urllib.error.HTTPError as error:
+        error.close()
+        raise RuntimeError(f"Gitea API {path}: HTTP {error.code}") from None
+    except (urllib.error.URLError, TimeoutError, ValueError, TypeError):
+        raise RuntimeError(
+            f"Gitea API {path}: request or JSON response failed"
+        ) from None
 
-    host, owner, repo = match.groups()
-    api_url = f"https://{host}"
-    return api_url, owner, repo
+
+def find_gitea_pr(branch: str, target: str | None = None) -> str | None:
+    _, owner, repo = get_repo_info()
+    page = 1
+    while True:
+        prs = gitea_api(f"/pulls?state=open&limit=50&page={page}", expect_list=True)
+        if not prs:
+            return None
+        for pr in prs:
+            head = pr.get("head") or {}
+            head_repo = head.get("repo") or {}
+            if (
+                head.get("ref") == branch
+                and head_repo.get("full_name") == f"{owner}/{repo}"
+                and (target is None or pr.get("base", {}).get("ref") == target)
+            ):
+                return gitea_pr_number(pr)
+        page += 1
 
 
-def check_pr_exists(branch: str, platform: Platform) -> bool:
+def check_pr_exists(branch: str, platform: Platform, target: str | None = None) -> bool:
     if platform == Platform.GITHUB:
         result = run(
             ["gh", "pr", "view", branch, "--json", "state"],
@@ -137,19 +252,7 @@ def check_pr_exists(branch: str, platform: Platform) -> bool:
             except json.JSONDecodeError:
                 pass
     else:
-        result = run(
-            ["tea", "pulls", "list", "--output", "json", "--state", "open"],
-            check=False,
-            capture=True,
-        )
-        if result.returncode == 0:
-            try:
-                prs = json.loads(result.stdout)
-                for pr in prs:
-                    if pr.get("head", {}).get("ref") == branch:
-                        return True
-            except json.JSONDecodeError:
-                pass
+        return find_gitea_pr(branch, target) is not None
     return False
 
 
@@ -180,87 +283,79 @@ def create_pr_github(branch: str, target: str, title: str, body: str) -> str:
     return branch
 
 
+def gitea_pr_number(pr: dict[str, Any]) -> str:
+    number = pr.get("number")
+    if type(number) is not int or number <= 0:
+        raise RuntimeError("Gitea API returned an invalid PR number")
+    return str(number)
+
+
+def gitea_head_sha(pr: dict[str, Any]) -> str:
+    sha = (pr.get("head") or {}).get("sha")
+    if not isinstance(sha, str) or not sha:
+        raise RuntimeError("Gitea API returned no PR head SHA")
+    return sha
+
+
 def gitea_enable_automerge(pr_index: str) -> None:
-    """Gitea has no CLI support for auto-merge, so use its REST API."""
     print_warning("Enabling auto-merge...")
-    api_url, owner, repo = get_repo_info()
-    token = os.environ.get("GITEA_TOKEN")
-
-    url = f"{api_url}/api/v1/repos/{owner}/{repo}/pulls/{pr_index}/merge"
-    headers = {"Content-Type": "application/json"}
-    if token:
-        headers["Authorization"] = f"token {token}"
-
-    data = json.dumps(
+    pr = gitea_api(f"/pulls/{pr_index}")
+    sha = gitea_head_sha(pr)
+    gitea_api(
+        f"/pulls/{pr_index}/merge",
         {
-            "Do": "merge",
+            "do": "rebase",
+            "head_commit_id": sha,
             "merge_when_checks_succeed": True,
             "delete_branch_after_merge": True,
-        }
-    ).encode()
-
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")  # noqa: S310
-    try:
-        urllib.request.urlopen(req, timeout=10)  # noqa: S310
-        print_success("✓ Auto-merge enabled")
-    except (urllib.error.HTTPError, urllib.error.URLError) as e:
-        print_warning(f"Could not enable auto-merge: {e}")
+        },
+    )
+    print_success("✓ Auto-merge enabled")
 
 
 def create_pr_gitea(branch: str, target: str, title: str, body: str) -> str:
-    result = run(
-        [
-            "tea",
-            "pulls",
-            "create",
-            "--head",
-            branch,
-            "--base",
-            target,
-            "--title",
-            title,
-            "--description",
-            body,
-            "--output",
-            "json",
-        ],
-        capture=True,
+    pr = gitea_api(
+        "/pulls", {"head": branch, "base": target, "title": title, "body": body}
     )
-
-    try:
-        pr_data = json.loads(result.stdout)
-        pr_index = str(pr_data["index"])
-    except (json.JSONDecodeError, KeyError):
-        print_warning("Could not parse PR number, using branch name")
-        return branch
-
-    gitea_enable_automerge(pr_index)
-    return pr_index
+    pr_id = gitea_pr_number(pr)
+    gitea_enable_automerge(pr_id)
+    return pr_id
 
 
 def check_gitea_pr_state(pr_id: str) -> bool | None:
-    """Check Gitea PR state. Returns True if merged, False if closed, None if open."""
-    result = run(
-        ["tea", "pulls", "list", "--output", "json", "--state", "all"],
-        check=False,
-        capture=True,
+    """Read the PR directly; fail once all reported commit checks settle."""
+    pr = gitea_api(f"/pulls/{pr_id}")
+    if pr.get("merged"):
+        return True
+    if pr.get("state") == "closed":
+        print_error("PR was closed without merging")
+        return False
+    if pr.get("state") != "open":
+        raise RuntimeError("Gitea API returned an invalid PR state")
+    sha = quote(gitea_head_sha(pr), safe="")
+    page = 1
+    states: dict[str, str] = {}
+    while True:
+        result = gitea_api(f"/commits/{sha}/status?limit=50&page={page}")
+        if "statuses" not in result:
+            raise RuntimeError("Gitea API returned no commit statuses")
+        statuses = result["statuses"] or []
+        if not isinstance(statuses, list):
+            raise TypeError("Invalid Gitea commit statuses")
+        if not statuses:
+            break
+        for status in statuses:
+            states.setdefault(status["context"], status["status"])
+        page += 1
+    pending = sum(
+        state not in ("success", "skipped", "failure", "error", "warning")
+        for state in states.values()
     )
-    if result.returncode != 0:
-        return None
-
-    try:
-        prs = json.loads(result.stdout)
-        for pr in prs:
-            if str(pr.get("index")) == pr_id:
-                state = pr.get("state", "").lower()
-                if state == "closed":
-                    if pr.get("merged"):
-                        return True
-                    print_error("PR was closed without merging")
-                    return False
-                break
-    except json.JSONDecodeError:
-        pass
+    failed = sum(state in ("failure", "error", "warning") for state in states.values())
+    if failed and not pending:
+        print_error(f"{failed} checks failed")
+        run_nixbot_log_if_needed(failed, pending, False)
+        return False
     return None
 
 
@@ -569,7 +664,9 @@ def push_branch(default_branch: str) -> str:
     return branch_name
 
 
-def enable_automerge_existing_pr(branch_name: str, platform: Platform) -> str:
+def enable_automerge_existing_pr(
+    branch_name: str, platform: Platform, target: str | None = None
+) -> str:
     """Enable auto-merge on an existing PR. Returns the PR ID."""
     if platform == Platform.GITHUB:
         print_warning("Enabling auto-merge...")
@@ -577,21 +674,11 @@ def enable_automerge_existing_pr(branch_name: str, platform: Platform) -> str:
         print_success("✓ Auto-merge enabled")
         return branch_name
 
-    # Gitea addresses PRs by number, so look it up from the branch name
-    result = run(
-        ["tea", "pulls", "list", "--output", "json", "--state", "open"],
-        capture=True,
-    )
-    try:
-        prs = json.loads(result.stdout)
-        for pr in prs:
-            if pr.get("head", {}).get("ref") == branch_name:
-                pr_id = str(pr["index"])
-                gitea_enable_automerge(pr_id)
-                return pr_id
-    except json.JSONDecodeError:
-        print_warning("Could not parse PR list")
-    return branch_name
+    pr_id = find_gitea_pr(branch_name, target)
+    if pr_id is None:
+        raise RuntimeError(f"No open Gitea PR for {branch_name}")
+    gitea_enable_automerge(pr_id)
+    return pr_id
 
 
 def finalize_merge(platform: Platform, pr_id: str, default_branch: str) -> int:
@@ -636,9 +723,9 @@ def main() -> int:
 
     branch_name = push_branch(default_branch)
 
-    if check_pr_exists(branch_name, platform):
+    if check_pr_exists(branch_name, platform, default_branch):
         print_success("✓ Using existing pull request")
-        pr_id = enable_automerge_existing_pr(branch_name, platform)
+        pr_id = enable_automerge_existing_pr(branch_name, platform, default_branch)
     else:
         title, body = get_pr_message(args.message, default_branch)
         print_header("Creating pull request...")
@@ -660,5 +747,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print_warning("\nInterrupted")
         sys.exit(130)
+    except (KeyError, TypeError, AttributeError, ValueError):
+        print_error("Invalid forge response or origin URL")
+        sys.exit(1)
+    except RuntimeError as e:
+        print_error(str(e))
+        sys.exit(1)
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
