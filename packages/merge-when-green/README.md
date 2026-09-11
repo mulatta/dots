@@ -28,4 +28,5 @@ merge-when-green -m "title"   # PR title/body from argument instead of $EDITOR
 - Gitea: `tea`, `GITEA_TOKEN` set (used to enable auto-merge via API)
 - Optional: `flake-fmt`, `git-absorb`, `lazygit`, `nbo`
 
-The platform is detected by trying `gh repo view` first, then `tea repos list`.
+The platform is detected from the origin URL. GitHub remotes use `gh`; other
+hosts are matched against `tea logins list`. Unmatched hosts fall back to GitHub.

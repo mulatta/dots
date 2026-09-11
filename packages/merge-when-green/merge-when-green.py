@@ -66,17 +66,21 @@ def run(
 
 
 def detect_platform() -> Platform:
-    result = run(["gh", "repo", "view", "--json", "name"], check=False, capture=True)
-    if result.returncode == 0:
+    api_url, _, _ = get_repo_info()
+    host = api_url.removeprefix("https://")
+    if host == "github.com":
         print_subtle("Detected GitHub")
         return Platform.GITHUB
 
-    result = run(["tea", "repos", "list", "--limit", "1"], check=False, capture=True)
-    if result.returncode == 0:
-        print_subtle("Detected Gitea")
+    result = run(["tea", "logins", "list", "-o", "simple"], check=False, capture=True)
+    if result.returncode == 0 and host in result.stdout:
+        print_subtle(f"Detected Gitea ({host})")
         return Platform.GITEA
 
-    print_warning("Could not detect platform, defaulting to GitHub")
+    print_warning(
+        f"Remote host {host!r} is not github.com and has no tea login, "
+        "defaulting to GitHub"
+    )
     return Platform.GITHUB
 
 
@@ -199,9 +203,9 @@ def gitea_enable_automerge(pr_index: str) -> None:
         }
     ).encode()
 
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")  # noqa: S310
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        urllib.request.urlopen(req, timeout=10)  # noqa: S310
+        urllib.request.urlopen(req, timeout=10)
         print_success("✓ Auto-merge enabled")
     except (urllib.error.HTTPError, urllib.error.URLError) as e:
         print_warning(f"Could not enable auto-merge: {e}")
