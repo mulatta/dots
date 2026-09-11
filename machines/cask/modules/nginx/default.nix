@@ -76,7 +76,7 @@ in
         proxy_headers_hash_max_size 1024;
         proxy_headers_hash_bucket_size 128;
 
-        map $request_uri $block_dotted {
+        map $uri $block_dotted {
           default 0;
           "~^/\.well-known/" 0;
           "~^/\."            1;

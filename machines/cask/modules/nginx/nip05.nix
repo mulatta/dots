@@ -31,6 +31,10 @@ in
     extraConfig = ''
       add_header Access-Control-Allow-Origin "*" always;
       add_header Cache-Control "public, max-age=3600";
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-Frame-Options "DENY" always;
       default_type application/json;
     '';
   };
