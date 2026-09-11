@@ -36,6 +36,59 @@
         };
     in
     {
+      apps.pre-stow-mutable =
+        let
+          files = [
+            ".config/openlogi/config.toml"
+            ".prime/agent/settings.json"
+          ];
+        in
+        {
+          type = "app";
+          program = "${
+            pkgs.writeShellApplication {
+              name = "pre-stow-mutable";
+              runtimeInputs = [ pkgs.coreutils ];
+              text = ''
+                umask 077
+                for relative in ${lib.escapeShellArgs files}; do
+                  source="$HOME/dots/home/$relative"
+                  target="$HOME/$relative"
+                  [[ -f "$source" ]] || continue
+
+                  if [[ -L "$target" ]]; then
+                    # Only detach links owned by this dotfiles checkout.
+                    [[ -f "$target" ]] || continue
+                    [[ "$(readlink -f "$target")" == "$(readlink -f "$source")" ]] || continue
+                    state="''${XDG_STATE_HOME:-$HOME/.local/state}/pre-stow-mutable"
+                    mkdir -p "$state"
+                    backup=$(mktemp "$state/$(basename "$target").XXXXXXXX")
+                    cp -L -- "$target" "$backup"
+                    temporary=$(mktemp "$(dirname "$target")/.pre-stow-mutable.XXXXXXXX")
+                    cp -- "$backup" "$temporary"
+                    # An app may have replaced the link while it was being copied.
+                    if [[ -L "$target" ]] && [[ "$(readlink -f "$target")" == "$(readlink -f "$source")" ]]; then
+                      mv -T -- "$temporary" "$target"
+                    else
+                      rm -- "$temporary"
+                    fi
+                  elif [[ ! -e "$target" ]]; then
+                    mkdir -p "$(dirname "$target")"
+                    temporary=$(mktemp "$(dirname "$target")/.pre-stow-mutable.XXXXXXXX")
+                    cp -- "$source" "$temporary"
+                    # Publish without overwriting a file created concurrently.
+                    ln -T -- "$temporary" "$target" || {
+                      rm -- "$temporary"
+                      exit 1
+                    }
+                    rm -- "$temporary"
+                  fi
+                done
+              '';
+            }
+          }/bin/pre-stow-mutable";
+        };
+
       apps.stow-dotfiles = {
         type = "app";
         program = "${
@@ -85,6 +138,8 @@
           fi
 
           if [[ "''${1:-}" == "switch" ]]; then
+            echo "==> Preparing mutable dotfiles..."
+            ${config.apps.pre-stow-mutable.program}
             echo "==> Stowing dotfiles..."
             ${config.apps.stow-dotfiles.program}
           fi
@@ -116,6 +171,8 @@
             git -C "$HOME/dots" pull --rebase || true
           fi
 
+          echo "==> Preparing mutable dotfiles..."
+          ${config.apps.pre-stow-mutable.program}
           echo "==> Stowing dotfiles..."
           ${config.apps.stow-dotfiles.program}
 
