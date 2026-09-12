@@ -4,7 +4,6 @@
 }:
 {
   flake.overlays.default = inputs.nixpkgs.lib.composeManyExtensions [
-    (import ./chatgpt { inherit inputs; })
     (import ./miniflux)
     (import ./gitea)
     (import ./radicle-httpd)
