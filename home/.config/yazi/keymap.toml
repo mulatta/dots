@@ -485,7 +485,7 @@ run = "arrow top"
 
 [[mgr.keymap]]
 desc = "Move cursor to the bottom"
-on = ["g", "G"]
+on = "G"
 run = "arrow bot"
 
 [[mgr.keymap]]
