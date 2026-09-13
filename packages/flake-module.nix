@@ -51,6 +51,7 @@
         rsshub = pkgs.callPackage ./rsshub {
           rsshub = pkgs.rsshub;
         };
+        tree-sitter-nextflow = pkgs.callPackage ./tree-sitter-nextflow { };
         updater = pkgs.callPackage ./updater { };
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
