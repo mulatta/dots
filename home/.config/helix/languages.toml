@@ -308,6 +308,20 @@ enable = true
 enable = true
 url = "https://www.schemastore.org/api/json/catalog.json"
 
+[[language]]
+name = "nextflow"
+scope = "source.nextflow"
+file-types = ["nf", { glob = "*.nf.test" }, { glob = "nextflow.config" }]
+roots = ["nextflow.config", ".git"]
+language-servers = ["nextflow-language-server"]
+auto-format = true
+
+[language-server.nextflow-language-server]
+command = "nextflow-language-server"
+
+[language-server.nextflow-language-server.config.nextflow.files]
+exclude = [".git", ".nf-test", "work"]
+
 # Quarkdown — markdown highlight via inherits, no harper (false positives on .function syntax)
 [[language]]
 name = "quarkdown"

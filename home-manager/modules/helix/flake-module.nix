@@ -1,47 +1,54 @@
 {
   perSystem =
-    { pkgs, ... }:
+    {
+      pkgs,
+      self',
+      ...
+    }:
     let
       # Keep in sync with home/.config/helix/languages.toml.
-      helix-lsp-packages = with pkgs; [
-        # JSON and Markdown
-        vscode-langservers-extracted
-        marksman
-        harper
-        prettier
+      helix-lsp-packages =
+        with pkgs;
+        [
+          # JSON and Markdown
+          vscode-langservers-extracted
+          marksman
+          harper
+          prettier
 
-        # Python
-        pyright
-        ruff
+          # Python
+          pyright
+          ruff
 
-        # Rust
-        rust-analyzer
-        clippy
-        rustfmt
+          # Rust
+          rust-analyzer
+          clippy
+          rustfmt
 
-        # Nix
-        nil
-        nixd
-        nixfmt-rs
-        # Available for manual linting; editor integration is pending.
-        deadnix
-        statix
+          # Nix
+          nil
+          nixd
+          nixfmt-rs
+          # Available for manual linting; editor integration is pending.
+          deadnix
+          statix
 
-        # TOML
-        taplo
+          # TOML
+          taplo
 
-        # Typst
-        tinymist
-        typstyle
+          # Typst
+          tinymist
+          typstyle
 
-        # YAML
-        yaml-language-server
-        yamlfmt
+          # YAML
+          yaml-language-server
+          yamlfmt
 
-        # Shell
-        bash-language-server
-        shfmt
-      ];
+          # Shell
+          bash-language-server
+          shfmt
+        ]
+        ++ [ self'.packages.nextflow-language-server ];
     in
     {
       legacyPackages = {
