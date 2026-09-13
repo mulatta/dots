@@ -65,8 +65,12 @@
           deadnix
           statix
 
-          # TOML
+          # TOML and Terraform
           taplo
+          terraform-ls
+
+          # TypeScript
+          vtsls
 
           # Typst
           tinymist
