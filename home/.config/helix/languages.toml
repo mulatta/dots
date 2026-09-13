@@ -51,6 +51,26 @@ args = ["--parser", "jsonc"]
 command = "prettier"
 
 [[language]]
+name = "javascript"
+language-servers = ["vtsls"]
+
+[[language]]
+name = "jsx"
+language-servers = ["vtsls"]
+
+[[language]]
+name = "typescript"
+language-servers = ["vtsls"]
+
+[[language]]
+name = "tsx"
+language-servers = ["vtsls"]
+
+[language-server.vtsls]
+command = "vtsls"
+args = ["--stdio"]
+
+[[language]]
 auto-format = true
 file-types = ["py", "pyi"]
 injection-regex = "python"
@@ -308,18 +328,19 @@ enable = true
 enable = true
 url = "https://www.schemastore.org/api/json/catalog.json"
 
-# Quarkdown — markdown highlight via inherits, no harper (false positives on .function syntax)
 [[language]]
-name = "quarkdown"
-scope = "text.markdown"
-file-types = ["qd"]
-language-servers = ["quarkdown-lsp", "marksman"]
-auto-format = false
-grammar = "markdown"
-comment-tokens = ["-", "+", "*", "- [ ]", ">"]
-soft-wrap.enable = true
-soft-wrap.wrap-at-text-width = true
-text-width = 80
+name = "nextflow"
+scope = "source.nextflow"
+file-types = ["nf", { glob = "*.nf.test" }, { glob = "nextflow.config" }]
+roots = ["nextflow.config", ".git"]
+language-servers = ["nextflow-language-server"]
+auto-format = true
+
+[language-server.nextflow-language-server]
+command = "nextflow-language-server"
+
+[language-server.nextflow-language-server.config.nextflow.files]
+exclude = [".git", ".nf-test", "work"]
 
 [language-server.harper-ls]
 command = "harper-ls"
@@ -327,7 +348,3 @@ args = ["--stdio"]
 
 [language-server.harper-ls.config.harper-ls]
 diagnosticSeverity = "hint"
-
-[language-server.quarkdown-lsp]
-command = "quarkdown"
-args = ["language-server"]

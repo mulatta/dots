@@ -33,6 +33,7 @@
         miniflux-sync = pkgs.callPackage ./miniflux-sync { };
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         n8n-hooks = pkgs.callPackage ./n8n-hooks { };
+        nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) n8n-hooks email-sync msmtp-with-sent;
@@ -50,6 +51,7 @@
         rsshub = pkgs.callPackage ./rsshub {
           rsshub = pkgs.rsshub;
         };
+        tree-sitter-nextflow = pkgs.callPackage ./tree-sitter-nextflow { };
         updater = pkgs.callPackage ./updater { };
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
