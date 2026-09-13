@@ -72,6 +72,24 @@
           # TypeScript
           vtsls
 
+          # Go
+          go
+          gopls
+          delve
+          golangci-lint
+          golangci-lint-langserver
+          ginkgo
+          gofumpt
+          golines
+          gomodifytags
+          gotests
+          gotestsum
+          # gopls also ships bin/modernize; let gopls win the collision.
+          (pkgs.lib.lowPrio gotools)
+          govulncheck
+          iferr
+          impl
+
           # Typst
           tinymist
           typstyle
