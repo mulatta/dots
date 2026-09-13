@@ -36,7 +36,7 @@ url = "*.py"
 run = 'piper -- bat -p --color=always "$1"'
 [[plugin.prepend_previewers]]
 url = "*.json"
-run = 'piper -- jq . "$1" 2>/dev/null || bat -p --color=always "$1"'
+run = 'piper -- jq -C . "$1" 2>/dev/null || bat -p --color=always "$1"'
 [[plugin.prepend_previewers]]
 url = "*.xml"
 run = 'piper -- bat -p --color=always "$1"'
@@ -45,6 +45,9 @@ url = "Dockerfile*"
 run = 'piper -- bat -p --color=always "$1"'
 [[plugin.prepend_previewers]]
 url = ".git*"
+run = 'piper -- bat -p --color=always "$1"'
+[[plugin.prepend_previewers]]
+mime = "text/*"
 run = 'piper -- bat -p --color=always "$1"'
 
 # Fallback hex preview for everything else.

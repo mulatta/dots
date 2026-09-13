@@ -32,6 +32,16 @@
       file = "extras/sublime/tokyonight_night.tmTheme";
     };
 
+    syntaxes.nextflow = {
+      src = pkgs.fetchFromGitHub {
+        owner = "peterk87";
+        repo = "sublime-nextflow";
+        rev = "a7a80779fe90ba49957b9c97241be861214be0ff";
+        hash = "sha256-fhvK/gD2cHToSQFmhgbMACwB1+AR+gyCaYwLyCcEsis=";
+      };
+      file = "Nextflow.sublime-syntax";
+    };
+
     extraPackages = with pkgs.bat-extras; [
       batgrep
       batman
