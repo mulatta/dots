@@ -24,7 +24,7 @@
 	trunk = "!f() { for ref in upstream/main upstream/master origin/main origin/master main master; do if git rev-parse --verify --quiet \"$ref\" >/dev/null; then echo \"$ref\"; return; fi; done; git rev-list --max-parents=0 HEAD | tail -1; }; f"
 	uncommit = "reset --soft HEAD^"
 	update = "!git pull && git submodule update --init --recursive"
-	sync = "!f() { test \"$#\" -eq 1 || { echo \"usage: git sync <branch>\" >&2; return 2; }; git switch \"$1\" && git pull --ff-only --prune; }; f"
+	sync = "!f() { test \"$#\" -le 1 || { echo \"usage: git sync [branch]\" >&2; return 2; }; git switch \"${1:-main}\" && git pull --ff-only --prune; }; f"
 
 [am]
 	threeWay = true
