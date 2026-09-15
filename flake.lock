@@ -35,11 +35,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787773679,
-        "narHash": "sha256-IKyhCD4IPzLMb5Ey9nnpJJ5TYSyyc/JczfgGE1Zwt58=",
+        "lastModified": 1788294714,
+        "narHash": "sha256-T25cVbsOSypvwMg3XT7WQCaDwd5Gd+9WZwDCoEnPHro=",
         "owner": "SBEE-Lab",
         "repo": "bioinformatics-toolkits",
-        "rev": "e9a2f41d92af4478b105580e043c94391be4324c",
+        "rev": "c5771ec6217b4393c0d7c4772b86a4a4bd8a367d",
         "type": "github"
       },
       "original": {
@@ -796,11 +796,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788084850,
-        "narHash": "sha256-ClIpz20ghYkvR8GyLqODf/7wFfvkUMf6boOhAL2ZiLI=",
+        "lastModified": 1788689681,
+        "narHash": "sha256-/nrTX55NenpGo36ijZtXgvhxyduBnG2qDJC8Aa5Ccsk=",
         "owner": "mulatta",
         "repo": "research-skills",
-        "rev": "6df62726b009192f952758836be04abe28dbe0e8",
+        "rev": "161a52fc06e9cb3324f97e68813ff2e5ddcf494e",
         "type": "github"
       },
       "original": {
