@@ -4,10 +4,13 @@
   ...
 }:
 {
-  home.packages = [
-    pkgs.docker-client
-    pkgs.docker-credential-helpers
-    pkgs.regctl
-  ]
-  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.colima ];
+  home.packages =
+    with pkgs;
+    [
+      docker-client
+      docker-credential-helpers
+      regctl
+      skopeo
+    ]
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.colima ];
 }
