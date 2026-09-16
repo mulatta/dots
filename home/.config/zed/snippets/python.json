@@ -1,0 +1,7 @@
+{
+  "Python cell": {
+    "prefix": "cell",
+    "body": ["# %% ${1:Cell}", "$0"],
+    "description": "Insert a Python REPL cell"
+  }
+}
