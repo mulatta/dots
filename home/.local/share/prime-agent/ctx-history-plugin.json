@@ -8,14 +8,10 @@
       "id": "default",
       "provider_key": "prime-agent",
       "source_id": "default",
-      "source_format": "prime-agent-jsonl-v1",
+      "source_format": "prime-agent-jsonl-v2",
+      "path": "ctx-history.jsonl",
       "enabled": true,
-      "refresh": "auto",
-      "command": [
-        "python3",
-        "/home/seungwon/dots/home/.ctx/plugins/prime-agent/export.py"
-      ],
-      "timeout_seconds": 300
+      "refresh": "manual"
     }
   ]
 }

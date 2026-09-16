@@ -29,6 +29,7 @@ export XDG_VIDEOS_DIR="$HOME/Videos"
 
 # Environment variables
 export NH_FLAKE="$HOME/dots"
+export CTX_HISTORY_PLUGIN_PATH="${XDG_DATA_HOME}/prime-agent"
 export EDITOR=hx
 export VISUAL=hx
 # Catppuccin Mocha theme for skim

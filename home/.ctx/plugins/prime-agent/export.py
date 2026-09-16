@@ -1,38 +1,25 @@
 #!/usr/bin/env python3
-"""Export Prime Agent JSONL sessions to ctx-history-jsonl-v1."""
+"""Export Prime Agent sessions to a durable ctx-history-jsonl-v2 file."""
 
+import argparse
 import json
 import os
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, TextIO
 
 SOURCE_ID = "default"
 PROVIDER_KEY = "prime-agent"
-SOURCE_FORMAT = "prime-agent-jsonl-v1"
-SESSIONS_DIR = Path.home() / ".prime" / "agent" / "sessions"
+SOURCE_FORMAT = "prime-agent-jsonl-v2"
 
 
-def emit(record):
-    print(json.dumps(record, ensure_ascii=False, separators=(",", ":")))
+def emit(output: TextIO, record: dict[str, Any]) -> None:
+    print(json.dumps(record, ensure_ascii=False, separators=(",", ":")), file=output)
 
 
-def load_cursor():
-    text = os.environ.get("CTX_HISTORY_CURSOR")
-    cursor_file = os.environ.get("CTX_HISTORY_CURSOR_FILE")
-    if not text and cursor_file:
-        try:
-            text = Path(cursor_file).read_text()
-        except OSError:
-            pass
-    try:
-        value = json.loads(text or "{}")
-        return value if isinstance(value, dict) else {}
-    except json.JSONDecodeError:
-        return {}
-
-
-def text_content(value):
+def text_content(value: Any) -> str:
     """Produce searchable text without discarding Prime's structured payload."""
     if isinstance(value, str):
         return value
@@ -44,11 +31,10 @@ def text_content(value):
                 text = text_content(value[key])
                 if text:
                     return text
-        return ""
     return ""
 
 
-def event_view(row):
+def event_view(row: dict[str, Any]) -> tuple[str, str | None, str]:
     kind = row.get("type", "event")
     role = None
     preview = ""
@@ -71,52 +57,45 @@ def event_view(row):
     return kind, role, preview[:4096]
 
 
-def iso_now():
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-
-
-def main():
-    cursor = {} if os.environ.get("CTX_HISTORY_FULL_RESCAN") == "1" else load_cursor()
-    old_files = (
-        cursor.get("files", {}) if isinstance(cursor.get("files", {}), dict) else {}
+def timestamp_from_mtime(path: Path) -> str:
+    return (
+        datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z")
     )
-    next_files = {}
-    output = []
 
-    for path in sorted(SESSIONS_DIR.glob("*.jsonl")) if SESSIONS_DIR.is_dir() else []:
-        stat = path.stat()
-        key = str(path)
-        previous = old_files.get(key, {})
-        offset = previous.get("offset", 0)
-        line_index = previous.get("lines", 0)
-        if (
-            not isinstance(offset, int)
-            or not isinstance(line_index, int)
-            or stat.st_size < offset
-        ):
-            offset = line_index = 0
 
-        session = None
-        rows = []
+def export(sessions_dir: Path, output: TextIO) -> None:
+    emit(
+        output,
+        {
+            "record_type": "manifest",
+            "schema_version": "ctx-history-jsonl-v2",
+            "producer": "prime-agent-ctx-plugin",
+        },
+    )
+    emit(
+        output,
+        {
+            "record_type": "source",
+            "source_id": SOURCE_ID,
+            "provider_key": PROVIDER_KEY,
+            "source_format": SOURCE_FORMAT,
+            "raw_source_path": str(sessions_dir),
+            "trust": "provider_export",
+            "fidelity": "partial",
+        },
+    )
+
+    paths = sorted(sessions_dir.glob("*.jsonl")) if sessions_dir.is_dir() else []
+    for path in paths:
+        fallback_timestamp = timestamp_from_mtime(path)
+        session: dict[str, Any] | None = None
+        rows: list[tuple[int, int, dict[str, Any]]] = []
+
         with path.open("rb") as handle:
-            # Read metadata from the first line even during an incremental append.
-            first = handle.readline()
-            try:
-                candidate = json.loads(first)
-                if candidate.get("type") == "session":
-                    session = candidate
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                pass
-            handle.seek(offset)
-            while True:
-                start = handle.tell()
-                raw = handle.readline()
-                if not raw:
-                    break
-                # Do not checkpoint an incomplete final line.
-                if not raw.endswith(b"\n"):
-                    handle.seek(start)
-                    break
+            for line_index, raw in enumerate(handle):
+                byte_offset = handle.tell() - len(raw)
                 try:
                     row = json.loads(raw)
                 except (json.JSONDecodeError, UnicodeDecodeError):
@@ -124,43 +103,37 @@ def main():
                         f"prime-agent ctx plugin: skipping malformed line in {path}",
                         file=sys.stderr,
                     )
-                    line_index += 1
                     continue
-                rows.append((line_index, start, row))
-                line_index += 1
-            final_offset = handle.tell()
+                if line_index == 0 and row.get("type") == "session":
+                    session = row
+                else:
+                    rows.append((line_index, byte_offset, row))
 
         if session is None:
-            next_files[key] = {
-                "offset": final_offset,
-                "lines": line_index,
-                "size": stat.st_size,
-            }
             continue
 
         session_id = str(session.get("id") or path.stem)
-        started_at = session.get("timestamp") or iso_now()
-        if rows or offset == 0:
-            output.append(
-                {
-                    "record_type": "session",
-                    "source_id": SOURCE_ID,
-                    "session_id": session_id,
-                    "native_session_id": session_id,
-                    "cwd": session.get("cwd"),
-                    "started_at": started_at,
-                    "agent_type": "primary"
-                    if session.get("rlmDepth", 0) == 0
-                    else "subagent",
-                    "role_hint": "developer",
-                    "is_primary": session.get("rlmDepth", 0) == 0,
-                    "metadata": {
-                        "rlm_depth": session.get("rlmDepth"),
-                        "git": session.get("git"),
-                        "source_file": path.name,
-                    },
-                }
-            )
+        started_at = session.get("timestamp") or fallback_timestamp
+        is_primary = session.get("rlmDepth", 0) == 0
+        emit(
+            output,
+            {
+                "record_type": "session",
+                "source_id": SOURCE_ID,
+                "provider_session_id": session_id,
+                "cwd": session.get("cwd"),
+                "started_at": started_at,
+                "agent_scope": "primary" if is_primary else "subagent",
+                "role_hint": "developer",
+                "status": "imported",
+                "fidelity": "partial",
+                "metadata": {
+                    "rlm_depth": session.get("rlmDepth"),
+                    "git": session.get("git"),
+                    "source_file": path.name,
+                },
+            },
+        )
 
         searchable_types = {
             "message",
@@ -173,57 +146,52 @@ def main():
             if row.get("type") not in searchable_types:
                 continue
             kind, role, preview = event_view(row)
-            output.append(
+            emit(
+                output,
                 {
                     "record_type": "event",
                     "source_id": SOURCE_ID,
-                    "session_id": session_id,
+                    "provider_session_id": session_id,
                     "event_index": index,
                     "event_id": row.get("id"),
                     "native_cursor": f"{path.name}:{byte_offset}",
                     "event_type": "message",
                     "role": role,
+                    "fidelity": "partial",
                     "metadata": {"prime_event_type": kind},
                     "occurred_at": row.get("timestamp") or started_at,
                     "payload": {"text": preview},
                     "preview": preview,
-                }
+                },
             )
-        next_files[key] = {
-            "offset": final_offset,
-            "lines": line_index,
-            "size": stat.st_size,
-        }
 
-    observed_at = iso_now()
-    emit(
-        {
-            "record_type": "manifest",
-            "schema_version": "ctx-history-jsonl-v1",
-            "metadata": {"exporter": "prime-agent-ctx-plugin"},
-        }
+
+def main() -> None:
+    home = Path.home()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--sessions-dir",
+        type=Path,
+        default=home / ".prime" / "agent" / "sessions",
     )
-    emit(
-        {
-            "record_type": "source",
-            "source_id": SOURCE_ID,
-            "provider_key": PROVIDER_KEY,
-            "source_format": SOURCE_FORMAT,
-            "raw_source_path": str(SESSIONS_DIR),
-            "observed_at": observed_at,
-            "cursor": {
-                "after": {
-                    "stream": os.environ.get(
-                        "CTX_HISTORY_CURSOR_STREAM", "prime-agent:default"
-                    ),
-                    "cursor": json.dumps({"files": next_files}, separators=(",", ":")),
-                    "observed_at": observed_at,
-                }
-            },
-        }
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=home / ".local" / "share" / "prime-agent" / "ctx-history.jsonl",
     )
-    for record in output:
-        emit(record)
+    args = parser.parse_args()
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary_name = tempfile.mkstemp(
+        dir=args.output.parent, prefix=f".{args.output.name}.", text=True
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as output:
+            export(args.sessions_dir, output)
+        os.replace(temporary_name, args.output)
+    except BaseException:
+        Path(temporary_name).unlink(missing_ok=True)
+        raise
 
 
 if __name__ == "__main__":
