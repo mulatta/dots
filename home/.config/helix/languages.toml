@@ -131,6 +131,10 @@ args = ["format", "-"]
 command = "taplo"
 
 [[language]]
+language-servers = ["terraform-ls"]
+name = "hcl"
+
+[[language]]
 auto-format = true
 file-types = ["md", "markdown"]
 language-servers = ["marksman", "harper-ls"]
@@ -276,6 +280,10 @@ hideNamedConstructor = false
 [language-server.taplo]
 args = ["lsp", "stdio"]
 command = "taplo"
+
+[language-server.terraform-ls]
+args = ["serve"]
+command = "terraform-ls"
 
 [language-server.tinymist]
 command = "tinymist"
