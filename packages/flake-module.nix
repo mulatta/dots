@@ -35,6 +35,9 @@
         n8n-hooks = pkgs.callPackage ./n8n-hooks { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
+        pi-acp = pkgs.callPackage ./pi-acp {
+          pi = llmAgents.pi;
+        };
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) n8n-hooks email-sync msmtp-with-sent;
           calendar-cli = skillz.calendar-cli.override {

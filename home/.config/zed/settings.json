@@ -1,0 +1,136 @@
+{
+  "agent": {
+    "default_model": {
+      "provider": "openai-subscribed",
+      "model": "gpt-5.6-sol",
+      "enable_thinking": true,
+      "effort": "low"
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "cli_default_open_behavior": "new_window",
+  "agent_servers": {
+    "claude-acp": {
+      "type": "custom",
+      "command": "claude-agent-acp",
+      "args": [],
+      "env": {}
+    },
+    "codex-acp": {
+      "type": "custom",
+      "command": "codex-acp",
+      "args": [],
+      "env": {}
+    },
+    "pi-acp": {
+      "type": "custom",
+      "command": "pi-acp",
+      "args": [],
+      "env": {}
+    }
+  },
+  "auto_install_extensions": {
+    "catppuccin": true,
+    "harper": true,
+    "live-server": true,
+    "nix": true,
+    "python": true,
+    "ruff": true,
+    "terraform": true,
+    "toml": true,
+    "typst": true
+  },
+  "helix_mode": true,
+  "load_direnv": "direct",
+  "languages": {
+    "Nix": {
+      "formatter": {
+        "external": {
+          "command": "nixfmt",
+          "arguments": []
+        }
+      },
+      "language_servers": ["nixd", "nil"]
+    },
+    "TOML": {
+      "formatter": {
+        "external": {
+          "command": "taplo",
+          "arguments": ["format", "-"]
+        }
+      }
+    },
+    "Typst": {
+      "soft_wrap": "none"
+    }
+  },
+  "lsp": {
+    "harper-ls": {
+      "settings": {
+        "harper-ls": {
+          "diagnosticSeverity": "hint"
+        }
+      }
+    },
+    "live-server": {
+      "initialization_options": {
+        "lazy": false,
+        "public": false,
+        "start_port": 5500
+      }
+    },
+    "nil": {
+      "initialization_options": {
+        "formatting": {
+          "command": ["nixfmt"]
+        }
+      }
+    },
+    "nixd": {
+      "settings": {
+        "nixpkgs": {
+          "expr": "import <nixpkgs> { }"
+        },
+        "options": {
+          "home_manager": {
+            "expr": "import <home-manager/modules> { }"
+          },
+          "nixos": {
+            "expr": "import <nixpkgs/nixos> { }"
+          }
+        }
+      }
+    },
+    "tinymist": {
+      "initialization_options": {
+        "preview": {
+          "background": {
+            "enabled": true
+          }
+        }
+      },
+      "settings": {
+        "exportPdf": "onSave",
+        "formatterMode": "typstyle",
+        "outputPath": "$root/$name"
+      }
+    }
+  },
+  "ssh_connections": [
+    {
+      "host": "psi",
+      "port_forwards": [
+        {
+          "local_port": 5500,
+          "remote_port": 5500
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "mode": "dark",
+    "dark": "Catppuccin Mocha",
+    "light": "Catppuccin Latte"
+  }
+}
