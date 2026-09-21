@@ -891,6 +891,7 @@
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",
+        "sofka": "sofka",
         "sops-nix": "sops-nix",
         "srvos": "srvos",
         "systems": "systems",
@@ -962,6 +963,29 @@
       "original": {
         "owner": "mulatta",
         "repo": "skillz",
+        "type": "github"
+      }
+    },
+    "sofka": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789974685,
+        "narHash": "sha256-9Exr/BC2xk/WgbRk8VayQc2xJuRyivSa+M2o63eHu1k=",
+        "owner": "nklmilojevic",
+        "repo": "sofka",
+        "rev": "12f6b740979401c324e4ec4f6ecd8c0b5b764176",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nklmilojevic",
+        "repo": "sofka",
         "type": "github"
       }
     },
