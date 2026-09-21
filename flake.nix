@@ -192,6 +192,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sofka = {
+      url = "github:nklmilojevic/sofka";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Agentic tools
     research-skills = {
       url = "github:mulatta/research-skills";

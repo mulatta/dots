@@ -40,6 +40,7 @@ in
     ./modules/zed.nix
     ./modules/keyboard
     ./modules/ai.nix
+    ./modules/kubernetes.nix
     ./modules/mail
     ./modules/nostr-chat.nix
     ./modules/ntfy.nix
