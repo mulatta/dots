@@ -9,6 +9,7 @@
     [
       docker-client
       docker-credential-helpers
+      podman
       regctl
       skopeo
     ]
