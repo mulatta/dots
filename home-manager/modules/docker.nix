@@ -7,6 +7,7 @@
   home.packages =
     with pkgs;
     [
+      devcontainer
       docker-client
       docker-credential-helpers
       podman
