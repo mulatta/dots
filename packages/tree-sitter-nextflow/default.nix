@@ -6,13 +6,13 @@
 
 tree-sitter.buildGrammar rec {
   language = "nextflow";
-  version = "0.3.0";
+  version = "0.4.0";
 
   src = fetchFromGitHub {
     owner = "nextflow-io";
     repo = "tree-sitter-nextflow";
     rev = "v${version}";
-    hash = "sha256-nMQATg0dP15d+P+8/9f0tWNpSl8FgBIR/KW9smPHKVk=";
+    hash = "sha256-WcqkGvd/NHzsdMt88pjyS02EFPAinljnETOb4FQrgR4=";
   };
 
   meta = {
