@@ -33,6 +33,7 @@ in
     settings = {
       min-free = toString (10 * 1024 * 1024 * 1024); # 10 GB
       max-free = toString (50 * 1024 * 1024 * 1024); # 50 GB
+      extra-system-features = [ "big-parallel" ];
       # for nix-direnv
       keep-outputs = true;
       keep-derivations = true;
