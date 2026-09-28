@@ -376,10 +376,11 @@ nixify() {
 
 flakify() {
   if [[ -n "$1" ]]; then
-    nix flake init -t "github:mulatta/flake-templates#$1"
+    nix flake init -t "github:mulatta/flake-templates#$1" || return
   else
-    nix flake init -t github:mulatta/flake-templates
+    nix flake init -t github:mulatta/flake-templates || return
   fi
+  jj git init --colocate .
 }
 
 uvfy() {
