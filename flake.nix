@@ -62,9 +62,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # https://github.com/Mic92/nix-grpc-store/pull/156
     nix-grpc-store = {
-      url = "github:Mic92/nix-grpc-store";
+      url = "github:mulatta/nix-grpc-store/fix-darwin-nix-store-version-suffix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.niks3.follows = "niks3";
     };
 
     nixos-hardware = {

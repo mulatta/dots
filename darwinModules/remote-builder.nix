@@ -12,9 +12,8 @@ let
   grpcUri = "grpc://psi.sjanglab.org:50051?ca-cert=${certs.nix-grpc-ca-cert.path}";
 in
 {
-  # nix-grpc-store only ships a NixOS client module, but it only extends
-  # nix.settings, which nix-darwin also exposes.
-  imports = [ "${self.inputs.nix-grpc-store}/nixos/client.nix" ];
+  # Client module only extends options shared by NixOS and nix-darwin.
+  imports = [ self.inputs.nix-grpc-store.nixosModules.client ];
 
   programs.nix-grpc-store.enable = grpcSupported;
 
