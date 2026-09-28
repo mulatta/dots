@@ -126,6 +126,7 @@ in
     selfPkgs.loc
     selfPkgs.merge-when-green
     selfPkgs.miniflux-sync
+    selfPkgs.termaid
   ]
   ++ (
     let

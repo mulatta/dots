@@ -54,6 +54,7 @@
         rsshub = pkgs.callPackage ./rsshub {
           rsshub = pkgs.rsshub;
         };
+        termaid = pkgs.callPackage ./termaid { };
         tree-sitter-nextflow = pkgs.callPackage ./tree-sitter-nextflow { };
         updater = pkgs.callPackage ./updater { };
       }
