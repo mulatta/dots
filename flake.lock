@@ -548,11 +548,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790610642,
-        "narHash": "sha256-fXNVyczFFnR+9Bc0QsLP2kKPq5QDn1pQJYubpVqjSAs=",
+        "lastModified": 1790612347,
+        "narHash": "sha256-eCDfggLNEKWcg5izidKrLKo+AJPvMLTZ+0PNwWSxnjI=",
         "owner": "mulatta",
         "repo": "nix-grpc-store",
-        "rev": "f3b8483598565c33cd4daa12b533bc2d925f520c",
+        "rev": "8a73739802c9749f87fc1e9d71c64d2f199a7b61",
         "type": "github"
       },
       "original": {
