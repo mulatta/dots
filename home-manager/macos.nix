@@ -65,6 +65,7 @@ in
     pkgs.basalt
     pkgs.czkawka-full
     pkgs.dorion
+    pkgs.tinycast
     pkgs.google-chrome
     pkgs.kanidm_1_11
     pkgs.mpv

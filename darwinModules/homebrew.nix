@@ -35,7 +35,6 @@
     "microsoft-word"
     "nextcloud"
     "onedrive"
-    "raycast"
     "secretive"
     "slack"
     "zoom"
