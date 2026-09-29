@@ -51,6 +51,8 @@ in
 
   home.packages = [
     selfPkgs.instagram-cli
+    selfPkgs.openknowledge
+    selfPkgs.openknowledge-desktop
     selfPkgs.openlogi
     selfPkgs.radicle-desktop
     pkgs.chatgpt
