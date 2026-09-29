@@ -6,11 +6,11 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "openknowledge";
-  version = "0.79.0";
+  version = "0.79.5";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@inkeep/open-knowledge/-/open-knowledge-${finalAttrs.version}.tgz";
-    hash = "sha256-NrFFKplJ4I/H39sJ8ZTiMUdMo4q05dodIL1n7yC1WxA=";
+    hash = "sha256-0qe2irVj3tIxe9DUjWL8rHqiyMP2PJwFdigEUuvoVMk=";
   };
 
   postPatch = ''
@@ -18,7 +18,7 @@ buildNpmPackage (finalAttrs: {
     cp ${./package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-TginCHgV8hPtBCibGOqSNk0lMnRuUjV7pwFvTBYevNM=";
+  npmDepsHash = "sha256-Sf/4yOXYfe4qdYHGBxp/iX7oCWOzNHJtj4H8LaHsH80=";
 
   dontNpmBuild = true;
 
