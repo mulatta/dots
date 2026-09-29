@@ -8,6 +8,7 @@
   nix-prefetch-git,
   prefetch-npm-deps,
   nix,
+  nodejs,
   git,
   gh,
 }:
@@ -36,6 +37,7 @@ python3Packages.buildPythonApplication {
           nix-prefetch-git
           prefetch-npm-deps
           nix
+          nodejs
           git
           gh
         ]
