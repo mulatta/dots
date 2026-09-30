@@ -35,7 +35,6 @@
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         n8n-hooks = pkgs.callPackage ./n8n-hooks { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
-        ntfy-subscribe = pkgs.callPackage ./ntfy-subscribe { };
         openknowledge = pkgs.callPackage ./openknowledge { };
         pi-acp = pkgs.callPackage ./pi-acp {
           pi = llmAgents.pi;

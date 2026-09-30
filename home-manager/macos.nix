@@ -43,7 +43,6 @@ in
     ./modules/kubernetes.nix
     ./modules/mail
     ./modules/nostr-chat.nix
-    ./modules/ntfy.nix
     ./modules/paneru.nix
     ./modules/zed.nix
     ./modules/zen.nix

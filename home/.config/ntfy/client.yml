@@ -1,4 +1,0 @@
-default-host: https://ntfy.mulatta.io
-subscribe:
-  - topic: claude
-    command: ntfy-on-message

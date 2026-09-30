@@ -233,21 +233,6 @@ tmux-upterm() {
   upterm-tmux "$@"
 }
 
-## Notifications
-# Clear ntfy unread markers for a topic (or all)
-ntfy-clear() {
-  local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/ntfy"
-  if [ -z "$1" ] || [ "$1" = "--all" ]; then
-    find "$state_dir" -mindepth 2 -type f -delete
-  else
-    rm -f "$state_dir/$1"/*
-  fi
-}
-alias nr='ntfy-read'
-
-## ntfy with rbw auth (inject -u after subcommand)
-ntfy() { command ntfy "$1" -u "seungwon:$(rbw get ntfy-password)" --config ~/.config/ntfy/client.yml "${@:2}"; }
-
 ## File/Directory utilities
 # yazi wrapper with cwd sync
 y() {
@@ -595,30 +580,6 @@ fi
 (( $+commands[khal] )) && compdef cal=khal
 (( $+commands[yazi] )) && compdef y=yazi
 (( $+commands[todo] )) && compdef t=todo
-
-_ntfy() {
-  local -a commands
-  commands=(
-    'publish:Send message via ntfy server'
-    'pub:Alias for publish'
-    'send:Alias for publish'
-    'trigger:Alias for publish'
-    'subscribe:Subscribe to one or more topics'
-    'sub:Alias for subscribe'
-    'access:Grant, revoke, or show topic access'
-    'serve:Run ntfy server'
-    'tier:Manage or show tiers'
-    'token:Create, list, or delete user tokens'
-    'user:Manage or show users'
-    'help:Show help'
-  )
-  _arguments \
-    '(-h --help)'{-h,--help}'[show help]' \
-    '(-v --version)'{-v,--version}'[show version]' \
-    '1:command:_describe -t commands "ntfy command" commands' \
-    '*::arg:_files'
-}
-(( $+commands[ntfy] || $+functions[ntfy] )) && compdef _ntfy ntfy
 
 _forklift() {
   local curcontext="$curcontext" state line

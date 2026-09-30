@@ -99,7 +99,6 @@ in
     hexyl
     hyperfine
     jq
-    ntfy-sh
     ouch
     procs
     ripgrep
