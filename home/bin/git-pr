@@ -524,7 +524,7 @@ def create_pr(args: CreateArgs) -> None:
             "--local",
             "--replace",
             f"branch.{branch_name}.merge",
-            upstream_branch,
+            f"refs/heads/{upstream_branch}",
         ],
         quiet=True,
     )
