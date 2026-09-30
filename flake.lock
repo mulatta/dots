@@ -732,29 +732,6 @@
         "type": "github"
       }
     },
-    "opencrow": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1782727145,
-        "narHash": "sha256-buooDQiylOxQBO6nvATodIpC/jp9Vic+JvWYYrTCv7M=",
-        "owner": "pinpox",
-        "repo": "opencrow",
-        "rev": "b6a2b714bbb8d10f848b9f859283bb5745f7dccf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pinpox",
-        "repo": "opencrow",
-        "type": "github"
-      }
-    },
     "paneru": {
       "inputs": {
         "flake-parts": [
@@ -905,7 +882,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "noctalia-plugins": "noctalia-plugins",
-        "opencrow": "opencrow",
         "paneru": "paneru",
         "radicle-mirror": "radicle-mirror",
         "research-skills": "research-skills",

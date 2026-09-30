@@ -30,17 +30,6 @@ in
     '';
   };
 
-  clan.core.vars.generators.miniflux-webhook = {
-    files.n8n-basic-password.secret = true;
-    files.webhook-url.secret = true;
-    runtimeInputs = [ pkgs.openssl ];
-    script = ''
-      password=$(openssl rand -hex 32 | tr -d '\n')
-      printf '%s' "$password" > "$out/n8n-basic-password"
-      printf 'https://miniflux:%s@n8n-api.mulatta.io/webhook/miniflux-save-entry' "$password" > "$out/webhook-url"
-    '';
-  };
-
   services.miniflux = {
     enable = true;
     createDatabaseLocally = true;
@@ -86,11 +75,6 @@ in
         openidConnectId = "a0ccbfe4-dfa2-44d5-ab46-cfe2701c1704";
         stylesheet = ./custom.css;
         javascript = ./custom.js;
-        webhook = {
-          enable = true;
-          urlFile = config.clan.core.vars.generators.miniflux-webhook.files.webhook-url.path;
-        };
-
         feeds = {
           geeknews = {
             url = "http://feeds.feedburner.com/geeknews-feed";

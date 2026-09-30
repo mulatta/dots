@@ -33,7 +33,7 @@ def _create_args(**overrides: Any) -> argparse.Namespace:
         "description": "Why keep text",
         "description_file": None,
         "collection": "Engineering",
-        "tags": ["source:rss", "signal:noa-saved", "kind:article", "Nix"],
+        "tags": ["source:rss", "signal:saved", "kind:article", "Nix"],
     }
     defaults.update(overrides)
     return argparse.Namespace(**defaults)
@@ -65,7 +65,7 @@ def test_create_link_payload_from_description_file(tmp_path: Path) -> None:
         "name": "Example Article",
         "description": "Why keep",
         "collection": "Engineering",
-        "tags": ["source:rss", "signal:noa-saved", "kind:article", "Nix"],
+        "tags": ["source:rss", "signal:saved", "kind:article", "Nix"],
     }
 
 

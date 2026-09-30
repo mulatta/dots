@@ -61,7 +61,6 @@ in
             "seungwon"
             "n8n_notify"
             "gitea_notify"
-            "noa"
           ];
         };
         cloud_users = {
@@ -106,13 +105,6 @@ in
         admins = {
           members = [ "seungwon" ];
         };
-        # Agents - automated agent identities (e.g. noa). Members
-        # authenticate to stalwart IMAP via kanidm POSIX password (LDAP
-        # simple bind) and have no other app SSO scope by default; the
-        # group exists to scope future agent-only policies.
-        agents = {
-          members = [ "noa" ];
-        };
         # Bots - non-interactive automation identities. Distinct from
         # `agents` (which receive mail) because bots only need OIDC
         # bootstrap to provision a downstream user, then operate via
@@ -154,14 +146,6 @@ in
         # outbound notification mail; this account writes to Nextcloud.
         n8n_bot = {
           displayName = "n8n automation bot";
-        };
-        # Personal assistant agent. Receives mail forwarded from
-        # seungwon's flagged messages via sieve and is read by mbsync
-        # on malt. External SMTP delivery is rejected at the stalwart
-        # MTA RCPT stage (only seungwon@ may originate mail to noa@).
-        noa = {
-          displayName = "Noa";
-          mailAddresses = [ "noa@${baseDomain}" ];
         };
       };
 

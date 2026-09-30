@@ -143,13 +143,10 @@ in
     }
   ];
 
-  # The OpenCrow node writes to the trigger FIFO from task runners, not only
-  # the main process.
   systemd.services.n8n = {
     after = [ "postgresql.service" ];
     requires = [ "postgresql.service" ];
     serviceConfig = {
-      SupplementaryGroups = [ "opencrow" ];
       LoadCredential = [
         "nextcloud-webdav-password:${config.clan.core.vars.generators.n8n-nextcloud-webdav.files.password.path}"
       ];
@@ -157,7 +154,6 @@ in
   };
 
   systemd.services.n8n-task-runner.serviceConfig = {
-    SupplementaryGroups = [ "opencrow" ];
     LoadCredential = [
       "nextcloud-webdav-password:${config.clan.core.vars.generators.n8n-nextcloud-webdav.files.password.path}"
     ];

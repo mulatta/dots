@@ -56,7 +56,7 @@ in
     ingressBindAddress = "[::]:8081";
     adminBindAddress = "[::]:9070";
     settings = {
-      cluster-name = "opencrow";
+      cluster-name = "restate";
       disable-telemetry = true;
       request-identity-private-key-pem-file = requestIdentity.files."private-key.pem".path;
     };

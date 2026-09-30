@@ -132,12 +132,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    opencrow = {
-      url = "github:pinpox/opencrow";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     rhwp-nextcloud = {
       url = "github:mulatta/rhwp-nextcloud";
       inputs.nixpkgs.follows = "nixpkgs";

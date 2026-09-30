@@ -58,7 +58,7 @@ n8n-hooks github /repos/NixOS/nixpkgs/pulls/12345/files -q per_page=100
 n8n-hooks slack replies C0123456789 1712345678.123456
 n8n-hooks slack file-info F0123456789
 n8n-hooks slack file-content F0123456789 --max-bytes 1048576
-n8n-hooks slack file-download F0123456789 -o /var/lib/opencrow/tmp
+n8n-hooks slack file-download F0123456789 -o /tmp
 n8n-hooks rss list-categories
 n8n-hooks rss list-entries --starred --category-id 12
 n8n-hooks rss show-entry 1234
@@ -71,7 +71,7 @@ n8n-hooks vikunja-task-create --project Inbox --title "Reply to mail" \
 n8n-hooks linkwarden search-links --query 'Nix source:rss'
 n8n-hooks linkwarden-link-create --url https://example.com --name Example \
   --collection Engineering --description-file description.md \
-  --tag source:rss --tag signal:noa-saved --tag kind:article --tag Nix
+  --tag source:rss --tag signal:saved --tag kind:article --tag Nix
 ```
 
 `vikunja-task-create` reads the selected Markdown+YAML template, validates the

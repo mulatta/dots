@@ -20,7 +20,7 @@ let
             ingressBindAddress = "127.0.0.1:18080";
             adminBindAddress = "127.0.0.1:19070";
             settings = {
-              cluster-name = "opencrow";
+              cluster-name = "restate";
               disable-telemetry = true;
               admin.disable-web-ui = true;
             };
@@ -55,7 +55,7 @@ assert pkgs.lib.assertMsg (
 pkgs.runCommand "restate-module-test" { } ''
   grep -Fx 'base-dir = "/srv/restate"' ${configFile}
   grep -Fx 'bind-address = "127.0.0.1:5122"' ${configFile}
-  grep -Fx 'cluster-name = "opencrow"' ${configFile}
+  grep -Fx 'cluster-name = "restate"' ${configFile}
   grep -Fx 'disable-telemetry = true' ${configFile}
   grep -Fx 'bind-address = "127.0.0.1:19070"' ${configFile}
   grep -Fx 'disable-web-ui = true' ${configFile}

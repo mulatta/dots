@@ -556,16 +556,6 @@
   };
 
   const setupRssActionLabels = () => {
-    document.querySelectorAll("[data-save-entry]").forEach((button) => {
-      button.title = "Ask Noa to inspect this entry";
-      button.dataset.labelDone = "Asked Noa";
-      button.dataset.toastDone = "Asked Noa";
-      const label = button.querySelector(".icon-label");
-      if (label && !button.dataset.completed) {
-        label.textContent = "Ask Noa";
-      }
-    });
-
     document.querySelectorAll("[data-toggle-starred]").forEach((button) => {
       const archived = button.dataset.value === "star";
       button.title = archived

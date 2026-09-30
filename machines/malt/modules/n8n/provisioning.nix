@@ -22,12 +22,6 @@ let
         tokenFile = "n8n-hooks-token";
       }
       {
-        kind = "httpBasicAuth";
-        name = "miniflux-webhook-basic";
-        user = "miniflux";
-        passwordFile = "miniflux-webhook-basic-password";
-      }
-      {
         kind = "httpHeaderAuth";
         name = "miniflux-api";
         tokenFile = "miniflux-api-token";
@@ -132,7 +126,7 @@ in
     home = n8nProvisionHome;
   };
 
-  clan.core.vars.generators.opencrow-n8n = {
+  clan.core.vars.generators.n8n = {
     files.n8n-api-key.secret = true;
 
     prompts.n8n-api-key = {
@@ -145,11 +139,11 @@ in
     '';
   };
 
-  clan.core.vars.generators.opencrow-n8n-hooks = {
+  clan.core.vars.generators.n8n-hooks = {
     files.n8n-hooks-token.secret = true;
 
     prompts.n8n-hooks-token = {
-      description = "Shared bearer token for opencrow-owned n8n webhooks";
+      description = "Shared bearer token for n8n webhook clients";
       type = "hidden";
     };
 
@@ -158,7 +152,7 @@ in
     '';
   };
 
-  clan.core.vars.generators.opencrow-n8n-linkwarden-api = {
+  clan.core.vars.generators.n8n-linkwarden-api = {
     files.linkwarden-api-token.secret = true;
 
     prompts.linkwarden-api-token = {
@@ -171,14 +165,14 @@ in
     '';
   };
 
-  clan.core.vars.generators.opencrow-n8n-workflows-ssh = {
+  clan.core.vars.generators.n8n-workflows-ssh = {
     files.ssh-private-key.secret = true;
     files.ssh-public-key.secret = false;
 
     runtimeInputs = [ pkgs.openssh ];
 
     script = ''
-      ssh-keygen -t ed25519 -N "" -f "$out/ssh-private-key" -C "opencrow-n8n-workflows@malt"
+      ssh-keygen -t ed25519 -N "" -f "$out/ssh-private-key" -C "n8n-workflows@malt"
       ssh-keygen -y -f "$out/ssh-private-key" > "$out/ssh-public-key"
     '';
   };
@@ -204,11 +198,10 @@ in
       StateDirectory = "n8n-provision";
       WorkingDirectory = n8nProvisionHome;
       LoadCredential = [
-        "n8n-api-key:${config.clan.core.vars.generators.opencrow-n8n.files.n8n-api-key.path}"
-        "n8n-hooks-token:${config.clan.core.vars.generators.opencrow-n8n-hooks.files.n8n-hooks-token.path}"
-        "miniflux-webhook-basic-password:${config.clan.core.vars.generators.miniflux-webhook.files.n8n-basic-password.path}"
+        "n8n-api-key:${config.clan.core.vars.generators.n8n.files.n8n-api-key.path}"
+        "n8n-hooks-token:${config.clan.core.vars.generators.n8n-hooks.files.n8n-hooks-token.path}"
         "miniflux-api-token:${config.clan.core.vars.generators.miniflux-seungwon.files.api-token.path}"
-        "linkwarden-api-token:${config.clan.core.vars.generators.opencrow-n8n-linkwarden-api.files.linkwarden-api-token.path}"
+        "linkwarden-api-token:${config.clan.core.vars.generators.n8n-linkwarden-api.files.linkwarden-api-token.path}"
       ];
     };
     script = ''
@@ -242,8 +235,8 @@ in
       StateDirectory = "n8n-provision";
       WorkingDirectory = n8nProvisionHome;
       LoadCredential = [
-        "n8n-api-key:${config.clan.core.vars.generators.opencrow-n8n.files.n8n-api-key.path}"
-        "n8n-workflows-ssh-private-key:${config.clan.core.vars.generators.opencrow-n8n-workflows-ssh.files.ssh-private-key.path}"
+        "n8n-api-key:${config.clan.core.vars.generators.n8n.files.n8n-api-key.path}"
+        "n8n-workflows-ssh-private-key:${config.clan.core.vars.generators.n8n-workflows-ssh.files.ssh-private-key.path}"
       ];
     };
     script = ''

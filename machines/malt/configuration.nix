@@ -23,7 +23,6 @@
     ./modules/network.nix
     ./modules/neko.nix
     ./modules/nextcloud.nix
-    ./modules/opencrow
     ./modules/paperless.nix
     ./modules/restate.nix
     ./modules/rsshub.nix

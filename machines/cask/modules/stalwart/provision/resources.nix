@@ -35,20 +35,4 @@
       urls = [ "stalwart://auth" ];
     }
   ];
-
-  mailboxAcls = [
-    {
-      account = "seungwon";
-      role = "inbox";
-      shareWith = {
-        noa = [
-          "mayReadItems"
-          # Stalwart derives maySetSeen from maySetKeywords and refuses to
-          # clear it, so it is declared to keep the mailbox converged.
-          "maySetSeen"
-          "maySetKeywords"
-        ];
-      };
-    }
-  ];
 }

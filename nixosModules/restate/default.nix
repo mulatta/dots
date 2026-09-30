@@ -53,7 +53,7 @@ in
       default = { };
       example = lib.literalExpression ''
         {
-          cluster-name = "opencrow";
+          cluster-name = "restate";
           disable-telemetry = true;
           rocksdb-total-memory-size = "1GiB";
         }
