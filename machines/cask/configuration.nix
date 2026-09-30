@@ -38,7 +38,6 @@
     ./modules/postgresql.nix
     ./modules/radicle.nix
     ./modules/radicle-mirror.nix
-    ./modules/route96.nix
     ./modules/sshd.nix
     ./modules/stalwart
     ./modules/step-ca.nix
