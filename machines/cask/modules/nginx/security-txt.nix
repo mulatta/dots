@@ -25,10 +25,6 @@ in
       "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
       "~ ^/\.well-known/".extraConfig = "return 404;";
     };
-    "relay.mulatta.io".locations = {
-      "= /.well-known/security.txt".return = "308 https://mulatta.io/.well-known/security.txt";
-      "~ ^/\.well-known/".extraConfig = "return 404;";
-    };
     "mulatta.io".locations = {
       "= /.well-known/security.txt" = {
         alias = securityTxtFile;

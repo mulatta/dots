@@ -32,7 +32,6 @@
     ./modules/network.nix
     ./modules/nginx
     ./modules/niks3.nix
-    ./modules/nostr-relay.nix
     ./modules/ntfy.nix
     ./modules/oauth2-proxy.nix
     ./modules/postgresql.nix

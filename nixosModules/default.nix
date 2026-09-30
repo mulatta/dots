@@ -18,7 +18,6 @@
     ./nginx.nix
     ./miniflux
     ./nftables.nix
-    ./nostr.nix
     ./restate
     ./journald.nix
     ./nix-daemon.nix

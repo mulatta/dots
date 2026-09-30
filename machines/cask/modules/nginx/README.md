@@ -12,7 +12,6 @@ shared HTTP maps. Generic `.n` access policy lives in `nixosModules/nginx.nix`.
 | ------------------ | -------------------------------------------------------------------------------------------------- |
 | `default.nix`      | nginx core config, listeners, shared HTTP maps and certificate, catch-all vhost, firewall, imports |
 | `mulatta-io.nix`   | homepage, blog, CV route, and `www` redirect                                                       |
-| `nip05.nix`        | apex NIP-05 response                                                                               |
 | `security-txt.nix` | RFC 9116 `security.txt`, WKD stub, and shared well-known locations                                 |
 | `<route>.nix`      | Static, redirect, or cross-host ingress owned by nginx                                             |
 

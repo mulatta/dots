@@ -14,7 +14,6 @@ in
     ./mulatta-io.nix
     ./nextcloud.nix
     ./paperless.nix
-    ./nip05.nix
     ./security-txt.nix
     ./sparkyfitness.nix
   ];

@@ -45,7 +45,6 @@ blog          IN A @SERVICE_IPV4@
 links         IN A @SERVICE_IPV4@
 chat          IN A @SERVICE_IPV4@
 ntfy          IN A @SERVICE_IPV4@
-relay         IN A @SERVICE_IPV4@
 tasks         IN A @SERVICE_IPV4@
 restate       IN A @SERVICE_IPV4@
 restate-api   IN A @SERVICE_IPV4@
