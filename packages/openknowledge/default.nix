@@ -1,6 +1,7 @@
 {
   buildNpmPackage,
   fetchurl,
+  installAgentSkills,
   lib,
 }:
 
@@ -20,7 +21,18 @@ buildNpmPackage (finalAttrs: {
 
   npmDepsHash = "sha256-Sf/4yOXYfe4qdYHGBxp/iX7oCWOzNHJtj4H8LaHsH80=";
 
+  nativeBuildInputs = [ installAgentSkills ];
+  dontInstallAgentSkills = true;
+  postInstall = ''
+    installSkill dist/assets/skills/discovery openknowledge
+  '';
+
   dontNpmBuild = true;
+
+  doInstallCheck = true;
+  installCheckPhase = ''
+    test -f $out/share/skills/openknowledge/discovery/SKILL.md
+  '';
 
   meta = {
     description = "Local-first Markdown knowledge base with agent integrations";

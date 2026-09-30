@@ -2,6 +2,7 @@
   lib,
   stdenvNoCC,
   fetchFromGitHub,
+  installAgentSkills,
   makeWrapper,
   nodejs,
 }:
@@ -17,7 +18,15 @@ stdenvNoCC.mkDerivation {
     hash = "sha256-PRPWBhwJGM56jKDn2jIOZbd8Y5hkqLhSDCF5NzFyEK0=";
   };
 
-  nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [
+    installAgentSkills
+    makeWrapper
+  ];
+  dontInstallAgentSkills = true;
+
+  preInstall = ''
+    installSkill archify
+  '';
 
   installPhase = ''
         runHook preInstall
@@ -64,6 +73,7 @@ stdenvNoCC.mkDerivation {
 
   installCheckPhase = ''
     runHook preInstallCheck
+    test -f $out/share/skills/archify-cli/archify/SKILL.md
     $out/bin/archify doctor
     $out/bin/archify validate architecture $out/share/skills/archify/examples/web-app.architecture.json
     runHook postInstallCheck

@@ -9,7 +9,53 @@ let
   aiTools = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
-  nixbot-cli = inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli;
+  installAgentSkills = pkgs.installAgentSkills;
+
+  herdr = aiTools.herdr.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+    dontInstallAgentSkills = true;
+    postInstall = (old.postInstall or "") + ''
+      installSkill skills/herdr herdr
+    '';
+  });
+
+  git-surgeon = aiTools.git-surgeon.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+    dontInstallAgentSkills = true;
+    postInstall = (old.postInstall or "") + ''
+      installSkill skills/git-surgeon git-surgeon
+    '';
+  });
+
+  ctx = aiTools.ctx.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+    dontInstallAgentSkills = true;
+    postInstall = (old.postInstall or "") + ''
+      installSkill skills/ctx ctx
+    '';
+  });
+
+  officecli = aiTools.officecli.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+    dontInstallAgentSkills = true;
+    postInstall = (old.postInstall or "") + ''
+      installSkill skills/officecli officecli
+    '';
+  });
+
+  nixbot-cli =
+    inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
+      (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+        dontInstallAgentSkills = true;
+        postInstall = (old.postInstall or "") + ''
+          chmod -R u+w "$out/share/skills/nixbot-cli"
+          rm -rf "$out/share/skills/nixbot-cli"
+          skillDir=$(mktemp -d)
+          cp -r ${old.src}/skill "$skillDir/nixbot-cli"
+          installSkill "$skillDir/nixbot-cli" nixbot-cli
+        '';
+      });
 
   # On GPU hosts pkgs is rebuilt with cudaSupport=true (gpu-support.nix); rebuild
   # qmd with CUDA there, otherwise take the cached upstream build. qmd sources
@@ -20,10 +66,6 @@ let
     else
       aiTools.qmd;
 
-  officecliSkill = pkgs.runCommand "officecli-skill-${aiTools.officecli.version}" { } ''
-    mkdir -p "$out"
-    cp ${aiTools.officecli.src}/SKILL.md "$out/SKILL.md"
-  '';
 in
 {
   imports = [
@@ -34,7 +76,7 @@ in
 
   programs.herdr = {
     enable = true;
-    package = aiTools.herdr;
+    package = herdr;
     plugins = [
       selfPkgs.herdr-sesh
       selfPkgs.herdr-autoname
@@ -72,28 +114,17 @@ in
   };
 
   home.file = {
-    ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify";
-
-    # herdr's Pi integration reports agent state and session metadata.
+    ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
+    ".claude/skills/open-knowledge-discovery".source =
+      "${selfPkgs.openknowledge}/share/skills/openknowledge/discovery";
+    ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".pi/agent/extensions/herdr-agent-state.ts".source =
-      "${aiTools.herdr.src}/src/integration/assets/pi/herdr-agent-state.ts";
-
-    # herdr's official skill exposes pane and workspace orchestration to agents.
-    ".claude/skills/herdr/SKILL.md".source = "${aiTools.herdr.src}/skills/herdr/SKILL.md";
-
-    # nixbot-cli ships its agent skill alongside the binary.
-    ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli";
-
-    # git-surgeon ships a skill teaching agents how to use its git primitives.
-    ".claude/skills/git-surgeon".source = "${aiTools.git-surgeon}/share/git-surgeon/skills/git-surgeon";
-
-    # officecli ships its skill text in-source and CI keeps it byte-identical to
-    # what the binary emits, so source it from officecli.src instead of vendoring
-    # a copy that would drift. Pinning to .src version-locks the skill to the
-    # binary and keeps the whole source tree out of the profile closure.
-    ".claude/skills/officecli/SKILL.md".source = "${officecliSkill}/SKILL.md";
-
-    ".claude/skills/ctx/SKILL.md".source = "${aiTools.ctx.src}/skills/ctx/SKILL.md";
+      "${herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
+    ".claude/skills/herdr".source = "${herdr}/share/skills/herdr/herdr";
+    ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
+    ".claude/skills/git-surgeon".source = "${git-surgeon}/share/skills/git-surgeon/git-surgeon";
+    ".claude/skills/officecli".source = "${officecli}/share/skills/officecli/officecli";
+    ".claude/skills/ctx".source = "${ctx}/share/skills/ctx/ctx";
 
   };
 
@@ -113,10 +144,10 @@ in
     aiTools.apm
     aiTools.ccstatusline
     aiTools.codex
-    aiTools.ctx
-    aiTools.git-surgeon
+    ctx
+    git-surgeon
     aiTools.jscpd
-    aiTools.officecli
+    officecli
     aiTools.openspec
     aiTools.prime-agent
     aiTools.tuicr
