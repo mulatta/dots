@@ -151,15 +151,21 @@
     };
   };
 
-  # macOS GUI launches don't inherit shell env, so set MOZ_LEGACY_PROFILES at the
-  # launchd session level. Without it each new install hash spawns a fresh random
-  # profile under Profiles/<rand>.Default; LegacyProfiles policy alone is not
-  # enough on macOS in practice.
-  home.activation.zenLegacyProfiles = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      /bin/launchctl setenv MOZ_LEGACY_PROFILES 1 2>/dev/null || true
-    ''
-  );
+  # macOS GUI launches don't inherit shell env. Set this on every login rather
+  # than only during activation, or a new Nix store path gets a new install ID
+  # and Zen creates a random profile after a reboot.
+  launchd.agents.zen-legacy-profiles = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    enable = true;
+    config = {
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "MOZ_LEGACY_PROFILES"
+        "1"
+      ];
+      RunAtLoad = true;
+    };
+  };
 
   # macOS: zen-browser wrapper doesn't set up native messaging hosts,
   # so register the manifest manually where Firefox-based browsers look for it
