@@ -34,17 +34,18 @@ let
 in
 {
   imports = [
+    ./modules/ai.nix
     ./modules/calendar
     ./modules/chat.nix
+    ./modules/darwin-managed-app.nix
     ./modules/docker.nix
-    ./modules/zed.nix
     ./modules/keyboard
-    ./modules/ai.nix
     ./modules/kubernetes.nix
     ./modules/mail
     ./modules/nostr-chat.nix
     ./modules/ntfy.nix
     ./modules/paneru.nix
+    ./modules/zed.nix
     ./modules/zen.nix
     ./modules/zotero.nix
   ];

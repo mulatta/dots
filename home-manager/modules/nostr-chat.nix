@@ -135,6 +135,8 @@ in
       cfg.barPackage
     ];
 
+    targets.darwin.managedApps = [ barApp ];
+
     home.activation.createNostrChatState = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run mkdir -p "${stateDir}"
       if [ -e "${barApp}" ]; then

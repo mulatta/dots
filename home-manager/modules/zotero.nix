@@ -1,9 +1,12 @@
 {
+  config,
   inputs,
   ...
 }:
 {
   imports = [ inputs.zhost.homeModules.zotero ];
+
+  targets.darwin.managedApps = [ "${config.home.homeDirectory}/Applications/Zotero.app" ];
 
   # Patched Zotero pointed at the self-hosted server. The package derives itself
   # from these endpoints (see zhost's homeModule — no overlay needed); on darwin
