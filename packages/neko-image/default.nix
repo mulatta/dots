@@ -1,9 +1,9 @@
 { dockerTools }:
 dockerTools.pullImage {
   imageName = "ghcr.io/m1k1o/neko/chromium";
-  imageDigest = "sha256:a79093411aced75b3ed7110d50ec9082f9933afabd6592254f01c383678082e7";
-  hash = "sha256-sZ3Z0Ti/PYXP7Qqxbm6w+09Asfld4uQxnUai+62Q/tM=";
-  finalImageTag = "3.1.5";
+  imageDigest = "sha256:2471119c7b4010067f76f3421a78a8bcf35e3c223b2d1f4db084914ec915fb30";
+  hash = "sha256-W473+T4TdDm89DZhoblXwk36BkH7ooB001KG5jDn3AQ=";
+  finalImageTag = "3.1.6";
   os = "linux";
   arch = "amd64";
 }
