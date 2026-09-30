@@ -16,6 +16,7 @@ in
     ./paperless.nix
     ./nip05.nix
     ./security-txt.nix
+    ./sparkyfitness.nix
   ];
 
   options.services.nginx.virtualHosts = lib.mkOption {

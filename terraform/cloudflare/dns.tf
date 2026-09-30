@@ -199,6 +199,16 @@ resource "cloudflare_dns_record" "video_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "fitness_a" {
+  zone_id = local.zone_id
+  name    = "fitness"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "SparkyFitness"
+}
+
 resource "cloudflare_dns_record" "home_a" {
   zone_id = local.zone_id
   name    = "home"

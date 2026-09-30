@@ -79,6 +79,9 @@ in
         paperless_users = {
           members = [ "seungwon" ];
         };
+        fitness_users = {
+          members = [ "seungwon" ];
+        };
         rss_users = {
           members = [ "seungwon" ];
         };

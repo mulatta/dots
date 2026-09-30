@@ -145,6 +145,11 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    sparkyfitness = {
+      url = "github:CodeWithCJ/SparkyFitness";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Applications
     flake-fmt = {
       url = "github:Mic92/flake-fmt";

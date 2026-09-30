@@ -177,6 +177,25 @@ in
       ];
     };
 
+    sparkyfitness = {
+      displayName = "SparkyFitness";
+      originUrl = [
+        "https://fitness.${baseDomain}"
+        "https://fitness.${baseDomain}/api/auth/sso/callback/kanidm"
+      ];
+      originLanding = "https://fitness.${baseDomain}";
+      public = false;
+      enableLocalhostRedirects = false;
+      preferShortUsername = true;
+      basicSecretFile = config.clan.core.vars.generators.kanidm-sparkyfitness-oidc.files.secret.path;
+      scopeMaps.fitness_users = [
+        "openid"
+        "email"
+        "profile"
+        "groups"
+      ];
+    };
+
     paperless = {
       displayName = "Paperless";
       imageFile = icons.paperless;
@@ -328,6 +347,18 @@ in
 
         printf '%s' "$client_secret" > "$out/client-secret"
         printf 'OAUTH2_CLIENT_SECRET=%s\n' "$client_secret" > "$out/env"
+      '';
+    };
+
+    kanidm-sparkyfitness-oidc = {
+      share = true;
+      files.secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 > "$out/secret"
       '';
     };
 
