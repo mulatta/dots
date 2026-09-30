@@ -5,12 +5,12 @@
   undmg,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "meetily";
   version = "0.4.1";
 
   src = fetchurl {
-    url = "https://github.com/Zackriya-Solutions/meeting-minutes/releases/download/v${version}/meetily_${version}_aarch64.dmg";
+    url = "https://github.com/Zackriya-Solutions/meeting-minutes/releases/download/v${finalAttrs.version}/meetily_${finalAttrs.version}_aarch64.dmg";
     hash = "sha256-FvhLF2lhm6Pak7xD6cH6MyDOKwDMnpkiWj0hMCdw6vU=";
   };
 
@@ -32,4 +32,4 @@ stdenvNoCC.mkDerivation rec {
     platforms = [ "aarch64-darwin" ];
     sourceProvenance = with sourceTypes; [ binaryNativeCode ];
   };
-}
+})

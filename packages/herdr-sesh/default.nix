@@ -4,14 +4,14 @@
   fetchFromGitHub,
 }:
 
-buildGoModule rec {
+buildGoModule (finalAttrs: {
   pname = "herdr-sesh";
   version = "0.5.0";
 
   src = fetchFromGitHub {
     owner = "fullerzz";
     repo = "herdr-plugin-sesh";
-    rev = "v${version}";
+    rev = "v${finalAttrs.version}";
     hash = "sha256-IGLMExUtNI8ybwY0tOVzhxZSFl5SJgu98DW+kvcBTyY=";
   };
 
@@ -19,7 +19,7 @@ buildGoModule rec {
 
   subPackages = [ "cmd/herdr-sesh" ];
 
-  ldflags = [ "-X=github.com/fullerzz/herdr-plugin-sesh/internal/app.Version=${version}" ];
+  ldflags = [ "-X=github.com/fullerzz/herdr-plugin-sesh/internal/app.Version=${finalAttrs.version}" ];
 
   # Ship as a herdr plugin directory: manifest at the root, binary under bin/,
   # matching the "./bin/herdr-sesh" commands in the manifest.
@@ -33,4 +33,4 @@ buildGoModule rec {
     license = lib.licenses.mit;
     mainProgram = "herdr-sesh";
   };
-}
+})

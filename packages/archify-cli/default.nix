@@ -7,14 +7,14 @@
   nodejs,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "archify-cli";
   version = "3.0.1";
 
   src = fetchFromGitHub {
     owner = "tt-a1i";
     repo = "archify";
-    rev = "v${version}";
+    rev = "v${finalAttrs.version}";
     hash = "sha256-i7+M5PdQkGiC/Sow9Vtfh+ZHnOMVM9uBOtdzkKZhzLY=";
   };
 
@@ -66,4 +66,4 @@ stdenvNoCC.mkDerivation rec {
     mainProgram = "archify";
     platforms = nodejs.meta.platforms;
   };
-}
+})

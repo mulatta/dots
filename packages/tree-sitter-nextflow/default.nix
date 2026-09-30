@@ -4,9 +4,12 @@
   tree-sitter,
 }:
 
-tree-sitter.buildGrammar rec {
-  language = "nextflow";
+let
   version = "0.4.0";
+in
+tree-sitter.buildGrammar {
+  language = "nextflow";
+  inherit version;
 
   src = fetchFromGitHub {
     owner = "nextflow-io";
