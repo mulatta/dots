@@ -14,7 +14,7 @@
     in
     {
       packages = {
-        archify-cli = pkgs.callPackage ./archify { };
+        archify-cli = pkgs.callPackage ./archify-cli { };
         bulwark-webmail = pkgs.callPackage ./bulwark-webmail { };
         claude-code = pkgs.callPackage ./claude-code {
           claude-code = llmAgents.claude-code;
