@@ -8,16 +8,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "instagram-cli";
-  version = "1.4.3";
+  version = "2.0.1";
 
   src = fetchFromGitHub {
     owner = "supreme-gg-gg";
     repo = "instagram-cli";
     tag = "ts-v${finalAttrs.version}";
-    hash = "sha256-EJxTPCiEOJG1AwWnsOrCIW/TQsrB1Kl678uocaWYC10=";
+    hash = "sha256-sBRHi/SFbytaF8QICp3RF4bHnSP4GUmd3jfAIZH1YjU=";
   };
 
-  npmDepsHash = "sha256-hUX+xZD3CDgPFwZtr91bJTC6JTXzIzgjn90QME+iMwE=";
+  npmDepsHash = "sha256-ZMenkLwwW78cRVmn/N8MjczUuS7p0vyNkL82nMPZzVE=";
 
   nodejs = nodejs_22;
 
