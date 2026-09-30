@@ -59,6 +59,9 @@
 [credential "https://github.com"]
 	helper = "!gh auth git-credential"
 
+[credential "https://api.github.com"]
+	helper = "!f() { if [ \"$1\" = get ]; then printf '%s\\n' username=x-access-token \"password=$(gh auth token)\"; fi; }; f"
+
 [delta]
 	dark = true
 	line-numbers = true
@@ -89,6 +92,7 @@
 
 [init]
 	defaultBranch = "main"
+	templateDir = ~/.config/maiao/template
 
 [interactive]
 	diffFilter = "delta --color-only"
@@ -134,10 +138,6 @@
 [tag]
 	gpgSign = true
 
-[url "git@github.com:"]
-	insteadOf = "https://github.com/"
-	insteadOf = "github:"
-
 [user]
 	email = "67085791+mulatta@users.noreply.github.com"
 	name = "mulatta"
@@ -148,3 +148,6 @@
 
 [include]
 	path = ~/.gitconfig.local
+
+[maiao]
+	autoInstallHook = true

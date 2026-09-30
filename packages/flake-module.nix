@@ -27,6 +27,7 @@
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };
+        maiao = pkgs.callPackage ./maiao { };
         merge-when-green = pkgs.callPackage ./merge-when-green {
           flake-fmt = inputs'.flake-fmt.packages.default;
         };

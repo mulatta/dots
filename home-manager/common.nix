@@ -124,6 +124,7 @@ in
   ++ [
     # Custom packages
     selfPkgs.loc
+    selfPkgs.maiao
     selfPkgs.merge-when-green
     selfPkgs.miniflux-sync
     selfPkgs.termaid
