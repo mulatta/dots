@@ -7,7 +7,7 @@
 {
   services.postgresql = {
     enable = true;
-    package = pkgs.postgresql_17;
+    package = lib.mkForce pkgs.postgresql_17;
   };
 
   services.postgresqlBackup = {
