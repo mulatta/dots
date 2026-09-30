@@ -60,7 +60,6 @@
         updater = pkgs.callPackage ./updater { };
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-        nostr-chat-bar = pkgs.callPackage ./nostr-chat-bar { };
         openknowledge-desktop = pkgs.callPackage ./openknowledge-desktop { };
         openlogi = pkgs.callPackage ./openlogi { };
         paneru-app = pkgs.callPackage ./paneru-app {

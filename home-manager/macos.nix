@@ -42,7 +42,7 @@ in
     ./modules/keyboard
     ./modules/kubernetes.nix
     ./modules/mail
-    ./modules/nostr-chat.nix
+
     ./modules/paneru.nix
     ./modules/zed.nix
     ./modules/zen.nix
@@ -73,21 +73,6 @@ in
     pkgs.tailscale
     pkgs.typora
   ];
-
-  services.nostr-chat = {
-    enable = true;
-    peerPubkey = lib.strings.trim (
-      builtins.readFile "${self}/vars/per-machine/malt/opencrow/nostr-public-key/value"
-    );
-    relays = [
-      "wss://relay.mulatta.io"
-      "wss://relay.primal.net"
-      "wss://nos.lol"
-    ];
-    blossom = "https://blossom.mulatta.io";
-    displayName = "Noa";
-    secretCommand = "rbw get nostr-identity";
-  };
 
   programs.rbw.settings = {
     pinentry = lib.mkForce selfPkgs.rbw-pinentry;
