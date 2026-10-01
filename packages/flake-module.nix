@@ -39,6 +39,9 @@
         pi-acp = pkgs.callPackage ./pi-acp {
           pi = llmAgents.pi;
         };
+        prime-agent = pkgs.callPackage ./prime-agent {
+          prime-agent = llmAgents.prime-agent;
+        };
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) n8n-hooks email-sync msmtp-with-sent;
           calendar-cli = skillz.calendar-cli.override {
