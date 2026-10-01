@@ -149,7 +149,7 @@ in
     aiTools.jscpd
     officecli
     aiTools.openspec
-    aiTools.prime-agent
+    selfPkgs.prime-agent
     aiTools.tuicr
     nixbot-cli
     pkgs.pueue
