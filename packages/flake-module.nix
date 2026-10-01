@@ -64,6 +64,8 @@
         openlogi = pkgs.callPackage ./openlogi { };
         paneru-app = pkgs.callPackage ./paneru-app {
           paneru = inputs'.paneru.packages.default;
+          # Prevent callPackage from injecting pkgs.lua; follow Paneru's LuaJIT default.
+          lua = null;
         };
         radicle-desktop = pkgs.callPackage ./radicle-desktop { };
         systemctl-macos = pkgs.callPackage ./systemctl { };

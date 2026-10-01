@@ -4,10 +4,13 @@
   rcodesign,
   paneru,
   enableLua ? false,
-  lua ? paneru.luaModule.lua,
+  lua ? null,
 }:
 let
-  daemon = paneru.override { inherit enableLua lua; };
+  daemon = paneru.override {
+    inherit enableLua;
+    lua = if lua == null then paneru.luaModule.lua else lua;
+  };
   appName = "Paneru.app";
   bundleVersion = builtins.head (lib.splitString "+" daemon.version);
   executable = "${appName}/Contents/MacOS/paneru";
