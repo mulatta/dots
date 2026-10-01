@@ -29,7 +29,7 @@
     "~/.prime/agent/extensions/permission-gate",
     "+extensions/permission-gate/index.ts"
   ],
-  "skills": ["~/.claude/skills", "-skill-creator/SKILL.md"],
+  "skills": ["~/.claude/skills", "!**/synced/**", "-skill-creator/SKILL.md"],
   "prompts": ["~/.pi/agent/prompts"],
   "theme": "tokyonight",
   "themes": ["~/.pi/agent/themes"],
