@@ -1,1 +1,0 @@
-../../../../../pi-agent-extensions/permission-gate/shell.ts

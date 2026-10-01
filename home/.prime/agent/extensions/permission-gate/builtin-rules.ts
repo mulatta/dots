@@ -1,1 +1,0 @@
-../../../../../pi-agent-extensions/permission-gate/builtin-rules.ts
