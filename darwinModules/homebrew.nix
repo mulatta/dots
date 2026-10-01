@@ -23,9 +23,9 @@
     # keep-sorted start
     "aldente"
     "alt-tab"
+    "bettershot"
     "bitwarden"
     "claude"
-    "cleanshot"
     "devonthink"
     "gureumkim"
     "hancom-word"
