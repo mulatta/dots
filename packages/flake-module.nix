@@ -13,6 +13,7 @@
     in
     {
       packages = {
+        addgene-mcp = pkgs.callPackage ./addgene-mcp { };
         archify-cli = pkgs.callPackage ./archify-cli { };
         bulwark-webmail = pkgs.callPackage ./bulwark-webmail { };
         claude-code = pkgs.callPackage ./claude-code {
