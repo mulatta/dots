@@ -200,8 +200,8 @@
     };
 
     # Agentic tools
-    research-skills = {
-      url = "github:mulatta/research-skills";
+    bioinformatics-toolkits = {
+      url = "github:SBEE-Lab/bioinformatics-toolkits";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
