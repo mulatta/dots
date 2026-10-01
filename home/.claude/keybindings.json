@@ -4,8 +4,7 @@
     {
       "context": "Chat",
       "bindings": {
-        "ctrl+e": "chat:externalEditor",
-        "ctrl+g": null
+        "alt+enter": "chat:queueSubmit"
       }
     },
     {
