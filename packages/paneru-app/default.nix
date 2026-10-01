@@ -3,9 +3,11 @@
   stdenvNoCC,
   rcodesign,
   paneru,
+  enableLua ? false,
+  lua ? paneru.luaModule.lua,
 }:
 let
-  daemon = paneru;
+  daemon = paneru.override { inherit enableLua lua; };
   appName = "Paneru.app";
   bundleVersion = builtins.head (lib.splitString "+" daemon.version);
   executable = "${appName}/Contents/MacOS/paneru";
