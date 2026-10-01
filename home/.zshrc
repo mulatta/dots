@@ -730,3 +730,5 @@ bindkey '^[O3C' forward-word        # Alt+Right (application mode, some terminal
 autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey '^[e' edit-command-line
+
+export PATH="$HOME/.local/bin:$PATH"
