@@ -17,6 +17,7 @@
   "hideThinkingBlock": true,
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "low",
   "recentModels": ["openai-codex/gpt-5.6-sol"],
   "telemetry": {
     "enabled": false,
