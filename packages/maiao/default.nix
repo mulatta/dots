@@ -20,6 +20,14 @@ buildGoModule (finalAttrs: {
 
   vendorHash = "sha256-ccuTrhRrH+Qe9VwIKSK9rQYcYtrB8YO3pODbMT5/sVc=";
 
+  overrideModAttrs = oldAttrs: {
+    nativeBuildInputs = lib.remove installShellFiles (
+      lib.remove installAgentSkills oldAttrs.nativeBuildInputs
+    );
+    preInstall = null;
+    postInstall = null;
+  };
+
   subPackages = [ "cmd/maiao" ];
 
   ldflags = [
