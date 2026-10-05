@@ -8,6 +8,7 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   selfPkgs = self.packages.${system};
   aiPkgs = self.inputs.llm-agents.packages.${system};
+  buzzPkgs = self.inputs.buzz.packages.${system};
   kandevRuntime = aiPkgs.kandev.override {
     claudeSupport = true;
     codexSupport = true;
@@ -36,6 +37,16 @@ in
   ];
 
   home.packages = [
+    (pkgs.writeShellApplication {
+      name = "buzz";
+      text = ''
+        export BUZZ_RELAY_URL="https://buzz.mulatta.io"
+        BUZZ_PRIVATE_KEY="$(${pkgs.rbw}/bin/rbw get --field password nostr-identity)"
+        export BUZZ_PRIVATE_KEY
+        exec ${buzzPkgs.buzz-cli}/bin/buzz "$@"
+      '';
+    })
+    buzzPkgs.buzz-desktop
     selfPkgs.instagram-cli
     selfPkgs.openknowledge
     selfPkgs.openknowledge-desktop
@@ -59,6 +70,9 @@ in
     pkgs.tailscale
     pkgs.typora
   ];
+
+  home.file.".claude/skills/buzz-cli".source =
+    "${buzzPkgs.buzz-cli}/share/skills/buzz-cli/sprout-cli";
 
   programs.rbw.settings = {
     pinentry = lib.mkForce selfPkgs.rbw-pinentry;
