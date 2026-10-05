@@ -3,6 +3,28 @@ locals {
   r2_account_id = local.secrets.CLOUDFLARE_ACCOUNT_ID
 }
 
+# Provider versions and builds come from flake.lock via opentofu.withPlugins.
+# Run inside the terraform devshell. Clean the *execution directory*, not only
+# the source directory: Terragrunt may reuse a cached lock after source changes.
+# Auto-init is disabled in the shell: initialize explicitly before plan/apply.
+terraform {
+  before_hook "check_nix_provider_environment" {
+    commands = ["init", "plan", "apply", "validate", "destroy", "import", "refresh", "providers", "state", "output", "show"]
+    execute  = [get_env("DOTS_TERRAFORM_GUARD", "/missing-terraform-devshell")]
+  }
+
+  before_hook "reset_nix_provider_metadata" {
+    commands = ["init"]
+    execute = ["bash", "-eu", "-c", <<-EOT
+      # Repeat the guard here so metadata deletion never depends on hook order.
+      "$${DOTS_TERRAFORM_GUARD:?Use the Terraform devshell}"
+      rm -f .terraform.lock.hcl
+      rm -rf -- "$${TF_DATA_DIR:-.terraform}/providers"
+    EOT
+    ]
+  }
+}
+
 remote_state {
   backend = "s3"
   generate = {

@@ -83,3 +83,40 @@ authentication scheme`), and enabling them would require switching
 
 Revisit this note if Cloudflare's Free-plan Terraform support for AI bot
 protection ships and the self-host trust boundaries shift.
+
+## Provider reproducibility
+
+Nix is the single authority for OpenTofu and provider versions. The Terraform
+shell supplies `opentofu.withPlugins`; update `flake.lock` to update providers.
+Do not add duplicate provider version pins or commit `.terraform.lock.hcl`.
+Generated lock files describe the local Nix-built packages, not a portable set
+of registry archives.
+
+Use the declared shell for every Terragrunt command, including automation:
+
+```sh
+nix develop .#terraform -c terragrunt --working-dir terraform/cloudflare init
+nix develop .#terraform -c terragrunt --working-dir terraform/cloudflare plan
+```
+
+The shell selects the Nix-packaged `tofu` and disables Terragrunt's automatic
+and explicit provider cache. These settings do not depend on loading `.envrc`.
+A Nix-generated guard verifies the exact packaged executable before initialization
+or provider/state operations. It rejects `TG_TF_PATH` overrides, inherited
+`TF_PLUGIN_CACHE_DIR` or `TF_CLI_CONFIG_FILE`, and changed cache controls.
+These are operational checks, not a security boundary against a user who can
+modify the environment or invoke OpenTofu directly.
+
+Before `init`, the shared hook removes the execution directory's generated lock
+and provider installation directory. This covers Terragrunt's cached lock copy
+and provider symlinks that may point to garbage-collected Nix paths. It does not
+remove backend metadata, state, or saved plans. Terragrunt auto-init is disabled and checked by the guard. A plan or apply that
+needs initialization must fail rather than silently regenerating its lock.
+Run an explicit `init` before the first plan and after changing the
+Nix environment or encountering stale provider links; do not fix discovery
+failures by introducing an independent registry provider selection.
+
+Keep the same flake revision, platform, and initialized provider selection from
+saved-plan creation through apply. Do not update Nix inputs or reinitialize with
+a different environment between them. Store plans with restricted permissions;
+they can contain secrets. Only apply a reviewed plan with explicit approval.

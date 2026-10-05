@@ -4,6 +4,7 @@ result
 .envrc.private
 
 .terraform/
+.terraform.lock.hcl
 terraform.tfstate
 *.tfstate.backup
 terraform.tf
