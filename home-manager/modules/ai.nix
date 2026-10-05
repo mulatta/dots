@@ -134,6 +134,7 @@ in
     selfPkgs.claude-code
     selfPkgs.claude-md
     selfPkgs.pim
+    selfPkgs.prime-agent
     (pkgs.writeShellApplication {
       name = "pi";
       text = ''
@@ -141,17 +142,17 @@ in
         exec ${aiTools.pi}/bin/pi "$@"
       '';
     })
-    aiTools.apm
+    aiTools.agent-slack
     aiTools.ccstatusline
     aiTools.codex
+    aiTools.jscpd
+    aiTools.openspec
+    aiTools.tuicr
     ctx
     git-surgeon
-    aiTools.jscpd
-    officecli
-    aiTools.openspec
-    selfPkgs.prime-agent
-    aiTools.tuicr
     nixbot-cli
+    officecli
     pkgs.pueue
+    pkgs.nushell
   ];
 }
