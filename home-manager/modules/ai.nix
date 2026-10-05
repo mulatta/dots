@@ -7,6 +7,7 @@
 }:
 let
   aiTools = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  bioPkgs = inputs.bioinformatics-toolkits.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
@@ -70,7 +71,6 @@ in
 {
   imports = [
     inputs.skillz.homeModules.default
-    inputs.research-skills.homeModules.default
     ./herdr
   ];
 
@@ -105,14 +105,6 @@ in
     };
   };
 
-  programs.research-skills = {
-    enable = true;
-    skills = [
-      "biomcp"
-      "pymol-cli"
-    ];
-  };
-
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/open-knowledge-discovery".source =
@@ -129,7 +121,6 @@ in
   };
 
   home.packages = [
-    qmd
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md
@@ -148,10 +139,12 @@ in
     aiTools.jscpd
     aiTools.openspec
     aiTools.tuicr
+    bioPkgs.biomcp
     ctx
     git-surgeon
     nixbot-cli
     officecli
+    qmd
     pkgs.pueue
     pkgs.nushell
   ];

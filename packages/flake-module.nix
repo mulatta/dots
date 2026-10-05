@@ -9,7 +9,6 @@
     }:
     let
       llmAgents = inputs'.llm-agents.packages;
-      researchSkills = inputs'.research-skills.packages;
       skillz = inputs'.skillz.packages;
     in
     {
@@ -50,7 +49,6 @@
           crabfit-cli = skillz.crabfit-cli;
           miniflux-cli = skillz.miniflux-cli;
           biorefs-cli = skillz.biorefs-cli;
-          pymol-cli = researchSkills.pymol-cli;
           pi = llmAgents.pi;
         };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
