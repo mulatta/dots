@@ -22,5 +22,12 @@
   "telemetry": {
     "enabled": false,
     "noticeShown": true
+  },
+  "mcpServers": {
+    "biomcp": {
+      "type": "stdio",
+      "command": "biomcp",
+      "args": ["mcp"]
+    }
   }
 }
