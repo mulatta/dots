@@ -19,13 +19,7 @@ let
     '';
   });
 
-  git-surgeon = aiTools.git-surgeon.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-    dontInstallAgentSkills = true;
-    postInstall = (old.postInstall or "") + ''
-      installSkill skills/git-surgeon git-surgeon
-    '';
-  });
+  git-surgeon = aiTools.git-surgeon;
 
   ctx = aiTools.ctx.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
