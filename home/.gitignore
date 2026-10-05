@@ -19,6 +19,7 @@ CLAUDE.md
 !.claude/CLAUDE.md
 CLAUDE.local.md
 AGENTS.md
+!.prime/agent/AGENTS.md
 
 
 **/.claude/settings.local.json
