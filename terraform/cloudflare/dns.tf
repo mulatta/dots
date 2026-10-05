@@ -405,6 +405,26 @@ resource "cloudflare_dns_record" "zotero_a" {
   comment = "zhost (self-hosted Zotero sync)"
 }
 
+resource "cloudflare_dns_record" "buzz_a" {
+  zone_id = local.zone_id
+  name    = "buzz"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Buzz cask ingress"
+}
+
+resource "cloudflare_dns_record" "buzz_pair_a" {
+  zone_id = local.zone_id
+  name    = "pair.buzz"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Buzz cask ingress"
+}
+
 # =============================================================================
 # Mail DNS Records (migrated from cloudflare-dns.nix)
 # =============================================================================

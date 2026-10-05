@@ -75,3 +75,29 @@ resource "cloudflare_r2_bucket_lifecycle" "zotero" {
     }
   }]
 }
+
+# buzz - private object storage; access only through bucket-scoped S3 credentials
+
+resource "cloudflare_r2_bucket" "buzz" {
+  account_id = local.account_id
+  name       = "buzz"
+  location   = "APAC"
+}
+
+resource "cloudflare_r2_bucket_lifecycle" "buzz" {
+  account_id  = local.account_id
+  bucket_name = cloudflare_r2_bucket.buzz.name
+  rules = [{
+    id      = "abort-incomplete-multipart-uploads"
+    enabled = true
+    conditions = {
+      prefix = ""
+    }
+    abort_multipart_uploads_transition = {
+      condition = {
+        max_age = 86400 # 1 day in seconds
+        type    = "Age"
+      }
+    }
+  }]
+}

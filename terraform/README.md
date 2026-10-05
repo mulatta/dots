@@ -84,6 +84,30 @@ authentication scheme`), and enabling them would require switching
 Revisit this note if Cloudflare's Free-plan Terraform support for AI bot
 protection ships and the self-host trust boundaries shift.
 
+## Buzz storage and DNS
+
+`cloudflare` creates the dedicated `buzz` R2 bucket in APAC. It stays private:
+do not enable an `r2.dev` public URL or attach an R2 custom domain. The
+`buzz.mulatta.io` and `pair.buzz.mulatta.io` DNS-only A records point to cask's
+reserved service IP, not to R2. TLS terminates at cask ingress. Keep these
+records in sync with `machines/cask/modules/knot/mulatta.io.zone`, which also
+defines the public zone for the Knot/HE DNS migration. Check active delegation
+and existing records before an approved apply; import existing resources rather
+than creating duplicate ownership.
+
+After an approved bucket apply, create a separate R2 API token with **Object
+Read & Write** access restricted to **only the `buzz` bucket**. Do not reuse
+the Terraform state, cache, backup, or Zotero credentials. Store the resulting
+S3 access key ID and secret access key in the cask runtime secret mechanism,
+not Terraform variables, outputs, Git, or the Nix store. Configure Buzz with
+bucket `buzz`, region `auto`, and endpoint
+`https://<account-id>.r2.cloudflarestorage.com`. The application credentials
+need object access, not bucket administration or account-wide access.
+
+The lifecycle rule aborts incomplete multipart uploads after one day. It does
+not expire completed objects. Verify authenticated upload, download, and delete
+through Buzz after deployment, and verify anonymous R2 reads remain denied.
+
 ## Provider reproducibility
 
 Nix is the single authority for OpenTofu and provider versions. The Terraform
