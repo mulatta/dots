@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   lib,
   self,
@@ -9,8 +8,7 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   selfPkgs = self.packages.${system};
   aiPkgs = self.inputs.llm-agents.packages.${system};
-  secretiveSocket = "${config.home.homeDirectory}/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh";
-  kandevRuntimeBase = aiPkgs.kandev.override {
+  kandevRuntime = aiPkgs.kandev.override {
     claudeSupport = true;
     codexSupport = true;
     piSupport = true;
@@ -19,18 +17,6 @@ let
       aiPkgs.prime-agent
     ];
   };
-  kandevRuntime = kandevRuntimeBase.overrideAttrs (old: {
-    passthru = old.passthru // {
-      agentRuntimeEnvironment = old.passthru.agentRuntimeEnvironment // {
-        SSH_AUTH_SOCK = secretiveSocket;
-      };
-      agentRuntimeWrapperArgs = old.passthru.agentRuntimeWrapperArgs ++ [
-        "--set"
-        "SSH_AUTH_SOCK"
-        secretiveSocket
-      ];
-    };
-  });
 in
 {
   imports = [
