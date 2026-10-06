@@ -11,6 +11,14 @@ let
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
 
+  agent-slack = aiTools.agent-slack.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
+    dontInstallAgentSkills = true;
+    postInstall = (old.postInstall or "") + ''
+      installSkill skills/agent-slack agent-slack
+    '';
+  });
+
   herdr = aiTools.herdr.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
     dontInstallAgentSkills = true;
@@ -117,6 +125,7 @@ in
     ".claude/skills/git-surgeon".source = "${aiTools.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${officecli}/share/skills/officecli/officecli";
     ".claude/skills/ctx".source = "${ctx}/share/skills/ctx/ctx";
+    ".claude/skills/agent-slack".source = "${agent-slack}/share/skills/agent-slack/agent-slack";
 
   };
 
@@ -133,7 +142,7 @@ in
         exec ${aiTools.pi}/bin/pi "$@"
       '';
     })
-    aiTools.apm
+    agent-slack
     aiTools.ccstatusline
     aiTools.codex
     ctx
