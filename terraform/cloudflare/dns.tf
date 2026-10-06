@@ -154,6 +154,16 @@ resource "cloudflare_dns_record" "n8n_api_a" {
   proxied = false
 }
 
+resource "cloudflare_dns_record" "hermes_a" {
+  zone_id = local.zone_id
+  name    = "hermes"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Hermes dashboard cask ingress"
+}
+
 resource "cloudflare_dns_record" "rss_a" {
   zone_id = local.zone_id
   name    = "rss"

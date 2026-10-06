@@ -99,6 +99,9 @@ in
         homeassistant_users = {
           members = [ "seungwon" ];
         };
+        hermes_users = {
+          members = [ "seungwon" ];
+        };
         chat_users = {
           members = [ "seungwon" ];
         };

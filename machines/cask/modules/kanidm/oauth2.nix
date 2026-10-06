@@ -99,6 +99,21 @@ in
       };
     };
 
+    # Hermes verifies OIDC ID tokens and uses S256 PKCE without a client secret.
+    # Scope maps are the access allow-list for this agent-control dashboard.
+    hermes = {
+      displayName = "Hermes Dashboard";
+      originUrl = [ "https://hermes.${baseDomain}/auth/callback" ];
+      originLanding = "https://hermes.${baseDomain}";
+      public = true;
+      enableLocalhostRedirects = false;
+      scopeMaps.hermes_users = [
+        "openid"
+        "profile"
+        "email"
+      ];
+    };
+
     # Nextcloud - public client with PKCE
     nextcloud = {
       displayName = "Nextcloud";

@@ -56,6 +56,18 @@ let
       interim_assistant_messages = false;
       tool_progress = "off";
     };
+    dashboard = {
+      # Force OIDC authentication even though the backend binds loopback.
+      public_url = "https://hermes.mulatta.io";
+      oauth = {
+        provider = "self-hosted";
+        self_hosted = {
+          issuer = "https://idm.mulatta.io/oauth2/openid/hermes";
+          client_id = "hermes";
+          scopes = "openid profile email";
+        };
+      };
+    };
     terminal.cwd = "${stateDir}/workspaces";
   };
   hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" hermesSettings;
@@ -89,6 +101,8 @@ let
   };
 in
 {
+  imports = [ ./ingress.nix ];
+
   clan.core.vars.generators.hermes = {
     files.slack-bot-token.secret = true;
     files.slack-app-token.secret = true;
