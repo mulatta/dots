@@ -56,6 +56,7 @@
           rsshub = pkgs.rsshub;
         };
         termaid = pkgs.callPackage ./termaid { };
+        trek = pkgs.callPackage ./trek { };
         tree-sitter-nextflow = pkgs.callPackage ./tree-sitter-nextflow { };
         updater = pkgs.callPackage ./updater { };
       }
