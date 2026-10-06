@@ -24,5 +24,16 @@ in
         proxy_send_timeout 300s;
       '';
     };
+
+    # MCP streams tool results over SSE, and TREK sends no
+    # X-Accel-Buffering header, so buffering would hold events back.
+    locations."/mcp" = {
+      proxyPass = "http://malt.n:${toString port}";
+      extraConfig = ''
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+      '';
+    };
   };
 }
