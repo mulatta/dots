@@ -196,6 +196,26 @@ in
       ];
     };
 
+    # TREK - confidential client; sends PKCE and posts the client secret.
+    trek = {
+      displayName = "TREK";
+      originUrl = [
+        "https://trek.${baseDomain}"
+        "https://trek.${baseDomain}/api/auth/oidc/callback"
+      ];
+      originLanding = "https://trek.${baseDomain}";
+      public = false;
+      enableLocalhostRedirects = false;
+      preferShortUsername = true;
+      basicSecretFile = config.clan.core.vars.generators.kanidm-trek-oidc.files.secret.path;
+      scopeMaps.trek_users = [
+        "openid"
+        "email"
+        "profile"
+        "groups_name"
+      ];
+    };
+
     paperless = {
       displayName = "Paperless";
       imageFile = icons.paperless;
@@ -351,6 +371,18 @@ in
     };
 
     kanidm-sparkyfitness-oidc = {
+      share = true;
+      files.secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 > "$out/secret"
+      '';
+    };
+
+    kanidm-trek-oidc = {
       share = true;
       files.secret = {
         secret = true;

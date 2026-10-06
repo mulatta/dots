@@ -2,7 +2,7 @@ $ORIGIN mulatta.io.
 $TTL 300
 
 @ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. (
-  2026090701 ; serial
+  2026100601 ; serial
   3600       ; refresh
   600        ; retry
   604800     ; expire
@@ -49,6 +49,7 @@ tasks         IN A @SERVICE_IPV4@
 restate       IN A @SERVICE_IPV4@
 restate-api   IN A @SERVICE_IPV4@
 zotero        IN A @SERVICE_IPV4@
+trek          IN A @SERVICE_IPV4@
 buzz          IN A @SERVICE_IPV4@
 pair.buzz     IN A @SERVICE_IPV4@
 minecraft     IN A 100.64.0.1

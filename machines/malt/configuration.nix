@@ -28,6 +28,7 @@
     ./modules/rsshub.nix
     ./modules/sparkyfitness.nix
     ./modules/tailscale.nix
+    ./modules/trek.nix
   ];
 
   networking.hostName = "malt";

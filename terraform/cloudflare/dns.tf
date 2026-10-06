@@ -209,6 +209,16 @@ resource "cloudflare_dns_record" "fitness_a" {
   comment = "SparkyFitness"
 }
 
+resource "cloudflare_dns_record" "trek_a" {
+  zone_id = local.zone_id
+  name    = "trek"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "TREK"
+}
+
 resource "cloudflare_dns_record" "home_a" {
   zone_id = local.zone_id
   name    = "home"
