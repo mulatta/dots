@@ -10,7 +10,13 @@ let
   aiPkgs = self.inputs.llm-agents.packages.${system};
   stateDir = "/var/lib/hermes";
   gen = config.clan.core.vars.generators.hermes;
+  buzzIdentity = config.clan.core.vars.generators.hermes-buzz;
+  buzzCli = self.inputs.buzz.packages.${system}.buzz-cli;
+  buzzOwnerPubkey = self.nixosConfigurations.cask.config.services.buzz-relay.ownerPubkey;
+  # Existing general channel; relay/channel membership is provisioned separately.
+  buzzChannel = "6fd9e6ce-242e-51ce-b931-7644668b87de";
   runtimePath = [
+    buzzCli
     aiPkgs.claude-code
     aiPkgs.codex
     aiPkgs.hermes-agent
@@ -27,10 +33,28 @@ let
       codex_gpt55_autoraise = true;
       codex_gpt55_autoraise_notice = false;
     };
-    platforms.slack.home_channel = {
+    gateway.platforms.slack.home_channel = {
       platform = "slack";
       chat_id = "D04GJGZK4SH";
       name = "Seungwon";
+    };
+    gateway.platforms.buzz = {
+      enabled = true;
+      extra = {
+        relay_url = "https://buzz.mulatta.io";
+        cli_path = "${buzzCli}/bin/buzz";
+        channels = [ buzzChannel ];
+        home_channel = buzzChannel;
+        allowed_users = [ buzzOwnerPubkey ];
+        allow_all_users = false;
+        require_mention = true;
+        transport = "auto";
+        poll_interval = 10;
+      };
+    };
+    display.platforms.buzz = {
+      interim_assistant_messages = false;
+      tool_progress = "off";
     };
     terminal.cwd = "${stateDir}/workspaces";
   };
@@ -43,6 +67,7 @@ let
     HERMES_INFERENCE_MODEL = hermesSettings.model.default;
     HERMES_MODEL = hermesSettings.model.default;
     SLACK_ALLOWED_USERS = "U04GMC10NNP";
+    BUZZ_RELAY_URL = hermesSettings.gateway.platforms.buzz.extra.relay_url;
   };
   commonService = {
     User = "hermes";
@@ -83,6 +108,18 @@ in
     '';
   };
 
+  # Independent bot identity: never reuse the human owner's or relay's key.
+  clan.core.vars.generators.hermes-buzz = {
+    files.private-key.secret = true;
+    files.public-key.secret = false;
+    runtimeInputs = [ pkgs.nak ];
+    script = ''
+      umask 077
+      nak key generate > "$out/private-key"
+      nak key public < "$out/private-key" > "$out/public-key"
+    '';
+  };
+
   users.users.hermes = {
     isSystemUser = true;
     group = "hermes";
@@ -106,6 +143,7 @@ in
     extraFlags = [
       "--load-credential=slack-bot-token:${gen.files.slack-bot-token.path}"
       "--load-credential=slack-app-token:${gen.files.slack-app-token.path}"
+      "--load-credential=buzz-private-key:${buzzIdentity.files.private-key.path}"
     ];
 
     config = _: {
@@ -145,12 +183,14 @@ in
             ImportCredential = [
               "slack-bot-token"
               "slack-app-token"
+              "buzz-private-key"
             ];
             ExecStart = pkgs.writeShellScript "hermes-gateway" ''
               set -euo pipefail
               SLACK_BOT_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-bot-token")
               SLACK_APP_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-app-token")
-              export SLACK_BOT_TOKEN SLACK_APP_TOKEN
+              BUZZ_PRIVATE_KEY=$(< "$CREDENTIALS_DIRECTORY/buzz-private-key")
+              export SLACK_BOT_TOKEN SLACK_APP_TOKEN BUZZ_PRIVATE_KEY
               exec ${lib.getExe aiPkgs.hermes-agent} gateway run
             '';
           };
