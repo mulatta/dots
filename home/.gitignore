@@ -14,6 +14,9 @@ result-*
 .ck/
 .ckignore
 
+# ctx graph index
+.graf/
+
 # CLAUDE.md
 CLAUDE.md
 !.claude/CLAUDE.md
