@@ -19,8 +19,6 @@ let
     '';
   });
 
-  git-surgeon = aiTools.git-surgeon;
-
   ctx = aiTools.ctx.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
     dontInstallAgentSkills = true;
@@ -116,7 +114,7 @@ in
       "${herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
     ".claude/skills/herdr".source = "${herdr}/share/skills/herdr/herdr";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
-    ".claude/skills/git-surgeon".source = "${git-surgeon}/share/skills/git-surgeon/git-surgeon";
+    ".claude/skills/git-surgeon".source = "${aiTools.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${officecli}/share/skills/officecli/officecli";
     ".claude/skills/ctx".source = "${ctx}/share/skills/ctx/ctx";
 
@@ -139,7 +137,7 @@ in
     aiTools.ccstatusline
     aiTools.codex
     ctx
-    git-surgeon
+    aiTools.git-surgeon
     aiTools.jscpd
     officecli
     aiTools.openspec
