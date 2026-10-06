@@ -11,6 +11,7 @@
   "compaction": {
     "enabled": true
   },
+  "quietStartup": "header",
   "hideThinkingBlock": true,
   "theme": "tokyonight"
 }
