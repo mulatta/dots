@@ -6,42 +6,10 @@
   ...
 }:
 let
-  aiTools = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
-
-  agent-slack = aiTools.agent-slack.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-    dontInstallAgentSkills = true;
-    postInstall = (old.postInstall or "") + ''
-      installSkill skills/agent-slack agent-slack
-    '';
-  });
-
-  herdr = aiTools.herdr.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-    dontInstallAgentSkills = true;
-    postInstall = (old.postInstall or "") + ''
-      installSkill skills/herdr herdr
-    '';
-  });
-
-  ctx = aiTools.ctx.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-    dontInstallAgentSkills = true;
-    postInstall = (old.postInstall or "") + ''
-      installSkill skills/ctx ctx
-    '';
-  });
-
-  officecli = aiTools.officecli.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-    dontInstallAgentSkills = true;
-    postInstall = (old.postInstall or "") + ''
-      installSkill skills/officecli officecli
-    '';
-  });
 
   nixbot-cli =
     inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
@@ -62,9 +30,9 @@ let
   # cudaPackages from its own pkgs, so cudaSupport is the only arg it accepts.
   qmd =
     if pkgs.config.cudaSupport or false then
-      aiTools.qmd.override { cudaSupport = true; }
+      aiPkgs.qmd.override { cudaSupport = true; }
     else
-      aiTools.qmd;
+      aiPkgs.qmd;
 
 in
 {
@@ -76,7 +44,7 @@ in
 
   programs.herdr = {
     enable = true;
-    package = herdr;
+    package = aiPkgs.herdr;
     plugins = [
       selfPkgs.herdr-sesh
       selfPkgs.herdr-autoname
@@ -119,13 +87,13 @@ in
       "${selfPkgs.openknowledge}/share/skills/openknowledge/discovery";
     ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".pi/agent/extensions/herdr-agent-state.ts".source =
-      "${herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
-    ".claude/skills/herdr".source = "${herdr}/share/skills/herdr/herdr";
+      "${aiPkgs.herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
+    ".claude/skills/herdr".source = "${aiPkgs.herdr}/share/skills/herdr/herdr";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
-    ".claude/skills/git-surgeon".source = "${aiTools.git-surgeon}/share/skills/git-surgeon/git-surgeon";
-    ".claude/skills/officecli".source = "${officecli}/share/skills/officecli/officecli";
-    ".claude/skills/ctx".source = "${ctx}/share/skills/ctx/ctx";
-    ".claude/skills/agent-slack".source = "${agent-slack}/share/skills/agent-slack/agent-slack";
+    ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
+    ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
+    ".claude/skills/ctx".source = "${aiPkgs.ctx}/share/skills/ctx/ctx";
+    ".claude/skills/agent-slack".source = "${aiPkgs.agent-slack}/share/skills/agent-slack/agent-slack";
 
   };
 
@@ -139,19 +107,19 @@ in
       name = "pi";
       text = ''
         ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
-        exec ${aiTools.pi}/bin/pi "$@"
+        exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
-    agent-slack
-    aiTools.ccstatusline
-    aiTools.codex
-    ctx
-    aiTools.git-surgeon
-    aiTools.jscpd
-    officecli
-    aiTools.openspec
-    aiTools.prime-agent
-    aiTools.tuicr
+    aiPkgs.agent-slack
+    aiPkgs.ccstatusline
+    aiPkgs.codex
+    aiPkgs.ctx
+    aiPkgs.git-surgeon
+    aiPkgs.jscpd
+    aiPkgs.officecli
+    aiPkgs.openspec
+    aiPkgs.prime-agent
+    aiPkgs.tuicr
     nixbot-cli
     pkgs.pueue
   ];
