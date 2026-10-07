@@ -15,6 +15,8 @@ let
   };
 in
 {
+  imports = [ ./people.nix ];
+
   services.kanidm = {
     server.enable = true;
     client.enable = true;
@@ -120,18 +122,6 @@ in
       };
 
       persons = {
-        seungwon = {
-          displayName = "Seungwon";
-          mailAddresses = [
-            "seungwon@${baseDomain}"
-            # Operational aliases terminate in the primary operator mailbox;
-            # no service needs separate mailbox credentials for these roles.
-            "acme@${baseDomain}"
-            "billings@${baseDomain}"
-            "postmaster@${baseDomain}"
-            "security@${baseDomain}"
-          ];
-        };
         n8n_notify = {
           displayName = "n8n notify";
           mailAddresses = [ "n8n@${baseDomain}" ];
