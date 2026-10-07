@@ -15,7 +15,11 @@ let
   };
 in
 {
-  imports = [ ./people.nix ];
+  imports = [
+    ./mail-sender.nix
+    ./onboarding.nix
+    ./people.nix
+  ];
 
   services.kanidm = {
     server.enable = true;
@@ -63,6 +67,7 @@ in
             "seungwon"
             "n8n_notify"
             "gitea_notify"
+            "kanidm_notify"
           ];
         };
         cloud_users = {
@@ -134,6 +139,11 @@ in
         gitea_notify = {
           displayName = "Gitea notifications";
           mailAddresses = [ "git@${baseDomain}" ];
+        };
+        # SMTP identity for kanidm-mail-sender.
+        kanidm_notify = {
+          displayName = "Kanidm notifications";
+          mailAddresses = [ "idm@${baseDomain}" ];
         };
         # n8n automation bot. OIDC into Nextcloud once to provision the
         # downstream user; thereafter n8n authenticates via a Nextcloud

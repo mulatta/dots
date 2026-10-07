@@ -4,11 +4,18 @@ in
 {
   # Human accounts. Service access groups in default.nix reference these.
   services.kanidm.provision = {
-    groups.friends.members = [
-      "mingyu"
-      "hyotaek"
-      "jinseok"
-    ];
+    groups = {
+      # Humans, as opposed to notify and bot identities.
+      people.members = [
+        "seungwon"
+        "friends"
+      ];
+      friends.members = [
+        "mingyu"
+        "hyotaek"
+        "jinseok"
+      ];
+    };
 
     persons = {
       seungwon = {
