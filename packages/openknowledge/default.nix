@@ -7,11 +7,11 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "openknowledge";
-  version = "0.82.3";
+  version = "0.83.2";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@inkeep/open-knowledge/-/open-knowledge-${finalAttrs.version}.tgz";
-    hash = "sha256-Q7gQ50mgKbcDEAiHX7ACFr2TaEzlQVka4rPN0OiTMRQ=";
+    hash = "sha256-GdqNzq6MDdNhXeyraVKyjthO10/E6wVJwj23fumv+VY=";
   };
 
   postPatch = ''
@@ -19,7 +19,7 @@ buildNpmPackage (finalAttrs: {
     cp ${./package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-1DHlfc7+ZcUnM3p0LiKT3CKW3m2AZdVT33TX1UGcc0w=";
+  npmDepsHash = "sha256-YQdvU+vO+aRHt6WXCSr6BfMAdDsyRQ7xpQPFfUWPkI4=";
 
   nativeBuildInputs = [ installAgentSkills ];
   dontInstallAgentSkills = true;
