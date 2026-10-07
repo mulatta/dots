@@ -11,6 +11,7 @@ let
   baseConfig = (pkgs.formats.toml { }).generate "kanidm-mail-sender.toml" {
     instance_display_name = "mulatta.io";
     instance_url = cfg.server.settings.origin;
+    schedule = "0 * * * * * *";
     mail_from_address = "idm@mulatta.io";
     mail_reply_to_address = "seungwon@mulatta.io";
     # Relay through Stalwart like other apps, so only Stalwart holds the Resend key.
