@@ -25,12 +25,6 @@ in
       '';
     };
 
-    # Local accounts are created only by an admin (POST /api/admin/users).
-    # Refuse self-registration, including invite links, so a password
-    # registration toggle left on in the database cannot open sign-up.
-    locations."= /api/auth/register".return = "403";
-    locations."^~ /api/auth/invite/".return = "403";
-
     # MCP streams tool results over SSE, and TREK sends no
     # X-Accel-Buffering header, so buffering would hold events back.
     locations."/mcp" = {

@@ -81,7 +81,10 @@ in
           members = [ "seungwon" ];
         };
         trek_users = {
-          members = [ "seungwon" ];
+          members = [
+            "seungwon"
+            "friends"
+          ];
         };
         fitness_users = {
           members = [ "seungwon" ];

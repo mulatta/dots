@@ -49,12 +49,12 @@ in
       TRUST_PROXY = "1";
       XDG_CACHE_HOME = "%C/trek";
 
-      # Kanidm scope maps gate SSO and admin rights follow the Kanidm admins
-      # group. Password login stays on for local accounts the admin creates;
-      # cask refuses self-registration.
+      # Kanidm scope maps are the login allow-list, so password login is
+      # disabled and admin rights follow the Kanidm admins group.
       OIDC_ISSUER = "https://${kanidmDomain}/oauth2/openid/trek";
       OIDC_CLIENT_ID = "trek";
       OIDC_DISPLAY_NAME = "Kanidm";
+      OIDC_ONLY = "true";
       # groups_name yields plain group names instead of SPNs and UUIDs.
       OIDC_SCOPE = "openid email profile groups_name";
       OIDC_ADMIN_CLAIM = "groups";

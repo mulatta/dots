@@ -4,6 +4,12 @@ in
 {
   # Human accounts. Service access groups in default.nix reference these.
   services.kanidm.provision = {
+    groups.friends.members = [
+      "mingyu"
+      "hyotaek"
+      "jinseok"
+    ];
+
     persons = {
       seungwon = {
         displayName = "Seungwon";
@@ -16,6 +22,18 @@ in
           "postmaster@${baseDomain}"
           "security@${baseDomain}"
         ];
+      };
+      mingyu = {
+        displayName = "Mingyu";
+        mailAddresses = [ "mid169@naver.com" ];
+      };
+      hyotaek = {
+        displayName = "Hyotaek";
+        mailAddresses = [ "kht1790@naver.com" ];
+      };
+      jinseok = {
+        displayName = "Jinseok";
+        mailAddresses = [ "wlstjr0033@naver.com" ];
       };
     };
   };
