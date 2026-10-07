@@ -6,16 +6,16 @@
 
 buildGoModule (finalAttrs: {
   pname = "herdr-sesh";
-  version = "0.14.0";
+  version = "0.15.0";
 
   src = fetchFromGitHub {
     owner = "fullerzz";
     repo = "herdr-plugin-sesh";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-dNFgiZeEbI0ByLXH8PFl1KudalFtYbc6cmgkls8EHn8=";
+    hash = "sha256-sHqlqQWoPWOJTVBlEvV6js0Wwk6ehMoa6uJx07Cg0+g=";
   };
 
-  vendorHash = "sha256-ZUUMJxW84MBOZ/Xw/FmxFRTSzsvPQM3uhqUi0QSt9Fc=";
+  vendorHash = "sha256-3v8D4Gblg/4REwiYCCPaDete8K+6ngzvdWnfJjbQ+O4=";
 
   subPackages = [ "cmd/herdr-sesh" ];
 
