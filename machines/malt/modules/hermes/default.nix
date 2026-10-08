@@ -9,6 +9,7 @@ let
   inherit (lib) mkOption types;
   cfg = config.services.hermes;
   aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   stateDir = "/var/lib/hermes";
   # Host and container must agree so the bind-mounted state keeps its owner.
   hermesId = 2001;
@@ -132,6 +133,7 @@ in
         aiPkgs.hermes-agent
         aiPkgs.claude-code
         aiPkgs.codex
+        selfPkgs.browser-use
       ];
     };
 
