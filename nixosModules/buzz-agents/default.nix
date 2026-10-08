@@ -24,6 +24,11 @@ let
           default = name;
           description = "Name shown for the agent on Buzz.";
         };
+        avatar = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = "Profile picture URL; relay media must be metadata-free.";
+        };
         channels = mkOption {
           type = types.listOf types.str;
           default = [ ];
@@ -173,7 +178,9 @@ in
           BUZZ_PRIVATE_KEY=$(< "$CREDENTIALS_DIRECTORY/private-key")
           BUZZ_AUTH_TAG=$(< "$CREDENTIALS_DIRECTORY/auth-tag")
           export BUZZ_PRIVATE_KEY BUZZ_AUTH_TAG
-          buzz users set-profile --name ${lib.escapeShellArg agent.displayName}
+          buzz users set-profile --name ${lib.escapeShellArg agent.displayName}${
+            lib.optionalString (agent.avatar != null) " --avatar ${lib.escapeShellArg agent.avatar}"
+          }
           buzz channels set-add-policy --policy ${agent.addPolicy}
         '';
 

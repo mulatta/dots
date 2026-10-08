@@ -98,6 +98,8 @@ in
     ownerPubkey = buzzOwnerPubkey;
     agents.noa = {
       displayName = "noa";
+      # NostrChatBar icon, uploaded to the relay's Blossom store.
+      avatar = "https://buzz.mulatta.io/media/ead748a855e4c6d64175becc7ac611dfcace4ab5b09bb8e58028d38721e93343.png";
       channels = [ buzzChannel ];
       before = [ "container@hermes.service" ];
     };
