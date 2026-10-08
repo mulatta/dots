@@ -60,5 +60,6 @@ in
     frontendUrl = "https://${domain}";
     environmentFile = config.clan.core.vars.generators.sparkyfitness.files.env.path;
     nginx.virtualHost = domain;
+    port = 3011;
   };
 }
