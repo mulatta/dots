@@ -45,4 +45,32 @@ in
     env = "SLACK_APP_TOKEN";
   };
 
+  # Discord
+
+  # Kept apart so rotating the bot token leaves Slack alone.
+  clan.core.vars.generators.hermes-discord = {
+    files.bot-token.secret = true;
+
+    prompts.bot-token = {
+      description = "Discord bot token for Hermes";
+      type = "hidden";
+    };
+
+    script = ''
+      cp "$prompts/bot-token" "$out/bot-token"
+    '';
+  };
+
+  # No channel allowlist: every channel stays reachable; the general
+  # channel only receives proactive messages.
+  services.hermes.settings.gateway.platforms.discord.home_channel = {
+    platform = "discord";
+    chat_id = "1557515680918675469";
+  };
+  services.hermes.environment.DISCORD_ALLOWED_USERS = "529227359866322945";
+  services.hermes.credentials.discord-bot-token = {
+    file = vars.hermes-discord.files.bot-token.path;
+    env = "DISCORD_BOT_TOKEN";
+  };
+
 }
