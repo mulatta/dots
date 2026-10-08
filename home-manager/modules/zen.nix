@@ -20,6 +20,12 @@
       PasswordManagerEnabled = false;
       OfferToSaveLogins = false;
 
+      # neko require microphone permissions
+      Permissions.Microphone.Allow = [
+        "https://neko.mulatta.io"
+        "https://neko.sjanglab.org"
+      ];
+
       ExtensionSettings = {
         # uBlock Origin
         "uBlock0@raymondhill.net" = {
