@@ -16,11 +16,11 @@ in
     files.slack-app-token.secret = true;
 
     prompts.slack-bot-token = {
-      description = "Slack bot token (xoxb-…) for the Nero app";
+      description = "Slack bot token (xoxb-…) for the noa app";
       type = "hidden";
     };
     prompts.slack-app-token = {
-      description = "Slack app-level token (xapp-…) with connections:write for Nero";
+      description = "Slack app-level token (xapp-…) with connections:write for noa";
       type = "hidden";
     };
 
