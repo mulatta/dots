@@ -111,6 +111,7 @@ in
         # refresh tokens; if Hermes borrowed them, each would log the other out.
         auth.adopt_external_logins = false;
         onboarding.profile_build = "off";
+        web.search_backend = "searxng";
         terminal.cwd = "${stateDir}/workspace";
       };
       environment = {
@@ -118,6 +119,7 @@ in
         HOME = stateDir;
         HERMES_HOME = "${stateDir}/.hermes";
         BROWSER_CDP_URL = "http://127.0.0.1:9222";
+        SEARXNG_URL = "http://127.0.0.1:8888";
         HERMES_INFERENCE_PROVIDER = model.provider;
         HERMES_INFERENCE_MODEL = model.default;
         HERMES_MODEL = model.default;
