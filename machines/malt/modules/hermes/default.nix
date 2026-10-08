@@ -117,6 +117,7 @@ in
         TZ = "Asia/Seoul";
         HOME = stateDir;
         HERMES_HOME = "${stateDir}/.hermes";
+        BROWSER_CDP_URL = "http://127.0.0.1:9222";
         HERMES_INFERENCE_PROVIDER = model.provider;
         HERMES_INFERENCE_MODEL = model.default;
         HERMES_MODEL = model.default;
