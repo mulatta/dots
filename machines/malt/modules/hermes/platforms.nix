@@ -38,7 +38,7 @@ in
 
   services.hermes.settings.gateway.platforms.slack.home_channel = {
     platform = "slack";
-    chat_id = "D04GJGZK4SH";
+    chat_id = "D0BNTAKEE84";
     name = "Seungwon";
   };
   # Deploys restart the gateway often; the notices would only add noise.
@@ -124,6 +124,9 @@ in
     tool_progress = "off";
   };
   services.hermes.environment.BUZZ_RELAY_URL = buzzRelayUrl;
+  # Cron's `deliver: buzz` resolves the plugin's home from this variable,
+  # not from `extra.home_channel`.
+  services.hermes.environment.BUZZ_HOME_CHANNEL = builtins.head buzzAgent.channels;
   services.hermes.packages = [ buzzCli ];
   services.hermes.credentials.buzz-private-key = {
     file = buzzAgent.privateKeyFile;
