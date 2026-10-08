@@ -12,6 +12,7 @@
     self.inputs.fast-nix-gc.nixosModules.default
     ./acme.nix
     ./bulwark-webmail
+    ./buzz-agents
     ./dns-client.nix
     ./i18n.nix
     ./minimal-docs.nix
