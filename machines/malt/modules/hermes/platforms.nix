@@ -41,6 +41,13 @@ in
     chat_id = "D04GJGZK4SH";
     name = "Seungwon";
   };
+  # Deploys restart the gateway often; the notices would only add noise.
+  services.hermes.settings.gateway.platforms.slack.gateway_restart_notification = false;
+  # Only final answers reach chat; tool calls stay in the agent log and session history.
+  services.hermes.settings.display.platforms.slack = {
+    interim_assistant_messages = false;
+    tool_progress = "off";
+  };
   services.hermes.environment.SLACK_ALLOWED_USERS = "U04GMC10NNP";
   services.hermes.credentials.slack-bot-token = {
     file = vars.hermes.files.slack-bot-token.path;
@@ -73,6 +80,11 @@ in
     platform = "discord";
     chat_id = "1557515680918675469";
   };
+  services.hermes.settings.gateway.platforms.discord.gateway_restart_notification = false;
+  services.hermes.settings.display.platforms.discord = {
+    interim_assistant_messages = false;
+    tool_progress = "off";
+  };
   services.hermes.environment.DISCORD_ALLOWED_USERS = "529227359866322945";
   services.hermes.credentials.discord-bot-token = {
     file = vars.hermes-discord.files.bot-token.path;
@@ -94,6 +106,7 @@ in
   # Buzz is a plugin adapter: its home channel and allowlist live under `extra`.
   services.hermes.settings.gateway.platforms.buzz = {
     enabled = true;
+    gateway_restart_notification = false;
     extra = {
       relay_url = buzzRelayUrl;
       cli_path = "${buzzCli}/bin/buzz";
