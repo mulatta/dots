@@ -6,44 +6,30 @@
   ...
 }:
 let
-  system = pkgs.stdenv.hostPlatform.system;
-  aiPkgs = self.inputs.llm-agents.packages.${system};
+  inherit (lib) mkOption types;
+  cfg = config.services.hermes;
+  aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   stateDir = "/var/lib/hermes";
-  gen = config.clan.core.vars.generators.hermes;
-  tools = [
-    aiPkgs.claude-code
-    aiPkgs.codex
-    aiPkgs.hermes-agent
-  ];
-  hermesSettings = {
-    model = {
-      default = "gpt-6.1-sol";
-      provider = "openai-codex";
-      openai_runtime = "auto";
-    };
-    # Coding CLIs and Hermes must not compete for single-use refresh tokens.
-    auth.adopt_external_logins = false;
-    onboarding.profile_build = "off";
-    compression = {
-      codex_gpt55_autoraise = true;
-      codex_gpt55_autoraise_notice = false;
-    };
-    platforms.slack.home_channel = {
-      platform = "slack";
-      chat_id = "D04GJGZK4SH";
-      name = "Seungwon";
-    };
-    terminal.cwd = "${stateDir}/workspace";
+  # Host and container must agree so the bind-mounted state keeps its owner.
+  hermesId = 2001;
+  hermesUser = {
+    isSystemUser = true;
+    group = "hermes";
+    uid = hermesId;
+    home = stateDir;
   };
-  hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" hermesSettings;
-  runtimeEnv = {
-    TZ = "Asia/Seoul";
-    HOME = stateDir;
-    HERMES_HOME = "${stateDir}/.hermes";
-    HERMES_INFERENCE_PROVIDER = hermesSettings.model.provider;
-    HERMES_INFERENCE_MODEL = hermesSettings.model.default;
-    HERMES_MODEL = hermesSettings.model.default;
-    SLACK_ALLOWED_USERS = "U04GMC10NNP";
+  hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" cfg.settings;
+  # The dashboard judges platforms as configured from its own environment, so
+  # both services export the same credentials instead of writing them to .env.
+  credentialEnv = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (name: c: ''
+      ${c.env}=$(< "$CREDENTIALS_DIRECTORY/${name}")
+      export ${c.env}'') cfg.credentials
+  );
+  model = {
+    default = "gpt-6.1-sol";
+    provider = "openai-codex";
+    openai_runtime = "auto";
   };
   commonService = {
     User = "hermes";
@@ -62,120 +48,164 @@ let
     ProtectKernelModules = true;
     ProtectKernelTunables = true;
     RestrictSUIDSGID = true;
+    ImportCredential = lib.attrNames cfg.credentials;
   };
 in
 {
-  clan.core.vars.generators.hermes = {
-    files.slack-bot-token.secret = true;
-    files.slack-app-token.secret = true;
-
-    prompts.slack-bot-token = {
-      description = "Slack bot token (xoxb-…) for the Nero app";
-      type = "hidden";
-    };
-    prompts.slack-app-token = {
-      description = "Slack app-level token (xapp-…) with connections:write for Nero";
-      type = "hidden";
-    };
-
-    script = ''
-      cp "$prompts/slack-bot-token" "$out/slack-bot-token"
-      cp "$prompts/slack-app-token" "$out/slack-app-token"
-    '';
-  };
-
-  users.users.hermes = {
-    isSystemUser = true;
-    group = "hermes";
-    uid = 2001;
-  };
-  users.groups.hermes.gid = 2001;
-  nix.settings.extra-allowed-users = [ "hermes" ];
-
-  systemd.tmpfiles.rules = [
-    "d ${stateDir} 0750 hermes hermes -"
+  imports = [
+    ./platforms.nix
   ];
 
-  containers.hermes = {
-    autoStart = true;
+  # Feature modules contribute here; the container below consumes the result.
+  options.services.hermes = {
+    settings = mkOption {
+      type = (pkgs.formats.yaml { }).type;
+      default = { };
+      description = "Contents of Hermes' config.yaml.";
+    };
+    environment = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      description = "Non-secret environment for the gateway and dashboard.";
+    };
+    packages = mkOption {
+      type = types.listOf types.package;
+      default = [ ];
+      description = "Tools installed in the container for Hermes and its terminal tasks.";
+    };
+    dashboardPort = mkOption {
+      type = types.port;
+      default = 9119;
+      description = "Loopback port of the web dashboard.";
+    };
+    credentials = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            file = mkOption {
+              type = types.str;
+              description = "Host path of the secret.";
+            };
+            env = mkOption {
+              type = types.str;
+              description = "Environment variable that receives the secret.";
+            };
+          };
+        }
+      );
+      default = { };
+      description = "Secrets loaded into the container and imported by the gateway and dashboard.";
+    };
+  };
 
-    bindMounts.${stateDir} = {
-      hostPath = stateDir;
-      isReadOnly = false;
+  config = {
+    services.hermes = {
+      settings = {
+        inherit model;
+        compression = {
+          codex_gpt55_autoraise = true;
+          codex_gpt55_autoraise_notice = false;
+        };
+        # Codex CLI and Claude Code refresh their own logins with single-use
+        # refresh tokens; if Hermes borrowed them, each would log the other out.
+        auth.adopt_external_logins = false;
+        onboarding.profile_build = "off";
+        terminal.cwd = "${stateDir}/workspace";
+      };
+      environment = {
+        TZ = "Asia/Seoul";
+        HOME = stateDir;
+        HERMES_HOME = "${stateDir}/.hermes";
+        HERMES_INFERENCE_PROVIDER = model.provider;
+        HERMES_INFERENCE_MODEL = model.default;
+        HERMES_MODEL = model.default;
+      };
+      # Both coding CLIs keep their own subscription logins under the state
+      # directory (`claude auth login`, `codex login --device-auth`), since they
+      # rotate refresh tokens at runtime.
+      packages = [
+        aiPkgs.hermes-agent
+        aiPkgs.claude-code
+        aiPkgs.codex
+      ];
     };
 
-    extraFlags = [
-      "--load-credential=slack-bot-token:${gen.files.slack-bot-token.path}"
-      "--load-credential=slack-app-token:${gen.files.slack-app-token.path}"
+    users.users.hermes = hermesUser;
+    users.groups.hermes.gid = hermesId;
+    nix.settings.extra-allowed-users = [ "hermes" ];
+
+    systemd.tmpfiles.rules = [
+      "d ${stateDir} 0750 hermes hermes -"
     ];
 
-    config = _: {
-      imports = [ ../agent-container.nix ];
+    containers.hermes = {
+      autoStart = true;
 
-      # Hermes runs terminal commands in a login shell, and NixOS' /etc/profile
-      # resets PATH there, so tools must live in the system profile rather than
-      # only in the units' PATH.
-      environment.systemPackages = tools;
-
-      system.stateVersion = "25.05";
-
-      users.users.hermes = {
-        isSystemUser = true;
-        group = "hermes";
-        uid = 2001;
-        home = stateDir;
+      bindMounts.${stateDir} = {
+        hostPath = stateDir;
+        isReadOnly = false;
       };
-      users.groups.hermes.gid = 2001;
 
-      time.timeZone = "Asia/Seoul";
+      extraFlags = lib.mapAttrsToList (name: c: "--load-credential=${name}:${c.file}") cfg.credentials;
 
-      systemd.tmpfiles.rules = [
-        "d ${stateDir} 0750 hermes hermes -"
-        "d ${stateDir}/workspace 0750 hermes hermes -"
-        "d ${stateDir}/.hermes 0750 hermes hermes -"
-        "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
-        "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
-      ];
+      config = _: {
+        imports = [ ../agent-container.nix ];
 
-      systemd.services = {
-        hermes-agent = {
-          description = "Hermes Agent Slack gateway";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
+        # Hermes runs terminal commands in a login shell, and NixOS' /etc/profile
+        # resets PATH there, so tools must live in the system profile rather than
+        # only in the units' PATH.
+        environment.systemPackages = cfg.packages;
 
-          path = [ "/run/current-system/sw" ];
-          environment = runtimeEnv;
+        system.stateVersion = "25.05";
 
-          serviceConfig = commonService // {
-            ImportCredential = [
-              "slack-bot-token"
-              "slack-app-token"
-            ];
-            ExecStart = pkgs.writeShellScript "hermes-gateway" ''
-              set -euo pipefail
-              SLACK_BOT_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-bot-token")
-              SLACK_APP_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-app-token")
-              export SLACK_BOT_TOKEN SLACK_APP_TOKEN
-              exec ${lib.getExe aiPkgs.hermes-agent} gateway run
-            '';
+        users.users.hermes = hermesUser;
+        users.groups.hermes.gid = hermesId;
+
+        time.timeZone = "Asia/Seoul";
+
+        systemd.tmpfiles.rules = [
+          "d ${stateDir} 0750 hermes hermes -"
+          "d ${stateDir}/workspace 0750 hermes hermes -"
+          "d ${stateDir}/.hermes 0750 hermes hermes -"
+          "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
+          "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
+        ];
+
+        systemd.services = {
+          hermes-gateway = {
+            description = "Hermes Agent messaging gateway";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
+
+            path = [ "/run/current-system/sw" ];
+            inherit (cfg) environment;
+
+            serviceConfig = commonService // {
+              ExecStart = pkgs.writeShellScript "hermes-gateway" ''
+                set -euo pipefail
+                ${credentialEnv}
+                exec ${lib.getExe aiPkgs.hermes-agent} gateway run
+              '';
+            };
           };
-        };
 
-        hermes-dashboard = {
-          description = "Hermes Agent web dashboard";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
+          hermes-dashboard = {
+            description = "Hermes Agent web dashboard";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
 
-          path = [ "/run/current-system/sw" ];
-          environment = runtimeEnv;
+            path = [ "/run/current-system/sw" ];
+            inherit (cfg) environment;
 
-          serviceConfig = commonService // {
-            ExecStart = pkgs.writeShellScript "hermes-dashboard" ''
-              set -euo pipefail
-              exec ${lib.getExe aiPkgs.hermes-agent} dashboard --host 127.0.0.1 --port 9119 --no-open --skip-build
-            '';
+            serviceConfig = commonService // {
+              ExecStart = pkgs.writeShellScript "hermes-dashboard" ''
+                set -euo pipefail
+                ${credentialEnv}
+                exec ${lib.getExe aiPkgs.hermes-agent} dashboard --host 127.0.0.1 --port ${toString cfg.dashboardPort} --no-open --skip-build
+              '';
+            };
           };
         };
       };
