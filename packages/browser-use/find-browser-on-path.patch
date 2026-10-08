@@ -1,0 +1,29 @@
+From c47fbbc9d841014ac5cc00accd4ee533e0cce84e Mon Sep 17 00:00:00 2001
+From: mulatta <67085791+mulatta@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 07:44:44 +0900
+Subject: [PATCH] Find browsers on PATH after fixed install locations
+
+---
+ browser_use/browser/watchdogs/local_browser_watchdog.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/browser_use/browser/watchdogs/local_browser_watchdog.py b/browser_use/browser/watchdogs/local_browser_watchdog.py
+index 71a8a5b..50be18d 100644
+--- a/browser_use/browser/watchdogs/local_browser_watchdog.py
++++ b/browser_use/browser/watchdogs/local_browser_watchdog.py
+@@ -355,6 +355,12 @@ class LocalBrowserWatchdog(BaseWatchdog):
+ 				if expanded_pattern.exists() and expanded_pattern.is_file():
+ 					return str(expanded_pattern)
+ 
++		# Nix and other package managers install browsers outside the fixed
++		# locations above; fall back to whatever is on PATH.
++		for name in ('google-chrome-stable', 'google-chrome', 'chromium', 'chromium-browser'):
++			if found := shutil.which(name):
++				return found
++
+ 		return None
+ 
+ 	async def _install_browser_with_playwright(self) -> str:
+-- 
+2.55.0
+

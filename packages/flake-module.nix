@@ -18,6 +18,9 @@
         browser-harness = pkgs.callPackage ./browser-harness {
           inherit (llmAgents) versionCheckHomeHook;
         };
+        browser-use = pkgs.callPackage ./browser-use {
+          inherit (self'.packages) browser-harness;
+        };
         bulwark-webmail = pkgs.callPackage ./bulwark-webmail { };
         buzz-agents-sync = pkgs.callPackage ./buzz-agents-sync {
           buzz-cli = inputs'.buzz.packages.buzz-cli;
