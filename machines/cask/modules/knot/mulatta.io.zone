@@ -27,6 +27,7 @@ vaultwarden   IN A @SERVICE_IPV4@
 headscale     IN A @SERVICE_IPV4@
 n8n           IN A @SERVICE_IPV4@
 n8n-api       IN A @SERVICE_IPV4@
+hermes        IN A @SERVICE_IPV4@
 rss           IN A @SERVICE_IPV4@
 paperless     IN A @SERVICE_IPV4@
 paperless-api IN A @SERVICE_IPV4@

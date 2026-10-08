@@ -7,6 +7,7 @@ let
 in
 {
   imports = [
+    ./hermes.nix
     ./home-assistant.nix
     ./jellyfin.nix
     ./linkwarden.nix

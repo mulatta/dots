@@ -54,6 +54,7 @@ in
 {
   imports = [
     ./platforms.nix
+    ./dashboard.nix
   ];
 
   # Feature modules contribute here; the container below consumes the result.
