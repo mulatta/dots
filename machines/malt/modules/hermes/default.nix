@@ -8,28 +8,21 @@
 let
   system = pkgs.stdenv.hostPlatform.system;
   aiPkgs = self.inputs.llm-agents.packages.${system};
-  hermesPkg = aiPkgs.hermes-agent;
   stateDir = "/var/lib/hermes";
   gen = config.clan.core.vars.generators.hermes;
-  runtimePath = [
-    hermesPkg
-    "/run/current-system/sw"
+  tools = [
+    aiPkgs.claude-code
+    aiPkgs.codex
+    aiPkgs.hermes-agent
   ];
-  runtimeEnv = {
-    TZ = "Asia/Seoul";
-    HOME = stateDir;
-    HERMES_HOME = "${stateDir}/.hermes";
-    HERMES_INFERENCE_PROVIDER = "openai-codex";
-    HERMES_INFERENCE_MODEL = "gpt-5.5";
-    HERMES_MODEL = "gpt-5.5";
-    SLACK_ALLOWED_USERS = "U04GMC10NNP";
-  };
-  hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" {
+  hermesSettings = {
     model = {
-      default = "gpt-5.5";
+      default = "gpt-6.1-sol";
       provider = "openai-codex";
       openai_runtime = "auto";
     };
+    # Coding CLIs and Hermes must not compete for single-use refresh tokens.
+    auth.adopt_external_logins = false;
     onboarding.profile_build = "off";
     compression = {
       codex_gpt55_autoraise = true;
@@ -40,8 +33,26 @@ let
       chat_id = "D04GJGZK4SH";
       name = "Seungwon";
     };
+    terminal.cwd = "${stateDir}/workspace";
   };
-  serviceHardening = {
+  hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" hermesSettings;
+  runtimeEnv = {
+    TZ = "Asia/Seoul";
+    HOME = stateDir;
+    HERMES_HOME = "${stateDir}/.hermes";
+    HERMES_INFERENCE_PROVIDER = hermesSettings.model.provider;
+    HERMES_INFERENCE_MODEL = hermesSettings.model.default;
+    HERMES_MODEL = hermesSettings.model.default;
+    SLACK_ALLOWED_USERS = "U04GMC10NNP";
+  };
+  commonService = {
+    User = "hermes";
+    Group = "hermes";
+    WorkingDirectory = stateDir;
+    StateDirectory = "hermes";
+    StateDirectoryMode = "0750";
+    Restart = "on-failure";
+    RestartSec = 30;
     CapabilityBoundingSet = "";
     LockPersonality = true;
     PrivateDevices = true;
@@ -51,7 +62,6 @@ let
     ProtectKernelModules = true;
     ProtectKernelTunables = true;
     RestrictSUIDSGID = true;
-    StateDirectoryMode = "0750";
   };
 in
 {
@@ -102,6 +112,11 @@ in
     config = _: {
       imports = [ ../agent-container.nix ];
 
+      # Hermes runs terminal commands in a login shell, and NixOS' /etc/profile
+      # resets PATH there, so tools must live in the system profile rather than
+      # only in the units' PATH.
+      environment.systemPackages = tools;
+
       system.stateVersion = "25.05";
 
       users.users.hermes = {
@@ -116,6 +131,7 @@ in
 
       systemd.tmpfiles.rules = [
         "d ${stateDir} 0750 hermes hermes -"
+        "d ${stateDir}/workspace 0750 hermes hermes -"
         "d ${stateDir}/.hermes 0750 hermes hermes -"
         "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
         "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
@@ -128,26 +144,20 @@ in
           after = [ "network-online.target" ];
           wants = [ "network-online.target" ];
 
-          path = runtimePath;
+          path = [ "/run/current-system/sw" ];
           environment = runtimeEnv;
 
-          serviceConfig = serviceHardening // {
-            User = "hermes";
-            Group = "hermes";
-            WorkingDirectory = stateDir;
-            StateDirectory = "hermes";
+          serviceConfig = commonService // {
             ImportCredential = [
               "slack-bot-token"
               "slack-app-token"
             ];
-            Restart = "on-failure";
-            RestartSec = 30;
             ExecStart = pkgs.writeShellScript "hermes-gateway" ''
               set -euo pipefail
               SLACK_BOT_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-bot-token")
               SLACK_APP_TOKEN=$(< "$CREDENTIALS_DIRECTORY/slack-app-token")
               export SLACK_BOT_TOKEN SLACK_APP_TOKEN
-              exec ${lib.getExe hermesPkg} gateway run
+              exec ${lib.getExe aiPkgs.hermes-agent} gateway run
             '';
           };
         };
@@ -158,19 +168,13 @@ in
           after = [ "network-online.target" ];
           wants = [ "network-online.target" ];
 
-          path = runtimePath;
+          path = [ "/run/current-system/sw" ];
           environment = runtimeEnv;
 
-          serviceConfig = serviceHardening // {
-            User = "hermes";
-            Group = "hermes";
-            WorkingDirectory = stateDir;
-            StateDirectory = "hermes";
-            Restart = "on-failure";
-            RestartSec = 30;
+          serviceConfig = commonService // {
             ExecStart = pkgs.writeShellScript "hermes-dashboard" ''
               set -euo pipefail
-              exec ${lib.getExe hermesPkg} dashboard --host 127.0.0.1 --port 9119 --no-open --skip-build
+              exec ${lib.getExe aiPkgs.hermes-agent} dashboard --host 127.0.0.1 --port 9119 --no-open --skip-build
             '';
           };
         };
