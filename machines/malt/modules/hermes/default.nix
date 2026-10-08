@@ -54,6 +54,7 @@ in
 {
   imports = [
     ./platforms.nix
+    ./mcp.nix
     ./dashboard.nix
   ];
 
