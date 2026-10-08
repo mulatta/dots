@@ -27,12 +27,16 @@ let
   # Keep runtime closures small while tying logos to package source revisions.
 
   iconBundle = pkgs.fetchzip {
-    url = "https://github.com/mulatta/dots/releases/download/oauth-icons-v1/kanidm-oauth-icons-v1.zip";
-    hash = "sha256-DZppoLkWXApmcliJT5RZjji2KrVKxthT5r8byNGZ9GA=";
+    url = "https://github.com/mulatta/dots/releases/download/oauth-icons-v2/kanidm-oauth-icons-v2.zip";
+    hash = "sha256-apaV+wlaaAoXFTycFdjdGVEksDG163PypP5QDa4NWTY=";
     stripRoot = false;
   };
 
   icons = {
+    neko = "${iconBundle}/neko.png";
+    hermes = "${iconBundle}/hermes.svg";
+    sparkyfitness = "${iconBundle}/sparkyfitness.png";
+    trek = "${iconBundle}/trek.svg";
     bulwark = "${iconBundle}/bulwark.svg";
     gitea = "${iconBundle}/gitea.svg";
     homeassistant = "${iconBundle}/homeassistant.svg";
@@ -52,6 +56,7 @@ in
     # Neko requires a confidential client and sends S256 PKCE.
     neko = {
       displayName = "Neko";
+      imageFile = icons.neko;
       originUrl = "https://neko.${baseDomain}/api/oauth/callback";
       originLanding = "https://neko.${baseDomain}";
       public = false;
@@ -123,6 +128,7 @@ in
     # Scope maps are the access allow-list for this agent-control dashboard.
     hermes = {
       displayName = "Hermes Dashboard";
+      imageFile = icons.hermes;
       originUrl = [ "https://hermes.${baseDomain}/auth/callback" ];
       originLanding = "https://hermes.${baseDomain}";
       public = true;
@@ -195,6 +201,7 @@ in
 
     sparkyfitness = {
       displayName = "SparkyFitness";
+      imageFile = icons.sparkyfitness;
       originUrl = [
         "https://fitness.${baseDomain}"
         "https://fitness.${baseDomain}/api/auth/sso/callback/kanidm"
@@ -215,6 +222,7 @@ in
     # TREK - confidential client; sends PKCE and posts the client secret.
     trek = {
       displayName = "TREK";
+      imageFile = icons.trek;
       originUrl = [
         "https://trek.${baseDomain}"
         "https://trek.${baseDomain}/api/auth/oidc/callback"
