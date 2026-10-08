@@ -269,6 +269,7 @@ in
         NEKO_MEMBER_OAUTH_SCOPES = "openid profile email";
         NEKO_MEMBER_OAUTH_SUBJECT_FIELD = "sub";
         NEKO_MEMBER_OAUTH_USERNAME_FIELD = "preferred_username";
+        NEKO_SESSION_COOKIE_ENABLED = "true";
         NEKO_SESSION_COOKIE_SECURE = "true";
         NEKO_WEBRTC_ICELITE = "true";
         NEKO_WEBRTC_NAT1TO1 = config.networking.naru.ipv6;
