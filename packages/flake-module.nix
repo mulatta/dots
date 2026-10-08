@@ -15,6 +15,9 @@
     {
       packages = {
         archify-cli = pkgs.callPackage ./archify-cli { };
+        browser-harness = pkgs.callPackage ./browser-harness {
+          inherit (llmAgents) versionCheckHomeHook;
+        };
         bulwark-webmail = pkgs.callPackage ./bulwark-webmail { };
         buzz-agents-sync = pkgs.callPackage ./buzz-agents-sync {
           buzz-cli = inputs'.buzz.packages.buzz-cli;
