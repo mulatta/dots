@@ -1,28 +1,5 @@
 {
   "nodes": {
-    "automation-runtime": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789063541,
-        "narHash": "sha256-1r6kGGAlByQqjW5SFxIFiLPcFDpf87SFJC6FUpLL1Us=",
-        "owner": "mulatta",
-        "repo": "automation-runtime",
-        "rev": "d9be6b7606af192a6462a2add37b160184ca14d3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "automation-runtime",
-        "type": "github"
-      }
-    },
     "bioinformatics-toolkits": {
       "inputs": {
         "nixpkgs": [
@@ -899,7 +876,6 @@
     },
     "root": {
       "inputs": {
-        "automation-runtime": "automation-runtime",
         "buzz": "buzz",
         "cherri": "cherri",
         "clan-core": "clan-core",

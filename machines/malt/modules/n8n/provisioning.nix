@@ -6,7 +6,6 @@
 }:
 let
   n8nApiUrl = "http://malt.n:5678";
-  restateIngressUrl = "http://malt.n:8081";
 
   system = pkgs.stdenv.hostPlatform.system;
 
@@ -36,11 +35,6 @@ let
         tokenFile = "linkwarden-api-token";
         allowedHttpRequestDomains = "domains";
         allowedDomains = "links.mulatta.io";
-      }
-      {
-        kind = "restateApi";
-        name = "restate-ingress";
-        baseUrl = restateIngressUrl;
       }
     ]
   );

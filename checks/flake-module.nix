@@ -33,7 +33,6 @@
 
           moduleChecks = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             bulwark-webmail = pkgs.callPackage ../nixosModules/bulwark-webmail/test.nix { };
-            restate = pkgs.callPackage ../nixosModules/restate/test.nix { };
           };
         in
         nixosChecks // darwinChecks // homeChecks // moduleChecks;

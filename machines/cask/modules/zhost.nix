@@ -15,8 +15,7 @@ let
   # nginx/zotero.nix). zhost is public for sync; enrollment is the one action
   # that must be tied to an identity, so the proxy authenticates the browser
   # against kanidm and forwards X-Auth-Request-Email, which zhost matches against
-  # loginAuthorizedUser. Mirrors the restate proxy in oauth2-proxy.nix; the
-  # upstream is local because zhost runs on cask.
+  # loginAuthorizedUser. The upstream is local because zhost runs on cask.
   zhostOauth2Args = [
     "--provider=oidc"
     "--client-id=zhost"

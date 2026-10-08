@@ -9,7 +9,6 @@ usage:
 DECLARATIONS.json is an array of credential declarations. Supported kinds:
   {"kind":"httpHeaderAuth","name":"...","tokenFile":"...","headerName":"Authorization","valuePrefix":"Bearer ","allowedHttpRequestDomains":"all|none|domains","allowedDomains":"example.com"}
   {"kind":"httpBasicAuth","name":"...","user":"...","passwordFile":"..."}
-  {"kind":"restateApi","name":"...","baseUrl":"http://[fd00::1]:8081","bearerTokenFile":"..."}
 
 Secret file paths are references resolved relative to CREDENTIALS_DIRECTORY.
 Declarations contain metadata and secret references, not secret values.
@@ -118,20 +117,6 @@ apply_spec_item() {
       --arg password "$password" \
       '{user:$user,password:$password,allowedHttpRequestDomains:"none"}')
     apply_json_credential "$name" httpBasicAuth "$data"
-    ;;
-  restateApi)
-    base_url=$(jq -r '.baseUrl // empty' <<<"$item")
-    [ -n "$base_url" ] || die "baseUrl missing for $name"
-    bearer_token_file=$(jq -r '.bearerTokenFile // empty' <<<"$item")
-    bearer_token=""
-    if [ -n "$bearer_token_file" ]; then
-      bearer_token=$(read_credential_file "$bearer_token_file")
-    fi
-    data=$(jq -n \
-      --arg base_url "$base_url" \
-      --arg bearer_token "$bearer_token" \
-      '{baseUrl:$base_url,bearerToken:$bearer_token}')
-    apply_json_credential "$name" restateApi "$data"
     ;;
   *)
     die "unsupported credential kind: $kind"

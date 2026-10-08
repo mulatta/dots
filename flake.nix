@@ -132,12 +132,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    automation-runtime = {
-      url = "github:mulatta/automation-runtime";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     rhwp-nextcloud = {
       url = "github:mulatta/rhwp-nextcloud";
       inputs.nixpkgs.follows = "nixpkgs";

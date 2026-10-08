@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -8,33 +7,6 @@ let
   kanidmDomain = "idm.mulatta.io";
   n8nDomain = "n8n.mulatta.io";
   n8nApiDomain = "n8n-api.mulatta.io";
-  restateDomain = "restate.mulatta.io";
-  restateApiDomain = "restate-api.mulatta.io";
-
-  restateOauth2Args = [
-    "--provider=oidc"
-    "--client-id=restate"
-    "--oidc-issuer-url=https://${kanidmDomain}/oauth2/openid/restate"
-    "--redirect-url=https://${restateDomain}/oauth2/callback"
-    "--scope=openid email profile"
-    "--email-domain=mulatta.io"
-    "--code-challenge-method=S256"
-    "--insecure-oidc-allow-unverified-email=true"
-    "--set-xauthrequest=true"
-    "--pass-access-token=true"
-    "--pass-authorization-header=true"
-    "--set-authorization-header=true"
-    "--reverse-proxy=true"
-    "--skip-provider-button=true"
-    "--cookie-domain=${restateDomain}"
-    "--cookie-name=_oauth2_proxy_restate"
-    "--cookie-secure=true"
-    "--cookie-httponly=true"
-    "--cookie-refresh=1h"
-    "--cookie-expire=72h"
-    "--upstream=http://malt.n:9070"
-    "--http-address=127.0.0.1:4181"
-  ];
 
   # These proxies are public OIDC clients, so the only generated secret is the
   # cookie-signing key; the client secret is an unused placeholder.
@@ -60,28 +32,6 @@ in
     wants = [ "kanidm.service" ];
   };
   clan.core.vars.generators.oauth2-proxy = mkOauth2ProxySecret;
-  clan.core.vars.generators.oauth2-proxy-restate = mkOauth2ProxySecret;
-
-  systemd.services.oauth2-proxy-restate = {
-    description = "OAuth2 Proxy for Restate";
-    wantedBy = [ "multi-user.target" ];
-    wants = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    after = [
-      "kanidm.service"
-      "network-online.target"
-    ];
-    restartTriggers = [ config.clan.core.vars.generators.oauth2-proxy-restate.files."env".path ];
-    serviceConfig = {
-      User = "oauth2-proxy";
-      Group = "oauth2-proxy";
-      EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-restate.files."env".path;
-      ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs restateOauth2Args}";
-      Restart = "always";
-    };
-  };
 
   services.oauth2-proxy = {
     enable = true;
@@ -162,28 +112,6 @@ in
           proxy_send_timeout 3600s;
         '';
       };
-      locations."/".return = "404";
-    };
-
-    ${restateDomain} = {
-      useACMEHost = "mulatta.io";
-      forceSSL = true;
-      mulatta.securityHeaders = "deny";
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:4181";
-        proxyWebsockets = true;
-        extraConfig = ''
-          client_max_body_size 50M;
-          proxy_read_timeout 3600s;
-          proxy_send_timeout 3600s;
-        '';
-      };
-    };
-
-    ${restateApiDomain} = {
-      useACMEHost = "mulatta.io";
-      forceSSL = true;
-      mulatta.securityHeaders = "deny";
       locations."/".return = "404";
     };
 

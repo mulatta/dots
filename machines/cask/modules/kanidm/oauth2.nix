@@ -42,7 +42,6 @@ let
     n8n = "${iconBundle}/n8n.svg";
     nextcloud = "${iconBundle}/nextcloud.svg";
     paperless = "${iconBundle}/paperless.svg";
-    restate = "${iconBundle}/restate.svg";
     stalwart = "${iconBundle}/stalwart.png";
     zotero = "${iconBundle}/zotero.svg";
   };
@@ -166,25 +165,6 @@ in
         "https://n8n.${baseDomain}/oauth2/callback"
       ];
       originLanding = "https://n8n.${baseDomain}";
-      public = true;
-      enableLocalhostRedirects = false;
-      scopeMaps.automation_users = [
-        "openid"
-        "email"
-        "profile"
-      ];
-    };
-
-    # Restate admin UI/API via oauth2-proxy. Runtime ingress stays on
-    # a separate vhost so public invocations can use workload-specific auth.
-    restate = {
-      displayName = "Restate Orchestration";
-      imageFile = icons.restate;
-      originUrl = [
-        "https://restate.${baseDomain}"
-        "https://restate.${baseDomain}/oauth2/callback"
-      ];
-      originLanding = "https://restate.${baseDomain}";
       public = true;
       enableLocalhostRedirects = false;
       scopeMaps.automation_users = [

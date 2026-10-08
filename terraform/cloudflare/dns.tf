@@ -407,24 +407,6 @@ resource "cloudflare_dns_record" "tasks_a" {
   proxied = false
 }
 
-resource "cloudflare_dns_record" "restate_a" {
-  zone_id = local.zone_id
-  name    = "restate"
-  content = local.service_ip
-  type    = "A"
-  ttl     = 300
-  proxied = false
-}
-
-resource "cloudflare_dns_record" "restate_api_a" {
-  zone_id = local.zone_id
-  name    = "restate-api"
-  content = local.service_ip
-  type    = "A"
-  ttl     = 300
-  proxied = false
-}
-
 resource "cloudflare_dns_record" "zotero_a" {
   zone_id = local.zone_id
   name    = "zotero"
