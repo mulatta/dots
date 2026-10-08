@@ -13,6 +13,7 @@ in
     ./linkwarden.nix
     ./miniflux.nix
     ./mulatta-io.nix
+    ./neko.nix
     ./nextcloud.nix
     ./paperless.nix
     ./security-txt.nix

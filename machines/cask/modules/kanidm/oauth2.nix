@@ -50,6 +50,27 @@ let
 in
 {
   clients = {
+    # Neko requires a confidential client and sends S256 PKCE.
+    neko = {
+      displayName = "Neko";
+      originUrl = "https://neko.${baseDomain}/api/oauth/callback";
+      originLanding = "https://neko.${baseDomain}";
+      public = false;
+      enableLocalhostRedirects = false;
+      preferShortUsername = true;
+      basicSecretFile = config.clan.core.vars.generators.kanidm-neko-oidc.files.client-secret.path;
+      scopeMaps.neko_users = [
+        "openid"
+        "email"
+        "profile"
+      ];
+      # Neko reads isAdmin, not groups; an array is not accepted as true.
+      claimMaps.isAdmin = {
+        joinType = "csv";
+        valuesByGroup.neko_admins = [ "true" ];
+      };
+    };
+
     # Stalwart Mail - public client with PKCE
     stalwart = {
       displayName = "Stalwart Mail";
@@ -369,6 +390,22 @@ in
   };
 
   generators = {
+    kanidm-neko-oidc = {
+      share = true;
+      files.client-secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      files.env.secret = true;
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        client_secret=$(openssl rand -hex 32 | tr -d '\n')
+
+        printf '%s' "$client_secret" > "$out/client-secret"
+        printf 'NEKO_MEMBER_OAUTH_CLIENT_SECRET=%s\n' "$client_secret" > "$out/env"
+      '';
+    };
+
     kanidm-miniflux-oidc = {
       share = true;
       files.client-secret = {

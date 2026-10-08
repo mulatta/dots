@@ -106,6 +106,12 @@ in
         zotero_users = {
           members = [ "seungwon" ];
         };
+        neko_users = {
+          members = [ "seungwon" ];
+        };
+        neko_admins = {
+          members = [ "seungwon" ];
+        };
         media_users = {
           members = [ "seungwon" ];
         };

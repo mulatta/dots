@@ -138,12 +138,32 @@ let
     }
   );
 
-  secretEnv = config.clan.core.vars.generators.neko.files.env.path;
+  secretEnv = config.clan.core.vars.generators.kanidm-neko-oidc.files.env.path;
 in
 {
+  clan.core.vars.generators.kanidm-neko-oidc = {
+    share = true;
+    files.client-secret.secret = true;
+    files.env = {
+      secret = true;
+      restartUnits = [ "podman-neko.service" ];
+    };
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      client_secret=$(openssl rand -hex 32 | tr -d '\n')
+
+      printf '%s' "$client_secret" > "$out/client-secret"
+      printf 'NEKO_MEMBER_OAUTH_CLIENT_SECRET=%s\n' "$client_secret" > "$out/env"
+    '';
+  };
+
+  # Retain the old password material for rollback; OAuth never loads it.
   clan.core.vars.generators.neko = {
     files = {
-      env.secret = true;
+      env = {
+        secret = true;
+        deploy = false;
+      };
       user-password = {
         secret = true;
         deploy = false;
@@ -153,7 +173,6 @@ in
         deploy = false;
       };
     };
-    files.env.restartUnits = [ "podman-neko.service" ];
     runtimeInputs = [ pkgs.openssl ];
     script = ''
       set -euo pipefail
@@ -241,8 +260,16 @@ in
       environmentFiles = [ secretEnv ];
       environment = {
         NEKO_DESKTOP_SCREEN = "1920x1080@30";
-        NEKO_MEMBER_PROVIDER = "multiuser";
-        NEKO_SESSION_COOKIE_SECURE = "false";
+        NEKO_MEMBER_PROVIDER = "oauth";
+        NEKO_MEMBER_OAUTH_ENABLED = "true";
+        NEKO_MEMBER_OAUTH_NAME = "Kanidm";
+        NEKO_MEMBER_OAUTH_CLIENT_ID = "neko";
+        NEKO_MEMBER_OAUTH_ISSUER_URL = "https://idm.mulatta.io/oauth2/openid/neko";
+        NEKO_MEMBER_OAUTH_REDIRECT_URL = "https://neko.mulatta.io/api/oauth/callback";
+        NEKO_MEMBER_OAUTH_SCOPES = "openid profile email";
+        NEKO_MEMBER_OAUTH_SUBJECT_FIELD = "sub";
+        NEKO_MEMBER_OAUTH_USERNAME_FIELD = "preferred_username";
+        NEKO_SESSION_COOKIE_SECURE = "true";
         NEKO_WEBRTC_ICELITE = "true";
         NEKO_WEBRTC_NAT1TO1 = config.networking.naru.ipv6;
         NEKO_WEBRTC_TCPMUX = toString ports.media;

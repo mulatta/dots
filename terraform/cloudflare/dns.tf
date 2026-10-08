@@ -164,6 +164,16 @@ resource "cloudflare_dns_record" "hermes_a" {
   comment = "Hermes dashboard cask ingress"
 }
 
+resource "cloudflare_dns_record" "neko_a" {
+  zone_id = local.zone_id
+  name    = "neko"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Neko UI only; media remains on Naru"
+}
+
 resource "cloudflare_dns_record" "rss_a" {
   zone_id = local.zone_id
   name    = "rss"
