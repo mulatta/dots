@@ -20,11 +20,10 @@ in
   # database restore. Identities live in Kanidm and are never touched here.
   systemd.services.stalwart-provision = {
     description = "Reconcile declarative Stalwart control-plane resources";
-    # Following stalwart.service instead of a target reconciles the control
-    # plane after every start, including the restart that follows a database
-    # restore, not only at deployment and boot.
+    # Propagate Stalwart restarts so database restores also reconcile resources.
     wantedBy = [ "stalwart.service" ];
     requires = [ "stalwart.service" ];
+    partOf = [ "stalwart.service" ];
     after = [
       "kanidm.service"
       "stalwart.service"
@@ -35,6 +34,8 @@ in
     ];
     serviceConfig = {
       Type = "oneshot";
+      # Active oneshots are restarted when deployment changes restartTriggers.
+      RemainAfterExit = true;
       User = "stalwart-mail";
       Group = "stalwart-mail";
       LoadCredential = [ "admin-password:${adminPasswordFile}" ];
