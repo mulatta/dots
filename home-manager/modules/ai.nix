@@ -17,6 +17,9 @@ let
     ps.requests
     ps.pexpect
     ps.pyelftools
+    (bioPkgs.pydna.override { python3Packages = ps; })
+    (bioPkgs.biotite.override { python3Packages = ps; })
+    (bioPkgs.primer3-py.override { python3Packages = ps; })
   ]);
 
   nixbot-cli =
@@ -61,7 +64,7 @@ in
   xdg.configFile."herdr/autoname-hook.zsh".source = "${selfPkgs.herdr-autoname}/shell/hook.zsh";
   xdg.configFile."pi-agent-extensions/python/config.json".text = builtins.toJSON {
     python = "${piPython}/bin/python3";
-    prompt = "Includes polars, matplotlib, requests, pexpect, and pyelftools. Python runs with user permissions, outside the shell permission gate.";
+    prompt = "Includes polars, matplotlib, requests, pexpect, pyelftools, pydna, biotite, and primer3. Python runs with user permissions, outside the shell permission gate.";
   };
 
   programs.skillz = {
