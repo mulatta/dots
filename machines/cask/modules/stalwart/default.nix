@@ -14,6 +14,7 @@ let
   resendKeyFile = config.clan.core.vars.generators.resend.files."api-key".path;
   acmeDir = config.security.acme.certs.${mailDomain}.directory;
   credential = name: "%{file:/run/credentials/stalwart.service/${name}}%";
+  mailUserFilter = "(memberof=spn=mail_users@idm.mulatta.io,dc=idm,dc=mulatta,dc=io)";
 in
 {
   imports = [ ./provision ];
@@ -198,8 +199,9 @@ in
         };
 
         filter = {
-          name = "(&(objectClass=person)(|(uid=?)(spn=?)(name=?)(mail=?)))";
-          email = "(&(objectClass=person)(mail=?))";
+          # Membership gates mail access without creating shared-folder groups.
+          name = "(&(objectClass=person)${mailUserFilter}(|(uid=?)(spn=?)(name=?)(mail=?)))";
+          email = "(&(objectClass=person)${mailUserFilter}(mail=?))";
         };
 
         attributes = {
