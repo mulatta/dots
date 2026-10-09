@@ -78,6 +78,9 @@ in
 
   };
 
+  # Public half of the login keychain identity from code-signing-identity.
+  targets.darwin.codeSigning.certificateSha1 = "d5f52c1ea9644923482d539ccfc51dc51c920080";
+
   programs.rbw.settings = {
     pinentry = lib.mkForce selfPkgs.rbw-pinentry;
     lock_timeout = lib.mkForce 3600;
