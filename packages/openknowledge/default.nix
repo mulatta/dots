@@ -18,6 +18,7 @@
   makeDesktopItem,
   writeText,
   libicns,
+  imagemagick,
   autoPatchelfHook,
   versionCheckHook,
 }:
@@ -165,7 +166,10 @@ stdenv.mkDerivation {
     makeBinaryWrapper
     installAgentSkills
   ]
-  ++ lib.optional stdenv.hostPlatform.isDarwin libicns
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    libicns
+    imagemagick
+  ]
   ++ lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
 
   buildInputs = lib.optional stdenv.hostPlatform.isLinux stdenv.cc.cc.lib;
@@ -210,6 +214,13 @@ stdenv.mkDerivation {
     appDir="$desktop/libexec/openknowledge/desktop"
     pnpm --filter @inkeep/open-knowledge-desktop deploy --prod --offline --ignore-scripts "$appDir"
     cp -R packages/desktop/out "$appDir/"
+    ${lib.optionalString stdenv.hostPlatform.isDarwin ''
+      # Upstream artwork fills the canvas; macOS icons need an outer inset.
+      # Electron also loads this PNG for app.dock.setIcon in our unbundled build.
+      magick packages/desktop/build/icon.png -resize 832x832 \
+        -gravity center -background none -extent 1024x1024 \
+        packages/desktop/build/icon.png
+    ''}
     install -Dm644 packages/desktop/build/icon.png "$appDir/build/icon.png"
     mkdir -p "$appDir/resources" "$desktop/bin"
     ln -s "$out/libexec/openknowledge/cli/dist/public" "$appDir/resources/app"
@@ -266,6 +277,12 @@ stdenv.mkDerivation {
     JS
     test -f "$desktop/libexec/openknowledge/desktop/resources/app/index.html"
     test -f "$desktop/libexec/openknowledge/desktop/resources/cli/dist/cli.mjs"
+    ${lib.optionalString stdenv.hostPlatform.isDarwin ''
+      icon="$desktop/libexec/openknowledge/desktop/build/icon.png"
+      test "$(magick identify -format '%wx%h' "$icon")" = 1024x1024
+      test "$(magick "$icon" -alpha extract -threshold 50% -format '%@' info:)" = 832x832+96+96
+      test -s "$desktop/Applications/${appName}.app/Contents/Resources/openknowledge.icns"
+    ''}
   '';
 
   passthru = {
