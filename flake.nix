@@ -108,6 +108,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    flakelet = {
+      # Keep Git flake updates working until the narHash URL fix lands upstream.
+      url = "github:mulatta/flakelet/fix-git-flake-narhash";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     gitea-mq = {
       url = "github:Mic92/gitea-mq";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -25,6 +25,7 @@
     ./modules/neko.nix
     ./modules/nextcloud.nix
     ./modules/paperless.nix
+    ./modules/private-service.nix
     ./modules/rsshub.nix
     ./modules/searxng.nix
     ./modules/sparkyfitness.nix
