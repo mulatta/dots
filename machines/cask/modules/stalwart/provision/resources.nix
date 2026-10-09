@@ -1,6 +1,11 @@
 {
   principals = [
     {
+      type = "oauthClient";
+      name = "pim-mcp";
+      description = "Personal information management MCP";
+    }
+    {
       type = "domain";
       name = "mulatta.io";
       description = "mulatta.io";
