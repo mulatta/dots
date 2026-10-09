@@ -10,6 +10,13 @@ let
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
+  piPython = pkgs.python3.withPackages (ps: [
+    ps.polars
+    ps.matplotlib
+    ps.requests
+    ps.pexpect
+    ps.pyelftools
+  ]);
 
   nixbot-cli =
     inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
@@ -52,6 +59,10 @@ in
   };
 
   xdg.configFile."herdr/autoname-hook.zsh".source = "${selfPkgs.herdr-autoname}/shell/hook.zsh";
+  xdg.configFile."pi-agent-extensions/python/config.json".text = builtins.toJSON {
+    python = "${piPython}/bin/python3";
+    prompt = "Includes polars, matplotlib, requests, pexpect, and pyelftools. Python runs with user permissions, outside the shell permission gate.";
+  };
 
   programs.skillz = {
     enable = true;
@@ -61,7 +72,6 @@ in
       "context7-cli"
       "kmap-cli"
       "linkwarden-cli"
-      "pexpect-cli"
       "queue"
     ]
     ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "shortcuts-cli" ];
@@ -119,5 +129,6 @@ in
     aiPkgs.tuicr
     nixbot-cli
     pkgs.pueue
+    piPython
   ];
 }
