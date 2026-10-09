@@ -19,6 +19,8 @@
   writeText,
   libicns,
   imagemagick,
+  python3,
+  rcodesign,
   autoPatchelfHook,
   versionCheckHook,
 }:
@@ -72,6 +74,8 @@ let
       CFBundleIdentifier = "com.inkeep.open-knowledge";
       CFBundleInfoDictionaryVersion = "6.0";
       CFBundleName = appName;
+      CFBundleDisplayName = appName;
+      CFBundleVersion = version;
       CFBundlePackageType = "APPL";
       CFBundleShortVersionString = version;
       CFBundleURLTypes = [
@@ -169,6 +173,8 @@ stdenv.mkDerivation {
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     libicns
     imagemagick
+    python3
+    rcodesign
   ]
   ++ lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
 
@@ -216,7 +222,7 @@ stdenv.mkDerivation {
     cp -R packages/desktop/out "$appDir/"
     ${lib.optionalString stdenv.hostPlatform.isDarwin ''
       # Upstream artwork fills the canvas; macOS icons need an outer inset.
-      # Electron also loads this PNG for app.dock.setIcon in our unbundled build.
+      # Electron also loads this PNG for app.dock.setIcon in our unpackaged runtime.
       magick packages/desktop/build/icon.png -resize 832x832 \
         -gravity center -background none -extent 1024x1024 \
         packages/desktop/build/icon.png
@@ -229,7 +235,48 @@ stdenv.mkDerivation {
     ln -s "$out/libexec/openknowledge/cli" "$appDir/resources/cli"
     cp -R packages/app/src/locales "$appDir/resources/locales"
 
-    makeWrapper ${lib.getExe electron} "$desktop/bin/openknowledge-desktop" \
+    electronExecutable=${lib.getExe electron}
+    launcher="$desktop/bin/openknowledge-desktop"
+    ${lib.optionalString stdenv.hostPlatform.isDarwin ''
+        bundle="$desktop/Applications/${appName}.app/Contents"
+        mkdir -p "$(dirname "$bundle")"
+        cp -R ${electron}/Applications/Electron.app/Contents "$bundle"
+        chmod -R u+w "$bundle"
+
+        # Preserve Electron's Cocoa configuration and privacy usage descriptions.
+        python3 - "$bundle/Info.plist" ${infoPlist} <<'PY'
+      import plistlib
+      import sys
+      from pathlib import Path
+
+      path, overrides = sys.argv[1:]
+      with open(path, "rb") as source:
+          info = plistlib.load(source)
+      with open(overrides, "rb") as source:
+          info.update(plistlib.load(source))
+      with open(path, "wb") as destination:
+          plistlib.dump(info, destination)
+
+      # Nix Electron omits helper executable keys; bundle signing needs them.
+      for helper in (Path(path).parent / "Frameworks").glob("Electron Helper*.app"):
+          contents = helper / "Contents"
+          executable, = (contents / "MacOS").iterdir()
+          helper_plist = contents / "Info.plist"
+          with helper_plist.open("rb") as source:
+              helper_info = plistlib.load(source)
+          helper_info["CFBundleExecutable"] = executable.name
+          with helper_plist.open("wb") as destination:
+              plistlib.dump(helper_info, destination)
+      PY
+        png2icns "$bundle/Resources/openknowledge.icns" packages/desktop/build/icon.png
+        electronExecutable="$bundle/MacOS/Electron"
+        launcher="$bundle/MacOS/${appName}"
+        ln -s "../Applications/${appName}.app/Contents/MacOS/${appName}" "$desktop/bin/openknowledge-desktop"
+    ''}
+
+    # Passing the app directory keeps Electron's default-app bootstrap and
+    # isPackaged=false, avoiding upstream mutable installer behavior on macOS.
+    makeWrapper "$electronExecutable" "$launcher" \
       --add-flags "$appDir" \
       --set OK_NIX_RESOURCES "$appDir/resources" \
       --set OK_NIX_CLI "$out/bin/open-knowledge" \
@@ -242,12 +289,6 @@ stdenv.mkDerivation {
 
     ${lib.optionalString stdenv.hostPlatform.isDarwin ''
       find "$desktop/libexec/openknowledge" -path '*/node-pty/prebuilds/darwin-*/spawn-helper' -exec chmod 755 {} +
-
-      bundle="$desktop/Applications/${appName}.app/Contents"
-      mkdir -p "$bundle/MacOS" "$bundle/Resources"
-      install -Dm644 ${infoPlist} "$bundle/Info.plist"
-      png2icns "$bundle/Resources/openknowledge.icns" packages/desktop/build/icon.png
-      ln -s "$desktop/bin/openknowledge-desktop" "$bundle/MacOS/${appName}"
     ''}
 
     runHook postInstall
@@ -257,11 +298,16 @@ stdenv.mkDerivation {
   dontAutoPatchelf = true;
   dontStrip = true;
   dontPatchELF = true;
-  postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
-    while IFS= read -r -d "" native; do
-      autoPatchelf "$native"
-    done < <(find "$out" "$desktop" -name '*.node' -path '*linux-${stdenv.hostPlatform.node.arch}*' -print0)
-  '';
+  postFixup =
+    lib.optionalString stdenv.hostPlatform.isLinux ''
+      while IFS= read -r -d "" native; do
+        autoPatchelf "$native"
+      done < <(find "$out" "$desktop" -name '*.node' -path '*linux-${stdenv.hostPlatform.node.arch}*' -print0)
+    ''
+    + lib.optionalString stdenv.hostPlatform.isDarwin ''
+      # Metadata and launcher changes invalidate the original bundle seal.
+      rcodesign sign --timestamp-url none "$desktop/Applications/${appName}.app"
+    '';
 
   doInstallCheck = true;
   nativeInstallCheckInputs = [ versionCheckHook ];
@@ -281,7 +327,13 @@ stdenv.mkDerivation {
       icon="$desktop/libexec/openknowledge/desktop/build/icon.png"
       test "$(magick identify -format '%wx%h' "$icon")" = 1024x1024
       test "$(magick "$icon" -alpha extract -threshold 50% -format '%@' info:)" = 832x832+96+96
-      test -s "$desktop/Applications/${appName}.app/Contents/Resources/openknowledge.icns"
+      bundle="$desktop/Applications/${appName}.app/Contents"
+      test -s "$bundle/Resources/openknowledge.icns"
+      test -x "$bundle/MacOS/${appName}"
+      test -x "$bundle/MacOS/Electron"
+      test ! -L "$bundle/MacOS/Electron"
+      test -d "$bundle/Frameworks/Electron Framework.framework"
+      ELECTRON_RUN_AS_NODE=1 "$bundle/MacOS/Electron" -e 'console.log(process.versions.electron)'
     ''}
   '';
 
