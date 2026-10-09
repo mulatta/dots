@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Idempotently reconcile installed Mac App Store apps with a wanted list.
 
 Adapted from Mic92/nix-config (MIT, Copyright (c) 2021 Jörg Thalheim):
@@ -11,35 +10,48 @@ import subprocess
 import sys
 
 
+def mas(*args: str) -> bool:
+    """Run mas and report success; a failed app must not abort activation."""
+    maybe_sudo = ["sudo"] if os.geteuid() != 0 else []
+    return subprocess.run([*maybe_sudo, "mas", *args], check=False).returncode == 0
+
+
+def installed_apps() -> set[int] | None:
+    ret = subprocess.run(
+        ["mas", "list"], stdout=subprocess.PIPE, text=True, check=False
+    )
+    if ret.returncode != 0:
+        return None
+    installed: set[int] = set()
+    for line in ret.stdout.splitlines():
+        with contextlib.suppress(ValueError, IndexError):
+            installed.add(int(line.split()[0]))
+    return installed
+
+
 def main() -> None:
     wanted = set(map(int, sys.argv[1:]))
-    ret = subprocess.run(["mas", "list"], stdout=subprocess.PIPE, check=True)
-    installed_ids: set[int] = set()
-    for line in ret.stdout.splitlines():
-        columns = line.split()
-        with contextlib.suppress(ValueError):
-            installed_ids.add(int(columns[0]))
-    core_apps = {
-        408981434,  # iMovie
-        409183694,  # Keynote
-        682658836,  # GarageBand
-        409201541,  # Pages
-        409203825,  # Numbers
-    }
-    unwanted = installed_ids - wanted - core_apps
-    missing = wanted - installed_ids
+    installed = installed_apps()
+    if installed is None:
+        print("warning: mas list failed; skipping App Store sync", file=sys.stderr)
+        return
 
-    maybe_sudo = ["sudo"] if os.geteuid() != 0 else []
+    failed: list[int] = []
+    for store_id in sorted(installed - wanted):
+        print(f"Removing App Store app {store_id}", file=sys.stderr)
+        if not mas("uninstall", str(store_id)):
+            failed.append(store_id)
+    for store_id in sorted(wanted - installed):
+        print(f"Installing App Store app {store_id}", file=sys.stderr)
+        # install only covers apps this account already got; get also claims free apps.
+        if not (mas("install", str(store_id)) or mas("get", str(store_id))):
+            failed.append(store_id)
 
-    if unwanted:
-        print(f"Remove the following apps: {' '.join(map(str, unwanted))}")
-        for store_id in unwanted:
-            subprocess.run([*maybe_sudo, "mas", "uninstall", str(store_id)], check=True)
-
-    if missing:
-        print(f"Install the following apps: {' '.join(map(str, missing))}")
-        for store_id in missing:
-            subprocess.run(["mas", "install", str(store_id)], check=True)
+    if failed:
+        print(
+            f"warning: App Store sync failed for {' '.join(map(str, failed))}",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

@@ -17,7 +17,6 @@
   # --no-quarantine was removed in Homebrew 5.0 (2025-09-22); no replacement.
   homebrew.onActivation.cleanup = "uninstall";
   homebrew.onActivation.upgrade = true;
-  homebrew.brews = [ "mas" ];
 
   homebrew.casks = [
     # keep-sorted start
