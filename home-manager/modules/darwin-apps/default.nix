@@ -1,3 +1,6 @@
 {
-  imports = [ ./managed.nix ];
+  imports = [
+    ./managed.nix
+    ./signed.nix
+  ];
 }
