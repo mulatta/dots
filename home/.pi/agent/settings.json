@@ -8,6 +8,15 @@
     "~/.claude/skills",
     "!**/.claude/skills/synced/**"
   ],
+  "packages": [
+    {
+      "source": "~/dots/pi-agent-extensions",
+      "extensions": [
+        "!*",
+        "+nushell/index.ts"
+      ]
+    }
+  ],
   "compaction": {
     "enabled": true
   },

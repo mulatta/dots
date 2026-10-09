@@ -129,6 +129,7 @@ in
     aiPkgs.tuicr
     nixbot-cli
     pkgs.pueue
+    pkgs.nushell
     piPython
   ];
 }
