@@ -45,6 +45,7 @@
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         openknowledge = pkgs.callPackage ./openknowledge { };
+        openknowledge-desktop = self'.packages.openknowledge.desktop;
         pi-acp = pkgs.callPackage ./pi-acp {
           pi = llmAgents.pi;
         };
@@ -70,7 +71,6 @@
         updater = pkgs.callPackage ./updater { };
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-        openknowledge-desktop = pkgs.callPackage ./openknowledge-desktop { };
         openlogi = pkgs.callPackage ./openlogi { };
         paneru-app = pkgs.callPackage ./paneru-app {
           paneru = inputs'.paneru.packages.default;

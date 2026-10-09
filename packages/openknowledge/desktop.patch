@@ -1,0 +1,324 @@
+--- a/packages/desktop/src/main/index.ts
++++ b/packages/desktop/src/main/index.ts
+@@ -1222,10 +1222,15 @@
+
+ const editorViewMenuStates = new EditorViewMenuStateRegistry();
+
+-const rendererDevUrl = process.env.ELECTRON_RENDERER_URL ?? null;
++// The Nix wrapper launches an unpackaged app, but supplies production resources.
++// Keep Electron's isPackaged unchanged for installer/updater/platform behavior.
++const nixResources = process.env.OK_NIX_RESOURCES;
++const isProductionRuntime = app.isPackaged || Boolean(nixResources);
++const runtimeResources = nixResources ?? process.resourcesPath;
++const rendererDevUrl = isProductionRuntime ? null : (process.env.ELECTRON_RENDERER_URL ?? null);
+
+ function isDebugKeyringSmokeAllowed(): boolean {
+-  return !app.isPackaged || process.env.OK_DEBUG_KEYRING_SMOKE === '1';
++  return !isProductionRuntime || process.env.OK_DEBUG_KEYRING_SMOKE === '1';
+ }
+
+ function resolveLocalOpCli(): LocalOpCliInvocation {
+@@ -1301,12 +1306,14 @@
+
+ function ensureWindowManager() {
+   if (wm) return;
+-  const rendererEntryPath = app.isPackaged
+-    ? join(process.resourcesPath, 'app', 'index.html')
++  const rendererEntryPath = isProductionRuntime
++    ? join(runtimeResources, 'app', 'index.html')
+     : join(__dirname, '../renderer/index.html');
+   const utilityEntryPath = join(__dirname, 'utility/server-entry.js');
+
+-  const bundleCliMjsPath = app.isPackaged
++  const bundleCliMjsPath = nixResources
++    ? join(nixResources, 'cli', 'dist', 'cli.mjs')
++    : app.isPackaged
+     ? join(
+         process.resourcesPath,
+         'app.asar.unpacked',
+@@ -1513,7 +1520,7 @@
+     terminalAuthAvailable: isTerminalAvailable(),
+     utilityEntryPath,
+     spawnSingleFileServer: spawnCliServer,
+-    ...(app.isPackaged ? { spawnDetachedServer: spawnCliServer } : {}),
++    ...(isProductionRuntime ? { spawnDetachedServer: spawnCliServer } : {}),
+     createEphemeralProjectDir,
+     removeDir: (dir: string) => fsPromises.rm(dir, { recursive: true, force: true }),
+     rendererEntryPath,
+@@ -1524,7 +1531,7 @@
+     selfChannel: resolveDesktopProductName(),
+     spawnLockPollDeadlineMs: readPositiveIntEnv('OK_SPAWN_STARTUP_TIMEOUT_MS'),
+     spawnLockProgressDeadlineMs: readPositiveIntEnv('OK_SPAWN_BIND_TIMEOUT_MS'),
+-    reclaimForeignServerInDev: !app.isPackaged,
++    reclaimForeignServerInDev: !isProductionRuntime,
+     isFirstLaunchAfterUpgrade: () => firstLaunchAfterUpgrade,
+     setTimeout: (cb, ms) => setTimeout(cb, ms),
+     setInterval: (cb, ms) => setInterval(cb, ms).unref(),
+@@ -1626,8 +1633,8 @@
+       attachSpellcheckMenuToWindow(win);
+       return win as unknown as BrowserWindowLike;
+     },
+-    rendererEntryPath: app.isPackaged
+-      ? join(process.resourcesPath, 'app', 'index.html')
++    rendererEntryPath: isProductionRuntime
++      ? join(runtimeResources, 'app', 'index.html')
+       : join(__dirname, '../renderer/index.html'),
+     rendererDevUrl,
+     appVersion: app.getVersion(),
+@@ -2494,7 +2501,7 @@
+       wc.reloadIgnoringCache();
+       return;
+     case 'toggleDevTools':
+-      if (!app.isPackaged || DESKTOP_VARIANT.name !== 'stable') {
++      if (!isProductionRuntime || DESKTOP_VARIANT.name !== 'stable') {
+         wc.toggleDevTools();
+       }
+       return;
+@@ -2526,7 +2533,7 @@
+   await installApplicationMenu({
+     appName: app.name,
+     translate: currentMenuTranslator(),
+-    showDevToolsMenu: !app.isPackaged || DESKTOP_VARIANT.name !== 'stable',
++    showDevToolsMenu: !isProductionRuntime || DESKTOP_VARIANT.name !== 'stable',
+     terminalCapable: isTerminalAvailable(),
+     dialog,
+     openNavigator,
+@@ -3230,8 +3237,8 @@
+     terminal: focused ? getTerminalWindowContext(focused.id) : undefined,
+     note: focused ? getNoteWindowContext(focused.id) : undefined,
+   });
+-  const rendererEntryPath = app.isPackaged
+-    ? join(process.resourcesPath, 'app', 'index.html')
++  const rendererEntryPath = isProductionRuntime
++    ? join(runtimeResources, 'app', 'index.html')
+     : join(__dirname, '../renderer/index.html');
+   createTerminalWindow({
+     createWindow: (opts) => {
+@@ -3358,8 +3365,8 @@
+     });
+   if (!project) return { ok: false, reason: 'no-project' };
+
+-  const rendererEntryPath = app.isPackaged
+-    ? join(process.resourcesPath, 'app', 'index.html')
++  const rendererEntryPath = isProductionRuntime
++    ? join(runtimeResources, 'app', 'index.html')
+     : join(__dirname, '../renderer/index.html');
+   const nativeChrome = noteWindowNativeChromeOptions(process.platform);
+
+@@ -4547,7 +4554,7 @@
+         return {
+           recentProjects: appState.recentProjects.map((r) => ({ path: r.path, name: r.name })),
+           spellCheckEnabled: appState.spellCheckEnabled,
+-          showDevToolsMenu: !app.isPackaged || DESKTOP_VARIANT.name !== 'stable',
++          showDevToolsMenu: !isProductionRuntime || DESKTOP_VARIANT.name !== 'stable',
+           canCheckForUpdates: autoUpdaterHandle != null,
+           canReconfigureMcpWiring: app.isPackaged && supportedPackagedInstall(),
+           activeTarget: currentActiveTarget(),
+@@ -5656,7 +5663,7 @@
+ function registerIntegrationsSettingsIpc(): void {
+   const integrationsLogger = getLogger('integrations-settings');
+   const { available, devBuild } = agentConnectionsAvailability(
+-    app.isPackaged,
++    isProductionRuntime,
+     process.platform,
+     app.getPath('exe'),
+     process.env,
+@@ -5807,7 +5814,7 @@
+ function registerProjectIntegrationsSettingsIpc(): void {
+   const projectLogger = getLogger('project-integrations-settings');
+   const { available } = agentConnectionsAvailability(
+-    app.isPackaged,
++    isProductionRuntime,
+     process.platform,
+     app.getPath('exe'),
+     process.env,
+@@ -5977,7 +5984,7 @@
+   );
+ }
+
+-if (!app.isPackaged) {
++if (!isProductionRuntime) {
+   const resolved = resolveEffectiveInstanceName(process.env, app.getAppPath(), {
+     autoDeriveEnabled: process.env.OK_DESKTOP_E2E_SMOKE !== '1',
+   });
+@@ -6282,7 +6289,7 @@
+         app.on(event as Parameters<typeof app.on>[0], cb as Parameters<typeof app.on>[1]);
+       },
+       whenReady: () => app.whenReady(),
+-      isPackaged: app.isPackaged,
++      isPackaged: isProductionRuntime,
+       setAsDefaultProtocolClient: (scheme) => app.setAsDefaultProtocolClient(scheme),
+       removeAsDefaultProtocolClient: (scheme) => app.removeAsDefaultProtocolClient(scheme),
+     },
+--- a/packages/desktop/src/main/main-i18n.ts
++++ b/packages/desktop/src/main/main-i18n.ts
+@@ -16,6 +16,7 @@
+ }
+
+ export function resolveMenuCatalogDir(deps: MenuCatalogDirDeps): string {
++  if (process.env.OK_NIX_RESOURCES) return join(process.env.OK_NIX_RESOURCES, 'locales');
+   if (deps.isPackaged) return join(deps.resourcesPath, 'locales');
+   return join(deps.mainDir, '..', '..', '..', 'app', 'src', 'locales');
+ }
+--- a/packages/desktop/src/main/local-op-cli-invocation.ts
++++ b/packages/desktop/src/main/local-op-cli-invocation.ts
+@@ -17,6 +17,7 @@
+ export function resolveLocalOpCliInvocation(
+   input: ResolveLocalOpCliInvocationInput,
+ ): LocalOpCliInvocation {
++  if (input.parentEnv.OK_NIX_CLI) return { cliArgs: [input.parentEnv.OK_NIX_CLI] };
+   if (!input.isPackaged) {
+     return { cliArgs: ['open-knowledge'] };
+   }
+--- a/packages/desktop/src/main/resolve-detached-spawn-args.ts
++++ b/packages/desktop/src/main/resolve-detached-spawn-args.ts
+@@ -83,10 +83,12 @@
+     terminalAuthAvailable,
+   } = input;
+
+-  const file =
++  // Nix supplies Node and the deployed CLI; no mutable macOS helper bundle.
++  const file = env.OK_NIX_NODE ?? (
+     platform === 'darwin' && isPackaged
+       ? resolveHelperBundleBinary(parentExecPath)
+-      : parentExecPath;
++      : parentExecPath
++  );
+
+   const projectRoot = projectDir ?? contentDir;
+   const args = [
+@@ -111,7 +113,7 @@
+     env: {
+       ...envWithoutPath,
+       PATH: buildEnrichedPath(platform, inheritedPath),
+-      ELECTRON_RUN_AS_NODE: '1',
++      ELECTRON_RUN_AS_NODE: env.OK_NIX_NODE ? undefined : '1',
+       OK_LOCK_KIND: 'interactive',
+     },
+     detached: true,
+--- a/packages/desktop/src/shared/ok-child-env.ts
++++ b/packages/desktop/src/shared/ok-child-env.ts
+@@ -1,4 +1,5 @@
+ import { homedir } from 'node:os';
++import { dirname } from 'node:path';
+ import {
+   OK_DESKTOP_TERMINAL_ENV,
+   OK_HOSTED_AGENT_ENV,
+@@ -44,7 +45,7 @@
+   return {
+     platform: overrides.platform ?? process.platform,
+     home: okChildHome(parentEnv),
+-    cliBinDir: overrides.cliBinDir,
++    cliBinDir: parentEnv.OK_NIX_CLI ? dirname(parentEnv.OK_NIX_CLI) : overrides.cliBinDir,
+   };
+ }
+
+@@ -56,7 +57,10 @@
+
+ export function okManagedBinDirs(options: OkManagedBinDirsOptions): readonly string[] {
+   if (options.platform === 'win32') return options.cliBinDir ? [options.cliBinDir] : [];
+-  return options.home ? [posixOkManagedBinDir(options.home)] : [];
++  return [
++    ...(options.cliBinDir ? [options.cliBinDir] : []),
++    ...(options.home ? [posixOkManagedBinDir(options.home)] : []),
++  ];
+ }
+
+ export function hasNoResolvableOkHome(options: OkManagedBinDirsOptions): boolean {
+--- a/packages/desktop/src/main/auto-updater.ts
++++ b/packages/desktop/src/main/auto-updater.ts
+@@ -391,7 +391,22 @@
+   return installInFlightAt(state, anchorMs, stagedAt, spanCollapsed);
+ }
+
++// The Nix store is immutable. Only Nix may update this application.
+ export function startAutoUpdater(opts: StartAutoUpdaterOpts): StartAutoUpdaterHandle {
++  opts.updater.autoDownload = false;
++  opts.updater.autoInstallOnAppQuit = false;
++  return {
++    destroy() {},
++    async checkForUpdatesNow() { return { kind: 'updater-inactive' }; },
++    getActiveWhatsNew() { return null; },
++    getPendingUpdate() { return null; },
++    suppressAutoInstallOnQuit() {},
++    recordInstallHandoffOnQuit() {},
++  };
++}
++
++// Kept separate so the Nix entry point cannot start upstream update machinery.
++function startUpstreamAutoUpdater(opts: StartAutoUpdaterOpts): StartAutoUpdaterHandle {
+   const {
+     updater,
+     ipcMain,
+--- a/packages/desktop/electron.vite.config.ts
++++ b/packages/desktop/electron.vite.config.ts
+@@ -140,7 +140,7 @@
+       // `await` is required here: electron-vite deep-clones the renderer
+       // config and chokes on the non-plain preset object —
+       // https://github.com/alex8088/electron-vite/issues/902
+-      await babel(RENDERER_BABEL_OPTIONS),
++      await babel({ ...RENDERER_BABEL_OPTIONS, cwd: appRoot }),
+     ],
+     resolve: {
+       alias: {
+--- a/packages/desktop/src/main/entry.ts
++++ b/packages/desktop/src/main/entry.ts
+@@ -1,5 +1,7 @@
+-import { existsSync, readFileSync } from 'node:fs';
++import { existsSync, mkdirSync, readFileSync } from 'node:fs';
++import { join } from 'node:path';
+ import { app } from 'electron';
++import { DESKTOP_VARIANT } from '../shared/desktop-variant.ts';
+ import {
+   parseDesktopUninstallResultArgs,
+   UNINSTALL_PROGRESS_ARG,
+@@ -7,6 +9,16 @@
+ } from './desktop-uninstall-result.ts';
+ import { isExecutableFileSync } from './executable-file.ts';
+ import { clearAmbientCapsBeforeBoot } from './linux-ambient-caps.ts';
++
++// Initialize the stable profile before importing modules that read userData.
++// The Nix Electron wrapper does not supply electron-builder's app identity.
++if (process.env.OK_NIX_RESOURCES) {
++  app.setName(DESKTOP_VARIANT.productName);
++  const profile = join(app.getPath('appData'), DESKTOP_VARIANT.productName);
++  mkdirSync(profile, { recursive: true });
++  app.setPath('userData', profile);
++  app.setPath('sessionData', profile);
++}
+
+ clearAmbientCapsBeforeBoot({
+   platform: process.platform,
+--- a/packages/desktop/src/main/uninstall-window.ts
++++ b/packages/desktop/src/main/uninstall-window.ts
+@@ -31,7 +31,8 @@
+   theme: UninstallWindowTheme,
+   locale?: SupportedLocale,
+ ): UninstallEntryTarget {
+-  if (deps.devServerUrl !== null && deps.devServerUrl !== '') {
++  const nixResources = process.env.OK_NIX_RESOURCES;
++  if (!nixResources && deps.devServerUrl !== null && deps.devServerUrl !== '') {
+     const origin = deps.devServerUrl.replace(/\/+$/, '');
+     return {
+       kind: 'url',
+@@ -40,7 +41,9 @@
+   }
+   return {
+     kind: 'file',
+-    path: deps.isPackaged
++    path: nixResources
++      ? join(nixResources, 'app', UNINSTALL_HTML)
++      : deps.isPackaged
+       ? join(deps.resourcesPath, 'app', UNINSTALL_HTML)
+       : join(deps.mainDir, '..', 'renderer', UNINSTALL_HTML),
+     query: { [UNINSTALL_THEME_QUERY_KEY]: theme, ...(locale === undefined ? {} : { locale }) },
+--- a/packages/desktop/src/main/install-shape.ts
++++ b/packages/desktop/src/main/install-shape.ts
+@@ -57,5 +57,7 @@
+ ): { available: boolean; devBuild: boolean } {
+   if (env.OK_RECLAIM_DISABLE === '1') return { available: false, devBuild: false };
+   if (!isPackaged && env.OK_M6B_FORCE !== '1') return { available: false, devBuild: true };
++  // Nix has no electron-builder bundle shape. Its wrapper supplies the CLI.
++  if (env.OK_NIX_RESOURCES && env.OK_NIX_CLI) return { available: true, devBuild: false };
+   return { available: isSupportedInstallShape(platform, executablePath, env), devBuild: false };
+ }
