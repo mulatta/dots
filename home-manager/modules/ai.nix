@@ -82,8 +82,6 @@ in
 
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
-    ".claude/skills/open-knowledge-discovery".source =
-      "${selfPkgs.openknowledge}/share/skills/openknowledge/discovery";
     ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".pi/agent/extensions/herdr-agent-state.ts".source =
       "${aiPkgs.herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
