@@ -90,8 +90,7 @@ in
   };
 
   # Cookie-signing key for the zhost oauth2-proxy; the OIDC client is public
-  # (PKCE), so the client secret is an unused placeholder. Same shape as the
-  # generators in oauth2-proxy.nix.
+  # (PKCE), so the client secret is an unused placeholder.
   clan.core.vars.generators.oauth2-proxy-zhost = {
     files.env = {
       secret = true;
@@ -126,6 +125,13 @@ in
       accessKeyFile = config.clan.core.vars.generators.zhost.files.r2-access-key.path;
       secretKeyFile = config.clan.core.vars.generators.zhost.files.r2-secret-key.path;
     };
+  };
+
+  # This standalone instance needs its own identity without the default proxy.
+  users.groups.oauth2-proxy = { };
+  users.users.oauth2-proxy = {
+    isSystemUser = true;
+    group = "oauth2-proxy";
   };
 
   systemd.services.oauth2-proxy-zhost = {

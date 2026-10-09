@@ -34,7 +34,6 @@
     ./modules/nginx
     ./modules/niks3.nix
     ./modules/ntfy.nix
-    ./modules/oauth2-proxy.nix
     ./modules/postgresql.nix
     ./modules/radicle.nix
     ./modules/radicle-mirror.nix

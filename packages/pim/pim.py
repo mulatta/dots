@@ -20,7 +20,6 @@ Available tools:
 - Calendar: calendar-cli, vdirsyncer, todo (todoman)
 - Scheduling polls: crabfit-cli
 - Email: notmuch, afew, mrefile (from mblaze), msmtp, mbsync, email-sync
-- n8n hooks: n8n-hooks (use store-draft for email drafts)
 - RSS/Miniflux: miniflux-cli (read starred notification entries for calendar-related RSS)
 - Vikunja: vikunja-cli
 - Biomedical references: biorefs-cli
@@ -45,9 +44,8 @@ Safety rules:
 - Do not run vdirsyncer sync, email-sync, mbsync, send mail, create events,
   edit events, delete events, modify contacts, or update Vikunja tasks/projects
   unless the user explicitly asks for that action in the current conversation.
-- Do not send mail directly unless the user explicitly requests sending. Prefer
-  n8n-hooks store-draft for email draft creation; n8n holds external service
-  credentials and stores the draft.
+- Do not send mail directly unless the user explicitly requests sending.
+  Compose draft text locally without sending it.
 - Before destructive changes, summarize the target item and ask for
   confirmation.
 - Do not print secrets or rbw values. Use rbw only as a credential provider for
@@ -112,7 +110,6 @@ Common sync/mutating tasks, only after explicit request:
 - Send invite: calendar-cli invite -s "Title" --start "2026-04-01 14:00" --timezone Asia/Seoul -d 60 -a "user@example.com"
 - Import invite: cat email.eml | calendar-cli import
 - RSVP: cat email.eml | calendar-cli reply accept
-- Create email draft via n8n: n8n-hooks store-draft --to user@example.com --subject "Subject" --body-plain "Draft body"
 - Create Vikunja task: vikunja-cli -j task create --project Inbox --title "Call Kim" --due 2026-05-15
 - Complete Vikunja task: vikunja-cli -j task complete 123
 - Move Vikunja kanban card: vikunja-cli -j bucket move-task --project Roadmap --view Kanban --task 123 --bucket Doing
@@ -144,7 +141,6 @@ RO_DIRS = [
     ".config/msmtp",
     ".config/miniflux-cli",
     ".config/vikunja-cli",
-    ".config/n8n-hooks",
     ".config/isyncrc",
     ".config/rbw",
     ".claude/skills",

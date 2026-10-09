@@ -43,7 +43,6 @@ let
     jellyfin = "${iconBundle}/jellyfin.svg";
     linkwarden = "${iconBundle}/linkwarden.png";
     miniflux = "${iconBundle}/miniflux.svg";
-    n8n = "${iconBundle}/n8n.svg";
     nextcloud = "${iconBundle}/nextcloud.svg";
     paperless = "${iconBundle}/paperless.svg";
     stalwart = "${iconBundle}/stalwart.png";
@@ -159,24 +158,6 @@ in
         "email"
         "profile"
         "groups"
-      ];
-    };
-
-    # n8n via oauth2-proxy
-    n8n = {
-      displayName = "n8n Automation";
-      imageFile = icons.n8n;
-      originUrl = [
-        "https://n8n.${baseDomain}"
-        "https://n8n.${baseDomain}/oauth2/callback"
-      ];
-      originLanding = "https://n8n.${baseDomain}";
-      public = true;
-      enableLocalhostRedirects = false;
-      scopeMaps.automation_users = [
-        "openid"
-        "email"
-        "profile"
       ];
     };
 

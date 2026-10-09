@@ -61,7 +61,6 @@ in
       "context7-cli"
       "kmap-cli"
       "linkwarden-cli"
-      "n8n-cli"
       "pexpect-cli"
       "queue"
     ]

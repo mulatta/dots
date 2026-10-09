@@ -19,7 +19,6 @@
     ./modules/linkwarden.nix
     ./modules/minecraft.nix
     ./modules/miniflux
-    ./modules/n8n
     ./modules/network.nix
     ./modules/neko.nix
     ./modules/nextcloud.nix

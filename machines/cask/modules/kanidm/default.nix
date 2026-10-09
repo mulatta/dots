@@ -65,7 +65,6 @@ in
         mail_users = {
           members = [
             "seungwon"
-            "n8n_notify"
             "gitea_notify"
             "kanidm_notify"
           ];
@@ -73,11 +72,7 @@ in
         cloud_users = {
           members = [
             "seungwon"
-            "n8n_bot"
           ];
-        };
-        automation_users = {
-          members = [ "seungwon" ];
         };
         task_users = {
           members = [ "seungwon" ];
@@ -127,22 +122,9 @@ in
         admins = {
           members = [ "seungwon" ];
         };
-        # Bots - non-interactive automation identities. Distinct from
-        # `agents` (which receive mail) because bots only need OIDC
-        # bootstrap to provision a downstream user, then operate via
-        # service-issued credentials (e.g. Nextcloud app passwords).
-        # Reserved for future bot-only account-policy carve-outs; no
-        # policy attached today.
-        bots = {
-          members = [ "n8n_bot" ];
-        };
       };
 
       persons = {
-        n8n_notify = {
-          displayName = "n8n notify";
-          mailAddresses = [ "n8n@${baseDomain}" ];
-        };
         # SMTP-only identity. Keep it outside git_users so mail credentials
         # cannot be used for interactive Gitea login.
         gitea_notify = {
@@ -153,14 +135,6 @@ in
         kanidm_notify = {
           displayName = "Kanidm notifications";
           mailAddresses = [ "idm@${baseDomain}" ];
-        };
-        # n8n automation bot. OIDC into Nextcloud once to provision the
-        # downstream user; thereafter n8n authenticates via a Nextcloud
-        # app password (stored in n8n credentials), so kanidm is not in
-        # the hot path. Mail intentionally omitted — n8n_notify owns
-        # outbound notification mail; this account writes to Nextcloud.
-        n8n_bot = {
-          displayName = "n8n automation bot";
         };
       };
 

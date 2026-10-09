@@ -43,14 +43,13 @@
         };
         miniflux-sync = pkgs.callPackage ./miniflux-sync { };
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
-        n8n-hooks = pkgs.callPackage ./n8n-hooks { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         openknowledge = pkgs.callPackage ./openknowledge { };
         pi-acp = pkgs.callPackage ./pi-acp {
           pi = llmAgents.pi;
         };
         pim = pkgs.callPackage ./pim {
-          inherit (self'.packages) n8n-hooks email-sync msmtp-with-sent;
+          inherit (self'.packages) email-sync msmtp-with-sent;
           calendar-cli = skillz.calendar-cli.override {
             msmtp = self'.packages.msmtp-with-sent;
           };

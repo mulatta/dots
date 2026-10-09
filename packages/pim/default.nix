@@ -11,7 +11,6 @@
   afew,
   mblaze,
   msmtp-with-sent,
-  n8n-hooks,
   miniflux-cli,
   biorefs-cli,
   pymol-cli,
@@ -43,7 +42,6 @@ let
       afew
       mblaze
       msmtp-with-sent
-      n8n-hooks
       miniflux-cli
       biorefs-cli
       pymol-cli

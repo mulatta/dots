@@ -503,32 +503,6 @@
         "type": "github"
       }
     },
-    "n8n-nodes": {
-      "inputs": {
-        "flake-parts": [
-          "flake-parts"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1782979781,
-        "narHash": "sha256-hM3Da76PRiPUekWI4gjQ/4Nt8WrASo8YPDbiiduHdEY=",
-        "owner": "mulatta",
-        "repo": "n8n-nodes",
-        "rev": "499164d51b7ace850958039f498dfcec6be23ecf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "n8n-nodes",
-        "type": "github"
-      }
-    },
     "niks3": {
       "inputs": {
         "nixpkgs": [
@@ -889,7 +863,6 @@
         "gitea-mq": "gitea-mq",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
-        "n8n-nodes": "n8n-nodes",
         "niks3": "niks3",
         "nix-darwin": "nix-darwin",
         "nix-grpc-store": "nix-grpc-store",

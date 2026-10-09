@@ -125,13 +125,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    n8n-nodes = {
-      url = "github:mulatta/n8n-nodes";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     rhwp-nextcloud = {
       url = "github:mulatta/rhwp-nextcloud";
       inputs.nixpkgs.follows = "nixpkgs";
