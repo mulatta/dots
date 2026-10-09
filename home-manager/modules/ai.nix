@@ -7,6 +7,7 @@
 }:
 let
   aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  bioPkgs = inputs.bioinformatics-toolkits.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
@@ -45,7 +46,6 @@ in
 {
   imports = [
     inputs.skillz.homeModules.default
-    inputs.research-skills.homeModules.default
     ./herdr
   ];
 
@@ -82,15 +82,9 @@ in
     };
   };
 
-  programs.research-skills = {
-    enable = true;
-    skills = [
-      "biomcp"
-    ];
-  };
-
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
+    ".claude/skills/biomcp".source = "${bioPkgs.biomcp}/share/skills/biomcp";
     ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".pi/agent/extensions/herdr-agent-state.ts".source =
       "${aiPkgs.herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
@@ -126,6 +120,7 @@ in
     aiPkgs.openspec
     aiPkgs.prime-agent
     aiPkgs.tuicr
+    bioPkgs.biomcp
     nixbot-cli
     pkgs.pueue
     pkgs.nushell

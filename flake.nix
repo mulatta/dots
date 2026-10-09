@@ -82,6 +82,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    bioinformatics-toolkits = {
+      url = "github:mulatta/bioinformatics-toolkits";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     # Infra-level modules sources
     fast-nix-gc = {
       url = "github:Mic92/fast-nix-gc";
@@ -192,12 +198,6 @@
     };
 
     # Agentic tools
-    research-skills = {
-      url = "github:mulatta/research-skills";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     cherri = {
       url = "github:electrikmilk/cherri";
       inputs.flake-utils.follows = "flake-utils";

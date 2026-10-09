@@ -3,24 +3,22 @@
     "bioinformatics-toolkits": {
       "inputs": {
         "nixpkgs": [
-          "research-skills",
           "nixpkgs"
         ],
         "treefmt-nix": [
-          "research-skills",
           "treefmt-nix"
         ]
       },
       "locked": {
-        "lastModified": 1788986684,
-        "narHash": "sha256-/PXzkU0ybQac8e2PKGa3Jgifqen5kic4s7SQqO9/z/4=",
-        "owner": "SBEE-Lab",
+        "lastModified": 1791376000,
+        "narHash": "sha256-DG4N6QEwqn0XR4c71XE3cMpM0DWtp/ta1IqQUngHEtc=",
+        "owner": "mulatta",
         "repo": "bioinformatics-toolkits",
-        "rev": "0e298faf1ed413db2422f325523f2384cc451e7b",
+        "rev": "b871bf39b7a1f13b3bec2ee41e264a061a66abb8",
         "type": "github"
       },
       "original": {
-        "owner": "SBEE-Lab",
+        "owner": "mulatta",
         "repo": "bioinformatics-toolkits",
         "type": "github"
       }
@@ -774,30 +772,6 @@
         "type": "github"
       }
     },
-    "research-skills": {
-      "inputs": {
-        "bioinformatics-toolkits": "bioinformatics-toolkits",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789294420,
-        "narHash": "sha256-UoGCDy12q1a/Oce4JXxl+YRaooqKraLmXugmc9S+5Es=",
-        "owner": "mulatta",
-        "repo": "research-skills",
-        "rev": "d5fa04b4554cdf7050c21f98257229e4839d967a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "research-skills",
-        "type": "github"
-      }
-    },
     "rhwp": {
       "inputs": {
         "nixpkgs": [
@@ -850,6 +824,7 @@
     },
     "root": {
       "inputs": {
+        "bioinformatics-toolkits": "bioinformatics-toolkits",
         "buzz": "buzz",
         "cherri": "cherri",
         "clan-core": "clan-core",
@@ -874,7 +849,6 @@
         "noctalia-plugins": "noctalia-plugins",
         "paneru": "paneru",
         "radicle-mirror": "radicle-mirror",
-        "research-skills": "research-skills",
         "rhwp": "rhwp",
         "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",
