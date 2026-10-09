@@ -24,7 +24,7 @@ in
     ./modules/ai.nix
     ./modules/calendar
     ./modules/chat.nix
-    ./modules/darwin-managed-app.nix
+    ./modules/darwin-apps
     ./modules/docker.nix
     ./modules/keyboard
     ./modules/kubernetes.nix

@@ -1,0 +1,3 @@
+{
+  imports = [ ./managed.nix ];
+}
