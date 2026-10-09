@@ -86,7 +86,6 @@ in
     enable = true;
     skills = [
       "biomcp"
-      "pymol-cli"
     ];
   };
 

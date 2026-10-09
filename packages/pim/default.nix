@@ -13,7 +13,6 @@
   msmtp-with-sent,
   miniflux-cli,
   biorefs-cli,
-  pymol-cli,
   isync,
   khard,
   email-sync,
@@ -44,7 +43,6 @@ let
       msmtp-with-sent
       miniflux-cli
       biorefs-cli
-      pymol-cli
       isync
       khard
       email-sync
@@ -83,7 +81,7 @@ python3Packages.buildPythonApplication {
     wrapProgram $out/bin/pim \
       --set PIM_TOOLS_PATH ${lib.escapeShellArg toolsPath} \
       --set PIM_PI_BIN ${pi}/bin/pi \
-      --set PIM_SKILL_PATHS ${lib.escapeShellArg "${crabfit-cli}/share/skills/crabfit-cli:${miniflux-cli}/share/skills/miniflux-cli:${biorefs-cli}/share/skills/biorefs-cli:${pymol-cli}/share/skills/pymol-cli"} \
+      --set PIM_SKILL_PATHS ${lib.escapeShellArg "${crabfit-cli}/share/skills/crabfit-cli:${miniflux-cli}/share/skills/miniflux-cli:${biorefs-cli}/share/skills/biorefs-cli"} \
       --prefix PATH : ${lib.makeBinPath runtimeDeps}
 
     runHook postInstall
