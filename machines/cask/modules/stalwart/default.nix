@@ -8,8 +8,12 @@ let
   mailDomain = "mail.${baseDomain}";
   publicDomain = "stalwart.${baseDomain}";
 
-  kanidmTokenFile = "/var/lib/stalwart-mail/kanidm-token";
-
+  cfg = config.services.stalwart;
+  kanidmTokenFile = "${cfg.dataDir}/kanidm-token";
+  adminPasswordFile = config.clan.core.vars.generators.stalwart-admin.files."password".path;
+  resendKeyFile = config.clan.core.vars.generators.resend.files."api-key".path;
+  acmeDir = config.security.acme.certs.${mailDomain}.directory;
+  credential = name: "%{file:/run/credentials/stalwart.service/${name}}%";
 in
 {
   imports = [ ./provision ];
@@ -18,7 +22,7 @@ in
     resend = {
       files."api-key" = {
         secret = true;
-        owner = "stalwart-mail";
+        owner = cfg.user;
       };
       prompts."api-key" = {
         description = "Resend API key (re_...)";
@@ -32,7 +36,7 @@ in
     stalwart-admin = {
       files."password" = {
         secret = true;
-        owner = "stalwart-mail";
+        owner = cfg.user;
       };
       runtimeInputs = [ pkgs.openssl ];
       script = ''
@@ -46,10 +50,16 @@ in
     enable = true;
     package = pkgs.stalwart_0_15;
     stateVersion = "25.05";
-    openFirewall = true;
+    # Keep the loopback HTTP listener out of the public firewall allow-list.
+    openFirewall = false;
+    credentials = {
+      admin-password = adminPasswordFile;
+      ldap-token = kanidmTokenFile;
+      resend-api-key = resendKeyFile;
+    };
 
     settings = {
-      # Declare NixOS-managed keys as local to suppress DB conflict warnings
+      # Nix owns service policy; runtime IP bans and exceptions stay in the DB.
       config.local-keys = [
         "store.*"
         "storage.*"
@@ -57,17 +67,20 @@ in
         "email.*"
         "certificate.*"
         "server.*"
+        "!server.blocked-ip.*"
+        "!server.allowed-ip.*"
         "authentication.*"
         "http.*"
         "tracer.*"
-        "tracing.*"
-        "config.*"
-        "cluster.*"
-        "auth.*"
+        "config.local-keys.*"
+        "auth.dkim.sign"
         "oauth.*"
         "session.*"
-        "queue.*"
-        "spam-filter.*"
+        "queue.strategy.route.*"
+        "queue.route.local.*"
+        "queue.route.resend.*"
+        "spam-filter.enable"
+        "spam-filter.resource"
         "sieve.*"
         "jmap.*"
         "webadmin.*"
@@ -126,12 +139,12 @@ in
       };
 
       certificate.default = {
-        cert = "%{file:/var/lib/acme/${mailDomain}/fullchain.pem}%";
-        private-key = "%{file:/var/lib/acme/${mailDomain}/key.pem}%";
+        cert = "%{file:${acmeDir}/fullchain.pem}%";
+        private-key = "%{file:${acmeDir}/key.pem}%";
         default = true;
       };
 
-      # DKIM handled by AWS SES relay
+      # Outbound delivery uses Resend's domain signing rather than local keys.
       auth.dkim.sign = false;
 
       resolver = {
@@ -157,15 +170,13 @@ in
         port = 5432;
         database = "stalwart-mail";
         user = "stalwart-mail";
-        # Connects over the unix socket with peer authentication, so the
-        # password is never used. The field is required, hence the placeholder.
+        # Peer authentication ignores this required password field.
         password = "unused";
         timeout = "15s";
         tls.enable = false;
         pool.max-connections = 3;
       };
 
-      # Kanidm LDAP directory
       directory.kanidm = {
         type = "ldap";
         url = "ldaps://127.0.0.1:3636";
@@ -178,7 +189,7 @@ in
 
         bind = {
           dn = "dn=token";
-          secret = "%{file:${kanidmTokenFile}}%";
+          secret = credential "ldap-token";
           auth = {
             method = "template";
             template = "spn={username}@idm.mulatta.io,dc=idm,dc=mulatta,dc=io";
@@ -204,7 +215,7 @@ in
 
       authentication.fallback-admin = {
         user = "admin";
-        secret = "%{file:${config.clan.core.vars.generators.stalwart-admin.files."password".path}}%";
+        secret = credential "admin-password";
       };
 
       http = {
@@ -232,63 +243,59 @@ in
           ];
         };
 
-        # Subaddressing: rewrite "user.tag@" and "user+tag@" → "user@" before
-        # directory lookup. Allows infinite per-service aliases without
-        # explicit alias entries; nonexistent base users still bounce because
-        # the kanidm lookup runs after rewriting.
-        rcpt.sub-addressing = [
-          {
-            "if" = "matches('^([^.]+)\\.([^.]+)@(.+)$', rcpt)";
-            "then" = "$1 + '@' + $3";
-          }
-          {
-            "if" = "matches('^([^+]+)\\+([^+]+)@(.+)$', rcpt)";
-            "then" = "$1 + '@' + $3";
-          }
-          { "else" = "rcpt"; }
-        ];
+        # Tagged addresses share the base mailbox; LDAP still rejects unknown users.
+        rcpt = {
+          sub-addressing = [
+            {
+              "if" = "matches('^([^.]+)\\.([^.]+)@(.+)$', rcpt)";
+              "then" = "$1 + '@' + $3";
+            }
+            {
+              "if" = "matches('^([^+]+)\\+([^+]+)@(.+)$', rcpt)";
+              "then" = "$1 + '@' + $3";
+            }
+            { "else" = "rcpt"; }
+          ];
+        };
 
         timeout = "5m";
         transfer-limit = "262144000";
         duration = "10m";
       };
 
-      queue.strategy.route = [
-        {
-          "if" = "is_local_domain('', rcpt_domain)";
-          "then" = "'local'";
-        }
-        { "else" = "'resend'"; }
-      ];
-
-      queue.route.local = {
-        type = "local";
-      };
-
-      queue.route.resend = {
-        type = "relay";
-        address = "smtp.resend.com";
-        port = 465;
-        protocol = "smtp";
-
-        tls = {
-          implicit = true;
-          allow-invalid-certs = false;
-        };
-
-        auth = {
-          enable = true;
-          username = "resend";
-          secret = "%{file:${config.clan.core.vars.generators.resend.files."api-key".path}}%";
+      queue = {
+        strategy.route = [
+          {
+            "if" = "is_local_domain('', rcpt_domain)";
+            "then" = "'local'";
+          }
+          { "else" = "'resend'"; }
+        ];
+        route = {
+          local.type = "local";
+          resend = {
+            type = "relay";
+            address = "smtp.resend.com";
+            port = 465;
+            protocol = "smtp";
+            tls = {
+              implicit = true;
+              allow-invalid-certs = false;
+            };
+            auth = {
+              enable = true;
+              username = "resend";
+              secret = credential "resend-api-key";
+            };
+          };
         };
       };
 
       spam-filter = {
         enable = true;
-        resource = "file://${pkgs.stalwart_0_15.passthru.spam-filter}/spam-filter.toml";
+        resource = "file://${cfg.package.passthru.spam-filter}/spam-filter.toml";
       };
 
-      # Enable user sieve scripts (uploaded via ManageSieve)
       sieve.untrusted = {
         limits = {
           script-size = 1048576;
@@ -324,23 +331,12 @@ in
         protocol.request.max-concurrent = 16;
       };
 
-      # Override only the shared-folder namespace prefix; leaving other
-      # special-use folders unset keeps stalwart's built-in defaults
-      # (Inbox, Drafts, Sent Items, Junk Mail, Deleted Items). Reason:
-      # avoid the whitespace in "Shared Folders" which complicates
-      # mbsync Patterns and shell handling on every consumer.
+      # Avoid whitespace in mbsync patterns without renaming standard folders.
       email.folders.shared.name = "Shared";
 
       webadmin = {
         enable = true;
-        path = "/var/cache/stalwart-mail";
-        resource = "file://${pkgs.stalwart_0_15.passthru.webadmin}/webadmin.zip";
-      };
-
-      tracing.stdout = {
-        enable = true;
-        level = "info";
-        ansi = false;
+        resource = "file://${cfg.package.passthru.webadmin}/webadmin.zip";
       };
 
       tracer.stdout = {
@@ -352,37 +348,41 @@ in
     };
   };
 
-  # Grant stalwart access to nginx ACME certs
-  users.users.stalwart-mail.extraGroups = [ "nginx" ];
+  networking.firewall.allowedTCPPorts = [
+    25
+    143
+    465
+    587
+    993
+    4190
+  ];
 
-  # Reload stalwart when certs are renewed
+  users.users.${cfg.user}.extraGroups = [ "nginx" ];
+
   security.acme.certs.${mailDomain} = {
     webroot = "/var/lib/acme/acme-challenge";
     group = "nginx";
     reloadServices = [ "stalwart.service" ];
   };
 
-  systemd.services = {
-    stalwart = {
-      after = [
-        "postgresql.service"
-        "acme-${mailDomain}.service"
-        "acme-finished-${mailDomain}.target"
-        "kanidm.service"
-      ];
-      wants = [
-        "acme-finished-${mailDomain}.target"
-        "kanidm.service"
-      ];
-      environment.STALWART_PUBLIC_URL = "https://${publicDomain}";
-      serviceConfig = {
-        ProtectClock = true;
-        ProtectKernelLogs = true;
-        RestrictAddressFamilies = [ "AF_UNIX" ];
-      };
+  systemd.services.stalwart = {
+    after = [
+      "postgresql.service"
+      "acme-${mailDomain}.service"
+      "acme-finished-${mailDomain}.target"
+      "kanidm.service"
+    ];
+    wants = [
+      "acme-finished-${mailDomain}.target"
+      "kanidm.service"
+    ];
+    environment.STALWART_PUBLIC_URL = "https://${publicDomain}";
+    serviceConfig = {
+      ProtectClock = true;
+      ProtectKernelLogs = true;
     };
-
   };
+
   services.nginx.virtualHosts.${publicDomain} = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
