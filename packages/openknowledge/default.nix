@@ -152,10 +152,14 @@ stdenv.mkDerivation {
   patches = [ ./desktop.patch ];
 
   postPatch = stripNodeRuntime + ''
-    # Nix pins Rust through nixpkgs rather than upstream's rustup declaration.
-    # Keep the exact-version guard, but check against the supplied compiler.
-    substituteInPlace rust-toolchain.toml \
-      --replace-fail 'channel = "1.99.0"' 'channel = "${rustc.version}"'
+    # These repeated expressions move independently as upstream splits index.ts.
+    # Match only renderer/devtools policy, never globally replace app.isPackaged:
+    # installer, uninstaller and platform behavior still need its real value.
+    substituteInPlace packages/desktop/src/main/index.ts \
+      --replace-fail "const rendererEntryPath = app.isPackaged" "const rendererEntryPath = isProductionRuntime" \
+      --replace-fail "rendererEntryPath: app.isPackaged" "rendererEntryPath: isProductionRuntime" \
+      --replace-fail "join(process.resourcesPath, 'app', 'index.html')" "join(runtimeResources, 'app', 'index.html')" \
+      --replace-fail "!app.isPackaged || DESKTOP_VARIANT.name !== 'stable'" "!isProductionRuntime || DESKTOP_VARIANT.name !== 'stable'"
 
     # Native-config uses the local Rust toolchain, not napi-cross downloads.
     substituteInPlace packages/native-config/scripts/build.mjs \
@@ -200,6 +204,11 @@ stdenv.mkDerivation {
   pnpmBuildFlags = [ "--env-mode=loose" ];
 
   preBuild = ''
+    # Use the already locked smol-toml dependency to preserve the toolchain
+    # table while selecting Nix's compiler, regardless of upstream's version.
+    cp ${./pin-rust-toolchain.mjs} scripts/nix-rust-toolchain.mjs
+    node scripts/nix-rust-toolchain.mjs rust-toolchain.toml ${rustc.version}
+
     # fetchPnpmDeps normalizes modes in the unpacked pnpm store.
     chmod +x node_modules/.pnpm/@typescript+typescript-*/node_modules/@typescript/typescript-*/lib/tsc
     chmod +x node_modules/.pnpm/@esbuild+*/node_modules/@esbuild/*/bin/esbuild
@@ -210,6 +219,11 @@ stdenv.mkDerivation {
       mv package.json.new "packages/$name/package.json"
     done
     node scripts/create-turbo-cache-key.mjs
+  '';
+
+  postBuild = ''
+    cp ${./nix-policy.test.ts} packages/desktop/tests/main/nix-policy.test.ts
+    pnpm --dir packages/desktop exec vitest run tests/main/nix-policy.test.ts
   '';
 
   installPhase = ''
