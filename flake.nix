@@ -75,7 +75,8 @@
 
     # Package sources
     llm-agents = {
-      url = "github:numtide/llm-agents.nix";
+      # url = "github:numtide/llm-agents.nix";
+      url = "github:mulatta/llm-agents.nix/prime-agent-runtime-split";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.systems.follows = "systems";
