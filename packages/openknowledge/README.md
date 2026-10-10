@@ -26,4 +26,5 @@ Validate an update with `nix build .#openknowledge --no-link -L` on the native
 platform, and separately apply `desktop.patch` to clean upstream sources with
 `patch --batch --fuzz=0 -p1`. Offset-only movement does not require refreshing the
 patch. Do not loosen policy assertions or drop failed hunks merely to build.
-This package adds no flake CI checks or updater scheduling changes.
+The shared checks module exposes local packages to CI, including this package.
+Which platforms CI builds is controlled separately by nixbot scheduling.
