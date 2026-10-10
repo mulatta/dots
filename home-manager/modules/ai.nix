@@ -69,6 +69,7 @@ in
 
   programs.skillz = {
     enable = true;
+    skillDirs = [ ".claude/skills" ];
     skills = [
       "biorefs-cli"
       "calendar-cli"
