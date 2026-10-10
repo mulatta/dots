@@ -175,6 +175,9 @@ in
           "d ${stateDir} 0750 hermes hermes -"
           "d ${stateDir}/workspace 0750 hermes hermes -"
           "d ${stateDir}/.hermes 0750 hermes hermes -"
+          "d ${stateDir}/.hermes/skills 0750 hermes hermes -"
+          # Preserve curated skills without syncing upstream bundles.
+          "f ${stateDir}/.hermes/.no-bundled-skills 0640 hermes hermes -"
           "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
           "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
         ];
