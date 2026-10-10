@@ -28,7 +28,7 @@ let
       export ${c.env}'') cfg.credentials
   );
   model = {
-    default = "gpt-6.1-sol";
+    default = "gpt-6-astra";
     provider = "openai-codex";
     openai_runtime = "auto";
   };
@@ -105,6 +105,7 @@ in
     services.hermes = {
       settings = {
         inherit model;
+        agent.reasoning_effort = "low";
         compression = {
           codex_gpt55_autoraise = true;
           codex_gpt55_autoraise_notice = false;
