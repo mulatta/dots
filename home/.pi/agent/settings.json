@@ -22,5 +22,8 @@
   },
   "quietStartup": "header",
   "hideThinkingBlock": true,
-  "theme": "tokyonight"
+  "theme": "tokyonight",
+  "terminal": {
+    "images": "kitty"
+  }
 }

@@ -112,6 +112,8 @@ scrollback_limit_bytes = 20000000
 directory = "~/.herdr/worktrees"
 
 [experimental]
+# Allow inline images from Pi's explicit Kitty protocol override.
+kitty_graphics = true
 # Temporarily switch macOS CJK IME to an ASCII layout while prefix bindings run.
 switch_ascii_input_source_in_prefix = true
 # Keep outer terminal cursor shape unchanged; IME source switching is enough.
