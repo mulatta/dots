@@ -157,7 +157,13 @@ in
       extraFlags = lib.mapAttrsToList (name: c: "--load-credential=${name}:${c.file}") cfg.credentials;
 
       config = _: {
-        imports = [ ../agent-container.nix ];
+        imports = [
+          ../agent-container.nix
+          (import ./repair-skill-permissions.nix {
+            inherit pkgs stateDir;
+            package = aiPkgs.hermes-agent;
+          })
+        ];
 
         # Hermes runs terminal commands in a login shell, and NixOS' /etc/profile
         # resets PATH there, so tools must live in the system profile rather than
