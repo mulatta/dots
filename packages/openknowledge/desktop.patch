@@ -1,6 +1,6 @@
 --- a/packages/desktop/src/main/index.ts
 +++ b/packages/desktop/src/main/index.ts
-@@ -1222,10 +1222,15 @@
+@@ -1234,10 +1234,15 @@
 
  const editorViewMenuStates = new EditorViewMenuStateRegistry();
 
@@ -18,7 +18,7 @@
  }
 
  function resolveLocalOpCli(): LocalOpCliInvocation {
-@@ -1301,12 +1306,14 @@
+@@ -1313,12 +1318,14 @@
 
  function ensureWindowManager() {
    if (wm) return;
@@ -36,7 +36,7 @@
      ? join(
          process.resourcesPath,
          'app.asar.unpacked',
-@@ -1513,7 +1520,7 @@
+@@ -1525,7 +1532,7 @@
      terminalAuthAvailable: isTerminalAvailable(),
      utilityEntryPath,
      spawnSingleFileServer: spawnCliServer,
@@ -45,7 +45,7 @@
      createEphemeralProjectDir,
      removeDir: (dir: string) => fsPromises.rm(dir, { recursive: true, force: true }),
      rendererEntryPath,
-@@ -1524,7 +1531,7 @@
+@@ -1536,7 +1543,7 @@
      selfChannel: resolveDesktopProductName(),
      spawnLockPollDeadlineMs: readPositiveIntEnv('OK_SPAWN_STARTUP_TIMEOUT_MS'),
      spawnLockProgressDeadlineMs: readPositiveIntEnv('OK_SPAWN_BIND_TIMEOUT_MS'),
@@ -54,7 +54,7 @@
      isFirstLaunchAfterUpgrade: () => firstLaunchAfterUpgrade,
      setTimeout: (cb, ms) => setTimeout(cb, ms),
      setInterval: (cb, ms) => setInterval(cb, ms).unref(),
-@@ -1626,8 +1633,8 @@
+@@ -1638,8 +1645,8 @@
        attachSpellcheckMenuToWindow(win);
        return win as unknown as BrowserWindowLike;
      },
@@ -65,16 +65,7 @@
        : join(__dirname, '../renderer/index.html'),
      rendererDevUrl,
      appVersion: app.getVersion(),
-@@ -2494,7 +2501,7 @@
-       wc.reloadIgnoringCache();
-       return;
-     case 'toggleDevTools':
--      if (!app.isPackaged || DESKTOP_VARIANT.name !== 'stable') {
-+      if (!isProductionRuntime || DESKTOP_VARIANT.name !== 'stable') {
-         wc.toggleDevTools();
-       }
-       return;
-@@ -2526,7 +2533,7 @@
+@@ -2470,7 +2477,7 @@
    await installApplicationMenu({
      appName: app.name,
      translate: currentMenuTranslator(),
@@ -82,8 +73,8 @@
 +    showDevToolsMenu: !isProductionRuntime || DESKTOP_VARIANT.name !== 'stable',
      terminalCapable: isTerminalAvailable(),
      dialog,
-     openNavigator,
-@@ -3230,8 +3237,8 @@
+     errorDialogParent: dialogParentWindow,
+@@ -3219,8 +3226,8 @@
      terminal: focused ? getTerminalWindowContext(focused.id) : undefined,
      note: focused ? getNoteWindowContext(focused.id) : undefined,
    });
@@ -94,7 +85,7 @@
      : join(__dirname, '../renderer/index.html');
    createTerminalWindow({
      createWindow: (opts) => {
-@@ -3358,8 +3365,8 @@
+@@ -3347,8 +3354,8 @@
      });
    if (!project) return { ok: false, reason: 'no-project' };
 
@@ -105,16 +96,25 @@
      : join(__dirname, '../renderer/index.html');
    const nativeChrome = noteWindowNativeChromeOptions(process.platform);
 
-@@ -4547,7 +4554,7 @@
+@@ -4580,7 +4587,7 @@
          return {
            recentProjects: appState.recentProjects.map((r) => ({ path: r.path, name: r.name })),
            spellCheckEnabled: appState.spellCheckEnabled,
 -          showDevToolsMenu: !app.isPackaged || DESKTOP_VARIANT.name !== 'stable',
 +          showDevToolsMenu: !isProductionRuntime || DESKTOP_VARIANT.name !== 'stable',
            canCheckForUpdates: autoUpdaterHandle != null,
-           canReconfigureMcpWiring: app.isPackaged && supportedPackagedInstall(),
+           canReconfigureMcpWiring: canReconfigureMcpWiring(),
            activeTarget: currentActiveTarget(),
-@@ -5656,7 +5663,7 @@
+@@ -4604,7 +4611,7 @@
+           showAboutPanel: () => app.showAboutPanel(),
+           resolveWindow: (sender) =>
+             BrowserWindow.fromWebContents(sender) ?? BrowserWindow.getFocusedWindow(),
+-          devToolsAllowed: !app.isPackaged || DESKTOP_VARIANT.name !== 'stable',
++          devToolsAllowed: !isProductionRuntime || DESKTOP_VARIANT.name !== 'stable',
+         });
+         return undefined;
+       case 'spelling-languages-query':
+@@ -5698,7 +5705,7 @@
  function registerIntegrationsSettingsIpc(): void {
    const integrationsLogger = getLogger('integrations-settings');
    const { available, devBuild } = agentConnectionsAvailability(
@@ -123,7 +123,7 @@
      process.platform,
      app.getPath('exe'),
      process.env,
-@@ -5807,7 +5814,7 @@
+@@ -5849,7 +5856,7 @@
  function registerProjectIntegrationsSettingsIpc(): void {
    const projectLogger = getLogger('project-integrations-settings');
    const { available } = agentConnectionsAvailability(
@@ -132,7 +132,7 @@
      process.platform,
      app.getPath('exe'),
      process.env,
-@@ -5977,7 +5984,7 @@
+@@ -6019,7 +6026,7 @@
    );
  }
 
@@ -141,7 +141,7 @@
    const resolved = resolveEffectiveInstanceName(process.env, app.getAppPath(), {
      autoDeriveEnabled: process.env.OK_DESKTOP_E2E_SMOKE !== '1',
    });
-@@ -6282,7 +6289,7 @@
+@@ -6325,7 +6332,7 @@
          app.on(event as Parameters<typeof app.on>[0], cb as Parameters<typeof app.on>[1]);
        },
        whenReady: () => app.whenReady(),
@@ -227,7 +227,7 @@
  export function hasNoResolvableOkHome(options: OkManagedBinDirsOptions): boolean {
 --- a/packages/desktop/src/main/auto-updater.ts
 +++ b/packages/desktop/src/main/auto-updater.ts
-@@ -391,7 +391,22 @@
+@@ -390,7 +390,22 @@
    return installInFlightAt(state, anchorMs, stagedAt, spanCollapsed);
  }
 

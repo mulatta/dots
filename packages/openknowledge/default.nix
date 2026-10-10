@@ -152,6 +152,11 @@ stdenv.mkDerivation {
   patches = [ ./desktop.patch ];
 
   postPatch = stripNodeRuntime + ''
+    # Nix pins Rust through nixpkgs rather than upstream's rustup declaration.
+    # Keep the exact-version guard, but check against the supplied compiler.
+    substituteInPlace rust-toolchain.toml \
+      --replace-fail 'channel = "1.99.0"' 'channel = "${rustc.version}"'
+
     # Native-config uses the local Rust toolchain, not napi-cross downloads.
     substituteInPlace packages/native-config/scripts/build.mjs \
       --replace-fail "args.push('--target', target, '--use-napi-cross');" "args.push('--target', target);"
