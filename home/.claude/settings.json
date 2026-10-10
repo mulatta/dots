@@ -5,6 +5,7 @@
     "defaultMode": "auto"
   },
   "model": "opus",
+  "remoteControlAtStartup": true,
   "skillOverrides": {
     "agent-slack": "name-only",
     "buzz-cli": "name-only",
