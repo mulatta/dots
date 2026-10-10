@@ -73,8 +73,6 @@ in
 
   home.file = {
     ".claude/skills/buzz-cli".source = "${buzzPkgs.buzz-cli}/share/skills/buzz-cli/sprout-cli";
-    ".claude/skills/open-knowledge-discovery".source =
-      "${selfPkgs.openknowledge}/share/skills/openknowledge/discovery";
 
   };
 
