@@ -30,11 +30,22 @@
     "command": "ccstatusline",
     "padding": 0
   },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
   "autoCompactEnabled": false,
+  "switchModelsOnFlag": true,
   "skipAutoPermissionPrompt": true,
-  "switchModelsOnFlag": true
+  "enabledPlugins": {
+    "ponytail@ponytail": true
+  }
 }
