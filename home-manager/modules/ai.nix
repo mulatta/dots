@@ -11,7 +11,8 @@ let
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
-  piPython = pkgs.python3.withPackages (ps: [
+
+  agentPython = ps: [
     ps.polars
     ps.matplotlib
     ps.requests
@@ -20,7 +21,13 @@ let
     (bioPkgs.pydna.override { python3Packages = ps; })
     (bioPkgs.biotite.override { python3Packages = ps; })
     (bioPkgs.primer3-py.override { python3Packages = ps; })
-  ]);
+  ];
+
+  primeAgent = aiPkgs.prime-agent.override {
+    extraPythonPackages = agentPython;
+  };
+
+  piPython = pkgs.python3.withPackages agentPython;
 
   nixbot-cli =
     inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
@@ -122,7 +129,13 @@ in
     aiPkgs.jscpd
     aiPkgs.officecli
     aiPkgs.openspec
-    aiPkgs.prime-agent
+    (pkgs.writeShellApplication {
+      name = "pa";
+      text = ''
+        ${pkgs.pueue}/bin/pueued -d > /dev/null 2>&1 || true
+        exec ${primeAgent}/bin/prime-agent "$@"
+      '';
+    })
     aiPkgs.tuicr
     bioPkgs.biomcp
     nixbot-cli
