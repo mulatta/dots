@@ -1,3 +1,7 @@
+# Drop the Nix git system osxkeychain helper; its unsigned binary loses keychain access on every rebuild.
+[credential]
+	helper =
+
 [alias]
 	clone = "clone --recursive"
 	backport = "cherry-pick -x"
