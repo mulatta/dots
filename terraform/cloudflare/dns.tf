@@ -146,6 +146,16 @@ resource "cloudflare_dns_record" "hermes_a" {
   comment = "Hermes dashboard cask ingress"
 }
 
+resource "cloudflare_dns_record" "hindsight_a" {
+  zone_id = local.zone_id
+  name    = "hindsight"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "Hindsight control plane behind cask oauth2-proxy"
+}
+
 resource "cloudflare_dns_record" "neko_a" {
   zone_id = local.zone_id
   name    = "neko"
