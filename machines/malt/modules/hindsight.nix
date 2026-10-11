@@ -99,9 +99,13 @@ in
           HINDSIGHT_API_RERANKER_LOCAL_MODEL = "BAAI/bge-reranker-v2-m3";
           # The default 300 pairs take minutes on CPU, and larger pools cost accuracy.
           HINDSIGHT_API_RERANKER_MAX_CANDIDATES = "50";
+          # Low-effort Luna leads the retain leaderboard and bills to the ChatGPT plan.
           HINDSIGHT_API_LLM_PROVIDER = "openai-codex";
           HINDSIGHT_API_LLM_MODEL = "gpt-6-luna";
+          HINDSIGHT_API_LLM_REASONING_EFFORT = "low";
           CODEX_HOME = "/data/codex";
+          # Bounds retain bursts so a backlog cannot exhaust the subscription quota.
+          HINDSIGHT_API_RETAIN_LLM_MAX_CONCURRENT = "4";
           HOME = "/data";
           HF_HOME = "/data/huggingface";
           TZ = "Asia/Seoul";
