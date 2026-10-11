@@ -63,6 +63,8 @@ let
       ${profile}/SingletonSocket
   '';
 
+  # A tab that activated a prerendered document has a main frame id differing from its
+  # target id, which hangs Playwright connectOverCDP (microsoft/playwright#41397).
   chromiumConfig = pkgs.writeText "neko-chromium.conf" ''
     [program:chromium]
     environment=HOME="/home/%(ENV_USER)s",USER="%(ENV_USER)s",DISPLAY="%(ENV_DISPLAY)s"
@@ -78,6 +80,7 @@ let
       --force-dark-mode
       --disable-file-system
       --disable-dev-shm-usage
+      --disable-features=Prerender2
     stopsignal=INT
     autorestart=true
     priority=800
