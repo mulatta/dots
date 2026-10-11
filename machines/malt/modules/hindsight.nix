@@ -121,8 +121,9 @@ in
         dependsOn = [ "hindsight-api" ];
         environmentFiles = [ secrets."cp.env".path ];
         environment = {
-          HOSTNAME = "127.0.0.1";
-          PORT = toString cpPort;
+          # start-all.sh derives HOSTNAME and PORT from these and ignores the plain names.
+          HINDSIGHT_CP_HOSTNAME = "127.0.0.1";
+          HINDSIGHT_CP_PORT = toString cpPort;
           HINDSIGHT_CP_DATAPLANE_API_URL = "http://127.0.0.1:${toString apiPort}";
         };
         extraOptions = [
