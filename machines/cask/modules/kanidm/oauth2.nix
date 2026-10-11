@@ -139,6 +139,23 @@ in
       ];
     };
 
+    # Hindsight control plane, gated by oauth2-proxy (public client with PKCE).
+    hindsight = {
+      displayName = "Hindsight Memory";
+      originUrl = [
+        "https://hindsight.${baseDomain}"
+        "https://hindsight.${baseDomain}/oauth2/callback"
+      ];
+      originLanding = "https://hindsight.${baseDomain}";
+      public = true;
+      enableLocalhostRedirects = false;
+      scopeMaps.hindsight_users = [
+        "openid"
+        "email"
+        "profile"
+      ];
+    };
+
     # Nextcloud - public client with PKCE
     nextcloud = {
       displayName = "Nextcloud";

@@ -8,6 +8,7 @@ in
 {
   imports = [
     ./hermes.nix
+    ./hindsight.nix
     ./home-assistant.nix
     ./jellyfin.nix
     ./linkwarden.nix

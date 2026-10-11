@@ -116,6 +116,9 @@ in
         hermes_users = {
           members = [ "seungwon" ];
         };
+        hindsight_users = {
+          members = [ "seungwon" ];
+        };
         chat_users = {
           members = [ "seungwon" ];
         };
