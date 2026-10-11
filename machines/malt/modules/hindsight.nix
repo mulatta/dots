@@ -91,11 +91,14 @@ in
           HINDSIGHT_API_DATABASE_URL = "postgresql://hindsight@/hindsight?host=/run/postgresql";
           HINDSIGHT_API_TENANT_EXTENSION = "hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension";
           HINDSIGHT_API_TEXT_SEARCH_EXTENSION = "pgroonga";
-          # The bundled English-only defaults bury Korean candidates (#5172).
+          # The bundled English-only defaults bury Korean candidates (#5172);
+          # KURE-v1 scored MRR 0.79 against 0.16 for an English model in cocobee.
           HINDSIGHT_API_EMBEDDINGS_PROVIDER = "local";
-          HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL = "BAAI/bge-m3";
+          HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL = "nlpai-lab/KURE-v1";
           HINDSIGHT_API_RERANKER_PROVIDER = "local";
           HINDSIGHT_API_RERANKER_LOCAL_MODEL = "BAAI/bge-reranker-v2-m3";
+          # The default 300 pairs take minutes on CPU, and larger pools cost accuracy.
+          HINDSIGHT_API_RERANKER_MAX_CANDIDATES = "50";
           HINDSIGHT_API_LLM_PROVIDER = "openai-codex";
           HINDSIGHT_API_LLM_MODEL = "gpt-6-luna";
           CODEX_HOME = "/data/codex";
