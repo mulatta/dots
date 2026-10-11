@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   self,
   ...
@@ -12,6 +13,10 @@ let
   # Existing general channel; membership is granted by buzz-agents-sync.
   buzzChannel = "6fd9e6ce-242e-51ce-b931-7644668b87de";
   buzzAgent = config.services.buzz-agents.agents.noa;
+  discordFreeResponseChannels = {
+    noa = "1558545862228058273";
+    papers = "1558649413650481272";
+  };
 in
 {
   # Slack
@@ -85,7 +90,17 @@ in
     interim_assistant_messages = false;
     tool_progress = "off";
   };
-  services.hermes.environment.DISCORD_ALLOWED_USERS = "529227359866322945";
+  services.hermes.environment = {
+    DISCORD_ALLOWED_USERS = "529227359866322945";
+    # Other channels, including new ones, keep mention-triggered auto-threading.
+    DISCORD_REQUIRE_MENTION = "true";
+    DISCORD_AUTO_THREAD = "true";
+    # Free-response channels reply inline and inherit mention-free replies in
+    # manually created threads. This is not a channel access allowlist.
+    DISCORD_FREE_RESPONSE_CHANNELS = lib.concatStringsSep "," (
+      builtins.attrValues discordFreeResponseChannels
+    );
+  };
   services.hermes.credentials.discord-bot-token = {
     file = vars.hermes-discord.files.bot-token.path;
     env = "DISCORD_BOT_TOKEN";
