@@ -51,7 +51,6 @@ in
     mailerPasswordFile = config.clan.core.vars.generators.gitea-mail.files.password.path;
     settings = {
       server = {
-        DOMAIN = domain;
         ROOT_URL = "https://${domain}/";
         PUBLIC_URL_DETECTION = "never";
         HTTP_ADDR = "127.0.0.1";
