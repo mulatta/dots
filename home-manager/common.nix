@@ -117,7 +117,8 @@ in
     sops
 
     # Radicle
-    radicle-node
+    # Radicle node transport leaks private repos until the next major release.
+    # radicle-node
 
   ])
   ++ [

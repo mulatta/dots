@@ -74,4 +74,11 @@ pyFinal: pyPrev: {
       changelog = "https://github.com/modelcontextprotocol/python-sdk/releases/tag/v${finalAttrs.version}";
     };
   });
+
+  # The test reads mcp 1's camelCase structuredContent attribute; mcp 2 renamed it.
+  posthog = pyPrev.posthog.overridePythonAttrs (old: {
+    disabledTests = old.disabledTests or [ ] ++ [
+      "test_prepare_tool_result_delivers_into_call_tool_result_models"
+    ];
+  });
 }
