@@ -36,7 +36,8 @@
     ./modules/ntfy.nix
     ./modules/postgresql.nix
     ./modules/radicle.nix
-    ./modules/radicle-mirror.nix
+    # Radicle node transport leaks private repos until the next major release.
+    # ./modules/radicle-mirror.nix
     ./modules/sshd.nix
     ./modules/stalwart
     ./modules/step-ca.nix
