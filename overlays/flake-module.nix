@@ -7,6 +7,7 @@
     (import ./miniflux)
     (import ./gitea)
     (import ./radicle-httpd)
+    (import ./go-mockery)
   ];
 
   perSystem =
