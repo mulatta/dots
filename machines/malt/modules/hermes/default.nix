@@ -57,6 +57,7 @@ in
     ./platforms.nix
     ./mcp.nix
     ./dashboard.nix
+    ./memory.nix
   ];
 
   # Feature modules contribute here; the container below consumes the result.
@@ -75,6 +76,11 @@ in
       type = types.listOf types.package;
       default = [ ];
       description = "Tools installed in the container for Hermes and its terminal tasks.";
+    };
+    plugins = mkOption {
+      type = types.attrsOf types.path;
+      default = { };
+      description = "Plugin directories linked into $HERMES_HOME/plugins by name.";
     };
     dashboardPort = mkOption {
       type = types.port;
@@ -178,9 +184,13 @@ in
           "d ${stateDir}/.hermes/skills 0750 hermes hermes -"
           # Preserve curated skills without syncing upstream bundles.
           "f ${stateDir}/.hermes/.no-bundled-skills 0640 hermes hermes -"
+          "d ${stateDir}/.hermes/plugins 0750 hermes hermes -"
           "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
           "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
-        ];
+        ]
+        ++ lib.mapAttrsToList (
+          name: dir: "L+ ${stateDir}/.hermes/plugins/${name} - - - - ${dir}"
+        ) cfg.plugins;
 
         systemd.services = {
           hermes-gateway = {
