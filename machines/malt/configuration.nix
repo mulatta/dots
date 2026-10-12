@@ -13,6 +13,7 @@
     ../../nixosModules/postgresql.nix
     # Radicle node transport leaks private repos until the next major release.
     # ../../nixosModules/radicle-mulatta.nix
+    ./modules/agentgateway.nix
     ./modules/disko.nix
     ./modules/hermes
     ./modules/hindsight
