@@ -4,7 +4,7 @@
   baseDomain,
 }:
 let
-  bulwarkWebmailDomain = config.services.bulwark-webmail.nginx.hostName;
+  bulwarkWebmailDomain = "mail.${baseDomain}";
   bulwarkWebmailLocales = [
     "cs"
     "en"

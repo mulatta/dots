@@ -4,7 +4,6 @@
     {
       config,
       lib,
-      pkgs,
       system,
       ...
     }:
@@ -39,11 +38,6 @@
           devShells = lib.mapAttrs' (name: lib.nameValuePair "devShell-${name}") config.devShells;
 
         in
-        lib.mkMerge [
-          (nixosMachines // darwinMachines // packages // packageTests // devShells // homeConfigurations)
-          (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-            bulwark-webmail = pkgs.callPackage ../nixosModules/bulwark-webmail/test.nix { };
-          })
-        ];
+        nixosMachines // darwinMachines // packages // packageTests // devShells // homeConfigurations;
     };
 }
