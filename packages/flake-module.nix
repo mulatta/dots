@@ -20,7 +20,6 @@
         browser-use = pkgs.callPackage ./browser-use {
           inherit (self'.packages) browser-harness;
         };
-        bulwark-webmail = pkgs.callPackage ./bulwark-webmail { };
         buzz-agents-sync = pkgs.callPackage ./buzz-agents-sync {
           buzz-cli = inputs'.buzz.packages.buzz-cli;
           clan-cli = inputs'.clan-core.packages.clan-cli;
