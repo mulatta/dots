@@ -132,13 +132,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    rhwp-nextcloud = {
-      url = "github:mulatta/rhwp-nextcloud";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rhwp-nix.follows = "rhwp";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     sparkyfitness = {
       url = "github:CodeWithCJ/SparkyFitness";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -173,12 +166,6 @@
     noctalia-plugins = {
       url = "github:mulatta/noctalia-plugins";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    rhwp = {
-      url = "github:mulatta/rhwp.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
     zen-browser = {

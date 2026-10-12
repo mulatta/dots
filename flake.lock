@@ -773,56 +773,6 @@
         "type": "github"
       }
     },
-    "rhwp": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay_2",
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790836903,
-        "narHash": "sha256-pWHEAxHPp+TrGCuabvnJAhiOs0pArymKfo1xjlfJq1o=",
-        "owner": "mulatta",
-        "repo": "rhwp.nix",
-        "rev": "81809a26ba7bae628000651cb942b209891eee16",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "rhwp.nix",
-        "type": "github"
-      }
-    },
-    "rhwp-nextcloud": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rhwp-nix": [
-          "rhwp"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789076807,
-        "narHash": "sha256-+Tdke/vWUoizDn4E5tJPs44OSY55GHH35Yr3YmEjk5Q=",
-        "owner": "mulatta",
-        "repo": "rhwp-nextcloud",
-        "rev": "2040d78803bb22fae28cad1e7bd893e4cb436942",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "rhwp-nextcloud",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "bioinformatics-toolkits": "bioinformatics-toolkits",
@@ -850,8 +800,6 @@
         "noctalia-plugins": "noctalia-plugins",
         "paneru": "paneru",
         "radicle-mirror": "radicle-mirror",
-        "rhwp": "rhwp",
-        "rhwp-nextcloud": "rhwp-nextcloud",
         "skillz": "skillz",
         "sofka": "sofka",
         "sops-nix": "sops-nix",
@@ -895,27 +843,6 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "4e9bb05a9ab6c37dc74c22974ebed6e36dc73eb2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "rust-overlay_2": {
-      "inputs": {
-        "nixpkgs": [
-          "rhwp",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790495762,
-        "narHash": "sha256-26FbceKgybcbwkIvs2yHsF5jHcWLEkITYg5g9WPSy64=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "edea2d6f98b1e5f64ce5ac21e19a96c603c20b8c",
         "type": "github"
       },
       "original": {
