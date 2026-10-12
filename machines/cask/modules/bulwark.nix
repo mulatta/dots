@@ -70,7 +70,9 @@ in
 {
   services.bulwark = {
     enable = true;
-    hostname = "127.0.0.1";
+    # Next normalizes loopback rewrites to localhost; any other bind host makes
+    # next-intl rewrites look external and get proxied over TLS (EPROTO).
+    hostname = "localhost";
     updateCheck.enabled = false;
 
     settings = {
@@ -100,7 +102,7 @@ in
     forceSSL = true;
     locations = {
       "/" = {
-        proxyPass = "http://127.0.0.1:${toString config.services.bulwark.port}";
+        proxyPass = "http://localhost:${toString config.services.bulwark.port}";
         proxyWebsockets = true;
       };
       "= /.well-known/oauth-authorization-server" = stalwartProxyLocation;
