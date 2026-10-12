@@ -45,4 +45,7 @@
 
   security.sudo.execWheelOnly = lib.mkForce false;
   programs.nano.enable = false;
+
+  # Only public repositories are mirrored, so unencrypted node traffic is accepted.
+  nixpkgs.config.permittedInsecurePackages = [ "radicle-node-1.10.3" ];
 }

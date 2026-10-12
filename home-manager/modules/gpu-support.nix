@@ -12,8 +12,7 @@
   _module.args.pkgs = lib.mkForce (
     import inputs.nixpkgs {
       inherit system;
-      config = {
-        allowUnfree = true;
+      config = import ../config.nix { } // {
         cudaSupport = true;
       };
       overlays = [

@@ -14,7 +14,6 @@ in
 
   services.radicle-mirror = {
     enable = true;
-    package = self.inputs.radicle-mirror.packages.${pkgs.stdenv.hostPlatform.system}.default;
     addr = "127.0.0.1:4128";
     ghAppId = 4741113;
     allowedOwners = [ "mulatta" ];
