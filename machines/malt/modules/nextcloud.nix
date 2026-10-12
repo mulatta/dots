@@ -56,7 +56,7 @@ in
     };
 
     extraApps = {
-      rhwpviewer = self.inputs.rhwp-nextcloud.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-viewer;
+      rhwpviewer = self.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-viewer;
       user_oidc = pkgs.nextcloud34Packages.apps.user_oidc;
     };
     extraAppsEnable = true;

@@ -1,0 +1,7 @@
+{
+  "version": "0.8.7",
+  "rev": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "hash": "sha256-Vik8+vVhP9RfK3VbR6Y0PeNSdH322BHulVd7s7GfvxM=",
+  "cargoHash": "sha256-JQEhhlMoeQ5050i5zVfGzWDerDMz8bY7FGqbnlX7utI=",
+  "wasmBindgenVersion": "0.2.127"
+}
