@@ -58,6 +58,7 @@ in
     ./mcp.nix
     ./dashboard.nix
     ./memory.nix
+    ./auxiliary.nix
   ];
 
   # Feature modules contribute here; the container below consumes the result.
