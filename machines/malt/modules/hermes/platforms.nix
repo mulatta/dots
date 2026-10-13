@@ -19,8 +19,7 @@ let
   };
 in
 {
-  # Slack
-
+  # --- Slack ---
   # Named before other platforms existed; renaming would move the stored vars.
   clan.core.vars.generators.hermes = {
     files.slack-bot-token.secret = true;
@@ -63,8 +62,7 @@ in
     env = "SLACK_APP_TOKEN";
   };
 
-  # Discord
-
+  # --- Discord ---
   # Kept apart so rotating the bot token leaves Slack alone.
   clan.core.vars.generators.hermes-discord = {
     files.bot-token.secret = true;
@@ -106,8 +104,7 @@ in
     env = "DISCORD_BOT_TOKEN";
   };
 
-  # Buzz
-
+  # --- Buzz ---
   services.buzz-agents = {
     relayUrl = buzzRelayUrl;
     ownerPubkey = buzzOwnerPubkey;
