@@ -46,6 +46,7 @@
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         openknowledge = pkgs.callPackage ./openknowledge { };
         openknowledge-desktop = self'.packages.openknowledge.desktop;
+        paperless-mcp = pkgs.callPackage ./paperless-mcp { };
         pi-acp = pkgs.callPackage ./pi-acp {
           pi = llmAgents.pi;
         };
