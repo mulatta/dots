@@ -28,7 +28,7 @@ let
       export ${c.env}'') cfg.credentials
   );
   model = {
-    default = "gpt-6-astra";
+    default = "gpt-6.1-sol";
     provider = "openai-codex";
     openai_runtime = "auto";
   };
