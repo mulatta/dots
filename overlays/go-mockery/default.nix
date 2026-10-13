@@ -1,7 +1,9 @@
 _final: prev: {
   # go-mockery 3.8.0 vendors golang.org/x/tools v0.49, which cannot read Go
   # 1.27.2 export data, so its checks (and sesh, built with Go 1.27) fail.
-  # Drop once nixpkgs carries 3.8.1 (vektra/mockery#1188, NixOS/nixpkgs#572848).
+  # nixos-unstable carries 3.8.1, but our pinned fork still has 3.8.0.
+  # Drop after updating the fork/input to include it (vektra/mockery#1188;
+  # NixOS/nixpkgs#572848 tracks the original build failure).
   go-mockery = prev.go-mockery.overrideAttrs (
     finalAttrs: _old: {
       version = "3.8.1";
