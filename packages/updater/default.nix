@@ -18,9 +18,24 @@ python3Packages.buildPythonApplication {
   version = "0.1.0";
   pyproject = false;
 
-  src = ./.;
+  # Regression tests exercise sibling update scripts using their real layout.
+  src = lib.fileset.toSource {
+    root = ../.;
+    fileset = lib.fileset.unions [
+      ./.
+      ../radicle-desktop/update.py
+      ../neko-image/update.py
+      ../neko-image/default.nix
+    ];
+  };
+  sourceRoot = "source/updater";
 
   nativeBuildInputs = [ makeWrapper ];
+  nativeCheckInputs = [ python3Packages.pytestCheckHook ];
+  doCheck = true;
+  preCheck = ''
+    export PYTHONPATH="$PWD/..''${PYTHONPATH:+:$PYTHONPATH}"
+  '';
 
   installPhase = ''
     runHook preInstall
