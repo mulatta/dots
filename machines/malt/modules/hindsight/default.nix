@@ -104,6 +104,8 @@ in
           HINDSIGHT_API_LLM_PROVIDER = "openai-codex";
           HINDSIGHT_API_LLM_MODEL = "gpt-6-luna";
           HINDSIGHT_API_LLM_REASONING_EFFORT = "low";
+          # Low-effort Luna ignores the keep-the-input-language rule and drifts into Hindi.
+          HINDSIGHT_API_LLM_OUTPUT_LANGUAGE = "Korean";
           # Replaces the per-call random prompt_cache_key; sitecustomize mirrors it into the
           # headers the Codex backend actually caches on.
           HINDSIGHT_API_LLM_EXTRA_BODY = builtins.toJSON { prompt_cache_key = "hindsight"; };
