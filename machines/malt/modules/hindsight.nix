@@ -58,7 +58,8 @@ in
   users.groups.hindsight.gid = hindsightId;
 
   # Codex refresh tokens rotate on use, so Hindsight keeps its own login apart
-  # from Hermes: sudo -u hindsight CODEX_HOME=/var/lib/hindsight/codex codex login
+  # from Hermes. sudo's secure_path hides the user's codex, hence the full path:
+  # sudo -u hindsight CODEX_HOME=/var/lib/hindsight/codex "$(which codex)" login --device-auth
   systemd.tmpfiles.rules = [
     "d ${stateDir} 0750 hindsight hindsight -"
     "d ${stateDir}/codex 0700 hindsight hindsight -"

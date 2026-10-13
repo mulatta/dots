@@ -134,8 +134,9 @@ in
         HERMES_MODEL = model.default;
       };
       # Both coding CLIs keep their own subscription logins under the state
-      # directory (`claude auth login`, `codex login --device-auth`), since they
-      # rotate refresh tokens at runtime.
+      # directory, since they rotate refresh tokens at runtime. Log in from
+      # `sudo nixos-container root-login hermes` via `runuser -u hermes --` with
+      # `claude auth login`, `codex login --device-auth` or `hermes auth add openai-codex`.
       packages = [
         aiPkgs.hermes-agent
         aiPkgs.claude-code
