@@ -104,6 +104,10 @@ in
           HINDSIGHT_API_LLM_PROVIDER = "openai-codex";
           HINDSIGHT_API_LLM_MODEL = "gpt-6-luna";
           HINDSIGHT_API_LLM_REASONING_EFFORT = "low";
+          # Replaces the per-call random prompt_cache_key; sitecustomize mirrors it into the
+          # headers the Codex backend actually caches on.
+          HINDSIGHT_API_LLM_EXTRA_BODY = builtins.toJSON { prompt_cache_key = "hindsight"; };
+          PYTHONPATH = "/opt/hindsight-site";
           CODEX_HOME = "/data/codex";
           # Bounds retain bursts so a backlog cannot exhaust the subscription quota.
           HINDSIGHT_API_RETAIN_LLM_MAX_CONCURRENT = "4";
@@ -114,6 +118,7 @@ in
         volumes = [
           "${stateDir}:/data:rw"
           "/run/postgresql:/run/postgresql:ro"
+          "${./codex-cache.py}:/opt/hindsight-site/sitecustomize.py:ro"
         ];
         extraOptions = [
           "--network=host"
