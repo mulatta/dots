@@ -12,7 +12,7 @@
 let
   inherit (lib) mkOption types;
   cfg = config.services.buzz-agents;
-  vars = config.clan.core.vars.generators;
+  gen = config.clan.core.vars.generators;
   buzzCli = self.inputs.buzz.packages.${pkgs.stdenv.hostPlatform.system}.buzz-cli;
 
   agentModule =
@@ -71,19 +71,19 @@ let
         pubkey = mkOption {
           type = types.str;
           readOnly = true;
-          default = vars.${config.keyGenerator}.files.public-key.value;
+          default = gen.${config.keyGenerator}.files.public-key.value;
           description = "Agent public key (hex).";
         };
         privateKeyFile = mkOption {
           type = types.str;
           readOnly = true;
-          default = vars.${config.keyGenerator}.files.private-key.path;
+          default = gen.${config.keyGenerator}.files.private-key.path;
           description = "Host path of the agent secret key.";
         };
         authTagFile = mkOption {
           type = types.str;
           readOnly = true;
-          default = vars.${config.authGenerator}.files.auth-tag.path;
+          default = gen.${config.authGenerator}.files.auth-tag.path;
           description = "Host path of the NIP-OA auth tag JSON.";
         };
       };

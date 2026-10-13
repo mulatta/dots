@@ -7,7 +7,7 @@
 }:
 let
   credentialsDirectory = "/run/credentials/radicle-mirror.service";
-  generators = config.clan.core.vars.generators;
+  gen = config.clan.core.vars.generators;
 in
 {
   imports = [ self.inputs.radicle-mirror.nixosModules.default ];
@@ -33,9 +33,9 @@ in
 
   systemd.services.radicle-mirror.serviceConfig = {
     LoadCredential = [
-      "github-app-key:${generators.radicle-mirror-github-key.files.private-key.path}"
-      "webhook-secret:${generators.radicle-mirror-webhook.files.secret.path}"
-      "radicle-key:${generators.radicle-mirror-key.files.private-key.path}"
+      "github-app-key:${gen.radicle-mirror-github-key.files.private-key.path}"
+      "webhook-secret:${gen.radicle-mirror-webhook.files.secret.path}"
+      "radicle-key:${gen.radicle-mirror-key.files.private-key.path}"
     ];
     MemoryHigh = "768M";
     MemoryMax = "1G";

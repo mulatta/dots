@@ -8,7 +8,7 @@
       ...
     }:
     let
-      llmAgents = inputs'.llm-agents.packages;
+      aiPkgs = inputs'.llm-agents.packages;
       skillz = inputs'.skillz.packages;
     in
     {
@@ -16,7 +16,7 @@
         agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
         browser-harness = pkgs.callPackage ./browser-harness {
-          inherit (llmAgents) versionCheckHomeHook;
+          inherit (aiPkgs) versionCheckHomeHook;
         };
         browser-use = pkgs.callPackage ./browser-use {
           inherit (self'.packages) browser-harness;
@@ -26,7 +26,7 @@
           clan-cli = inputs'.clan-core.packages.clan-cli;
         };
         claude-code = pkgs.callPackage ./claude-code {
-          claude-code = llmAgents.claude-code;
+          claude-code = aiPkgs.claude-code;
         };
         claude-md = pkgs.callPackage ./claude-md { };
         email-sync = pkgs.callPackage ./email-sync { };
@@ -45,7 +45,7 @@
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         openknowledge = pkgs.callPackage ./openknowledge {
-          inherit (llmAgents)
+          inherit (aiPkgs)
             pi
             pi-acp
             claude-code
@@ -70,7 +70,7 @@
           crabfit-cli = skillz.crabfit-cli;
           miniflux-cli = skillz.miniflux-cli;
           biorefs-cli = skillz.biorefs-cli;
-          pi = llmAgents.pi;
+          pi = aiPkgs.pi;
         };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
         rhwp = inputs'.rhwp.packages.rhwp-cli;
