@@ -6,7 +6,7 @@
   ...
 }:
 let
-  vars = config.clan.core.vars.generators;
+  gen = config.clan.core.vars.generators;
   buzzOwnerPubkey = self.nixosConfigurations.cask.config.services.buzz-relay.ownerPubkey;
   buzzCli = self.inputs.buzz.packages.${pkgs.stdenv.hostPlatform.system}.buzz-cli;
   buzzRelayUrl = "https://buzz.mulatta.io";
@@ -54,11 +54,11 @@ in
   };
   services.hermes.environment.SLACK_ALLOWED_USERS = "U04GMC10NNP";
   services.hermes.credentials.slack-bot-token = {
-    file = vars.hermes.files.slack-bot-token.path;
+    file = gen.hermes.files.slack-bot-token.path;
     env = "SLACK_BOT_TOKEN";
   };
   services.hermes.credentials.slack-app-token = {
-    file = vars.hermes.files.slack-app-token.path;
+    file = gen.hermes.files.slack-app-token.path;
     env = "SLACK_APP_TOKEN";
   };
 
@@ -100,7 +100,7 @@ in
     );
   };
   services.hermes.credentials.discord-bot-token = {
-    file = vars.hermes-discord.files.bot-token.path;
+    file = gen.hermes-discord.files.bot-token.path;
     env = "DISCORD_BOT_TOKEN";
   };
 
