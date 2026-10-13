@@ -26,7 +26,7 @@
 }:
 let
   pname = "openknowledge";
-  version = "0.85.0";
+  version = "0.86.11";
   pnpm = pnpm_12;
   electron = electron_44;
   appName = "OpenKnowledge";
@@ -35,7 +35,7 @@ let
     owner = "inkeep";
     repo = "open-knowledge";
     tag = "v${version}";
-    hash = "sha256-ArVBXvLxw9c5onQw5+5dnU/Rk9kkc1z3s+NU+L3zylM=";
+    hash = "sha256-LJMzZuI9oNPpLyBrrY7/sc/49+4ICK8owceUCpTuVVU=";
   };
 
   # Nix supplies Node. Do not fetch upstream devEngines.runtime binaries.
@@ -121,7 +121,7 @@ stdenv.mkDerivation {
       nativeBuildInputs = [ jq ];
       postPatch = stripNodeRuntime;
       fetcherVersion = 4;
-      hash = "sha256-6FfyCNIO18UQSPPISG1GdUq6ql/899uwdMwmh28/fy4=";
+      hash = "sha256-cHObuWLaWATOYUlP771xWFwiAXp8BUOOccZU0ZKys58=";
       # Runtime download policies are irrelevant to an integrity-locked store.
       prePnpmInstall = ''
         export pnpm_config_fetch_timeout=600000
