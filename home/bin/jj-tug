@@ -7,7 +7,7 @@ if ! command -v jj >/dev/null 2>&1; then
 fi
 
 topic=$(jj config get scope.topic 2>/dev/null || true)
-if [[ -z "$topic" ]]; then
+if [[ -z $topic ]]; then
   echo "jj-tug: scope.topic not set" >&2
   echo "Set it with: jj topic <bookmark>" >&2
   exit 1

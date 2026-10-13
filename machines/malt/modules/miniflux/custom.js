@@ -146,7 +146,10 @@
     const save = () => {
       ticking = false;
       try {
-        localStorage.setItem(key, JSON.stringify({ y: window.scrollY, t: Date.now() }));
+        localStorage.setItem(
+          key,
+          JSON.stringify({ y: window.scrollY, t: Date.now() }),
+        );
       } catch {
         // Storage can be disabled or full; reader behavior should continue.
       }
@@ -168,7 +171,8 @@
     });
   };
 
-  const HIGHLIGHT_JS_URL = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.11.1/es/highlight.min.js";
+  const HIGHLIGHT_JS_URL =
+    "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.11.1/es/highlight.min.js";
   let highlightJsPromise = null;
   let trustedHtmlPolicy = null;
 
@@ -177,7 +181,9 @@
       return highlightJsPromise;
     }
 
-    highlightJsPromise = import(HIGHLIGHT_JS_URL).then((module) => module.default);
+    highlightJsPromise = import(HIGHLIGHT_JS_URL).then(
+      (module) => module.default,
+    );
     return highlightJsPromise;
   };
 
@@ -186,19 +192,27 @@
       return value;
     }
     if (!trustedHtmlPolicy) {
-      trustedHtmlPolicy = window.trustedTypes.createPolicy("miniflux-highlight", {
-        createHTML: (html) => html,
-      });
+      trustedHtmlPolicy = window.trustedTypes.createPolicy(
+        "miniflux-highlight",
+        {
+          createHTML: (html) => html,
+        },
+      );
     }
     return trustedHtmlPolicy.createHTML(value);
   };
 
   const highlightedCodeLanguage = (code) => {
-    const languageClass = Array.from(code.classList).find((name) => name.startsWith("language-") || name.startsWith("highlight-source-"));
+    const languageClass = Array.from(code.classList).find(
+      (name) =>
+        name.startsWith("language-") || name.startsWith("highlight-source-"),
+    );
     if (!languageClass) {
       return null;
     }
-    return languageClass.replace(/^language-/, "").replace(/^highlight-source-/, "");
+    return languageClass
+      .replace(/^language-/, "")
+      .replace(/^highlight-source-/, "");
   };
 
   const setupSyntaxHighlighting = async () => {
@@ -229,7 +243,10 @@
       codeBlocks.forEach((code) => {
         const source = code.textContent ?? "";
         const language = highlightedCodeLanguage(code);
-        const result = language && highlighter.getLanguage(language) ? highlighter.highlight(source, { language, ignoreIllegals: true }) : highlighter.highlightAuto(source);
+        const result =
+          language && highlighter.getLanguage(language)
+            ? highlighter.highlight(source, { language, ignoreIllegals: true })
+            : highlighter.highlightAuto(source);
         code.innerHTML = trustedHtml(result.value);
         if (result.language) {
           code.classList.add(`language-${result.language}`);
@@ -277,10 +294,14 @@
 
   const text = (node) => node.textContent?.replace(/\s+/g, " ").trim() ?? "";
 
-  const escapeMarkdown = (value) => value.replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
+  const escapeMarkdown = (value) =>
+    value.replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
 
   const fenceFor = (value) => {
-    const longest = Math.max(0, ...Array.from(value.matchAll(/`+/g), (match) => match[0].length));
+    const longest = Math.max(
+      0,
+      ...Array.from(value.matchAll(/`+/g), (match) => match[0].length),
+    );
     return "`".repeat(Math.max(3, longest + 1));
   };
 
@@ -291,7 +312,8 @@
     return languageClass ? languageClass.slice("language-".length) : "";
   };
 
-  const childrenToMarkdown = (node) => Array.from(node.childNodes, nodeToMarkdown).join("");
+  const childrenToMarkdown = (node) =>
+    Array.from(node.childNodes, nodeToMarkdown).join("");
 
   const block = (value) => {
     const trimmed = value.trim();
@@ -299,7 +321,9 @@
   };
 
   const listToMarkdown = (list, ordered) => {
-    const items = Array.from(list.children).filter((child) => child.tagName === "LI");
+    const items = Array.from(list.children).filter(
+      (child) => child.tagName === "LI",
+    );
     return `${items
       .map((item, index) => {
         const prefix = ordered ? `${index + 1}. ` : "- ";
@@ -318,7 +342,11 @@
     }
 
     const element = node;
-    if (element.matches(".miniflux-code-copy, .miniflux-copy-markdown, script, style, noscript")) {
+    if (
+      element.matches(
+        ".miniflux-code-copy, .miniflux-copy-markdown, script, style, noscript",
+      )
+    ) {
       return "";
     }
 
@@ -348,7 +376,11 @@
       return `${fence}${value}${fence}`;
     }
     if (tag === "PRE") {
-      const value = (element.querySelector("code")?.textContent ?? element.textContent ?? "").trimEnd();
+      const value = (
+        element.querySelector("code")?.textContent ??
+        element.textContent ??
+        ""
+      ).trimEnd();
       const fence = fenceFor(value);
       const language = codeLanguage(element);
       return `${fence}${language}\n${value}\n${fence}\n\n`;
@@ -371,7 +403,12 @@
     }
     if (tag === "BLOCKQUOTE") {
       const rendered = childrenToMarkdown(element).trim();
-      return rendered ? `${rendered.split("\n").map((line) => `> ${line}`).join("\n")}\n\n` : "";
+      return rendered
+        ? `${rendered
+            .split("\n")
+            .map((line) => `> ${line}`)
+            .join("\n")}\n\n`
+        : "";
     }
     if (tag === "UL" || tag === "OL") {
       return listToMarkdown(element, tag === "OL");
@@ -398,10 +435,17 @@
       }
       const renderedRows = rows.map((row) => nodeToMarkdown(row)).join("");
       const firstCellCount = rows[0].children.length;
-      const separator = firstCellCount > 0 ? `| ${Array(firstCellCount).fill("---").join(" | ")} |\n` : "";
+      const separator =
+        firstCellCount > 0
+          ? `| ${Array(firstCellCount).fill("---").join(" | ")} |\n`
+          : "";
       return `${renderedRows.split("\n", 1)[0]}\n${separator}${renderedRows.split("\n").slice(1).join("\n")}\n\n`;
     }
-    if (["DIV", "SECTION", "ARTICLE", "ASIDE", "FIGURE", "FIGCAPTION"].includes(tag)) {
+    if (
+      ["DIV", "SECTION", "ARTICLE", "ASIDE", "FIGURE", "FIGCAPTION"].includes(
+        tag,
+      )
+    ) {
       return block(childrenToMarkdown(element));
     }
 
@@ -410,7 +454,10 @@
 
   const entryMarkdown = () => {
     const title = text(document.querySelector(".entry-header h1"));
-    const url = document.querySelector(".entry-header h1 a")?.href ?? document.querySelector(".entry-external-link a")?.href ?? "";
+    const url =
+      document.querySelector(".entry-header h1 a")?.href ??
+      document.querySelector(".entry-external-link a")?.href ??
+      "";
     const content = document.querySelector(ENTRY_SELECTOR);
     const parts = [];
     if (title) {
@@ -422,7 +469,10 @@
     if (content) {
       parts.push(childrenToMarkdown(content));
     }
-    return `${parts.join("\n\n").replace(/\n{3,}/g, "\n\n").trim()}\n`;
+    return `${parts
+      .join("\n\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()}\n`;
   };
 
   const setupMarkdownCopy = () => {
@@ -462,7 +512,12 @@
   // entry-actions toolbar so it lives next to Star/Share/etc. Source the URL
   // from whichever element the current Miniflux build exposes.
   const entryUrl = () => {
-    const candidates = [".entry-external-link", ".entry-header h1 a", ".entry .item-title a", ".entry[data-id] a"];
+    const candidates = [
+      ".entry-external-link",
+      ".entry-header h1 a",
+      ".entry .item-title a",
+      ".entry[data-id] a",
+    ];
     for (const selector of candidates) {
       const node = document.querySelector(selector);
       const href = node?.getAttribute("href");
@@ -494,7 +549,12 @@
 
     content.querySelectorAll("table").forEach((table) => {
       const cells = Array.from(table.querySelectorAll("td"));
-      const isMediaLayout = !table.querySelector("th") && cells.length > 0 && cells.every((cell) => cell.querySelector("img, picture") && !text(cell));
+      const isMediaLayout =
+        !table.querySelector("th") &&
+        cells.length > 0 &&
+        cells.every(
+          (cell) => cell.querySelector("img, picture") && !text(cell),
+        );
       if (isMediaLayout) {
         table.classList.add("github-readme-layout-table");
       }
@@ -528,7 +588,9 @@
 
     item.append(link);
 
-    const markdownItem = actions.querySelector(".miniflux-copy-markdown")?.closest("li");
+    const markdownItem = actions
+      .querySelector(".miniflux-copy-markdown")
+      ?.closest("li");
     if (markdownItem) {
       actions.insertBefore(item, markdownItem);
     } else {
@@ -537,7 +599,10 @@
   };
 
   const githubTrendingTitle = (value) => {
-    const match = value.replace(/\s+/g, " ").trim().match(/^([^\s]+\/[^\s]+)\s+—\s+(.+)$/);
+    const match = value
+      .replace(/\s+/g, " ")
+      .trim()
+      .match(/^([^\s]+\/[^\s]+)\s+—\s+(.+)$/);
     if (!match) {
       return null;
     }
@@ -582,7 +647,12 @@
       const item = anchor.closest(".entry-item");
       const title = anchor.closest(".item-title");
       const header = anchor.closest(".item-header");
-      if (!item || !title || !header || header.querySelector(".github-trending-list-description")) {
+      if (
+        !item ||
+        !title ||
+        !header ||
+        header.querySelector(".github-trending-list-description")
+      ) {
         return;
       }
 
@@ -604,7 +674,10 @@
     replaceAnchorText(entryTitle, parsed.repo);
 
     const heading = entryTitle.closest("h1");
-    if (!heading || heading.parentElement?.querySelector(".github-trending-entry-description")) {
+    if (
+      !heading ||
+      heading.parentElement?.querySelector(".github-trending-entry-description")
+    ) {
       return;
     }
 

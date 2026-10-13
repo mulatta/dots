@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from urllib.parse import quote, urlencode
-from dataclasses import dataclass
 import argparse
 import webbrowser
+from dataclasses import dataclass
+from urllib.parse import quote, urlencode
 
 
 @dataclass

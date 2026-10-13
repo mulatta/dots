@@ -22,7 +22,7 @@ is_valid() {
   # wttr.in's success format is "<icon>|<+temp>". Any error response
   # (HTML, plain text apology, etc.) won't contain the '|' separator,
   # so we use that as a cheap sanity check.
-  [[ "$1" == *"|"* ]]
+  [[ $1 == *"|"* ]]
 }
 
 # Use cache if fresh (<30 min) AND it actually held a valid response.
@@ -35,7 +35,7 @@ fi
 if ! is_valid "$raw"; then
   raw=$(fetch)
   if is_valid "$raw"; then
-    printf '%s' "$raw" > "$CACHE"
+    printf '%s' "$raw" >"$CACHE"
   else
     # Fall back to whatever stale-but-valid response we have on disk;
     # better to show yesterday's temperature than an upstream error.

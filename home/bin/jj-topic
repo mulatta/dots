@@ -6,7 +6,7 @@ if ! command -v jj >/dev/null 2>&1; then
   exit 127
 fi
 
-if [[ $# -ne 1 || -z "${1:-}" ]]; then
+if [[ $# -ne 1 || -z ${1:-} ]]; then
   echo "Usage: jj topic <bookmark-or-revset>" >&2
   exit 1
 fi

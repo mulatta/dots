@@ -11,14 +11,14 @@ if [ $# -lt 1 ]; then
 fi
 
 case "$(uname -s)" in
-  Darwin)
-    exec "${BROWSER:-zen-beta}" "$@"
-    ;;
-  Linux)
-    exec "${BROWSER:-xdg-open}" "$@"
-    ;;
-  *)
-    echo "unsupported platform: $(uname -s)" >&2
-    exit 1
-    ;;
+Darwin)
+  exec "${BROWSER:-zen-beta}" "$@"
+  ;;
+Linux)
+  exec "${BROWSER:-xdg-open}" "$@"
+  ;;
+*)
+  echo "unsupported platform: $(uname -s)" >&2
+  exit 1
+  ;;
 esac

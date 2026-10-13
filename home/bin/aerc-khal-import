@@ -10,7 +10,7 @@ calendar="${1:-personal}"
 tmpfile=$(mktemp /tmp/khal-import-XXXXXX.ics)
 trap 'rm -f "$tmpfile"' EXIT
 
-cat > "$tmpfile"
+cat >"$tmpfile"
 
 if ! grep -q 'BEGIN:VCALENDAR' "$tmpfile"; then
   echo "Error: not a valid ICS file" >&2

@@ -6,7 +6,7 @@ set -euo pipefail
 tmpfile=$(mktemp)
 trap 'rm -f "$tmpfile"' EXIT
 
-cat > "$tmpfile"
+cat >"$tmpfile"
 
 # Generate unique filename for maildir (D=Draft, S=Seen)
 timestamp=$(date +%s.%N)

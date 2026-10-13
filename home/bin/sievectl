@@ -38,7 +38,7 @@ require_password() {
   PASSWORD="$(rbw get mulatta.io --field password 2>/dev/null ||
     rbw get mail.mulatta.io 2>/dev/null ||
     true)"
-  if [[ -z "${PASSWORD:-}" ]]; then
+  if [[ -z ${PASSWORD:-} ]]; then
     echo "Could not retrieve password from rbw" >&2
     exit 1
   fi
@@ -77,13 +77,13 @@ cmd_push() {
   local activate_default=0
   for name in "${names[@]}"; do
     local path="$SIEVE_DIR/$name.sieve"
-    if [[ ! -f "$path" ]]; then
+    if [[ ! -f $path ]]; then
       echo "  skip $name (no $path)"
       continue
     fi
     echo "  push $name <- $path"
     sc --remotesieve "$name" --localsieve "$path" --upload
-    [[ "$name" == "default" ]] && activate_default=1
+    [[ $name == "default" ]] && activate_default=1
   done
   if ((activate_default)); then
     echo "  activate default"
@@ -98,7 +98,7 @@ cmd_check() {
   local failed=0
   for name in "${names[@]}"; do
     local path="$SIEVE_DIR/$name.sieve"
-    if [[ ! -f "$path" ]]; then
+    if [[ ! -f $path ]]; then
       echo "  skip $name (no $path)"
       continue
     fi
@@ -127,17 +127,17 @@ main() {
   local cmd="$1"
   shift
   case "$cmd" in
-    list) cmd_list "$@" ;;
-    pull) cmd_pull "$@" ;;
-    push) cmd_push "$@" ;;
-    check) cmd_check "$@" ;;
-    edit) cmd_edit "$@" ;;
-    -h | --help) usage ;;
-    *)
-      echo "Unknown command: $cmd" >&2
-      usage
-      exit 1
-      ;;
+  list) cmd_list "$@" ;;
+  pull) cmd_pull "$@" ;;
+  push) cmd_push "$@" ;;
+  check) cmd_check "$@" ;;
+  edit) cmd_edit "$@" ;;
+  -h | --help) usage ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage
+    exit 1
+    ;;
   esac
 }
 

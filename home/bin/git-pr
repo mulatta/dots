@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-import re
 import json
+import re
+import shlex
 import shutil
 import subprocess
 import sys
 import webbrowser
-from urllib.parse import urljoin, quote_plus, urlencode
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import override
 from urllib.error import URLError
+from urllib.parse import quote_plus, urlencode, urljoin
 from urllib.request import urlopen
-import shlex
 
 
 class Error(Exception):

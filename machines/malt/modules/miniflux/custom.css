@@ -6,12 +6,16 @@
      glyphs the page renders.
    - D2 Coding for code blocks: Naver's monospace font with Hangul coverage,
      used for inline code and pre blocks. */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
-@import url('https://cdn.jsdelivr.net/gh/wan2land/d2coding/d2coding-subset.css');
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import url("https://cdn.jsdelivr.net/gh/wan2land/d2coding/d2coding-subset.css");
 
 :root {
-  --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'D2Coding', 'D2 Coding', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-sans:
+    "Pretendard Variable", Pretendard, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:
+    "D2Coding", "D2 Coding", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
 
   color-scheme: light;
   --ctp-rosewater: #dc8a78;
@@ -83,8 +87,16 @@
   --item-meta-focus-color: var(--ctp-mauve);
   --current-item-border-color: var(--ctp-blue);
   --alert-color: var(--ctp-red);
-  --alert-background-color: color-mix(in srgb, var(--ctp-red) 10%, var(--ctp-base));
-  --alert-border-color: color-mix(in srgb, var(--ctp-red) 45%, var(--ctp-surface1));
+  --alert-background-color: color-mix(
+    in srgb,
+    var(--ctp-red) 10%,
+    var(--ctp-base)
+  );
+  --alert-border-color: color-mix(
+    in srgb,
+    var(--ctp-red) 45%,
+    var(--ctp-surface1)
+  );
   --toast-color: var(--ctp-base);
   --toast-background-color: var(--ctp-text);
   --miniflux-reader-width: 78ch;
@@ -140,7 +152,11 @@
     --table-th-background: var(--ctp-mantle);
     --table-tr-hover-background: var(--ctp-surface0);
     --category-background-color: var(--ctp-mantle);
-    --alert-background-color: color-mix(in srgb, var(--ctp-red) 14%, var(--ctp-base));
+    --alert-background-color: color-mix(
+      in srgb,
+      var(--ctp-red) 14%,
+      var(--ctp-base)
+    );
     --toast-color: var(--ctp-crust);
     --toast-background-color: var(--ctp-text);
   }
@@ -279,23 +295,23 @@ body,
 }
 
 .entry-content a > img[height],
-.entry-content a > img[alt='CI' i],
-.entry-content a > img[alt='discord' i],
-.entry-content a > img[alt='downloads' i],
-.entry-content a > img[alt='license' i],
-.entry-content a > img[alt='links' i],
-.entry-content a > img[alt='pypi' i],
-.entry-content a > img[alt='python' i],
-.entry-content a > img[alt='release' i],
-.entry-content a > img[alt='rust' i],
-.entry-content a > img[alt='stars' i],
-.entry-content a > img[alt*='badge' i],
-.entry-content a > img[alt*='button' i],
-.entry-content a > img[src*='shields.io'],
+.entry-content a > img[alt="CI" i],
+.entry-content a > img[alt="discord" i],
+.entry-content a > img[alt="downloads" i],
+.entry-content a > img[alt="license" i],
+.entry-content a > img[alt="links" i],
+.entry-content a > img[alt="pypi" i],
+.entry-content a > img[alt="python" i],
+.entry-content a > img[alt="release" i],
+.entry-content a > img[alt="rust" i],
+.entry-content a > img[alt="stars" i],
+.entry-content a > img[alt*="badge" i],
+.entry-content a > img[alt*="button" i],
+.entry-content a > img[src*="shields.io"],
 .entry-content a > picture > img[height],
-.entry-content a > picture > img[alt*='badge' i],
-.entry-content a > picture > img[alt*='button' i],
-.entry-content a > picture > img[src*='shields.io'] {
+.entry-content a > picture > img[alt*="badge" i],
+.entry-content a > picture > img[alt*="button" i],
+.entry-content a > picture > img[src*="shields.io"] {
   border-radius: 0;
   display: inline-block;
   margin-inline: 0;
@@ -502,7 +518,10 @@ body,
   position: absolute;
   right: 0.75rem;
   top: 0.75rem;
-  transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease;
+  transition:
+    opacity 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
 }
 
 .entry-content pre:hover .miniflux-code-copy,

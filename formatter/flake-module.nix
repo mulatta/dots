@@ -4,6 +4,26 @@
 
   perSystem =
     { pkgs, lib, ... }:
+    let
+      # Stow commands have no extension; select by interpreter, not filename.
+      scripts = builtins.readDir ../home/bin;
+      scriptsFor =
+        interpreters:
+        lib.mapAttrsToList (name: _: "home/bin/${name}") (
+          lib.filterAttrs (
+            name: type:
+            type == "regular"
+            && builtins.elem (builtins.head (
+              lib.splitString "\n" (builtins.readFile (../home/bin + "/${name}"))
+            )) interpreters
+          ) scripts
+        );
+      pythonScripts = scriptsFor [ "#!/usr/bin/env python3" ];
+      shellScripts = scriptsFor [
+        "#!/usr/bin/env bash"
+        "#!/bin/sh"
+      ];
+    in
     {
       treefmt = {
         # Worktrees use a .git file, so anchor formatting on the flake root.
@@ -26,7 +46,7 @@
         programs.rustfmt.enable = true;
         programs.shellcheck.enable = true;
 
-        # prettier: json, markdown only (yaml uses yamlfmt)
+        # Limit source formatting to maintained integrations; YAML uses yamlfmt.
         programs.prettier = {
           enable = true;
           includes = [
@@ -34,10 +54,17 @@
             "*.jsonc"
             "*.md"
             "*.markdown"
+            "packages/**/*.ts"
+            "packages/**/*.mjs"
+            "machines/**/*.js"
+            "machines/**/*.css"
           ];
         };
 
         settings.formatter = {
+          ruff-format.includes = pythonScripts;
+          shfmt.includes = shellScripts;
+          shellcheck.includes = shellScripts;
           shellcheck.options = [
             "--external-sources"
             "--source-path=SCRIPTDIR"
@@ -56,7 +83,8 @@
             includes = [
               "*.py"
               "*.pyi"
-            ];
+            ]
+            ++ pythonScripts;
             priority = 1; # run before ruff format
           };
         };
@@ -65,6 +93,8 @@
           "**/.direnv/**"
           "**/secrets.yaml"
           "**/secrets.yml"
+          # Chromium's vendored OSC 52 helper retains its upstream shell style.
+          "home/bin/osc52"
           # pi rewrites this on every run with its own style
           "home/.pi/**"
           # vendored pnpm lockfiles are generated; yamlfmt churns them
