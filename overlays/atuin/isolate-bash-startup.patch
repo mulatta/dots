@@ -1,0 +1,24 @@
+From 2397d543f49d7d1da9cbe80481ea60a8dcdcc29c Mon Sep 17 00:00:00 2001
+From: mulatta <67085791+mulatta@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 17:48:08 +0900
+Subject: [PATCH] test: isolate Bash from system startup files
+
+On nix-darwin, /etc/bashrc loads the system environment and replaces PATH. The PTY capture test then cannot find its temporary atuin executable, so shell hooks never initialize and the positive capture control times out. Pass NOSYSBASHRC in the child environment because FreshEnv clears inherited variables.
+
+---
+ crates/atuin/tests/common/mod.rs | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/crates/atuin/tests/common/mod.rs b/crates/atuin/tests/common/mod.rs
+index be42315..43a1ead 100644
+--- a/crates/atuin/tests/common/mod.rs
++++ b/crates/atuin/tests/common/mod.rs
+@@ -44,6 +44,8 @@ impl FreshEnv {
+         let home = self.home.path();
+         let mut vars = vec![
+             ("HOME".into(), home.display().to_string()),
++            // System Bash startup files can overwrite the isolated test PATH.
++            ("NOSYSBASHRC".into(), "1".into()),
+             ("XDG_CONFIG_HOME".into(), home.join(".config").display().to_string()),
+             ("XDG_DATA_HOME".into(), home.join(".local/share").display().to_string()),
+             ("XDG_CACHE_HOME".into(), home.join(".cache").display().to_string()),
