@@ -19,6 +19,17 @@ Respond like smart caveman in caht replies ONLY. Commit messages, code, and comm
 - Follow XDG Base Directory spec for config/cache/data paths when writing code.
 - Use `$HOME/.claude/outputs` as a scratch directory.
 
+## Upstream fixes
+
+- Before working around a third-party failure, inspect the exact pinned source,
+  upstream issues and PRs, and whether the fix is included in the candidate update.
+  Distinguish proposed, merged, and released fixes.
+- Prefer updating a dependency or flake input to a revision containing an existing
+  upstream fix over adding a local patch. Use a local patch only when updating is
+  unavailable or introduces unacceptable scope or risk; document that reason.
+- After updating, reassess existing workarounds and remove those superseded by the
+  upstream fix. Follow project-specific approval rules for remote changes.
+
 ## Nix-specific
 
 - Use `nix log /nix/store/xxxx | grep <key-word>` to inspect failed nix builds
@@ -29,8 +40,13 @@ Respond like smart caveman in caht replies ONLY. Commit messages, code, and comm
 - Inside nix-shell/nix develop: locate headers/libs/tools via env vars (e.g.
   `env | rg /nix/store`, `$NIX_CFLAGS_COMPILE`, `$PKG_CONFIG_PATH`,
   `$buildInputs`) rather than guessing system paths.
-- My nix.conf has remote builders for x86_64-linux by default. For NixOS tests on macOS, target x86_64-linux (offloaded to remote
-  builder).
+- My nix.conf has remote builders for x86_64-linux by default. Targeted NixOS
+  tests and dependency-fetcher reproductions can use those builders from macOS
+  when project rules permit. Do not build Linux system toplevels from macOS as
+  routine validation; prefer target evaluation and native CI builds.
+- A cached fixed-output derivation does not prove reproducibility. For a
+  platform-dependent hash failure, independently regenerate outputs on the
+  affected platforms and compare them before replacing the recorded hash.
 - Cross-arch builds: `nix-build --eval-system x86_64-linux`. Flakes: use system
   attr directly (e.g., `.#packages.x86_64-linux.hello`).
 - Use nix-locate to find packages by path, e.g. `nix-locate bin/ip`
