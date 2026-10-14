@@ -127,7 +127,6 @@ in
     selfPkgs.maiao
     selfPkgs.merge-when-green
     selfPkgs.miniflux-sync
-    selfPkgs.termaid
   ]
   ++ (
     let
