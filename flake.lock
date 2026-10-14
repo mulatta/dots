@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791376000,
-        "narHash": "sha256-DG4N6QEwqn0XR4c71XE3cMpM0DWtp/ta1IqQUngHEtc=",
+        "lastModified": 1792053049,
+        "narHash": "sha256-6VZzaNr64MF0ISRIHvr2xJze0zq9pz2pf/SXv9PQSgU=",
         "owner": "mulatta",
         "repo": "bioinformatics-toolkits",
-        "rev": "b871bf39b7a1f13b3bec2ee41e264a061a66abb8",
+        "rev": "962dcd47a5c75d2823c56b13e6bcf319e4a2083d",
         "type": "github"
       },
       "original": {
