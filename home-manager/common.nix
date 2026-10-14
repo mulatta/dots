@@ -120,6 +120,9 @@ in
     # Radicle node transport leaks private repos until the next major release.
     # radicle-node
 
+    # Analysis
+    csvlens
+    duckdb
   ])
   ++ [
     # Custom packages
