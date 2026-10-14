@@ -121,7 +121,7 @@ stdenv.mkDerivation {
       nativeBuildInputs = [ jq ];
       postPatch = stripNodeRuntime;
       fetcherVersion = 4;
-      hash = "sha256-cHObuWLaWATOYUlP771xWFwiAXp8BUOOccZU0ZKys58=";
+      hash = "sha256-e4Bf/Jm5pSxtr/gl3T4691bmLBzllnFTUWc2k799DMA=";
       # Runtime download policies are irrelevant to an integrity-locked store.
       prePnpmInstall = ''
         export pnpm_config_fetch_timeout=600000
