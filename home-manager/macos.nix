@@ -9,15 +9,6 @@ let
   selfPkgs = self.packages.${system};
   aiPkgs = self.inputs.llm-agents.packages.${system};
   buzzPkgs = self.inputs.buzz.packages.${system};
-  kandevRuntime = aiPkgs.kandev.override {
-    claudeSupport = true;
-    codexSupport = true;
-    piSupport = true;
-    extraPackages = [
-      pkgs.gh
-      aiPkgs.prime-agent
-    ];
-  };
 in
 {
   imports = [
@@ -54,9 +45,6 @@ in
     selfPkgs.radicle-desktop
     pkgs.chatgpt
     aiPkgs.hermes-desktop
-    (aiPkgs.kandev-desktop.override {
-      inherit kandevRuntime;
-    })
     selfPkgs.rbw-pinentry
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt
