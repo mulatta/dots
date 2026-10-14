@@ -488,16 +488,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1791617457,
-        "narHash": "sha256-ciuSFu2qs/WUMmEZ7xX6n5x3a8f5Wi4ySQqD7RHBM2s=",
-        "owner": "mulatta",
+        "lastModified": 1791976318,
+        "narHash": "sha256-w7gcrqJmQ7jBezXvudA5GpZGh7ELzz0j/oolYUuSzT8=",
+        "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "8a566c1063441d2f027196104a33374f471d9b0f",
+        "rev": "42e40703df50a5357841310209d9023e8c321458",
         "type": "github"
       },
       "original": {
-        "owner": "mulatta",
-        "ref": "prime-agent-runtime-split",
+        "owner": "numtide",
         "repo": "llm-agents.nix",
         "type": "github"
       }
