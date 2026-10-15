@@ -1,6 +1,6 @@
 # GPU support profile
-# Rebuilds pkgs with cudaSupport=true; qmd picks up CUDA via a local override
-# in the llm-agents module keyed off pkgs.config.cudaSupport.
+# Rebuilds pkgs with cudaSupport=true; the qmd overlay selects its CUDA runtime
+# independently so prebuilt binaries keep their matching library versions.
 {
   lib,
   self,

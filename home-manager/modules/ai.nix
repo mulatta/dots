@@ -43,15 +43,6 @@ let
         '';
       });
 
-  # On GPU hosts pkgs is rebuilt with cudaSupport=true (gpu-support.nix); rebuild
-  # qmd with CUDA there, otherwise take the cached upstream build. qmd sources
-  # cudaPackages from its own pkgs, so cudaSupport is the only arg it accepts.
-  qmd =
-    if pkgs.config.cudaSupport or false then
-      aiPkgs.qmd.override { cudaSupport = true; }
-    else
-      aiPkgs.qmd;
-
 in
 {
   imports = [
@@ -108,7 +99,7 @@ in
   };
 
   home.packages = [
-    qmd
+    pkgs.qmd
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md
