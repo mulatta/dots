@@ -6,7 +6,7 @@ status_path = "~/.local/share/vdirsyncer/status"
 [pair calendar_stalwart]
 a = "calendar_stalwart_remote"
 b = "calendar_stalwart_local"
-collections = [["personal", "Personal", "personal"], ["academic", "Academic", "academic"], ["research", "Research", "research"], ["dev", "Dev", "dev"]]
+collections = [["personal", "Personal", "personal"], ["academic", "Academic", "academic"], ["research", "Research", "research"], ["plan", "Plan", "plan"]]
 metadata = ["color", "displayname"]
 
 [pair contacts_stalwart]

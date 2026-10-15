@@ -82,10 +82,10 @@ Common read-only tasks:
 - Search PubChem compounds: biorefs-cli compound search olaparib --type name --limit 5 --json
 
 Calendar policy:
-- Valid calendars: personal, academic, research, dev
+- Valid calendars: personal, academic, research, plan
 - Do not use stale/nested calendars such as mulatta/* or nextcloud/*
 - Use academic for school/graduate deadlines, research for thesis/research projects,
-  dev for dots/side-project todos, and personal for private life.
+  plan for recurring routine blocks, and personal for private life.
 - Keep SUMMARY concise and human-scannable.
 - Keep DESCRIPTION short: context, checklist notes, or caveats only. Never put long
   source URLs in DESCRIPTION when URL/ATTACH fields can represent them.

@@ -11,8 +11,8 @@ color = dark blue
 path = ~/.local/share/calendars/research/
 color = dark green
 
-[[dev]]
-path = ~/.local/share/calendars/dev/
+[[plan]]
+path = ~/.local/share/calendars/plan/
 color = dark cyan
 
 [default]
