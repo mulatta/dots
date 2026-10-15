@@ -36,7 +36,7 @@
 }:
 let
   pname = "openknowledge";
-  version = "0.86.16";
+  version = "0.86.18";
   pnpm = pnpm_12;
   electron = electron_44;
   appName = "OpenKnowledge";
@@ -66,7 +66,7 @@ let
     owner = "inkeep";
     repo = "open-knowledge";
     tag = "v${version}";
-    hash = "sha256-8u/jyzQGEVrUHr7SmBwD8dVY8WC0hZL6nozZZFnL7Sc=";
+    hash = "sha256-bEwr8dBcR7rSwZR/jriW2Fa3qW3+Oayz8BrPO3j3VJU=";
   };
 
   # Nix supplies Node. Do not fetch upstream devEngines.runtime binaries.
