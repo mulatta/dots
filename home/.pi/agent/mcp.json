@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "biomcp": {
-      "command": "biomcp",
-      "args": ["mcp"]
-    }
-  }
-}
