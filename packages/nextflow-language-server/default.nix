@@ -8,11 +8,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "nextflow-language-server";
-  version = "26.04.4";
+  version = "26.10.0";
 
   src = fetchurl {
     url = "https://github.com/nextflow-io/language-server/releases/download/v${finalAttrs.version}/language-server-all.jar";
-    hash = "sha256-4cXakMfwVlup5krDxbWPEhXjFda/5EFNYv8tAnSeiIc=";
+    hash = "sha256-DRW2DkZBAHDCLkklqc19nl7HsPtMwstUpAhPmG5oz1s=";
   };
 
   nativeBuildInputs = [ makeWrapper ];
