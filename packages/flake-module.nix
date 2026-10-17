@@ -29,7 +29,9 @@
 
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
-        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client { };
+        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client {
+          inherit (aiPkgs) hindsight;
+        };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };

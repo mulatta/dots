@@ -1,7 +1,7 @@
 {
   lib,
   buildPythonPackage,
-  fetchPypi,
+  hindsight,
   hatchling,
   aiohttp,
   aiohttp-retry,
@@ -12,16 +12,12 @@
   yarl,
 }:
 
-buildPythonPackage (finalAttrs: {
+buildPythonPackage {
   pname = "hindsight-client";
-  version = "1.2.0";
+  # Built from the server's own source so client and server always share a release.
+  inherit (hindsight) version src;
+  sourceRoot = "${hindsight.src.name}/hindsight-clients/python";
   pyproject = true;
-
-  src = fetchPypi {
-    pname = "hindsight_client";
-    inherit (finalAttrs) version;
-    hash = "sha256-Hi3UbubnM3SRc89lNdQ1iZqJ+WzOkd2pLq/PgM+kpcU=";
-  };
 
   build-system = [ hatchling ];
 
@@ -45,4 +41,4 @@ buildPythonPackage (finalAttrs: {
     homepage = "https://github.com/vectorize-io/hindsight";
     license = lib.licenses.mit;
   };
-})
+}
