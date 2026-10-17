@@ -5,23 +5,24 @@
 }:
 let
   cask = self.nixosConfigurations.cask.config.networking.naru;
+  hermes = config.containers.hermes;
   port = 9120;
 in
 {
-  services.hermes.settings.dashboard = {
-    # Force OIDC authentication even though the backend binds loopback.
-    public_url = "https://hermes.mulatta.io";
-    oauth = {
-      provider = "self-hosted";
-      self_hosted = {
+  containers.hermes.config = {
+    services.hermes.dashboard = {
+      host = "0.0.0.0";
+      publicUrl = "https://hermes.mulatta.io";
+      oidc = {
         issuer = "https://idm.mulatta.io/oauth2/openid/hermes";
-        client_id = "hermes";
-        scopes = "openid profile email";
+        clientId = "hermes";
       };
     };
+    # The veth is the only way in, and only this host's relay uses it.
+    networking.firewall.allowedTCPPorts = [ hermes.config.services.hermes.dashboard.port ];
   };
 
-  # The dashboard stays on loopback. Only cask can reach this Naru relay.
+  # Only cask can reach this Naru relay.
   services.nginx.enable = true;
   services.nginx.virtualHosts."hermes.mulatta.io" = {
     listen = [
@@ -40,7 +41,7 @@ in
       deny all;
     '';
     locations."/" = {
-      proxyPass = "http://127.0.0.1:${toString config.services.hermes.dashboardPort}";
+      proxyPass = "http://${hermes.localAddress}:${toString hermes.config.services.hermes.dashboard.port}";
       proxyWebsockets = true;
       recommendedProxySettings = false;
       # Cask terminates TLS. Do not replace its https scheme with this

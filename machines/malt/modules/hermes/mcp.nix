@@ -1,30 +1,28 @@
-{ config, ... }:
+{ config, lib, ... }:
+let
+  paperlessPort = lib.toInt config.systemd.services.paperless-mcp.environment.MCP_PORT;
+in
 {
-  # User approval and refresh tokens stay in Hermes' mutable state, not Nix.
-  services.hermes.settings.mcp_servers.trek = {
-    url = "https://trek.mulatta.io/mcp";
-    auth = "oauth";
-  };
-
-  # SparkyFitness issues user-scoped API keys rather than MCP OAuth tokens.
-  # Create the key in its UI before deployment; do not use an admin key.
-  clan.core.vars.generators.hermes-sparkyfitness = {
-    files.api-key.secret = true;
-    prompts.api-key = {
-      description = "SparkyFitness ordinary-user API key for Hermes MCP";
-      type = "hidden";
+  containers.hermes.config.services.hermes.profiles.noa.mcpServers = {
+    # User approval and refresh tokens stay in Hermes' mutable state, not Nix.
+    trek = {
+      url = "https://trek.mulatta.io/mcp";
+      auth = "oauth";
     };
-    script = ''
-      cp "$prompts/api-key" "$out/api-key"
-    '';
+    # SparkyFitness issues user-scoped API keys rather than MCP OAuth tokens.
+    sparkyfitness = {
+      url = "https://fitness.mulatta.io/mcp";
+      bearerTokenCredential = "noa-sparkyfitness-api-key";
+    };
+    paperless.url = "http://${config.containers.hermes.hostAddress}:${toString paperlessPort}/mcp";
   };
+  # paperless-mcp binds every host interface itself; only the veth may reach it.
+  networking.firewall.interfaces.ve-hermes.allowedTCPPorts = [ paperlessPort ];
 
-  services.hermes.credentials.sparkyfitness-api-key = {
-    file = config.clan.core.vars.generators.hermes-sparkyfitness.files.api-key.path;
-    env = "SPARKYFITNESS_API_KEY";
-  };
-  services.hermes.settings.mcp_servers.sparkyfitness = {
-    url = "https://fitness.mulatta.io/mcp";
-    headers.Authorization = "Bearer \${SPARKYFITNESS_API_KEY}";
+  # Create the key in its UI before deployment; do not use an admin key.
+  clan.core.vars.generators.hermes-sparkyfitness.prompts.api-key = {
+    description = "SparkyFitness ordinary-user API key for Hermes MCP";
+    type = "hidden";
+    persist = true;
   };
 }
