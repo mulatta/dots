@@ -1,239 +1,178 @@
+# Hermes runs in a container with its own network namespace; SOUL.md and
+# skills stay mutable state in its state directory, outside this public repo.
 {
   config,
   lib,
-  pkgs,
   self,
+  pkgs,
   ...
 }:
 let
-  inherit (lib) mkOption types;
-  cfg = config.services.hermes;
+  vars = config.clan.core.vars.generators;
+  hermes = config.containers.hermes.config.services.hermes;
   aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   citra = self.nixosConfigurations.citra.config.networking.naru;
-  stateDir = "/var/lib/hermes";
-  # Host and container must agree so the bind-mounted state keeps its owner.
-  hermesId = 2001;
-  hermesUser = {
-    isSystemUser = true;
-    group = "hermes";
-    uid = hermesId;
-    home = stateDir;
+  hostAddress = "10.90.0.1";
+  localAddress = "10.90.0.2";
+  iface = "ve-hermes";
+  credentials = {
+    noa-discord-bot-token = vars.hermes-discord.files.bot-token.path;
+    noa-sparkyfitness-api-key = vars.hermes-sparkyfitness.files.api-key.path;
+    hindsight-api-key = vars.hindsight.files.api-key.path;
   };
-  hermesConfig = pkgs.writers.writeYAML "hermes-config.yaml" cfg.settings;
-  # The dashboard judges platforms as configured from its own environment, so
-  # both services export the same credentials instead of writing them to .env.
-  credentialEnv = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (name: c: ''
-      ${c.env}=$(< "$CREDENTIALS_DIRECTORY/${name}")
-      export ${c.env}'') cfg.credentials
-  );
-  model = {
-    default = "gpt-6.1-sol";
-    provider = "openai-codex";
-    openai_runtime = "auto";
+  loopbackServices = {
+    hindsight-api = 8890;
+    searxng = 8888;
+    neko-cdp = 9222;
   };
-  commonService = {
-    User = "hermes";
-    Group = "hermes";
-    WorkingDirectory = stateDir;
-    StateDirectory = "hermes";
-    StateDirectoryMode = "0750";
-    Restart = "on-failure";
-    RestartSec = 30;
-    CapabilityBoundingSet = "";
-    LockPersonality = true;
-    PrivateDevices = true;
-    ProtectClock = true;
-    ProtectControlGroups = true;
-    ProtectHostname = true;
-    ProtectKernelModules = true;
-    ProtectKernelTunables = true;
-    RestrictSUIDSGID = true;
-    ImportCredential = lib.attrNames cfg.credentials;
-  };
+  # Neko runs on citra, which relays its CDP port to malt only.
+  remoteServices.neko-cdp = "${citra.ipv4}:9222";
+  url = port: "http://${hostAddress}:${toString port}";
 in
 {
   imports = [
     ./platforms.nix
     ./mcp.nix
     ./dashboard.nix
-    ./memory.nix
     ./auxiliary.nix
   ];
 
-  # Feature modules contribute here; the container below consumes the result.
-  options.services.hermes = {
-    settings = mkOption {
-      type = (pkgs.formats.yaml { }).type;
-      default = { };
-      description = "Contents of Hermes' config.yaml.";
-    };
-    environment = mkOption {
-      type = types.attrsOf types.str;
-      default = { };
-      description = "Non-secret environment for the gateway and dashboard.";
-    };
-    packages = mkOption {
-      type = types.listOf types.package;
-      default = [ ];
-      description = "Tools installed in the container for Hermes and its terminal tasks.";
-    };
-    plugins = mkOption {
-      type = types.attrsOf types.path;
-      default = { };
-      description = "Plugin directories linked into $HERMES_HOME/plugins by name.";
-    };
-    dashboardPort = mkOption {
-      type = types.port;
-      default = 9119;
-      description = "Loopback port of the web dashboard.";
-    };
-    credentials = mkOption {
-      type = types.attrsOf (
-        types.submodule {
-          options = {
-            file = mkOption {
-              type = types.str;
-              description = "Host path of the secret.";
-            };
-            env = mkOption {
-              type = types.str;
-              description = "Environment variable that receives the secret.";
-            };
-          };
-        }
-      );
-      default = { };
-      description = "Secrets loaded into the container and imported by the gateway and dashboard.";
-    };
+  users.users.hermes = {
+    isSystemUser = true;
+    group = "hermes";
+    inherit (hermes) uid;
+    home = hermes.stateDir;
   };
+  users.groups.hermes.gid = hermes.uid;
+  systemd.tmpfiles.rules = [ "d ${hermes.stateDir} 0750 hermes hermes -" ];
 
-  config = {
-    services.hermes = {
-      settings = {
-        inherit model;
-        agent.reasoning_effort = "low";
-        compression = {
-          codex_gpt55_autoraise = true;
-          codex_gpt55_autoraise_notice = false;
-        };
-        # Codex CLI and Claude Code refresh their own logins with single-use
-        # refresh tokens; if Hermes borrowed them, each would log the other out.
-        auth.adopt_external_logins = false;
-        onboarding.profile_build = "off";
-        web.search_backend = "searxng";
-        terminal.cwd = "${stateDir}/workspace";
-      };
-      environment = {
-        TZ = "Asia/Seoul";
-        HOME = stateDir;
-        HERMES_HOME = "${stateDir}/.hermes";
-        # Chromium refuses DevTools requests whose Host is a name, so use the address.
-        BROWSER_CDP_URL = "http://${citra.ipv4}:9222";
-        SEARXNG_URL = "http://127.0.0.1:8888";
-        HERMES_INFERENCE_PROVIDER = model.provider;
-        HERMES_INFERENCE_MODEL = model.default;
-        HERMES_MODEL = model.default;
-      };
-      # Both coding CLIs keep their own subscription logins under the state
-      # directory, since they rotate refresh tokens at runtime. Log in from
-      # `sudo nixos-container root-login hermes` via `runuser -u hermes --` with
-      # `claude auth login`, `codex login --device-auth` or `hermes auth add openai-codex`.
-      packages = [
-        aiPkgs.hermes-agent
-        aiPkgs.claude-code
-        aiPkgs.codex
-        selfPkgs.browser-use
+  containers.hermes = {
+    autoStart = true;
+    privateNetwork = true;
+    inherit hostAddress localAddress;
+    bindMounts.${hermes.stateDir} = {
+      hostPath = hermes.stateDir;
+      isReadOnly = false;
+    };
+    # A credential the container needs but the host lacks fails evaluation here.
+    extraFlags = map (
+      name: "--load-credential=${name}:${credentials.${name}}"
+    ) hermes.requiredCredentials;
+
+    config = {
+      imports = [
+        ../agent-container.nix
+        ../../../../nixosModules/hermes
       ];
-    };
 
-    users.users.hermes = hermesUser;
-    users.groups.hermes.gid = hermesId;
-    nix.settings.extra-allowed-users = [ "hermes" ];
+      system.stateVersion = "25.05";
+      time.timeZone = "Asia/Seoul";
+      networking.nameservers = [ hostAddress ];
+      # The host resolv.conf points at its own stub, unreachable from this namespace.
+      networking.useHostResolvConf = false;
 
-    systemd.tmpfiles.rules = [
-      "d ${stateDir} 0750 hermes hermes -"
-    ];
+      services.hermes = {
+        enable = true;
+        # Hermes keeps its own ChatGPT login in its state directory. Log in from
+        # `sudo nixos-container root-login hermes` via
+        # `runuser -u hermes -- env HOME=/var/lib/hermes hermes auth add openai-codex`;
+        # runuser keeps root's HOME, and -l fails on the nologin shell.
+        package = aiPkgs.hermes-agent;
+        defaultProfile = "noa";
 
-    containers.hermes = {
-      autoStart = true;
+        settings = {
+          # Codex CLI and Claude Code refresh their own logins with single-use
+          # refresh tokens; if Hermes borrowed them, each would log the other out.
+          auth.adopt_external_logins = false;
+          onboarding.profile_build = "off";
+        };
 
-      bindMounts.${stateDir} = {
-        hostPath = stateDir;
-        isReadOnly = false;
-      };
-
-      extraFlags = lib.mapAttrsToList (name: c: "--load-credential=${name}:${c.file}") cfg.credentials;
-
-      config = _: {
-        imports = [ ../agent-container.nix ];
-
-        # Hermes runs terminal commands in a login shell, and NixOS' /etc/profile
-        # resets PATH there, so tools must live in the system profile rather than
-        # only in the units' PATH.
-        environment.systemPackages = cfg.packages;
-
-        system.stateVersion = "25.05";
-
-        users.users.hermes = hermesUser;
-        users.groups.hermes.gid = hermesId;
-
-        time.timeZone = "Asia/Seoul";
-
-        systemd.tmpfiles.rules = [
-          "d ${stateDir} 0750 hermes hermes -"
-          "d ${stateDir}/workspace 0750 hermes hermes -"
-          "d ${stateDir}/.hermes 0750 hermes hermes -"
-          "d ${stateDir}/.hermes/skills 0750 hermes hermes -"
-          # Preserve curated skills without syncing upstream bundles.
-          "f ${stateDir}/.hermes/.no-bundled-skills 0640 hermes hermes -"
-          "d ${stateDir}/.hermes/plugins 0750 hermes hermes -"
-          "L+ ${stateDir}/.hermes/config.yaml - - - - ${hermesConfig}"
-          "L+ ${stateDir}/.hermes/SOUL.md - - - - ${./SOUL.md}"
-        ]
-        ++ lib.mapAttrsToList (
-          name: dir: "L+ ${stateDir}/.hermes/plugins/${name} - - - - ${dir}"
-        ) cfg.plugins;
-
-        systemd.services = {
-          hermes-gateway = {
-            description = "Hermes Agent messaging gateway";
-            wantedBy = [ "multi-user.target" ];
-            after = [ "network-online.target" ];
-            wants = [ "network-online.target" ];
-
-            path = [ "/run/current-system/sw" ];
-            inherit (cfg) environment;
-
-            serviceConfig = commonService // {
-              ExecStart = pkgs.writeShellScript "hermes-gateway" ''
-                set -euo pipefail
-                ${credentialEnv}
-                exec ${lib.getExe aiPkgs.hermes-agent} gateway run
-              '';
-            };
+        profiles.noa = {
+          model = {
+            provider = "openai-codex";
+            name = "gpt-6.1-sol";
+            reasoningEffort = "low";
           };
-
-          hermes-dashboard = {
-            description = "Hermes Agent web dashboard";
-            wantedBy = [ "multi-user.target" ];
-            after = [ "network-online.target" ];
-            wants = [ "network-online.target" ];
-
-            path = [ "/run/current-system/sw" ];
-            inherit (cfg) environment;
-
-            serviceConfig = commonService // {
-              ExecStart = pkgs.writeShellScript "hermes-dashboard" ''
-                set -euo pipefail
-                ${credentialEnv}
-                exec ${lib.getExe aiPkgs.hermes-agent} dashboard --host 127.0.0.1 --port ${toString cfg.dashboardPort} --no-open --skip-build
-              '';
+          environment.HERMES_MEDIA_ALLOW_DIRS = "${hermes.stateDir}/workspace";
+          settings = {
+            model.openai_runtime = "auto";
+            compression = {
+              codex_gpt55_autoraise = true;
+              codex_gpt55_autoraise_notice = false;
             };
           };
         };
+
+        memory.hindsight = {
+          enable = true;
+          apiUrl = url loopbackServices.hindsight-api;
+          client = selfPkgs.hindsight-client;
+          plugins = selfPkgs.hindsight-plugins;
+        };
+        browser.cdpUrl = url loopbackServices.neko-cdp;
+        search.searxngUrl = url loopbackServices.searxng;
       };
     };
   };
+
+  networking.nat = {
+    enable = true;
+    internalInterfaces = [ iface ];
+    externalInterface = "enp1s0";
+  };
+  networking.firewall.interfaces.${iface} = {
+    allowedTCPPorts = [
+      53
+    ]
+    ++ lib.attrValues loopbackServices;
+    allowedUDPPorts = [ 53 ];
+  };
+  services.resolved.settings.Resolve.DNSStubListenerExtra = hostAddress;
+  # The NixOS firewall does not filter forwarded traffic.
+  networking.nftables.tables.hermes-isolation = {
+    family = "inet";
+    content = ''
+      chain forward {
+        type filter hook forward priority -5; policy accept;
+        iifname "${iface}" ct state established,related accept
+        iifname "${iface}" ip daddr { 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16 } drop
+        iifname "${iface}" ip6 daddr { ::1/128, fc00::/7, fe80::/10 } drop
+      }
+    '';
+  };
+  systemd.sockets = lib.mapAttrs' (
+    name: port:
+    lib.nameValuePair "hermes-proxy-${name}" {
+      wantedBy = [ "sockets.target" ];
+      listenStreams = [ "${hostAddress}:${toString port}" ];
+      socketConfig.FreeBind = true;
+    }
+  ) loopbackServices;
+  systemd.services = lib.mapAttrs' (
+    name: port:
+    lib.nameValuePair "hermes-proxy-${name}" {
+      serviceConfig = {
+        ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd ${
+          remoteServices.${name} or "127.0.0.1:${toString port}"
+        }";
+        DynamicUser = true;
+        PrivateTmp = true;
+      };
+    }
+  ) loopbackServices;
+
+  # FODs run in the host namespace and would bypass the container's isolation.
+  nix.firewall = {
+    enable = true;
+    allowPrivateNetworks = false;
+    extraNftablesRules = [
+      # resolved.nix only opens UDP.
+      "ip daddr { 127.0.0.53, 127.0.0.54 } tcp dport 53 accept"
+      # Missing from nixpkgs' private ranges.
+      "ip daddr 100.64.0.0/10 counter drop"
+      "ip6 daddr fc00::/7 counter drop"
+    ];
+  };
+  networking.nftables.flushRuleset = false;
 }
