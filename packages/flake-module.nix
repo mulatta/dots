@@ -60,7 +60,8 @@
           pi = llmAgents.pi;
         };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
-        rhwp = inputs'.rhwp.packages.rhwp-cli;
+        rhwp = pkgs.callPackage ./rhwp { };
+        rhwp-viewer = pkgs.callPackage ./rhwp-viewer { inherit (self'.packages) rhwp; };
         rsshub = pkgs.callPackage ./rsshub {
           rsshub = pkgs.rsshub;
         };

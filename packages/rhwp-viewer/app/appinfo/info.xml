@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+  <id>rhwpviewer</id>
+  <name>RHWP Studio</name>
+  <summary>Open HWP/HWPX files in RHWP Studio via rhwp WebAssembly.</summary>
+  <description><![CDATA[Open Hangul Word Processor files (.hwp / .hwpx) directly in Nextcloud Files using RHWP Studio and the rhwp WebAssembly engine. No external services. Server-side SVG previews via the bundled `rhwp` CLI.]]></description>
+  <version>0.1.0</version>
+  <namespace>RhwpViewer</namespace>
+  <licence>mit</licence>
+  <author>mulatta</author>
+  <category>files</category>
+  <website>https://github.com/mulatta/rhwp-nextcloud</website>
+  <bugs>https://github.com/mulatta/rhwp-nextcloud/issues</bugs>
+  <repository type="git">https://github.com/mulatta/rhwp-nextcloud.git</repository>
+  <dependencies>
+    <nextcloud min-version="33" max-version="34"/>
+  </dependencies>
+</info>
