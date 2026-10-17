@@ -1,6 +1,6 @@
 # GPU support profile
-# Rebuilds pkgs with cudaSupport=true; the qmd overlay selects its CUDA runtime
-# independently so prebuilt binaries keep their matching library versions.
+# Rebuilds pkgs with cudaSupport=true; ai.nix forwards this to qmd,
+# whose upstream package selects matching CUDA runtime libraries.
 {
   lib,
   self,

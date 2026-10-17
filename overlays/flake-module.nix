@@ -9,7 +9,6 @@
     (import ./radicle-httpd)
     (import ./go-mockery)
     (import ./atuin)
-    (import ./qmd { llm-agents = inputs.llm-agents; })
   ];
 
   perSystem =

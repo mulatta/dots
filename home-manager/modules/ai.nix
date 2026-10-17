@@ -12,6 +12,11 @@ let
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
 
+  # Flake packages do not inherit the consuming host's nixpkgs configuration.
+  qmd = aiPkgs.qmd.override {
+    cudaSupport = pkgs.config.cudaSupport or false;
+  };
+
   agentPython = ps: [
     ps.polars
     ps.matplotlib
@@ -99,7 +104,7 @@ in
   };
 
   home.packages = [
-    pkgs.qmd
+    qmd
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md
