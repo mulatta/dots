@@ -15,12 +15,6 @@
       packages = {
         agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
-        browser-harness = pkgs.callPackage ./browser-harness {
-          inherit (llmAgents) versionCheckHomeHook;
-        };
-        browser-use = pkgs.callPackage ./browser-use {
-          inherit (self'.packages) browser-harness;
-        };
         buzz-agents-sync = pkgs.callPackage ./buzz-agents-sync {
           buzz-cli = inputs'.buzz.packages.buzz-cli;
           clan-cli = inputs'.clan-core.packages.clan-cli;
@@ -33,7 +27,6 @@
 
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
-        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client { };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };
