@@ -15,7 +15,7 @@
     # ../../nixosModules/radicle-mulatta.nix
     ./modules/agentgateway.nix
     ./modules/disko.nix
-    ./modules/hermes
+    ./modules/hermes.nix
     ./modules/hindsight
     ./modules/home-assistant.nix
     ./modules/jellyfin
