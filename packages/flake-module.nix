@@ -15,12 +15,6 @@
       packages = {
         agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
-        browser-harness = pkgs.callPackage ./browser-harness {
-          inherit (aiPkgs) versionCheckHomeHook;
-        };
-        browser-use = pkgs.callPackage ./browser-use {
-          inherit (self'.packages) browser-harness;
-        };
         claude-code = pkgs.callPackage ./claude-code {
           claude-code = aiPkgs.claude-code;
         };
