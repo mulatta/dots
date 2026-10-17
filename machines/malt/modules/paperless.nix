@@ -1,10 +1,13 @@
 {
   config,
+  lib,
   pkgs,
+  self,
   ...
 }:
 let
   port = 28981;
+  mcpPort = 28982;
   uiDomain = "paperless.mulatta.io";
   apiDomain = "paperless-api.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
@@ -75,7 +78,7 @@ in
       PAPERLESS_URL = "https://${uiDomain}";
       PAPERLESS_OCR_LANGUAGE = "kor+eng";
       PAPERLESS_TIME_ZONE = "Asia/Seoul";
-      PAPERLESS_ALLOWED_HOSTS = "${uiDomain},${apiDomain}";
+      PAPERLESS_ALLOWED_HOSTS = "${uiDomain},${apiDomain},localhost";
       PAPERLESS_CSRF_TRUSTED_ORIGINS = "https://${uiDomain},https://${apiDomain}";
       PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
       PAPERLESS_DISABLE_REGULAR_LOGIN = true;
@@ -94,4 +97,35 @@ in
   };
 
   networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
+
+  # A token of a Paperless user with only the permissions agents should have;
+  # the MCP server exposes every tool, deletion included, to whoever reaches it.
+  clan.core.vars.generators.paperless-mcp.prompts.api-token = {
+    description = "Paperless API token of the user MCP clients act as";
+    type = "hidden";
+    persist = true;
+  };
+
+  # PaperlessMCP always binds 0.0.0.0 and has no inbound auth; the firewall keeps
+  # MCP_PORT closed except where a consumer opens it.
+  systemd.services.paperless-mcp = {
+    description = "Paperless MCP server";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "paperless-web.service" ];
+    environment = {
+      PAPERLESS_BASE_URL = "http://localhost:${toString port}";
+      MCP_PORT = toString mcpPort;
+    };
+    serviceConfig = {
+      LoadCredential = "api-token:${config.clan.core.vars.generators.paperless-mcp.files.api-token.path}";
+      ExecStart = pkgs.writeShellScript "paperless-mcp" ''
+        set -euo pipefail
+        PAPERLESS_API_TOKEN=$(< "$CREDENTIALS_DIRECTORY/api-token")
+        export PAPERLESS_API_TOKEN
+        exec ${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.paperless-mcp}
+      '';
+      DynamicUser = true;
+      Restart = "on-failure";
+    };
+  };
 }
