@@ -11,6 +11,7 @@
     (import ./afew)
     (import ./sphinx-hook)
     (import ./php)
+    (import ./hindsight { inherit inputs; })
   ];
 
   perSystem =

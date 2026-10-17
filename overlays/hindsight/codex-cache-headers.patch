@@ -1,0 +1,37 @@
+From d452abdde3c0fd3a7311ab01868b96c277ebfbd1 Mon Sep 17 00:00:00 2001
+From: mulatta <67085791+mulatta@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 20:23:43 +0900
+Subject: [PATCH] codex: send the pinned prompt cache key as session headers
+
+Signed-off-by: mulatta <67085791+mulatta@users.noreply.github.com>
+---
+ hindsight_api/engine/providers/codex_llm.py | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/hindsight_api/engine/providers/codex_llm.py b/hindsight_api/engine/providers/codex_llm.py
+index 4687fab..84cbc01 100644
+--- a/hindsight_api/engine/providers/codex_llm.py
++++ b/hindsight_api/engine/providers/codex_llm.py
+@@ -324,7 +324,7 @@ class CodexLLM(LLMInterface):
+         return self._auth_manager.account_id
+ 
+     def _build_request_headers(self) -> dict[str, str]:
+-        return {
++        headers = {
+             "Authorization": f"Bearer {self.access_token}",
+             "Content-Type": "application/json",
+             # Must be "ChatGPT-Account-ID" — the name the official Codex CLI
+@@ -338,6 +338,13 @@ class CodexLLM(LLMInterface):
+             "Origin": "https://chatgpt.com",
+             "originator": _CODEX_ORIGINATOR,
+         }
++        # The Codex backend caches on these headers, not on the body's
++        # prompt_cache_key, so mirror a pinned key from extra_body into them.
++        key = self._extra_body.get("prompt_cache_key")
++        if key:
++            headers["session_id"] = key
++            headers["x-client-request-id"] = key
++        return headers
+ 
+     @property
+     def refresh_token(self) -> str | None:
