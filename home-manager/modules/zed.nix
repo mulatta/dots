@@ -1,6 +1,5 @@
 {
   inputs,
-  self,
   system,
   ...
 }:
@@ -11,7 +10,7 @@ in
   home.packages = [
     aiPkgs.claude-agent-acp
     aiPkgs.codex-acp
-    self.packages.${system}.pi-acp
+    aiPkgs.pi-acp
   ];
 
   programs.zed-editor.enable = true;

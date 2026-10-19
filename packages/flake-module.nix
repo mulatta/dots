@@ -46,9 +46,6 @@
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
         openknowledge = pkgs.callPackage ./openknowledge { };
         openknowledge-desktop = self'.packages.openknowledge.desktop;
-        pi-acp = pkgs.callPackage ./pi-acp {
-          pi = llmAgents.pi;
-        };
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) email-sync msmtp-with-sent;
           calendar-cli = skillz.calendar-cli.override {
