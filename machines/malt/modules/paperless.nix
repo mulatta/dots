@@ -64,7 +64,8 @@ in
     enable = true;
     dataDir = "/var/lib/paperless";
     mediaDir = "/var/lib/paperless/media";
-    consumptionDir = "/var/lib/paperless/consume";
+    # Outside the Z rule below, whose chmod would mask the Nextcloud ACL.
+    consumptionDir = "/srv/files/inbox";
     address = "::";
     inherit port;
     passwordFile = config.clan.core.vars.generators.paperless.files.admin-password.path;
@@ -80,12 +81,19 @@ in
       PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
       PAPERLESS_DISABLE_REGULAR_LOGIN = true;
       PAPERLESS_REDIRECT_LOGIN_TO_SSO = true;
+      PAPERLESS_CONSUMER_RECURSIVE = true;
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
     };
   };
 
   systemd.tmpfiles.rules = [
     "Z /var/lib/paperless 0750 paperless paperless -"
     "C+ /var/lib/paperless/nixos-paperless-secret-key 0600 paperless paperless - ${config.clan.core.vars.generators.paperless.files.secret-key.path}"
+    "a+ /srv/files/inbox - - - - u:nextcloud:rwx,d:u:nextcloud:rwx,d:u:paperless:rwx"
+    "a+ /var/lib/paperless - - - - u:nextcloud:--x"
+    "a+ /var/lib/paperless/media - - - - u:nextcloud:--x"
+    "a+ /var/lib/paperless/media/documents - - - - u:nextcloud:--x"
+    "A+ /var/lib/paperless/media/documents/originals - - - - u:nextcloud:r-X,d:u:nextcloud:r-X"
   ];
 
   systemd.services.paperless-scheduler = {

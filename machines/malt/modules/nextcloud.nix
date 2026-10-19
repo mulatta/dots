@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   self,
   ...
@@ -10,8 +11,44 @@ let
   kanidmIssuer = "https://${kanidmDomain}/oauth2/openid/nextcloud";
 
   # cask fronts Nextcloud as the public reverse proxy.
+
+  filesUser = "seungwon";
+  filesDir = "/srv/files/${filesUser}";
+  paperless = config.services.paperless;
+
+  # Mount point, datadir, option pairs; options apply only on creation.
+  externalMounts = [
+    [
+      "/Files"
+      filesDir
+      "enable_sharing"
+      "true"
+    ]
+    [
+      "/Inbox"
+      paperless.consumptionDir
+    ]
+    [
+      "/Documents"
+      "${paperless.mediaDir}/documents/originals"
+      "readonly"
+      "true"
+    ]
+  ];
 in
 {
+  # Not backed up to R2.
+  disko.devices.zpool.zroot.datasets."files" = {
+    type = "zfs_fs";
+    mountpoint = "/srv/files";
+    options = {
+      "com.sun:auto-snapshot" = "true";
+      "com.sun:auto-snapshot:frequent" = "false";
+      "com.sun:auto-snapshot:hourly" = "false";
+      "com.sun:auto-snapshot:monthly" = "false";
+    };
+  };
+
   clan.core.vars.generators.nextcloud = {
     files.admin-password = {
       secret = true;
@@ -65,6 +102,10 @@ in
   # ZFS auto-creates the dataset root-owned; reset it to the service user.
   systemd.tmpfiles.rules = [
     "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
+    "d /srv/files 0700 root root -"
+    "a+ /srv/files - - - - u:nextcloud:--x,u:paperless:--x,u:${filesUser}:--x"
+    "d ${filesDir} 0770 nextcloud nextcloud -"
+    "a+ ${filesDir} - - - - u:${filesUser}:rwx,d:u:${filesUser}:rwx,d:u:nextcloud:rwx"
   ];
 
   # OIDC configuration via occ commands
@@ -99,6 +140,65 @@ in
       User = "nextcloud";
       RemainAfterExit = true;
     };
+  };
+
+  systemd.services.nextcloud-external-storage = {
+    description = "Configure Nextcloud local external storage mounts";
+    after = [
+      "nextcloud-setup.service"
+      "systemd-tmpfiles-setup.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+
+    path = [
+      config.services.nextcloud.occ
+      pkgs.jq
+    ];
+
+    script = ''
+      nextcloud-occ app:enable files_external
+      existing=$(nextcloud-occ files_external:list --output=json)
+
+      add_mount() {
+        local mount_point=$1 datadir=$2 id
+        shift 2
+        if jq -e --arg mp "$mount_point" 'any(.[]; .mount_point == $mp)' <<<"$existing" >/dev/null; then
+          return
+        fi
+        id=$(nextcloud-occ files_external:create --output=json \
+          --applicable-user=${filesUser} --config="datadir=$datadir" \
+          "$mount_point" local null::null)
+        while [ $# -gt 0 ]; do
+          nextcloud-occ files_external:option "$id" "$1" "$2"
+          shift 2
+        done
+      }
+
+      ${lib.concatMapStrings (mount: "add_mount ${lib.escapeShellArgs mount}\n") externalMounts}
+    '';
+
+    serviceConfig = {
+      Type = "oneshot";
+      User = "nextcloud";
+      RemainAfterExit = true;
+    };
+  };
+
+  # Paperless adds files behind Nextcloud's back.
+  systemd.services.nextcloud-scan-documents = {
+    description = "Index Paperless originals in Nextcloud";
+    after = [ "nextcloud-external-storage.service" ];
+    path = [ config.services.nextcloud.occ ];
+    script = "nextcloud-occ files:scan --path=/${filesUser}/files/Documents";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "nextcloud";
+    };
+  };
+
+  systemd.timers.nextcloud-scan-documents = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "hourly";
   };
 
   # Allow access from WireGuard interface
