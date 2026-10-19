@@ -1,0 +1,69 @@
+From 6040feeac48c6849b5c3f7a93102da7418086b74 Mon Sep 17 00:00:00 2001
+From: mulatta <67085791+mulatta@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 13:32:42 +0900
+Subject: [PATCH] runtime: use package-selected Nix executables
+
+---
+ packages/cli/src/commands/editors.ts | 14 +-------------
+ packages/server/src/acp/launch.ts    | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+), 13 deletions(-)
+
+diff --git a/packages/cli/src/commands/editors.ts b/packages/cli/src/commands/editors.ts
+index baa22d1..b324f92 100644
+--- a/packages/cli/src/commands/editors.ts
++++ b/packages/cli/src/commands/editors.ts
+@@ -46,21 +46,9 @@ function winChainSentinel(product: DesktopProduct): string {
+ 
+ function buildUnixChain(name: DesktopProductName): string {
+   const product = DESKTOP_PRODUCTS[name];
+-  const npxSpec = `${OK_PACKAGE_SPEC}@${product.npmDistTag}`;
+   const channelLine = name === 'stable' ? '' : `\nexport ${OK_CHANNEL_ENV}=${name}`;
+   return `${unixChainSentinel(product)}${channelLine}
+-USER_BUNDLE="$HOME/Applications/${product.productName}.app/Contents/Resources/cli/bin/ok.sh"
+-[ -f "$USER_BUNDLE" ] && [ -x "$USER_BUNDLE" ] && exec "$USER_BUNDLE" mcp
+-BUNDLE="/Applications/${product.productName}.app/Contents/Resources/cli/bin/ok.sh"
+-[ -f "$BUNDLE" ] && [ -x "$BUNDLE" ] && exec "$BUNDLE" mcp
+-DEB_BUNDLE="/opt/${product.productName}/resources/cli/bin/ok.sh"
+-[ -f "$DEB_BUNDLE" ] && [ -x "$DEB_BUNDLE" ] && exec "$DEB_BUNDLE" mcp
+-command -v npx >/dev/null 2>&1 && exec npx -y ${npxSpec} mcp
+-for d in "$HOME/.nvm/versions/node"/*/bin "$HOME/.fnm/node-versions"/*/installation/bin "$HOME/.asdf/installs/nodejs"/*/bin /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin" "$HOME/.volta/bin"; do
+-  [ -f "$d/npx" ] && [ -x "$d/npx" ] && exec "$d/npx" -y ${npxSpec} mcp
+-done
+-echo "OpenKnowledge: install OK Desktop or Node.js 24+, then restart your editor" >&2
+-exit 127`;
++exec "@nixCli@" mcp`;
+ }
+ 
+ function buildWinChain(name: DesktopProductName): string {
+diff --git a/packages/server/src/acp/launch.ts b/packages/server/src/acp/launch.ts
+index ff8ca53..af94bde 100644
+--- a/packages/server/src/acp/launch.ts
++++ b/packages/server/src/acp/launch.ts
+@@ -42,6 +42,9 @@ export const MINIMUM_NPX_NODE_MAJOR = 22;
+ 
+ const NPX_REFUSE_INSTALL = ['--yes=false', '--loglevel=error'] as const;
+ 
++// Package-selected adapters must bypass mutable registry acquisition entirely.
++const NIX_AGENT_COMMANDS = new Map<string, string | null>(Object.entries(@nixAgentCommands@));
++
+ export class AgentLaunchError extends Error {
+   readonly machineDetail?: string;
+   readonly npxCacheEntry?: NpxCacheEntry;
+@@ -149,6 +152,17 @@ export async function resolveRegistryLaunch(
+   prepare?: PrepareRegistryLaunch,
+   acquisition?: RegistryAcquisitionOptions,
+ ): Promise<ResolvedLaunch | null> {
++  const nixCommand = NIX_AGENT_COMMANDS.get(agent.id);
++  if (nixCommand != null) {
++    const launch: ResolvedLaunch = {
++      cmd: nixCommand,
++      args: [],
++      env: mergedEnv(),
++      pathFromOverlay: false,
++      kind: 'custom',
++    };
++    return prepare === undefined ? launch : prepare(launch);
++  }
+   let acquiringReported = false;
+   const reporting: RegistryAcquisitionOptions = {
+     ...acquisition,

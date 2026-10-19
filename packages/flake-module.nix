@@ -44,7 +44,19 @@
         miniflux-sync = pkgs.callPackage ./miniflux-sync { };
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
-        openknowledge = pkgs.callPackage ./openknowledge { };
+        openknowledge = pkgs.callPackage ./openknowledge {
+          inherit (llmAgents)
+            pi
+            pi-acp
+            claude-code
+            claude-agent-acp
+            codex
+            codex-acp
+            ;
+          piSupport = true;
+          claudeSupport = true;
+          codexSupport = true;
+        };
         openknowledge-desktop = self'.packages.openknowledge.desktop;
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) email-sync msmtp-with-sent;

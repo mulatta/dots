@@ -23,6 +23,16 @@
   rcodesign,
   autoPatchelfHook,
   versionCheckHook,
+  pi,
+  pi-acp,
+  claude-code,
+  claude-agent-acp,
+  codex,
+  codex-acp,
+  piSupport ? false,
+  claudeSupport ? false,
+  codexSupport ? false,
+  extraPackages ? [ ],
 }:
 let
   pname = "openknowledge";
@@ -30,6 +40,27 @@ let
   pnpm = pnpm_12;
   electron = electron_44;
   appName = "OpenKnowledge";
+  agentCommands = {
+    pi-acp = if piSupport then lib.getExe pi-acp else null;
+    claude-acp = if claudeSupport then lib.getExe claude-agent-acp else null;
+    codex-acp = if codexSupport then lib.getExe codex-acp else null;
+  };
+  runtimePath = lib.makeBinPath (
+    [ nodejs_24 ]
+    ++ lib.optionals piSupport [
+      pi
+      pi-acp
+    ]
+    ++ lib.optionals claudeSupport [
+      claude-code
+      claude-agent-acp
+    ]
+    ++ lib.optionals codexSupport [
+      codex
+      codex-acp
+    ]
+    ++ extraPackages
+  );
 
   src = fetchFromGitHub {
     owner = "inkeep";
@@ -152,6 +183,12 @@ stdenv.mkDerivation {
   patches = [ ./desktop.patch ];
 
   postPatch = stripNodeRuntime + ''
+    # Render the runtime policy once, then require full upstream hunk context.
+    substitute ${./runtime.patch} "$TMPDIR/runtime.patch" \
+      --replace-fail '@nixAgentCommands@' '${builtins.toJSON agentCommands}' \
+      --replace-fail '@nixCli@' "$out/bin/open-knowledge"
+    patch --batch --forward --fuzz=0 -p1 < "$TMPDIR/runtime.patch"
+
     # These repeated expressions move independently as upstream splits index.ts.
     # Match only renderer/devtools policy, never globally replace app.isPackaged:
     # installer, uninstaller and platform behavior still need its real value.
@@ -224,6 +261,11 @@ stdenv.mkDerivation {
   postBuild = ''
     cp ${./nix-policy.test.ts} packages/desktop/tests/main/nix-policy.test.ts
     pnpm --dir packages/desktop exec vitest run tests/main/nix-policy.test.ts
+    cp ${./nix-runtime.test.ts} packages/server/src/acp/nix-runtime.test.ts
+    substituteInPlace packages/server/src/acp/nix-runtime.test.ts \
+      --replace-fail '@nixShell@' '${stdenv.shell}' \
+      --replace-fail '@nixAgentCommands@' '${builtins.toJSON agentCommands}'
+    pnpm --dir packages/server exec vitest run src/acp/nix-runtime.test.ts
   '';
 
   installPhase = ''
@@ -232,7 +274,8 @@ stdenv.mkDerivation {
     pnpm --filter @inkeep/open-knowledge deploy --prod --offline --ignore-scripts "$out/libexec/openknowledge/cli"
     mkdir -p "$out/bin"
     makeWrapper ${lib.getExe nodejs_24} "$out/bin/ok" \
-      --add-flags "$out/libexec/openknowledge/cli/dist/cli.mjs"
+      --add-flags "$out/libexec/openknowledge/cli/dist/cli.mjs" \
+      --prefix PATH : ${runtimePath}
     ln -s ok "$out/bin/open-knowledge"
     installSkill "$out/libexec/openknowledge/cli/dist/assets/skills/discovery" openknowledge
 
@@ -300,7 +343,7 @@ stdenv.mkDerivation {
       --set OK_NIX_RESOURCES "$appDir/resources" \
       --set OK_NIX_CLI "$out/bin/open-knowledge" \
       --set OK_NIX_NODE ${lib.getExe nodejs_24} \
-      --prefix PATH : ${lib.makeBinPath [ nodejs_24 ]} \
+      --prefix PATH : ${runtimePath} \
       --inherit-argv0
 
     install -Dm644 packages/desktop/build/icon.png "$desktop/share/icons/hicolor/512x512/apps/openknowledge.png"
@@ -357,7 +400,12 @@ stdenv.mkDerivation {
   '';
 
   passthru = {
-    inherit appName;
+    inherit
+      appName
+      piSupport
+      claudeSupport
+      codexSupport
+      ;
   };
 
   meta = {
