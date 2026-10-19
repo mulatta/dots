@@ -71,10 +71,16 @@ in
     passwordFile = config.clan.core.vars.generators.paperless.files.admin-password.path;
     environmentFile = config.clan.core.vars.generators.paperless.files.env.path;
     database.createLocally = true;
+    # Office formats (docx, xlsx, pptx, odt) via Tika + Gotenberg; HWP stays unsupported upstream.
+    configureTika = true;
 
     settings = {
       PAPERLESS_URL = "https://${uiDomain}";
       PAPERLESS_OCR_LANGUAGE = "kor+eng";
+      # Tesseract otherwise splits Hangul syllables into separate words.
+      PAPERLESS_OCR_USER_ARGS = builtins.toJSON {
+        tesseract_config = [ "${pkgs.writeText "tesseract-hangul.cfg" "preserve_interword_spaces 1\n"}" ];
+      };
       PAPERLESS_TIME_ZONE = "Asia/Seoul";
       PAPERLESS_ALLOWED_HOSTS = "${uiDomain},${apiDomain}";
       PAPERLESS_CSRF_TRUSTED_ORIGINS = "https://${uiDomain},https://${apiDomain}";
@@ -83,6 +89,8 @@ in
       PAPERLESS_REDIRECT_LOGIN_TO_SSO = true;
       PAPERLESS_CONSUMER_RECURSIVE = true;
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
+      # A private/ root lets a later share exclude personal documents; date-first names sort.
+      PAPERLESS_FILENAME_FORMAT = "{% if 'private' in tag_name_list %}private/{% endif %}{{ document_type }}/{{ created }} {{ correspondent }} {{ title }}";
     };
   };
 
