@@ -1,7 +1,8 @@
 { ... }:
 {
   # Separates cask latency from malt upstream time.
-  services.nginx.appendHttpConfig = ''
+  # Must precede the vhosts, which appendHttpConfig does not.
+  services.nginx.commonHttpConfig = ''
     log_format cloud_timing '$remote_addr "$request" $status $body_bytes_sent '
                             'rt=$request_time uct=$upstream_connect_time '
                             'uht=$upstream_header_time urt=$upstream_response_time';
