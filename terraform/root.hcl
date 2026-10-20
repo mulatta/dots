@@ -3,24 +3,27 @@ locals {
   r2_account_id = local.secrets.CLOUDFLARE_ACCOUNT_ID
 }
 
-# Provider versions and builds come from flake.lock via opentofu.withPlugins.
-# Run inside the terraform devshell. Clean the *execution directory*, not only
-# the source directory: Terragrunt may reuse a cached lock after source changes.
-# Auto-init is disabled in the shell: initialize explicitly before plan/apply.
+# Keep both lock files and provider links scoped to the Nix package.
+download_dir = "${get_original_terragrunt_dir()}/.terragrunt-cache/${get_env("DOTS_TERRAFORM_CACHE_KEY")}"
+
 terraform {
+  copy_terraform_lock_file = false
+  exclude_from_copy        = [".terraform.lock.hcl", ".terraform", ".terragrunt-cache"]
   before_hook "check_nix_provider_environment" {
     commands = ["init", "plan", "apply", "validate", "destroy", "import", "refresh", "providers", "state", "output", "show"]
     execute  = [get_env("DOTS_TERRAFORM_GUARD", "/missing-terraform-devshell")]
   }
 
-  before_hook "reset_nix_provider_metadata" {
+  # Auto-init must not change provider selection while applying a saved plan.
+  before_hook "reject_apply_auto_init" {
     commands = ["init"]
     execute = ["bash", "-eu", "-c", <<-EOT
-      # Repeat the guard here so metadata deletion never depends on hook order.
-      "$${DOTS_TERRAFORM_GUARD:?Use the Terraform devshell}"
-      rm -f .terraform.lock.hcl
-      rm -rf -- "$${TF_DATA_DIR:-.terraform}/providers"
+      if [ "$1" = apply ]; then
+        echo 'Initialize and create a new reviewed plan in this Nix environment before applying.' >&2
+        exit 1
+      fi
     EOT
+      , "reject-apply-auto-init", get_terraform_command()
     ]
   }
 }
@@ -32,9 +35,9 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket         = "dots-tfstate"
-    key            = "${path_relative_to_include()}/terraform.tfstate"
-    region         = "auto"
+    bucket = "dots-tfstate"
+    key    = "${path_relative_to_include()}/terraform.tfstate"
+    region = "auto"
 
     # Cloudflare R2 credentials
     access_key = local.secrets.R2_ACCESS_KEY_ID

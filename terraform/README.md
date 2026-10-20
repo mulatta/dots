@@ -127,18 +127,27 @@ The shell selects the Nix-packaged `tofu` and disables Terragrunt's automatic
 and explicit provider cache. These settings do not depend on loading `.envrc`.
 A Nix-generated guard verifies the exact packaged executable before initialization
 or provider/state operations. It rejects `TG_TF_PATH` overrides, inherited
-`TF_PLUGIN_CACHE_DIR` or `TF_CLI_CONFIG_FILE`, and changed cache controls.
+`TF_PLUGIN_CACHE_DIR`, `TF_CLI_CONFIG_FILE`, `TF_DATA_DIR`, or `TG_DOWNLOAD_DIR`,
+and changed cache controls.
 These are operational checks, not a security boundary against a user who can
 modify the environment or invoke OpenTofu directly.
 
-Before `init`, the shared hook removes the execution directory's generated lock
-and provider installation directory. This covers Terragrunt's cached lock copy
-and provider symlinks that may point to garbage-collected Nix paths. It does not
-remove backend metadata, state, or saved plans. Terragrunt auto-init is disabled and checked by the guard. A plan or apply that
-needs initialization must fail rather than silently regenerating its lock.
-Run an explicit `init` before the first plan and after changing the
-Nix environment or encountering stale provider links; do not fix discovery
-failures by introducing an independent registry provider selection.
+Each unit uses `.terragrunt-cache/<Nix-package-basename>/` for its execution
+cache. The basename identifies the complete `opentofu.withPlugins` package, so
+changing OpenTofu or a provider selects a fresh cache. Both `.terraform/` and
+`.terraform.lock.hcl` stay inside that cache; source-directory lock files and
+provider metadata are excluded from copying, and locks are not copied back.
+
+Terragrunt auto-init initializes a fresh cache before the first plan. Subsequent
+plans reuse it without reinitializing unless Terragrunt detects another reason
+to initialize, such as changed modules or backend configuration. Initialization
+can require credentials and network access. No hook deletes provider metadata.
+
+An init hook rejects automatic initialization triggered by `apply`. If its cache
+is missing or environment changed, create and review a new plan first. Keep
+saved plans outside the disposable cache using an absolute `-out` path. Old
+cache directories can be removed when no active operation needs them; never
+remove remote state.
 
 Keep the same flake revision, platform, and initialized provider selection from
 saved-plan creation through apply. Do not update Nix inputs or reinitialize with

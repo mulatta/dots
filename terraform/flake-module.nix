@@ -12,8 +12,8 @@
         TG_NO_AUTO_PROVIDER_CACHE_DIR = "1";
         TG_PROVIDER_CACHE = "false";
         TG_TF_PATH = "${config.packages.terraform}/bin/tofu";
-        # Never silently reinitialize between a reviewed plan and apply.
-        TG_NO_AUTO_INIT = "true";
+        TG_NO_AUTO_INIT = "false";
+        DOTS_TERRAFORM_CACHE_KEY = builtins.baseNameOf config.packages.terraform;
         DOTS_TERRAFORM_GUARD = "${pkgs.writeShellScript "terraform-environment-guard" ''
           set -eu
           if [ "''${TG_TF_PATH:-}" != "${config.packages.terraform}/bin/tofu" ] ||
@@ -28,8 +28,11 @@
             echo 'External provider caches or CLI configuration are not supported.' >&2
             exit 1
           fi
-          if [ "''${TG_NO_AUTO_INIT:-}" != true ]; then
-            echo 'Automatic init is disabled; run an explicit init first.' >&2
+          if [ "''${TG_NO_AUTO_INIT:-}" != false ] ||
+             [ "''${DOTS_TERRAFORM_CACHE_KEY:-}" != "${builtins.baseNameOf config.packages.terraform}" ] ||
+             [ -n "''${TG_DOWNLOAD_DIR:-}" ] ||
+             [ -n "''${TF_DATA_DIR:-}" ]; then
+            echo 'Use automatic init and the Nix-specific Terragrunt cache without overrides.' >&2
             exit 1
           fi
         ''}";
