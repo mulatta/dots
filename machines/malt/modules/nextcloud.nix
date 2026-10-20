@@ -15,6 +15,7 @@ let
   filesUser = "seungwon";
   filesDir = "/srv/files/${filesUser}";
   paperless = config.services.paperless;
+  research = config.clan.core.vars.generators.nextcloud-research-r2.files;
 
   # Mount point, datadir, option pairs; options apply only on creation.
   externalMounts = [
@@ -59,6 +60,31 @@ in
 
     script = ''
       openssl rand -hex 24 > "$out/admin-password"
+    '';
+  };
+
+  # Read-only token scoped to the research bucket.
+  clan.core.vars.generators.nextcloud-research-r2 = {
+    # rustic already prompts for and validates the account ID.
+    dependencies = [ "rustic-r2" ];
+    files.account-id.owner = "nextcloud";
+    files.access-key.owner = "nextcloud";
+    files.secret-key.owner = "nextcloud";
+    prompts.access-key = {
+      description = "Nextcloud R2 Access Key ID (research bucket, Object Read only)";
+      type = "hidden";
+      persist = true;
+    };
+    prompts.secret-key = {
+      description = "Nextcloud R2 Secret Access Key (research bucket, Object Read only)";
+      type = "hidden";
+      persist = true;
+    };
+    runtimeInputs = [ pkgs.coreutils ];
+    script = ''
+      cat "$in/rustic-r2/r2_account_id" > "$out/account-id"
+      cat "$prompts/access-key" > "$out/access-key"
+      cat "$prompts/secret-key" > "$out/secret-key"
     '';
   };
 
@@ -175,6 +201,36 @@ in
       }
 
       ${lib.concatMapStrings (mount: "add_mount ${lib.escapeShellArgs mount}\n") externalMounts}
+
+      # stdin keeps the secret out of process arguments.
+      # Uploads bypass Nextcloud; rescan instead of polling R2.
+      if ! jq -e 'any(.[]; .mount_point == "/Research")' <<<"$existing" >/dev/null; then
+        jq -n \
+          --rawfile account ${research.account-id.path} \
+          --rawfile key ${research.access-key.path} \
+          --rawfile secret ${research.secret-key.path} \
+          '{
+            mount_id: null,
+            mount_point: "/Research",
+            storage: "\\OCA\\Files_External\\Lib\\Storage\\AmazonS3",
+            authentication_type: "amazons3::accesskey",
+            configuration: {
+              bucket: "research",
+              hostname: "\(($account | rtrimstr("\n"))).r2.cloudflarestorage.com",
+              region: "auto",
+              use_ssl: true,
+              use_path_style: true,
+              key: ($key | rtrimstr("\n")),
+              secret: ($secret | rtrimstr("\n"))
+            },
+            options: {
+              readonly: true,
+              filesystem_check_changes: 0
+            },
+            applicable_users: ["${filesUser}"],
+            applicable_groups: []
+          }' | nextcloud-occ files_external:import -
+      fi
     '';
 
     serviceConfig = {
