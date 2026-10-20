@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paperless-rhwp"
+version = "0.1.0"
+description = "Paperless-ngx parser for HWP/HWPX documents via rhwp"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+
+[project.entry-points."paperless_ngx.parsers"]
+rhwp = "paperless_rhwp:RhwpDocumentParser"
+
+[tool.ruff]
+target-version = "py313"

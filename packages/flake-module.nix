@@ -58,6 +58,10 @@
           codexSupport = true;
         };
         openknowledge-desktop = self'.packages.openknowledge.desktop;
+        # Paperless's interpreter, so the entry point loads there.
+        paperless-rhwp = pkgs.paperless-ngx.python.pkgs.callPackage ./paperless-rhwp {
+          rhwp = inputs'.rhwp.packages.rhwp-cli;
+        };
         pim = pkgs.callPackage ./pim {
           inherit (self'.packages) email-sync msmtp-with-sent;
           calendar-cli = skillz.calendar-cli.override {
