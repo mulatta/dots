@@ -274,11 +274,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788012328,
-        "narHash": "sha256-dG/GtkcdBuvd+Ei2c6MiWFA+OymETjpXQuoEGk92vJU=",
+        "lastModified": 1792503436,
+        "narHash": "sha256-bfv/fqPGvFebQdZ79fanFrsr0NF1SwFTTXRXLj17Vko=",
         "owner": "dure-net",
         "repo": "dure",
-        "rev": "fee350f66f8a95f96d3ea5df3f0553fdfea98033",
+        "rev": "65ff5c30c7081a2cf0b2e2976481b52bbab8789e",
         "type": "github"
       },
       "original": {
@@ -592,11 +592,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790703353,
-        "narHash": "sha256-CrLCN7Ru5wJ5ebdfUcW53w/ChV24Dg5IpzloXeNcBu4=",
+        "lastModified": 1792491537,
+        "narHash": "sha256-NrPxQCeyDzeNyRzYjNPFiNzQkNGLxtI6CG6Sg1iHZ/8=",
         "owner": "Mic92",
         "repo": "nix-grpc-store",
-        "rev": "fea464c36ff34e8327bee14db5053ac4f26de2c9",
+        "rev": "17f4ff97a6fdac3c68458a0f15210762eba261ea",
         "type": "github"
       },
       "original": {
