@@ -1,10 +1,18 @@
 { ... }:
 {
+  # Separates cask latency from malt upstream time.
+  services.nginx.appendHttpConfig = ''
+    log_format cloud_timing '$remote_addr "$request" $status $body_bytes_sent '
+                            'rt=$request_time uct=$upstream_connect_time '
+                            'uht=$upstream_header_time urt=$upstream_response_time';
+  '';
+
   services.nginx.virtualHosts."cloud.mulatta.io" = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
 
     extraConfig = ''
+      access_log syslog:server=unix:/dev/log,tag=nginx_cloud cloud_timing;
       client_max_body_size 16G;
       client_body_timeout 3600s;
       proxy_connect_timeout 3600s;
