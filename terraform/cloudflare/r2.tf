@@ -101,3 +101,66 @@ resource "cloudflare_r2_bucket_lifecycle" "buzz" {
     }
   }]
 }
+
+# Immutable research archive, one top-level folder per finished project.
+resource "cloudflare_r2_bucket" "research" {
+  account_id = local.account_id
+  name       = "research"
+  location   = "APAC"
+}
+
+locals {
+  # Rules only match key prefixes, so each finished project is listed.
+  research_raw_prefixes = [
+    "Inducible-RNA-Regulator/raw/ngs/",
+  ]
+}
+
+resource "cloudflare_r2_bucket_lifecycle" "research" {
+  account_id  = local.account_id
+  bucket_name = cloudflare_r2_bucket.research.name
+  rules = concat(
+    [{
+      id      = "abort-incomplete-multipart-uploads"
+      enabled = true
+      conditions = {
+        prefix = ""
+      }
+      abort_multipart_uploads_transition = {
+        condition = {
+          max_age = 86400 # 1 day in seconds
+          type    = "Age"
+        }
+      }
+    }],
+    # Raw data is rarely read after verification.
+    [for prefix in local.research_raw_prefixes : {
+      id      = "raw-infrequent-access-${trimsuffix(replace(prefix, "/", "-"), "-")}"
+      enabled = true
+      conditions = {
+        prefix = prefix
+      }
+      storage_class_transitions = [{
+        condition = {
+          max_age = 2592000 # 30 days in seconds
+          type    = "Age"
+        }
+        storage_class = "InfrequentAccess"
+      }]
+    }],
+  )
+}
+
+# Object tokens cannot delete verified raw data.
+resource "cloudflare_r2_bucket_lock" "research" {
+  account_id  = local.account_id
+  bucket_name = cloudflare_r2_bucket.research.name
+  rules = [for prefix in local.research_raw_prefixes : {
+    id      = "raw-lock-${trimsuffix(replace(prefix, "/", "-"), "-")}"
+    enabled = true
+    prefix  = prefix
+    condition = {
+      type = "Indefinite"
+    }
+  }]
+}
