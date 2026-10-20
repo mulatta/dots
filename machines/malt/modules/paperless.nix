@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  self,
   ...
 }:
 let
@@ -71,8 +72,19 @@ in
     passwordFile = config.clan.core.vars.generators.paperless.files.admin-password.path;
     environmentFile = config.clan.core.vars.generators.paperless.files.env.path;
     database.createLocally = true;
-    # Office formats (docx, xlsx, pptx, odt) via Tika + Gotenberg; HWP stays unsupported upstream.
+    # Office formats (docx, xlsx, pptx, odt) via Tika + Gotenberg.
     configureTika = true;
+    # Every wrapper and service builds PYTHONPATH from passthru.dependencies.
+    # overrideAttrs keeps .override, which the module calls.
+    package = pkgs.paperless-ngx.overrideAttrs (old: {
+      passthru = old.passthru // {
+        dependencies = old.passthru.dependencies ++ [
+          self.packages.${pkgs.stdenv.hostPlatform.system}.paperless-rhwp
+        ];
+      };
+      # Only the wrapper changes; upstream already tested this source.
+      doCheck = false;
+    });
 
     settings = {
       PAPERLESS_URL = "https://${uiDomain}";
