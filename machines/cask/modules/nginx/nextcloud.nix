@@ -4,6 +4,7 @@
   # Must precede the vhosts, which appendHttpConfig does not.
   services.nginx.commonHttpConfig = ''
     log_format cloud_timing '$remote_addr "$request" $status $body_bytes_sent '
+                            'req=$request_length "$http_user_agent" '
                             'rt=$request_time uct=$upstream_connect_time '
                             'uht=$upstream_header_time urt=$upstream_response_time';
   '';
@@ -29,6 +30,10 @@
         proxy_request_buffering off;
       '';
     };
+
+    # Dotfiles and dependency manifests are never served; exact .well-known matches win over this.
+    locations."~ ^/(?:\\.(?!well-known/)|composer\\.(?:json|lock)$|package(?:-lock)?\\.json$)".return =
+      "404";
 
     # CalDAV/CardDAV well-known redirects
     locations."= /.well-known/carddav".return = "301 $scheme://$host/remote.php/dav";
