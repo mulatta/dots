@@ -14,13 +14,13 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "hindsight-client";
-  version = "1.0.0";
+  version = "1.1.0";
   pyproject = true;
 
   src = fetchPypi {
     pname = "hindsight_client";
     inherit (finalAttrs) version;
-    hash = "sha256-iky/bUpajdbecKGBslJ3eKbNZtiNSc3mCPsH5lh+IsE=";
+    hash = "sha256-EyBV7v6tfDuI+3e4bXz+CJ+rjfHCb15wpUKi3xf+buA=";
   };
 
   build-system = [ hatchling ];
