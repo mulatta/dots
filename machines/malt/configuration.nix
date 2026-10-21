@@ -8,7 +8,8 @@
     self.nixosModules.default
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
-    ../../nixosModules/auto-upgrade.nix
+    # Main lacks the PHP 8.4.27 overlay; auto-upgrading would roll Nextcloud back to 8.4.26.
+    # ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/docker-zfs.nix
     ../../nixosModules/postgresql.nix
     # Radicle node transport leaks private repos until the next major release.
