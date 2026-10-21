@@ -90,7 +90,7 @@ in
 
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud34;
+    package = pkgs.nextcloud35;
     hostName = "cloud.mulatta.io";
 
     config = {
@@ -120,7 +120,7 @@ in
 
     extraApps = {
       rhwpviewer = self.inputs.rhwp-nextcloud.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-viewer;
-      user_oidc = pkgs.nextcloud34Packages.apps.user_oidc;
+      user_oidc = pkgs.nextcloud35Packages.apps.user_oidc;
     };
     extraAppsEnable = true;
   };
