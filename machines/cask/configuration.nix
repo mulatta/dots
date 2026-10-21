@@ -68,6 +68,12 @@
 
   system.autoUpgrade.enable = true;
 
+  # The public ingress logs here; incident review needs more than the shared week.
+  services.journald.settings.Journal = {
+    SystemMaxUse = lib.mkForce "2G";
+    MaxRetentionSec = lib.mkForce "90day";
+  };
+
   nixpkgs = {
     hostPlatform = "x86_64-linux";
     config.allowUnfree = true;
