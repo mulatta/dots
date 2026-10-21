@@ -128,7 +128,8 @@ in
   # ZFS auto-creates the dataset root-owned; reset it to the service user.
   systemd.tmpfiles.rules = [
     "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
-    "d /srv/files 0700 root root -"
+    # chmod sets the ACL mask from the group bits; --x keeps the entries below effective.
+    "d /srv/files 0710 root root -"
     "a+ /srv/files - - - - u:nextcloud:--x,u:paperless:--x,u:${filesUser}:--x"
     "d ${filesDir} 0770 nextcloud nextcloud -"
     "a+ ${filesDir} - - - - u:${filesUser}:rwx,d:u:${filesUser}:rwx,d:u:nextcloud:rwx"
