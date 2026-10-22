@@ -12,9 +12,9 @@ diff --git a/packages/cli/src/commands/editors.ts b/packages/cli/src/commands/ed
 index baa22d1..b324f92 100644
 --- a/packages/cli/src/commands/editors.ts
 +++ b/packages/cli/src/commands/editors.ts
-@@ -46,21 +46,9 @@ function winChainSentinel(product: DesktopProduct): string {
+@@ -54,21 +54,9 @@ function winChainSentinel(product: DesktopProduct): string {
  
- function buildUnixChain(name: DesktopProductName): string {
+ function buildUnixChain(name: PackagedDesktopProductName): string {
    const product = DESKTOP_PRODUCTS[name];
 -  const npxSpec = `${OK_PACKAGE_SPEC}@${product.npmDistTag}`;
    const channelLine = name === 'stable' ? '' : `\nexport ${OK_CHANNEL_ENV}=${name}`;
@@ -34,7 +34,7 @@ index baa22d1..b324f92 100644
 +exec "@nixCli@" mcp`;
  }
  
- function buildWinChain(name: DesktopProductName): string {
+ function buildWinChain(name: PackagedDesktopProductName): string {
 diff --git a/packages/server/src/acp/launch.ts b/packages/server/src/acp/launch.ts
 index ff8ca53..af94bde 100644
 --- a/packages/server/src/acp/launch.ts
