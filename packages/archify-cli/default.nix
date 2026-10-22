@@ -9,13 +9,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "archify-cli";
-  version = "3.1.0";
+  version = "3.2.0";
 
   src = fetchFromGitHub {
     owner = "tt-a1i";
     repo = "archify";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-qAK94hWORRfhkgmRttDbNn6fGQYaLr1J7OKjwxnGJ6w=";
+    hash = "sha256-pejw78BgKDnttOAGcLvVtWa50azpCjTfESnmdYIjCoI=";
   };
 
   nativeBuildInputs = [
