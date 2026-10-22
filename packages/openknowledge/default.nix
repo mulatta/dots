@@ -340,6 +340,7 @@ stdenv.mkDerivation {
     # isPackaged=false, avoiding upstream mutable installer behavior on macOS.
     makeWrapper "$electronExecutable" "$launcher" \
       --add-flags "$appDir" \
+      --set OK_CHANNEL stable \
       --set OK_NIX_RESOURCES "$appDir/resources" \
       --set OK_NIX_CLI "$out/bin/open-knowledge" \
       --set OK_NIX_NODE ${lib.getExe nodejs_24} \

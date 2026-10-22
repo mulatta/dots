@@ -55,6 +55,9 @@ on every update, and retain the behavioral tests.
 
 - `desktop.patch` keeps the small CLI, locale, spawn, profile and updater
   overrides, plus the selected main-process production-runtime wiring.
+- The wrapper sets upstream's `OK_CHANNEL=stable` override so the unpackaged
+  production app does not default to the dev channel. Keep channel selection
+  out of the patch; upstream already preserves explicit channel overrides.
 - `postPatch` replaces only the repeated renderer and DevTools expressions in
   `index.ts`. Exact, fail-closed replacements avoid dependency on adjacent menu
   code. Moving a policy to another file or changing its meaning still needs

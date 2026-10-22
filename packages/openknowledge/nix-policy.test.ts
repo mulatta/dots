@@ -6,6 +6,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { parse } from 'smol-toml';
 import { pinRustToolchain } from '../../../../scripts/nix-rust-toolchain.mjs';
 import { startAutoUpdater, type UpdaterLike } from '../../src/main/auto-updater.ts';
+import { applyUnpackagedDevChannel } from '../../src/main/dev-channel.ts';
 import { resolveLocalOpCliInvocation } from '../../src/main/local-op-cli-invocation.ts';
 import { resolveMenuCatalogDir } from '../../src/main/main-i18n.ts';
 import { applyMenuDispatchRole } from '../../src/main/menu-dispatch-role.ts';
@@ -53,7 +54,9 @@ describe('Nix helper behavior', () => {
         isPackaged,
         execPath: '/electron',
         resourcesPath: '/unused',
-        parentEnv: { OK_NIX_CLI: cli },
+        parentEnv: { OK_NIX_CLI: cli, OK_CHANNEL: 'dev' },
+        workspaceCliEntry: '/workspace/cli.mjs',
+        workspaceCliBuilt: false,
       }),
     ).toEqual({ cliArgs: [cli] });
   });
@@ -66,6 +69,8 @@ describe('Nix helper behavior', () => {
         execPath: '/electron',
         resourcesPath: '/unused',
         parentEnv: {},
+        workspaceCliEntry: '/workspace/cli.mjs',
+        workspaceCliBuilt: false,
       }),
     ).toEqual({ cliArgs: ['open-knowledge'] });
   });
@@ -226,6 +231,12 @@ describe('Nix main-process source wiring', () => {
     readFileSync(new URL(`../../src/main/${name}.ts`, import.meta.url), 'utf8');
   const index = source('index');
   const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+  test('preserves the wrapper stable channel for unpackaged production', () => {
+    const env = { OK_CHANNEL: 'stable' };
+    applyUnpackagedDevChannel(env, false);
+    expect(env.OK_CHANNEL).toBe('stable');
+  });
 
   test('uses a separate production flag and the Nix resource root', () => {
     expect(index).toMatch(/const\s+nixResources\s*=\s*process\.env\.OK_NIX_RESOURCES\s*;/);
