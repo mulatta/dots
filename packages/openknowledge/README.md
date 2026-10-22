@@ -62,6 +62,10 @@ on every update, and retain the behavioral tests.
   `index.ts`. Exact, fail-closed replacements avoid dependency on adjacent menu
   code. Moving a policy to another file or changing its meaning still needs
   review. Never use `--replace-warn` to make an update pass.
+- `strip_node_runtime.py` validates the exact Node runtime declaration and the
+  importer/package/snapshot lockfile entries before removing them. Missing or
+  changed entries fail closed; unrelated `devEngines` settings and lockfile text
+  are preserved. Its regression tests run during every package build.
 - `pin-rust-toolchain.mjs` parses upstream TOML using the locked `smol-toml`
   dependency. It selects Nix's Rust version while preserving other TOML values
   and the upstream exact-version guard. Compilation still checks compatibility;

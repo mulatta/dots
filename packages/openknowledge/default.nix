@@ -71,17 +71,7 @@ let
 
   # Nix supplies Node. Do not fetch upstream devEngines.runtime binaries.
   stripNodeRuntime = ''
-    runtime=$(jq -r .devEngines.runtime.version package.json)
-    jq 'del(.devEngines)' package.json > package.json.new
-    mv package.json.new package.json
-    sed -i \
-      -e "/^      node:\$/{N;N;/specifier: runtime:$runtime\n/d}" \
-      -e "/^  node@runtime:$runtime:/,/^\$/d" \
-      pnpm-lock.yaml
-    if grep -q '[@ ]runtime:' pnpm-lock.yaml; then
-      echo "error: upstream pnpm-lock.yaml runtime entries changed" >&2
-      exit 1
-    fi
+    python3 ${./strip_node_runtime.py} .
   '';
 
   desktopItem = makeDesktopItem {
@@ -149,7 +139,7 @@ stdenv.mkDerivation {
         src
         pnpm
         ;
-      nativeBuildInputs = [ jq ];
+      nativeBuildInputs = [ python3 ];
       postPatch = stripNodeRuntime;
       fetcherVersion = 4;
       hash = "sha256-e4Bf/Jm5pSxtr/gl3T4691bmLBzllnFTUWc2k799DMA=";
@@ -215,11 +205,11 @@ stdenv.mkDerivation {
     git
     makeBinaryWrapper
     installAgentSkills
+    python3
   ]
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     libicns
     imagemagick
-    python3
     rcodesign
   ]
   ++ lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
@@ -259,6 +249,7 @@ stdenv.mkDerivation {
   '';
 
   postBuild = ''
+    python3 -m unittest discover -s ${./.} -p test_strip_node_runtime.py
     cp ${./nix-policy.test.ts} packages/desktop/tests/main/nix-policy.test.ts
     pnpm --dir packages/desktop exec vitest run tests/main/nix-policy.test.ts
     cp ${./nix-runtime.test.ts} packages/server/src/acp/nix-runtime.test.ts
