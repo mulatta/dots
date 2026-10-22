@@ -10,3 +10,7 @@ output "account_id" {
 output "r2_buzz_bucket" {
   value = cloudflare_r2_bucket.buzz.name
 }
+
+output "r2_research_bucket" {
+  value = cloudflare_r2_bucket.research.name
+}

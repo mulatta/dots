@@ -67,6 +67,7 @@ in
             "seungwon"
             "gitea_notify"
             "kanidm_notify"
+            "noa"
           ];
         };
         cloud_users = {
@@ -78,7 +79,10 @@ in
           members = [ "seungwon" ];
         };
         paperless_users = {
-          members = [ "seungwon" ];
+          members = [
+            "seungwon"
+            "noa"
+          ];
         };
         trek_users = {
           members = [
@@ -138,6 +142,11 @@ in
         kanidm_notify = {
           displayName = "Kanidm notifications";
           mailAddresses = [ "idm@${baseDomain}" ];
+        };
+        # Hermes agent mailbox; outside people, so no onboarding link.
+        noa = {
+          displayName = "Noa";
+          mailAddresses = [ "noa@${baseDomain}" ];
         };
       };
 

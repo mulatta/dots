@@ -29,6 +29,7 @@ let
     "var/lib/containers"
     "var/lib/docker"
     "var/lib/neko"
+    "var/lib/nextcloud/data/*/files_trashbin"
     "var/lib/private/*/.cache"
     "var/lib/postgresql"
     "var/lib/systemd"
