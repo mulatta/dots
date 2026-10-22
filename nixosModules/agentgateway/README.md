@@ -42,7 +42,8 @@ Defaults that machines can override:
 - `config.statsAddr` and `config.readinessAddr` are `off`; upstream binds both on every
   interface.
 
-`checks.x86_64-linux.nixosModule-agentgateway` covers client-key enforcement from bearer,
+Modules normally have no VM tests. This one is the exception: `test.nix` is registered by hand
+in `checks/flake-module.nix`, and `checks.x86_64-linux.nixosModule-agentgateway` covers client-key enforcement from bearer,
 `x-api-key` and `x-goog-api-key` headers, upstream key injection without leaking the client key,
 Anthropic `cache_control` passthrough on `/v1/messages`, native Gemini `generateContent`
 routing, per-key `allowedModels`, budgets that block and persist across a restart, the
