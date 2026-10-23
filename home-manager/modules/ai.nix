@@ -26,6 +26,7 @@ let
     (bioPkgs.pydna.override { python3Packages = ps; })
     (bioPkgs.biotite.override { python3Packages = ps; })
     ps.primer3-py
+    (bioPkgs.dna-features-viewer.override { python3Packages = ps; })
   ];
 
   primeAgent = aiPkgs.prime-agent.override {
