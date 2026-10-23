@@ -106,6 +106,9 @@ in
     };
   };
 
+  # Linkwarden owns port 3000; Paperless derives its endpoint from this port.
+  services.gotenberg.port = 3002;
+
   systemd.tmpfiles.rules = [
     "Z /var/lib/paperless 0750 paperless paperless -"
     "C+ /var/lib/paperless/nixos-paperless-secret-key 0600 paperless paperless - ${config.clan.core.vars.generators.paperless.files.secret-key.path}"
