@@ -26,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792053049,
-        "narHash": "sha256-6VZzaNr64MF0ISRIHvr2xJze0zq9pz2pf/SXv9PQSgU=",
+        "lastModified": 1792745550,
+        "narHash": "sha256-A97lLoDimGDIIzwqsYMpmQh+5YWzscXzd7msHKoBPiA=",
         "owner": "mulatta",
         "repo": "bioinformatics-toolkits",
-        "rev": "962dcd47a5c75d2823c56b13e6bcf319e4a2083d",
+        "rev": "5d3b1c3e88d83816d49b89c67108ae97e99846b3",
         "type": "github"
       },
       "original": {
@@ -147,11 +147,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788865076,
-        "narHash": "sha256-/wOckDueIfjGG/huYMqvvJaAWlrQvinASpTG+s8rzh4=",
+        "lastModified": 1792732642,
+        "narHash": "sha256-go+G9Lj7ti6xO55LsGOiSEB2yTACXSvLT1ou0u0HNwY=",
         "ref": "main",
-        "rev": "510cfe37786c8455004e07a751869afb7690dec8",
-        "revCount": 15255,
+        "rev": "1738aea7b36e3c9c00dd7ec28c9670a880431d6a",
+        "revCount": 15411,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -207,11 +207,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788466152,
-        "narHash": "sha256-isxp9C6uopHsXmfh8oj392ZYR7P6Yv/KkZo6jk5ai74=",
-        "rev": "9761d7227702c66b944e56ba7e7ee7af4ca8126e",
+        "lastModified": 1791886485,
+        "narHash": "sha256-/+7ayxD7PeW6wMQiHw20UJHmSTGN8Y5HXbn0zG/EgoA=",
+        "rev": "8d4d36437f9fff6ecaa34872bd53c3ed09ef5464",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/9761d7227702c66b944e56ba7e7ee7af4ca8126e.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/8d4d36437f9fff6ecaa34872bd53c3ed09ef5464.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -358,11 +358,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783557899,
-        "narHash": "sha256-zpyrja8s+hmANNpoKb6ffm3HZWjgNCa8OVXtJFCYm5o=",
+        "lastModified": 1792629817,
+        "narHash": "sha256-6f6cuhDwnxIZmko/WPzO/SG7fm6NsfcDX2wLuTwgKT4=",
         "owner": "Mic92",
         "repo": "flake-fmt",
-        "rev": "f46dd93676214f5756c8dcf9ece2584fd7f23f50",
+        "rev": "3b24f547f61d152d0c4303107918d145dbd36329",
         "type": "github"
       },
       "original": {
@@ -526,11 +526,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792687927,
-        "narHash": "sha256-O8JsXXPl26uxJ2nITotVnq7FAubqzsK4pWhZuh78bDA=",
+        "lastModified": 1792772068,
+        "narHash": "sha256-i0dtkuO1FMvHuvsXR9LdnXrIMyqqmUXcOjg/GVb506U=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "24cf271f40105749bb82ad318013c372183ef28e",
+        "rev": "5dd70c4c3c79062a043e3f2ad6c4976afa887ced",
         "type": "github"
       },
       "original": {
@@ -672,11 +672,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791629704,
-        "narHash": "sha256-4zOW6nfXR6a9Q/eD9ioa71wvUPdUqx412Z4h32Qh+ZQ=",
+        "lastModified": 1792282151,
+        "narHash": "sha256-tU4OsJZTWo+TYQwTFN+5oreAkkkoyN8gggWxNuI5yww=",
         "owner": "Mic92",
         "repo": "nixbot",
-        "rev": "3c432d5932bd274dfd36530d7c486bde83418194",
+        "rev": "d020013fa0db4ec40ddd0593b9bfce65fedbff64",
         "type": "github"
       },
       "original": {
@@ -707,10 +707,10 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1791961309,
-        "narHash": "sha256-KtwU0/z32So1UKwDh+vGFWpQYMu8UXlUyDwSB+xLecE=",
+        "lastModified": 1792736026,
+        "narHash": "sha256-ARn8pflRckT41Upn9u4yKUX5+5tC/cKZf0+hilgKa1o=",
         "ref": "main",
-        "rev": "3d5aa37c758d61745e12200614b9dd189810161e",
+        "rev": "105566fea3cf360d2a98aa558a2340db22c8ec79",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/mulatta/nixpkgs"
@@ -975,11 +975,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791557251,
-        "narHash": "sha256-Yp1yx+x5T4b/rtEjq51Fb+/z7a+ookQacTO3gCoYoeE=",
+        "lastModified": 1792754814,
+        "narHash": "sha256-N2vdTEdtFK7HMq8vCtJv3Ex1Joy9GS0TlbknqYUuK1o=",
         "owner": "mulatta",
         "repo": "skillz",
-        "rev": "e23aebbf24b76a1cdac589323de8d6868e6edd20",
+        "rev": "7aad5f743c3dd81ed56ab4fb22f3950a74eaa199",
         "type": "github"
       },
       "original": {

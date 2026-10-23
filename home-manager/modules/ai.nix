@@ -25,7 +25,7 @@ let
     ps.pyelftools
     (bioPkgs.pydna.override { python3Packages = ps; })
     (bioPkgs.biotite.override { python3Packages = ps; })
-    (bioPkgs.primer3-py.override { python3Packages = ps; })
+    ps.primer3-py
   ];
 
   primeAgent = aiPkgs.prime-agent.override {
