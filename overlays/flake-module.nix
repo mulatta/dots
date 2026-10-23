@@ -9,6 +9,7 @@
     (import ./radicle-httpd)
     (import ./atuin)
     (import ./afew)
+    (import ./sphinx-hook)
     (import ./php)
   ];
 
