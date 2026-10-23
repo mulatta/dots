@@ -137,7 +137,11 @@ in
   # Using Kanidm public client with PKCE (no client secret needed)
   systemd.services.nextcloud-oidc-config = {
     description = "Configure Nextcloud OIDC integration with Kanidm";
-    after = [ "nextcloud-setup.service" ];
+    after = [
+      "nextcloud-setup.service"
+      "postgresql.service"
+    ];
+    requires = [ "postgresql.service" ];
     wantedBy = [ "multi-user.target" ];
 
     path = [ config.services.nextcloud.occ ];
