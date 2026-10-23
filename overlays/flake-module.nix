@@ -9,6 +9,7 @@
     (import ./radicle-httpd)
     (import ./go-mockery)
     (import ./atuin)
+    (import ./afew)
     (import ./php)
   ];
 
