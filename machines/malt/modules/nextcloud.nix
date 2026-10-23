@@ -94,8 +94,6 @@ in
     hostName = "cloud.mulatta.io";
 
     config = {
-      adminuser = "admin";
-      adminpassFile = config.clan.core.vars.generators.nextcloud.files.admin-password.path;
       dbtype = "pgsql";
     };
 
