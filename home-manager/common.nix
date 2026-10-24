@@ -115,6 +115,7 @@ in
     age
     age-plugin-yubikey
     sops
+    yubikey-manager
 
     # Radicle
     # Radicle node transport leaks private repos until the next major release.
