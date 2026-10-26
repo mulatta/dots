@@ -1,18 +1,10 @@
 {
   config,
   lib,
-  pkgs,
-  self,
   ...
 }:
 let
   gen = config.clan.core.vars.generators;
-  buzzOwnerPubkey = self.nixosConfigurations.cask.config.services.buzz-relay.ownerPubkey;
-  buzzCli = self.inputs.buzz.packages.${pkgs.stdenv.hostPlatform.system}.buzz-cli;
-  buzzRelayUrl = "https://buzz.mulatta.io";
-  # Existing general channel; membership is granted by buzz-agents-sync.
-  buzzChannel = "6fd9e6ce-242e-51ce-b931-7644668b87de";
-  buzzAgent = config.services.buzz-agents.agents.noa;
   discordFreeResponseChannels = {
     noa = "1558545862228058273";
     papers = "1558649413650481272";
@@ -102,52 +94,5 @@ in
   services.hermes.credentials.discord-bot-token = {
     file = gen.hermes-discord.files.bot-token.path;
     env = "DISCORD_BOT_TOKEN";
-  };
-
-  # --- Buzz ---
-  services.buzz-agents = {
-    relayUrl = buzzRelayUrl;
-    ownerPubkey = buzzOwnerPubkey;
-    agents.noa = {
-      displayName = "noa";
-      # NostrChatBar icon, uploaded to the relay's Blossom store.
-      avatar = "https://buzz.mulatta.io/media/ead748a855e4c6d64175becc7ac611dfcace4ab5b09bb8e58028d38721e93343.png";
-      channels = [ buzzChannel ];
-      before = [ "container@hermes.service" ];
-    };
-  };
-
-  # Buzz is a plugin adapter: its home channel and allowlist live under `extra`.
-  services.hermes.settings.gateway.platforms.buzz = {
-    enabled = true;
-    gateway_restart_notification = false;
-    extra = {
-      relay_url = buzzRelayUrl;
-      cli_path = "${buzzCli}/bin/buzz";
-      inherit (buzzAgent) channels;
-      home_channel = builtins.head buzzAgent.channels;
-      allowed_users = [ buzzOwnerPubkey ];
-      allow_all_users = false;
-      require_mention = true;
-      transport = "auto";
-      poll_interval = 10;
-    };
-  };
-  services.hermes.settings.display.platforms.buzz = {
-    interim_assistant_messages = false;
-    tool_progress = "off";
-  };
-  services.hermes.environment.BUZZ_RELAY_URL = buzzRelayUrl;
-  # Cron's `deliver: buzz` resolves the plugin's home from this variable,
-  # not from `extra.home_channel`.
-  services.hermes.environment.BUZZ_HOME_CHANNEL = builtins.head buzzAgent.channels;
-  services.hermes.packages = [ buzzCli ];
-  services.hermes.credentials.buzz-private-key = {
-    file = buzzAgent.privateKeyFile;
-    env = "BUZZ_PRIVATE_KEY";
-  };
-  services.hermes.credentials.buzz-auth-tag = {
-    file = buzzAgent.authTagFile;
-    env = "BUZZ_AUTH_TAG";
   };
 }

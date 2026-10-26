@@ -8,7 +8,6 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   selfPkgs = self.packages.${system};
   aiPkgs = self.inputs.llm-agents.packages.${system};
-  buzzPkgs = self.inputs.buzz.packages.${system};
 in
 {
   imports = [
@@ -28,16 +27,6 @@ in
   ];
 
   home.packages = [
-    (pkgs.writeShellApplication {
-      name = "buzz";
-      text = ''
-        export BUZZ_RELAY_URL="https://buzz.mulatta.io"
-        BUZZ_PRIVATE_KEY="$(${pkgs.rbw}/bin/rbw get --field password nostr-identity)"
-        export BUZZ_PRIVATE_KEY
-        exec ${buzzPkgs.buzz-cli}/bin/buzz "$@"
-      '';
-    })
-    buzzPkgs.buzz-desktop
     selfPkgs.instagram-cli
     selfPkgs.openknowledge
     selfPkgs.openknowledge-desktop
@@ -58,11 +47,6 @@ in
     pkgs.tailscale
     pkgs.typora
   ];
-
-  home.file = {
-    ".claude/skills/buzz-cli".source = "${buzzPkgs.buzz-cli}/share/skills/buzz-cli/sprout-cli";
-
-  };
 
   # Public half of the login keychain identity from code-signing-identity.
   targets.darwin.codeSigning.certificateSha1 = "d5f52c1ea9644923482d539ccfc51dc51c920080";

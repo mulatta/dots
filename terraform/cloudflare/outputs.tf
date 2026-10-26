@@ -7,10 +7,6 @@ output "account_id" {
   sensitive = true
 }
 
-output "r2_buzz_bucket" {
-  value = cloudflare_r2_bucket.buzz.name
-}
-
 output "r2_research_bucket" {
   value = cloudflare_r2_bucket.research.name
 }

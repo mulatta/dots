@@ -126,12 +126,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    buzz = {
-      url = "github:mulatta/buzz.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     zhost = {
       url = "github:mulatta/zhost";
       inputs.treefmt-nix.follows = "treefmt-nix";

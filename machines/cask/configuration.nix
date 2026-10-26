@@ -23,7 +23,6 @@
     ../../nixosModules/vultr.nix
     ./modules/atuin.nix
     ./modules/bulwark.nix
-    ./modules/buzz.nix
     ./modules/disko.nix
     ./modules/gitea
     ./modules/gitea-mq.nix

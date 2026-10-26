@@ -8,7 +8,6 @@
   "remoteControlAtStartup": true,
   "skillOverrides": {
     "agent-slack": "name-only",
-    "buzz-cli": "name-only",
     "calendar-cli": "name-only",
     "kmap-cli": "name-only",
     "linkwarden-cli": "name-only"

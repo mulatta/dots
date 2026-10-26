@@ -12,7 +12,6 @@
     self.inputs.fast-nix-gc.nixosModules.default
     ./acme.nix
     ./agentgateway
-    ./buzz-agents
     ./dns-client.nix
     ./i18n.nix
     ./minimal-docs.nix
