@@ -96,14 +96,14 @@ let
 in
 python.pkgs.buildPythonApplication (finalAttrs: {
   pname = "browser-use";
-  version = "0.13.13";
+  version = "0.13.14";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "browser-use";
     repo = "browser-use";
     tag = finalAttrs.version;
-    hash = "sha256-yIQ3qGdLxP+34qXRBC20p9KWQLA6D1zmhjMn94586xc=";
+    hash = "sha256-HrAxu6t//HIQmoeCkuwBZHUWWZayWD1SLcrSl6Od0Ps=";
   };
 
   patches = [
