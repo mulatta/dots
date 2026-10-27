@@ -14,7 +14,7 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "agentgateway";
-  version = "1.6.0";
+  version = "1.7.0";
 
   __structuredAttrs = true;
 
@@ -22,10 +22,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
     owner = "agentgateway";
     repo = "agentgateway";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-rxRDONkTVFbav+cVO+aYtIzjcFu9JfnD/DTwumXgEYA=";
+    hash = "sha256-otrX0zLcDb/QPrErHmvW4eihsV1WEcnsE1jFlnp1pwI=";
   };
 
-  cargoHash = "sha256-PCE/wyslj4UPHocBKNp24QaqeKIGXRig9KZovBqdcHo=";
+  cargoHash = "sha256-tcF+rj+WPUwil+kQA1dbkLK/ybLt0CJTGi7qmeMyo94=";
 
   frontend = stdenvNoCC.mkDerivation (uiAttrs: {
     pname = "${finalAttrs.pname}-ui";
@@ -43,7 +43,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
         ;
       pnpm = pnpm_11;
       fetcherVersion = 4;
-      hash = "sha256-g27D5XrehjTH/ThyPJiTjljvO5cjQ60NinFNDcleWjw=";
+      hash = "sha256-dvs1zkJarSRGIP8KuKgB8EuRVN05J79EURFTE9MJ5lQ=";
     };
 
     nativeBuildInputs = [
