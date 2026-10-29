@@ -149,7 +149,7 @@ clone() {
   fi
 
   mkdir -p -- "$base" || return
-  git clone --depth=1 "github:$slug" "$dest" || return
+  git clone --depth=1 "https://github.com/$slug" "$dest" || return
   jj git init --colocate "$dest" || return
   if (( cd_after )); then
     cd -- "$dest"
