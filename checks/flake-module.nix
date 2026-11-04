@@ -42,6 +42,9 @@
           nixosModules = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (
             lib.mapAttrs' (name: lib.nameValuePair "nixosModule-${name}") {
               agentgateway = pkgs.callPackage ../nixosModules/agentgateway/test.nix { };
+              agentsview = pkgs.callPackage ../nixosModules/agentsview/test.nix {
+                package = self.inputs.llm-agents.packages.${system}.agentsview;
+              };
             }
           );
 
