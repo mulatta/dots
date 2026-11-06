@@ -18,12 +18,7 @@ in
 
   # this extends srvos's common settings
   nix = {
-    # nix 2.34 has a remote-builder dispatch regression on darwin
-    # (https://github.com/NixOS/nix/issues/10451): an aarch64-darwin
-    # host refuses to schedule x86_64-linux derivations to a working
-    # ssh-ng builder, surfacing as "platform mismatch". Keep the daemon on
-    # the latest pre-2.34 release that nixpkgs still ships.
-    package = pkgs.nixVersions.nix_2_31;
+    package = pkgs.nixVersions.latest;
 
     # fast-nix-gc and fast-nix-optimise take the same gc.lock; keep stock
     # launchd jobs off so nix-darwin does not run slower duplicate jobs.
