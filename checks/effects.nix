@@ -84,7 +84,7 @@ in
           extraSecrets.dure-ca = "dure-ca";
         }
         ''
-          cert=vars/per-machine/taps/step-intermediate-cert/intermediate.crt/value
+          cert=vars/per-machine/cask/step-intermediate-cert/intermediate.crt/value
           if openssl x509 -checkend $((90 * 24 * 3600)) -noout -in "$cert"; then
             echo "intermediate certificate valid for more than 90 days"
             exit 0
