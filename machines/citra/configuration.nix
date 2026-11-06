@@ -11,6 +11,7 @@
     self.inputs.disko.nixosModules.disko
     ./modules/disko.nix
     ./modules/initrd.nix
+    ./modules/tribuchet.nix
     ./modules/network.nix
   ];
 

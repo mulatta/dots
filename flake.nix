@@ -111,6 +111,14 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    tribuchet = {
+      url = "github:Mic92/tribuchet";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.nix-darwin.follows = "nix-darwin";
+      inputs.crane.follows = "crane";
+    };
+
     flakelet = {
       # Keep Git flake updates working until the narHash URL fix lands upstream.
       url = "github:mulatta/flakelet/fix-git-flake-narhash";
