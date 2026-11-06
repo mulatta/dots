@@ -8,10 +8,13 @@ let
   inherit (self.inputs) tribuchet;
   tribuchetPkg = tribuchet.packages.${pkgs.stdenv.hostPlatform.system}.default;
   gen = config.clan.core.vars.generators.tribuchet.files;
-  hub = config.services.tribuchet-hub;
+  hubPort = 7437;
 in
 {
-  imports = [ tribuchet.nixosModules.default ];
+  imports = [
+    tribuchet.nixosModules.default
+    self.inputs.flakelet.nixosModules.flakelet
+  ];
 
   # psi's worker uses worker.{crt,key} from this CA.
   clan.core.vars.generators.tribuchet = {
@@ -38,17 +41,30 @@ in
   environment.etc."tribuchet/ca/hub.crt".source = gen."hub.crt".path;
   environment.etc."tribuchet/ca/hub.key".source = gen."hub.key".path;
 
-  services.tribuchet-hub = {
+  # Tracks main like the psi worker so both protocol ends stay in step.
+  services.flakelets = {
     enable = true;
-    settings.hub.metrics-listen = "127.0.0.1:7438";
-    externalBuilders = {
-      enable = true;
-      dynamic = true;
+    services.tribuchet-hub = {
+      flake = "github:Mic92/tribuchet";
+      output = "flakelets.hub";
+      autoUpdate.enable = true;
+      settings = {
+        port = hubPort;
+        inherit (config.services.tribuchet-hub.externalBuilders) nixConfigPath;
+        hub.metrics-listen = "127.0.0.1:7438";
+      };
     };
   };
 
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ hub.port ];
+  services.tribuchet-hub.externalBuilders = {
+    enable = true;
+    # The flakelet's RuntimeDirectory.
+    nixConfigPath = "/run/tribuchet-hub/nix.conf";
+    dynamic = true;
+  };
+
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ hubPort ];
 
   # Each external build holds a uid slot.
-  nix.settings.id-count = hub.externalBuilders.maxJobsCap * 65536;
+  nix.settings.id-count = config.services.tribuchet-hub.externalBuilders.maxJobsCap * 65536;
 }
