@@ -54,6 +54,18 @@ in
     '';
   };
 
+  # Copy of cask's dure-ca-renew-effect-secrets/secrets; the CA lives on cask.
+  clan.core.vars.generators.nixbot-dots-effects = {
+    prompts.secrets = {
+      description = "dots effect secrets JSON (cask dure-ca-renew-effect-secrets/secrets)";
+      type = "multiline-hidden";
+      persist = true;
+    };
+    script = ''
+      cp "$prompts/secrets" "$out/secrets"
+    '';
+  };
+
   services.nixbot = {
     enable = true;
     inherit domain;
@@ -77,6 +89,8 @@ in
       topic = "build-with-nixbot";
       userAllowlist = [ "mulatta" ];
     };
+
+    effects.perRepoSecretFiles."github:mulatta/dots" = gen.nixbot-dots-effects.files.secrets.path;
 
     niks3 = {
       enable = true;
