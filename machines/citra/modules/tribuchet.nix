@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   self,
   ...
@@ -10,9 +9,6 @@ let
   tribuchetPkg = tribuchet.packages.${pkgs.stdenv.hostPlatform.system}.default;
   gen = config.clan.core.vars.generators.tribuchet.files;
   hub = config.services.tribuchet-hub;
-
-  # Naru runs with StrictSubnets, so a source address proves the peer.
-  psiNaru = file: lib.trim (builtins.readFile "${self.inputs.dure}/sbee/hosts/psi/naru/${file}");
 in
 {
   imports = [ tribuchet.nixosModules.default ];
@@ -51,10 +47,7 @@ in
     };
   };
 
-  networking.firewall.extraInputRules = ''
-    iifname "tinc.naru" ip saddr ${psiNaru "ip4"} tcp dport ${toString hub.port} accept
-    iifname "tinc.naru" ip6 saddr ${psiNaru "ip6"} tcp dport ${toString hub.port} accept
-  '';
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ hub.port ];
 
   # Each external build holds a uid slot.
   nix.settings.id-count = hub.externalBuilders.maxJobsCap * 65536;
