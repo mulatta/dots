@@ -52,6 +52,14 @@
           };
         };
 
+        # citra's GNOME remote login asks for a password; other hosts stay key-only.
+        users-seungwon = {
+          module.name = "users";
+          module.input = "clan-core";
+          roles.default.machines.citra = { };
+          roles.default.settings.user = "seungwon";
+        };
+
         # WireGuard VPN - cask is the production controller
         wireguard = {
           module.name = "wireguard";

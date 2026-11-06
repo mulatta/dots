@@ -14,6 +14,7 @@
     ./modules/nixbot.nix
     ./modules/tribuchet.nix
     ./modules/network.nix
+    ../../nixosModules/gnome-desktop.nix
   ];
 
   networking.hostName = "citra";
