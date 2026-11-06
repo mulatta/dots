@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import subprocess
+import termios
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -41,7 +42,8 @@ logger = logging.getLogger(__name__)
 class Pinentry:
     """Pinentry wrapper that caches passwords in system secure storage."""
 
-    def __init__(self) -> None:
+    def __init__(self, ttyname: str | None = None) -> None:
+        self.ttyname = ttyname
         self.rbw_profile = os.environ.get("RBW_PROFILE", "rbw")
         self.service_name = "rbw-master-password"
         self.cache_account = self._build_cache_account()
@@ -121,6 +123,34 @@ class Pinentry:
             logger.warning("Failed to call zenity: %s", e)
         return None
 
+    def _prompt_tty(self, ttyname: str, text: str) -> str | None:
+        """Read the password on rbw's terminal with echo off, like pinentry-curses."""
+        try:
+            fd = os.open(ttyname, os.O_RDWR | os.O_NOCTTY)
+        except OSError as e:
+            logger.warning("Failed to open %s: %s", ttyname, e)
+            return None
+        line = b""
+        try:
+            old = termios.tcgetattr(fd)
+            new = termios.tcgetattr(fd)
+            new[3] &= ~termios.ECHO
+            # Echo goes off before the prompt so nothing typed after it is flushed.
+            termios.tcsetattr(fd, termios.TCSAFLUSH, new)
+            try:
+                os.write(fd, f"{text}: ".encode())
+                while not line.endswith(b"\n") and (chunk := os.read(fd, 1024)):
+                    line += chunk
+            finally:
+                termios.tcsetattr(fd, termios.TCSAFLUSH, old)
+                os.write(fd, b"\n")
+        except OSError as e:
+            logger.warning("Failed to prompt on %s: %s", ttyname, e)
+            return None
+        finally:
+            os.close(fd)
+        return line.decode().rstrip("\n") or None
+
     def _legacy_cache_accounts(self) -> list[str]:
         if self.rbw_profile == self.cache_account:
             return []
@@ -190,10 +220,17 @@ class Pinentry:
                 else f"Please enter the password for '{self.rbw_profile}' (will be cached in secure storage)"
             )
 
-        # Show prompt
-        secret_value = self._show_zenity_password_dialog(
-            title=title, prompt=prompt, desc=desc, error=error
-        )
+        # Without a display (e.g. over ssh) zenity cannot show; use rbw's terminal.
+        has_display = "WAYLAND_DISPLAY" in os.environ or "DISPLAY" in os.environ
+        if not has_display and self.ttyname:
+            text = "\n".join(p for p in (error and f"Error: {error}", desc) if p)
+            secret_value = self._prompt_tty(
+                self.ttyname, f"{text}\n{prompt or 'Password'}"
+            )
+        else:
+            secret_value = self._show_zenity_password_dialog(
+                title=title, prompt=prompt, desc=desc, error=error
+            )
 
         # Cache password if successfully entered
         if secret_value:

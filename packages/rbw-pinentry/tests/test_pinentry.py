@@ -137,3 +137,42 @@ class PinentryCacheAccountTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PinentryTerminalPromptTests(unittest.TestCase):
+    def test_prompts_on_tty_and_caches_without_display(self) -> None:
+        import threading
+
+        master, slave = os.openpty()
+        ttyname = os.ttyname(slave)
+        seen = bytearray()
+
+        def type_password() -> None:
+            while b": " not in seen:
+                seen.extend(os.read(master, 1024))
+            os.write(master, b"hunter2\n")
+
+        typist = threading.Thread(target=type_password)
+        fake = FakeKeyring()
+        with tempfile.TemporaryDirectory() as root:
+            write_config(root, "https://vault.example.com")
+            env = {"XDG_CONFIG_HOME": root}
+            with (
+                mock.patch.dict(os.environ, env, clear=True),
+                mock.patch("rbw_pinentry.pinentry.keyring", fake),
+                mock.patch.object(
+                    Pinentry, "_show_zenity_password_dialog", side_effect=AssertionError
+                ),
+            ):
+                pinentry = Pinentry(ttyname=ttyname)
+                typist.start()
+                password = pinentry._handle_password("rbw", "Master Password", "", "")
+                typist.join(timeout=5)
+
+        seen.extend(os.read(master, 1024))  # the newline written after the prompt
+        os.close(master)
+        os.close(slave)
+        self.assertEqual(password, "hunter2")
+        self.assertIn(b"Master Password", seen)
+        self.assertNotIn(b"hunter2", seen)  # echo stays off
+        self.assertIn("hunter2", fake.store.values())

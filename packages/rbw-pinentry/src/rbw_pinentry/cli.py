@@ -38,7 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Clear the stored master password from secure storage and exit",
     )
-    # Arguments passed by rbw-agent (ignored for compatibility)
+    # Arguments passed by rbw-agent; --ttyname is the prompt fallback without a display
     parser.add_argument("--timeout", type=str, help=argparse.SUPPRESS)
     parser.add_argument("--ttyname", type=str, help=argparse.SUPPRESS)
     parser.add_argument("--display", type=str, help=argparse.SUPPRESS)
@@ -56,5 +56,5 @@ def main() -> None:
         print(f"Cleared password for profile: {pinentry.rbw_profile}")
         sys.exit(0)
 
-    pinentry = Pinentry()
+    pinentry = Pinentry(ttyname=args.ttyname)
     pinentry.handle_pinentry_session()
