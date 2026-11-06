@@ -10,6 +10,7 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
     ./modules/disko.nix
+    ./modules/initrd.nix
     ./modules/network.nix
   ];
 

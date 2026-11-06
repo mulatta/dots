@@ -1,17 +1,30 @@
-{ lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   disks = {
     primary = {
-      device = "/dev/disk/by-id/INSTALL-CITRA-PRIMARY";
+      device = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7HENU0YB65570K";
       boot = "/boot";
     };
     secondary = {
-      device = "/dev/disk/by-id/INSTALL-CITRA-SECONDARY";
+      device = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7HENU0YB65633L";
       boot = "/boot-secondary";
     };
   };
 in
 {
+  clan.core.vars.generators.zfs = {
+    files.key.neededFor = "partitioning";
+    runtimeInputs = [ pkgs.xkcdpass ];
+    script = ''
+      xkcdpass -d - -n 8 | tr -d '\n' > "$out/key"
+    '';
+  };
+
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
@@ -69,8 +82,11 @@ in
             mountpoint = "none";
             encryption = "aes-256-gcm";
             keyformat = "passphrase";
-            keylocation = "prompt";
+            # disko cannot answer a passphrase prompt; clan uploads the key only for install.
+            keylocation = "file://${config.clan.core.vars.generators.zfs.files.key.path}";
           };
+          # Later boots prompt on the console or over initrd ssh.
+          postCreateHook = "zfs set keylocation=prompt zroot/root";
         };
         "root/nixos" = {
           type = "zfs_fs";
