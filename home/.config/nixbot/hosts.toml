@@ -1,3 +1,7 @@
 ["https://nixbot.sjanglab.org"]
 # API token from https://nixbot.sjanglab.org/settings, stored in Bitwarden.
 token_command = "rbw get nixbot.sjanglab.org/nbo"
+
+["https://nixbot.mulatta.io"]
+# API token from https://nixbot.mulatta.io/settings, stored in Bitwarden.
+token_command = "rbw get nixbot.mulatta.io/nbo"

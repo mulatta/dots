@@ -15,6 +15,7 @@ in
     ./miniflux.nix
     ./mulatta-io.nix
     ./neko.nix
+    ./nixbot.nix
     ./nextcloud.nix
     ./paperless.nix
     ./security-txt.nix

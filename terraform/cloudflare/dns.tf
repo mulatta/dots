@@ -261,6 +261,16 @@ resource "cloudflare_dns_record" "mq_a" {
   comment = "gitea-mq merge queue"
 }
 
+resource "cloudflare_dns_record" "nixbot_a" {
+  zone_id = local.zone_id
+  name    = "nixbot"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+  comment = "nixbot CI on citra, proxied by cask"
+}
+
 resource "cloudflare_dns_record" "git_a" {
   zone_id = local.zone_id
   name    = "git"
