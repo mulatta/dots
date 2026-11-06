@@ -128,6 +128,7 @@
             ["rhesus"]="macos"
             ["psi"]="psi"
             ["malt"]="malt"
+            ["citra"]="citra"
           )
           host=$(hostname -s)
           profile=''${profiles[$host]:-base}
@@ -194,6 +195,7 @@
       // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
         psi = mkHomeConfig { extraModules = [ ./psi.nix ]; };
         malt = mkHomeConfig { extraModules = [ ./malt.nix ]; };
+        citra = mkHomeConfig { extraModules = [ ./citra.nix ]; };
       };
     };
 }
