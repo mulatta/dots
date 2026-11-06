@@ -129,6 +129,8 @@
     };
   };
   security.acme.certs."ca.x".server = "https://ca.x:1443/acme/acme/directory";
+  # Clan host entries cover machines only; cask is the sole client of ca.x.
+  networking.hosts."127.0.0.1" = [ "ca.x" ];
 
   services.nginx.virtualHosts."ca.x" = {
     addSSL = true;
