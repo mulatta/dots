@@ -62,6 +62,9 @@ in
     admins = [ "github:mulatta" ];
     database.createLocally = true;
 
+    # psi egresses with the university address; gate outside PRs.
+    prApproval.enable = true;
+
     buildSystems = [ "x86_64-linux" ];
 
     github = {
