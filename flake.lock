@@ -250,11 +250,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792503436,
-        "narHash": "sha256-bfv/fqPGvFebQdZ79fanFrsr0NF1SwFTTXRXLj17Vko=",
+        "lastModified": 1793088294,
+        "narHash": "sha256-ME2ABsBCHbHMJPD2QWOq6oh7ddhrBDa4JvggAqEHO8w=",
         "owner": "dure-net",
         "repo": "dure",
-        "rev": "65ff5c30c7081a2cf0b2e2976481b52bbab8789e",
+        "rev": "66a7dbeaf6352fa1f1c4d5a5f953c122c16559e5",
         "type": "github"
       },
       "original": {
