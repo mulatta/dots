@@ -13,7 +13,6 @@
     in
     {
       packages = {
-        agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
         browser-harness = pkgs.callPackage ./browser-harness {
           inherit (aiPkgs) versionCheckHomeHook;
