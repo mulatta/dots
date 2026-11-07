@@ -116,12 +116,12 @@ stdenv.mkDerivation (
   in
   {
     pname = "openknowledge";
-    version = "0.88.1";
+    version = "0.89.3";
     src = fetchFromGitHub {
       owner = "inkeep";
       repo = "open-knowledge";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-RDIHSQC2tK4zXtHOuFfiQHYqFvsuKAsKJtTbpyJYO3w=";
+      hash = "sha256-Z8vXhgnsGFT+8jHk8M8OJyrTP8QGS9xiyrZYMtaJ6qI=";
     };
 
     outputs = [
@@ -139,7 +139,7 @@ stdenv.mkDerivation (
         nativeBuildInputs = [ python3 ];
         postPatch = stripNodeRuntime;
         fetcherVersion = 4;
-        hash = "sha256-y2Wu26+kKqWU+YeBbApY0bfsRSS3jSsZMbdHye0Hjqw=";
+        hash = "sha256-4FQ2VUO1jzlqz1oHS4oPLYl/8YYkW5Rd+3FjG8xeg3o=";
         # Runtime download policies are irrelevant to an integrity-locked store.
         prePnpmInstall = ''
           export pnpm_config_fetch_timeout=600000
