@@ -58,10 +58,12 @@ on every update, and retain the behavioral tests.
 - The wrapper sets upstream's `OK_CHANNEL=stable` override so the unpackaged
   production app does not default to the dev channel. Keep channel selection
   out of the patch; upstream already preserves explicit channel overrides.
-- `postPatch` replaces only the repeated renderer and DevTools expressions in
-  `index.ts`. Exact, fail-closed replacements avoid dependency on adjacent menu
-  code. Moving a policy to another file or changing its meaning still needs
-  review. Never use `--replace-warn` to make an update pass.
+- `desktop.patch` selects production resources in `rendererRoot()` so window
+  entries and file-protocol containment use the same root. `postPatch` replaces
+  only the repeated DevTools expressions in `index.ts`. Exact, fail-closed
+  replacements avoid dependency on adjacent menu code. Moving a policy to another
+  file or changing its meaning still needs review. Never use `--replace-warn` to
+  make an update pass.
 - `strip_node_runtime.py` validates the exact Node runtime declaration and the
   importer/package/snapshot lockfile entries before removing them. Missing or
   changed entries fail closed; unrelated `devEngines` settings and lockfile text

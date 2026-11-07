@@ -116,12 +116,12 @@ stdenv.mkDerivation (
   in
   {
     pname = "openknowledge";
-    version = "0.86.18";
+    version = "0.88.1";
     src = fetchFromGitHub {
       owner = "inkeep";
       repo = "open-knowledge";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-bEwr8dBcR7rSwZR/jriW2Fa3qW3+Oayz8BrPO3j3VJU=";
+      hash = "sha256-RDIHSQC2tK4zXtHOuFfiQHYqFvsuKAsKJtTbpyJYO3w=";
     };
 
     outputs = [
@@ -139,7 +139,7 @@ stdenv.mkDerivation (
         nativeBuildInputs = [ python3 ];
         postPatch = stripNodeRuntime;
         fetcherVersion = 4;
-        hash = "sha256-e4Bf/Jm5pSxtr/gl3T4691bmLBzllnFTUWc2k799DMA=";
+        hash = "sha256-y2Wu26+kKqWU+YeBbApY0bfsRSS3jSsZMbdHye0Hjqw=";
         # Runtime download policies are irrelevant to an integrity-locked store.
         prePnpmInstall = ''
           export pnpm_config_fetch_timeout=600000
@@ -176,13 +176,8 @@ stdenv.mkDerivation (
         --replace-fail '@nixCli@' "$out/bin/open-knowledge"
       patch --batch --forward --fuzz=0 -p1 < "$TMPDIR/runtime.patch"
 
-      # These repeated expressions move independently as upstream splits index.ts.
-      # Match only renderer/devtools policy, never globally replace app.isPackaged:
-      # installer, uninstaller and platform behavior still need its real value.
+      # Installer and platform behavior still need the real app.isPackaged.
       substituteInPlace packages/desktop/src/main/index.ts \
-        --replace-fail "const rendererEntryPath = app.isPackaged" "const rendererEntryPath = isProductionRuntime" \
-        --replace-fail "rendererEntryPath: app.isPackaged" "rendererEntryPath: isProductionRuntime" \
-        --replace-fail "join(process.resourcesPath, 'app', 'index.html')" "join(runtimeResources, 'app', 'index.html')" \
         --replace-fail "!app.isPackaged || DESKTOP_VARIANT.name !== 'stable'" "!isProductionRuntime || DESKTOP_VARIANT.name !== 'stable'"
 
       # Native-config uses the local Rust toolchain, not napi-cross downloads.
