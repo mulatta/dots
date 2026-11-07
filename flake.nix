@@ -175,12 +175,6 @@
       inputs.crane.follows = "crane";
     };
 
-    nix-minecraft = {
-      url = "github:Infinidoge/nix-minecraft";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.systems.follows = "systems";
-    };
-
     noctalia-plugins = {
       url = "github:mulatta/noctalia-plugins";
       inputs.nixpkgs.follows = "nixpkgs";

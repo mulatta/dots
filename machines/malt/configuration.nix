@@ -20,7 +20,6 @@
     ./modules/home-assistant.nix
     ./modules/jellyfin
     ./modules/linkwarden.nix
-    ./modules/minecraft.nix
     ./modules/miniflux
     ./modules/network.nix
     ./modules/neko.nix
