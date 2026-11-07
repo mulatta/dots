@@ -26,14 +26,6 @@ let
     }
     // optional (m.reasoningEffort != null) { reasoning_effort = m.reasoningEffort; };
 
-  homeChannel =
-    platform: chatId: extra:
-    {
-      inherit platform;
-      chat_id = chatId;
-    }
-    // extra;
-
   quietDisplay =
     p:
     optional (!p.progressMessages) {
@@ -46,28 +38,15 @@ let
   platformParts =
     p:
     let
-      inherit (p.platforms) slack discord;
+      inherit (p.platforms) discord;
     in
-    lib.optional slack.enable {
-      settings = {
-        gateway.platforms.slack = {
-          home_channel = homeChannel "slack" slack.homeChannel (
-            optional (slack.homeChannelName != null) { name = slack.homeChannelName; }
-          );
-          gateway_restart_notification = slack.restartNotification;
-        };
-        display.platforms.slack = quietDisplay slack;
-      };
-      env.SLACK_ALLOWED_USERS = lib.concatStringsSep "," slack.allowedUsers;
-      secrets = {
-        SLACK_BOT_TOKEN = slack.botTokenCredential;
-        SLACK_APP_TOKEN = slack.appTokenCredential;
-      };
-    }
-    ++ lib.optional discord.enable {
+    lib.optional discord.enable {
       settings = {
         gateway.platforms.discord = {
-          home_channel = homeChannel "discord" discord.homeChannel { };
+          home_channel = {
+            platform = "discord";
+            chat_id = discord.homeChannel;
+          };
           gateway_restart_notification = discord.restartNotification;
         };
         display.platforms.discord = quietDisplay discord;

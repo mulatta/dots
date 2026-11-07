@@ -85,15 +85,6 @@ let
           };
 
           platforms = {
-            slack = platformOptions // {
-              enable = mkEnableOption "Slack for profile ${name}";
-              homeChannelName = mkOption {
-                type = types.nullOr types.str;
-                default = null;
-              };
-              botTokenCredential = cred "slack-bot-token" "Slack bot token (xoxb-).";
-              appTokenCredential = cred "slack-app-token" "Slack app-level token (xapp-).";
-            };
             discord = platformOptions // {
               enable = mkEnableOption "Discord for profile ${name}";
               requireMention = mkOption {

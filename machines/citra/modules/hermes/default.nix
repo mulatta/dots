@@ -17,8 +17,6 @@ let
   localAddress = "10.90.0.2";
   iface = "ve-hermes";
   credentials = {
-    noa-slack-bot-token = vars.hermes.files.slack-bot-token.path;
-    noa-slack-app-token = vars.hermes.files.slack-app-token.path;
     noa-discord-bot-token = vars.hermes-discord.files.bot-token.path;
     noa-sparkyfitness-api-key = vars.hermes-sparkyfitness.files.api-key.path;
     hindsight-api-key = vars.hindsight.files.api-key.path;
