@@ -1,8 +1,5 @@
 { config, pkgs, ... }:
 {
-  # Remote unlock: initrd sshd on the LAN, reached through malt.
-  boot.initrd.systemd.enable = true;
-
   # A separate key, because initrd secrets sit unencrypted on the ESPs.
   clan.core.vars.generators.initrd-ssh = {
     files."id_ed25519".neededFor = "activation";
@@ -13,6 +10,7 @@
     '';
   };
 
+  # Remote unlock: initrd sshd on the LAN, reached through malt.
   boot.initrd.network = {
     enable = true;
     ssh = {
