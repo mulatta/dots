@@ -10,7 +10,7 @@ let
   env = config.clan.core.vars.generators.oauth2-proxy-hindsight.files.env.path;
 
   # The Hindsight control plane only supports a shared access key, so this proxy
-  # is its identity gate; the API key stays on malt behind the control plane.
+  # is its identity gate; the API key stays on citra behind the control plane.
   oauth2Args = [
     "--provider=oidc"
     "--client-id=hindsight"
@@ -28,7 +28,7 @@ let
     "--cookie-httponly=true"
     "--cookie-refresh=1h"
     "--cookie-expire=12h"
-    "--upstream=http://malt.n:9121"
+    "--upstream=http://citra.n:9121"
     "--http-address=127.0.0.1:${toString oauth2Port}"
   ];
 in

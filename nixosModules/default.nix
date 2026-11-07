@@ -11,7 +11,6 @@
     self.inputs.srvos.nixosModules.mixins-trusted-nix-caches
     self.inputs.fast-nix-gc.nixosModules.default
     ./acme.nix
-    ./agentgateway
     ./dns-client.nix
     ./i18n.nix
     ./minimal-docs.nix

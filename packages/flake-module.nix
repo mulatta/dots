@@ -13,14 +13,7 @@
     in
     {
       packages = {
-        agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
-        browser-harness = pkgs.callPackage ./browser-harness {
-          inherit (aiPkgs) versionCheckHomeHook;
-        };
-        browser-use = pkgs.callPackage ./browser-use {
-          inherit (self'.packages) browser-harness;
-        };
         claude-code = pkgs.callPackage ./claude-code {
           claude-code = aiPkgs.claude-code;
         };
@@ -29,7 +22,10 @@
 
         herdr-autoname = pkgs.callPackage ./herdr-autoname { };
         herdr-sesh = pkgs.callPackage ./herdr-sesh { };
-        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client { };
+        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client {
+          inherit (aiPkgs) hindsight;
+        };
+        hindsight-plugins = pkgs.callPackage ./hindsight-plugins { inherit (aiPkgs) hindsight; };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };

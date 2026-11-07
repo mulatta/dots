@@ -17,7 +17,6 @@
       "/System/Applications/Mail.app"
       "/System/Applications/System Settings.app"
       "/Applications/Claude.app"
-      "/Applications/Slack.app"
       # zen-browser, obsidian, ghostty are managed by home-manager
       # — keeping them here causes duplicate Dock icons
       "/Applications/KakaoTalk.app"

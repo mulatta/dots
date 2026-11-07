@@ -6,7 +6,7 @@
     mulatta.securityHeaders = "deny";
 
     locations."/" = {
-      proxyPass = "http://malt.n:9120";
+      proxyPass = "http://citra.n:9120";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_buffering off;

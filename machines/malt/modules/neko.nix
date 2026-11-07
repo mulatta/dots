@@ -36,6 +36,8 @@ let
     };
   };
 
+  citra = self.nixosConfigurations.citra.config.networking.naru;
+
   image = self.packages.${pkgs.stdenv.hostPlatform.system}.neko-image;
 
   podmanNetworkConfig = (pkgs.formats.json { }).generate "neko-podman-network.json" {
@@ -203,6 +205,21 @@ in
       ports.media
     ];
     allowedUDPPorts = [ ports.media ];
+  };
+
+  # Hermes on citra drives this browser; no other Naru peer may reach CDP.
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${citra.ipv4} tcp dport ${toString ports.cdp.host} accept
+  '';
+  systemd.sockets.neko-cdp-naru = {
+    wantedBy = [ "sockets.target" ];
+    listenStreams = [ "${config.networking.naru.ipv4}:${toString ports.cdp.host}" ];
+    socketConfig.FreeBind = true;
+  };
+  systemd.services.neko-cdp-naru.serviceConfig = {
+    ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd 127.0.0.1:${toString ports.cdp.host}";
+    DynamicUser = true;
+    PrivateTmp = true;
   };
 
   networking.firewall.extraForwardRules = ''
