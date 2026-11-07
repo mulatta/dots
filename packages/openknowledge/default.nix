@@ -176,13 +176,8 @@ stdenv.mkDerivation (
         --replace-fail '@nixCli@' "$out/bin/open-knowledge"
       patch --batch --forward --fuzz=0 -p1 < "$TMPDIR/runtime.patch"
 
-      # These repeated expressions move independently as upstream splits index.ts.
-      # Match only renderer/devtools policy, never globally replace app.isPackaged:
-      # installer, uninstaller and platform behavior still need its real value.
+      # Installer and platform behavior still need the real app.isPackaged.
       substituteInPlace packages/desktop/src/main/index.ts \
-        --replace-fail "const rendererEntryPath = app.isPackaged" "const rendererEntryPath = isProductionRuntime" \
-        --replace-fail "rendererEntryPath: app.isPackaged" "rendererEntryPath: isProductionRuntime" \
-        --replace-fail "join(process.resourcesPath, 'app', 'index.html')" "join(runtimeResources, 'app', 'index.html')" \
         --replace-fail "!app.isPackaged || DESKTOP_VARIANT.name !== 'stable'" "!isProductionRuntime || DESKTOP_VARIANT.name !== 'stable'"
 
       # Native-config uses the local Rust toolchain, not napi-cross downloads.

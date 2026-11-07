@@ -295,22 +295,25 @@ describe("Nix main-process source wiring", () => {
     },
   );
 
-  test("every rendererEntryPath uses production resources", () => {
+  test("windows and file containment share the production renderer root", () => {
+    const root = index.match(
+      /function rendererRoot\(\): string\s*\{\s*return\s+([^;]+);\s*\}/,
+    );
+    expect(root).not.toBeNull();
+    expect(normalize(root![1])).toBe(
+      "isProductionRuntime ? join(runtimeResources, 'app') : join(__dirname, '../renderer')",
+    );
     const paths = [
-      ...index.matchAll(
-        /\brendererEntryPath\s*[:=]\s*([^;]+?join\(__dirname,\s*'\.\.\/renderer\/index\.html'\))/g,
-      ),
+      ...index.matchAll(/\brendererEntryPath\s*[:=]\s*([^;\n]+)/g),
     ];
-    const sites = [...index.matchAll(/\brendererEntryPath\s*[:=]/g)];
-    expect(sites.length).toBeGreaterThan(0);
-    expect(paths).toHaveLength(sites.length);
+    expect(paths.length).toBeGreaterThan(0);
     for (const [, expression] of paths) {
-      expect(normalize(expression)).toBe(
-        "isProductionRuntime ? join(runtimeResources, 'app', 'index.html') : join(__dirname, '../renderer/index.html')",
+      expect(normalize(expression).replace(/[;,]$/, "")).toBe(
+        "join(rendererRoot(), 'index.html')",
       );
     }
-    expect(index).not.toMatch(
-      /join\(process\.resourcesPath,\s*'app',\s*'index\.html'\)/,
+    expect(index).toMatch(
+      /installRendererFileProtocol\(\s*session\.defaultSession\.protocol,\s*rendererRoot\(\)\s*,?\s*\)/,
     );
   });
 

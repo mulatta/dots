@@ -1,5 +1,24 @@
+From 2b7e4f39af91a8ab8a9bb9f2eaa4f491e3623186 Mon Sep 17 00:00:00 2001
+From: mulatta <67085791+mulatta@users.noreply.github.com>
+Date: Sat, 7 Nov 2026 16:14:16 +0900
+Subject: [PATCH] desktop: support immutable Nix production resources
+
+Nix launches an unpackaged app with immutable production resources. Share the renderer root between window entry paths and file-protocol containment without changing Electron packaging state.
+---
+ packages/desktop/electron.vite.config.ts      |  2 +-
+ packages/desktop/src/main/auto-updater.ts     | 15 +++++++++++
+ packages/desktop/src/main/entry.ts            | 14 +++++++++-
+ packages/desktop/src/main/index.ts            | 27 ++++++++++++-------
+ packages/desktop/src/main/install-shape.ts    |  2 ++
+ .../src/main/local-op-cli-invocation.ts       |  1 +
+ packages/desktop/src/main/main-i18n.ts        |  1 +
+ .../src/main/resolve-detached-spawn-args.ts   |  8 +++---
+ packages/desktop/src/main/uninstall-window.ts |  7 +++--
+ packages/desktop/src/shared/ok-child-env.ts   |  8 ++++--
+ 10 files changed, 66 insertions(+), 19 deletions(-)
+
 diff --git a/packages/desktop/electron.vite.config.ts b/packages/desktop/electron.vite.config.ts
-index b9fff46..b438424 100644
+index 3697e5c8..1d6884cf 100644
 --- a/packages/desktop/electron.vite.config.ts
 +++ b/packages/desktop/electron.vite.config.ts
 @@ -136,7 +136,7 @@ export default defineConfig({
@@ -12,7 +31,7 @@ index b9fff46..b438424 100644
      resolve: {
        alias: {
 diff --git a/packages/desktop/src/main/auto-updater.ts b/packages/desktop/src/main/auto-updater.ts
-index d8b096b..5c96178 100644
+index d8b096bd..5c961788 100644
 --- a/packages/desktop/src/main/auto-updater.ts
 +++ b/packages/desktop/src/main/auto-updater.ts
 @@ -416,7 +416,22 @@ export function installWasInFlightDuring(
@@ -39,7 +58,7 @@ index d8b096b..5c96178 100644
      updater,
      ipcMain,
 diff --git a/packages/desktop/src/main/entry.ts b/packages/desktop/src/main/entry.ts
-index bc10707..4cb3d52 100644
+index bc107073..6c035092 100644
 --- a/packages/desktop/src/main/entry.ts
 +++ b/packages/desktop/src/main/entry.ts
 @@ -1,5 +1,7 @@
@@ -69,10 +88,10 @@ index bc10707..4cb3d52 100644
    platform: process.platform,
    uid: process.getuid?.() ?? -1,
 diff --git a/packages/desktop/src/main/index.ts b/packages/desktop/src/main/index.ts
-index db8b3ba..3535d7f 100644
+index 1823d053..648d2f7c 100644
 --- a/packages/desktop/src/main/index.ts
 +++ b/packages/desktop/src/main/index.ts
-@@ -1262,10 +1262,15 @@ function currentActiveTarget(): EditorActiveTargetSnapshot {
+@@ -1267,10 +1267,15 @@ function currentActiveTarget(): EditorActiveTargetSnapshot {
 
  const editorViewMenuStates = new EditorViewMenuStateRegistry();
 
@@ -90,8 +109,17 @@ index db8b3ba..3535d7f 100644
  }
 
  let warnedUnbuiltWorkspaceCli = false;
-@@ -1363,7 +1368,9 @@ function ensureWindowManager() {
-     : join(__dirname, '../renderer/index.html');
+@@ -1362,7 +1367,7 @@ function readPositiveIntEnv(envVar: string): number | undefined {
+ }
+
+ function rendererRoot(): string {
+-  return app.isPackaged ? join(process.resourcesPath, 'app') : join(__dirname, '../renderer');
++  return isProductionRuntime ? join(runtimeResources, 'app') : join(__dirname, '../renderer');
+ }
+
+ function ensureWindowManager() {
+@@ -1370,7 +1375,9 @@ function ensureWindowManager() {
+   const rendererEntryPath = join(rendererRoot(), 'index.html');
    const utilityEntryPath = join(__dirname, 'utility/server-entry.js');
 
 -  const bundleCliMjsPath = app.isPackaged
@@ -101,7 +129,7 @@ index db8b3ba..3535d7f 100644
      ? join(
          process.resourcesPath,
          'app.asar.unpacked',
-@@ -1574,7 +1581,7 @@ function ensureWindowManager() {
+@@ -1587,7 +1594,7 @@ function ensureWindowManager() {
      terminalAuthAvailable: isTerminalAvailable(),
      utilityEntryPath,
      spawnSingleFileServer: spawnCliServer,
@@ -110,7 +138,7 @@ index db8b3ba..3535d7f 100644
      createEphemeralProjectDir,
      removeDir: (dir: string) => fsPromises.rm(dir, { recursive: true, force: true }),
      rendererEntryPath,
-@@ -1585,7 +1592,7 @@ function ensureWindowManager() {
+@@ -1598,7 +1605,7 @@ function ensureWindowManager() {
      selfChannel: resolveDesktopProductName(),
      spawnLockPollDeadlineMs: readPositiveIntEnv('OK_SPAWN_STARTUP_TIMEOUT_MS'),
      spawnLockProgressDeadlineMs: readPositiveIntEnv('OK_SPAWN_BIND_TIMEOUT_MS'),
@@ -119,7 +147,7 @@ index db8b3ba..3535d7f 100644
      isFirstLaunchAfterUpgrade: () => firstLaunchAfterUpgrade,
      setTimeout: (cb, ms) => setTimeout(cb, ms),
      setInterval: (cb, ms) => setInterval(cb, ms).unref(),
-@@ -5760,7 +5767,7 @@ function projectDirForSender(event: IpcMainInvokeEvent): string | null {
+@@ -5755,7 +5762,7 @@ function projectDirForSender(event: IpcMainInvokeEvent): string | null {
  function registerIntegrationsSettingsIpc(): void {
    const integrationsLogger = getLogger('integrations-settings');
    const { available, devBuild } = agentConnectionsAvailability(
@@ -128,7 +156,7 @@ index db8b3ba..3535d7f 100644
      process.platform,
      app.getPath('exe'),
      process.env,
-@@ -5911,7 +5918,7 @@ function registerIntegrationsSettingsIpc(): void {
+@@ -5906,7 +5913,7 @@ function registerIntegrationsSettingsIpc(): void {
  function registerProjectIntegrationsSettingsIpc(): void {
    const projectLogger = getLogger('project-integrations-settings');
    const { available } = agentConnectionsAvailability(
@@ -137,7 +165,7 @@ index db8b3ba..3535d7f 100644
      process.platform,
      app.getPath('exe'),
      process.env,
-@@ -6090,7 +6097,7 @@ if (bootAmbientCapsFacts) {
+@@ -6086,7 +6093,7 @@ if (bootAmbientCapsFacts) {
    );
  }
 
@@ -146,7 +174,7 @@ index db8b3ba..3535d7f 100644
    const resolved = resolveEffectiveInstanceName(process.env, app.getAppPath(), {
      autoDeriveEnabled: process.env.OK_DESKTOP_E2E_SMOKE !== '1',
    });
-@@ -6403,7 +6410,7 @@ function bootPrimaryInstance(): void {
+@@ -6400,7 +6407,7 @@ function bootPrimaryInstance(): void {
          app.on(event as Parameters<typeof app.on>[0], cb as Parameters<typeof app.on>[1]);
        },
        whenReady: () => app.whenReady(),
@@ -156,7 +184,7 @@ index db8b3ba..3535d7f 100644
        removeAsDefaultProtocolClient: (scheme) => app.removeAsDefaultProtocolClient(scheme),
      },
 diff --git a/packages/desktop/src/main/install-shape.ts b/packages/desktop/src/main/install-shape.ts
-index 04ba32c..e81af80 100644
+index 04ba32ca..e81af803 100644
 --- a/packages/desktop/src/main/install-shape.ts
 +++ b/packages/desktop/src/main/install-shape.ts
 @@ -57,5 +57,7 @@ export function agentConnectionsAvailability(
@@ -168,7 +196,7 @@ index 04ba32c..e81af80 100644
    return { available: isSupportedInstallShape(platform, executablePath, env), devBuild: false };
  }
 diff --git a/packages/desktop/src/main/local-op-cli-invocation.ts b/packages/desktop/src/main/local-op-cli-invocation.ts
-index cae9f38..f98b2c3 100644
+index cae9f38a..f98b2c3a 100644
 --- a/packages/desktop/src/main/local-op-cli-invocation.ts
 +++ b/packages/desktop/src/main/local-op-cli-invocation.ts
 @@ -25,6 +25,7 @@ function bundledCliEntryOnWindows(resourcesPath: string): string {
@@ -180,7 +208,7 @@ index cae9f38..f98b2c3 100644
      if (!isDevChannel(input.parentEnv)) return { cliArgs: ['open-knowledge'] };
      return input.workspaceCliBuilt ? { cliArgs: ['node', input.workspaceCliEntry] } : undefined;
 diff --git a/packages/desktop/src/main/main-i18n.ts b/packages/desktop/src/main/main-i18n.ts
-index 78f8c1c..1c1e4c6 100644
+index 78f8c1c9..1c1e4c67 100644
 --- a/packages/desktop/src/main/main-i18n.ts
 +++ b/packages/desktop/src/main/main-i18n.ts
 @@ -16,6 +16,7 @@ interface MenuCatalogDirDeps {
@@ -192,7 +220,7 @@ index 78f8c1c..1c1e4c6 100644
    return join(deps.mainDir, '..', '..', '..', 'app', 'src', 'locales');
  }
 diff --git a/packages/desktop/src/main/resolve-detached-spawn-args.ts b/packages/desktop/src/main/resolve-detached-spawn-args.ts
-index 719ba59..fc91e19 100644
+index 719ba592..fc91e197 100644
 --- a/packages/desktop/src/main/resolve-detached-spawn-args.ts
 +++ b/packages/desktop/src/main/resolve-detached-spawn-args.ts
 @@ -83,10 +83,12 @@ export function resolveDetachedSpawnArgs(
@@ -220,7 +248,7 @@ index 719ba59..fc91e19 100644
      },
      detached: true,
 diff --git a/packages/desktop/src/main/uninstall-window.ts b/packages/desktop/src/main/uninstall-window.ts
-index aa9461d..f8db05f 100644
+index aa9461d7..f8db05f0 100644
 --- a/packages/desktop/src/main/uninstall-window.ts
 +++ b/packages/desktop/src/main/uninstall-window.ts
 @@ -31,7 +31,8 @@ export function resolveUninstallEntryTarget(
@@ -245,7 +273,7 @@ index aa9461d..f8db05f 100644
        : join(deps.mainDir, '..', 'renderer', UNINSTALL_HTML),
      query: { [UNINSTALL_THEME_QUERY_KEY]: theme, ...(locale === undefined ? {} : { locale }) },
 diff --git a/packages/desktop/src/shared/ok-child-env.ts b/packages/desktop/src/shared/ok-child-env.ts
-index 3201add..b8d19ca 100644
+index 3201add9..b8d19ca4 100644
 --- a/packages/desktop/src/shared/ok-child-env.ts
 +++ b/packages/desktop/src/shared/ok-child-env.ts
 @@ -1,4 +1,5 @@
