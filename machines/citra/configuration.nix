@@ -9,13 +9,17 @@
     self.nixosModules.default
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
+    ../../nixosModules/postgresql.nix
     ./modules/disko.nix
+    ./modules/hermes
+    ./modules/hindsight.nix
     ./modules/initrd.nix
     ./modules/nixbot.nix
     ./modules/tribuchet.nix
     ./modules/network.nix
     ./modules/neko
     ../../nixosModules/gnome-desktop.nix
+    ./modules/searxng.nix
   ];
 
   networking.hostName = "citra";

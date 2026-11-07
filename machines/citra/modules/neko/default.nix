@@ -221,7 +221,7 @@ in
     allowedUDPPorts = [ ports.media ];
   };
 
-  # Hermes and job-01 on malt read this browser; no other Naru peer may reach CDP.
+  # job-01 on malt reads this browser; no other Naru peer may reach CDP.
   # A host relay, unlike a published port, passes through the input firewall.
   networking.firewall.extraInputRules = ''
     iifname "tinc.naru" ip saddr ${malt.ipv4} tcp dport ${toString ports.cdp.host} accept

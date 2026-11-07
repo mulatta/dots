@@ -12,7 +12,6 @@ let
   hermes = config.containers.hermes.config.services.hermes;
   aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
-  citra = self.nixosConfigurations.citra.config.networking.naru;
   hostAddress = "10.90.0.1";
   localAddress = "10.90.0.2";
   iface = "ve-hermes";
@@ -26,8 +25,6 @@ let
     searxng = 8888;
     neko-cdp = 9222;
   };
-  # Neko runs on citra, which relays its CDP port to malt only.
-  remoteServices.neko-cdp = "${citra.ipv4}:9222";
   url = port: "http://${hostAddress}:${toString port}";
 in
 {
@@ -119,7 +116,7 @@ in
   networking.nat = {
     enable = true;
     internalInterfaces = [ iface ];
-    externalInterface = "enp1s0";
+    externalInterface = "enp10s0";
   };
   networking.firewall.interfaces.${iface} = {
     allowedTCPPorts = [
@@ -153,9 +150,7 @@ in
     name: port:
     lib.nameValuePair "hermes-proxy-${name}" {
       serviceConfig = {
-        ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd ${
-          remoteServices.${name} or "127.0.0.1:${toString port}"
-        }";
+        ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd 127.0.0.1:${toString port}";
         DynamicUser = true;
         PrivateTmp = true;
       };

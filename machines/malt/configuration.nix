@@ -15,8 +15,6 @@
     # Radicle node transport leaks private repos until the next major release.
     # ../../nixosModules/radicle-mulatta.nix
     ./modules/disko.nix
-    ./modules/hermes
-    ./modules/hindsight.nix
     ./modules/home-assistant.nix
     ./modules/jellyfin
     ./modules/linkwarden.nix
@@ -26,7 +24,6 @@
     ./modules/paperless.nix
     ./modules/private-service.nix
     ./modules/rsshub.nix
-    ./modules/searxng.nix
     ./modules/sparkyfitness.nix
     ./modules/trek.nix
   ];
