@@ -18,9 +18,6 @@
         configure =
           { availablePlugins, ... }:
           {
-            scripts = with pkgs.weechatScripts; [
-              wee-slack
-            ];
             plugins = [
               availablePlugins.python
               availablePlugins.perl

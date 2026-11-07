@@ -100,8 +100,6 @@ in
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
     ".claude/skills/ctx".source = "${aiPkgs.ctx}/share/skills/ctx/ctx";
-    ".claude/skills/agent-slack".source = "${aiPkgs.agent-slack}/share/skills/agent-slack/agent-slack";
-
   };
 
   home.packages = [
@@ -117,7 +115,6 @@ in
         exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
-    aiPkgs.agent-slack
     aiPkgs.ccstatusline
     aiPkgs.codex
     aiPkgs.ctx
