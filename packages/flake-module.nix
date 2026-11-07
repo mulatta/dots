@@ -13,7 +13,6 @@
     in
     {
       packages = {
-        agentgateway = pkgs.callPackage ./agentgateway { };
         archify-cli = pkgs.callPackage ./archify-cli { };
         claude-code = pkgs.callPackage ./claude-code {
           claude-code = aiPkgs.claude-code;

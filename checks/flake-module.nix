@@ -4,7 +4,6 @@
     {
       config,
       lib,
-      pkgs,
       system,
       ...
     }:
@@ -38,20 +37,7 @@
           ) config.packages;
           devShells = lib.mapAttrs' (name: lib.nameValuePair "devShell-${name}") config.devShells;
 
-          # NixOS module VM tests only run on Linux.
-          nixosModules = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (
-            lib.mapAttrs' (name: lib.nameValuePair "nixosModule-${name}") {
-              agentgateway = pkgs.callPackage ../nixosModules/agentgateway/test.nix { };
-            }
-          );
-
         in
-        nixosMachines
-        // darwinMachines
-        // packages
-        // packageTests
-        // devShells
-        // homeConfigurations
-        // nixosModules;
+        nixosMachines // darwinMachines // packages // packageTests // devShells // homeConfigurations;
     };
 }
