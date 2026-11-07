@@ -151,7 +151,7 @@ let
             type = types.attrsOf types.str;
             default = { };
             example = {
-              AGENTGATEWAY_TOKEN = "noa-agentgateway-token";
+              OPENROUTER_API_KEY = "noa-openrouter-api-key";
             };
             description = "Further .env variables read from host credentials, for settings that name an env var such as a provider's key_env.";
           };
