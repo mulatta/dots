@@ -1,6 +1,7 @@
 {
   python3Packages,
   lib,
+  stdenv,
   makeWrapper,
   zenity,
 }:
@@ -26,7 +27,7 @@ py.buildPythonApplication {
     py.keyring
   ];
 
-  pythonImportsCheck = [ "rbw_pinentry" ];
+  pythonImportsCheck = [ "rbw_pinentry.cli" ];
 
   checkPhase = ''
     runHook preCheck
@@ -34,7 +35,8 @@ py.buildPythonApplication {
     runHook postCheck
   '';
 
-  postInstall = ''
+  # macOS uses the system osascript dialog.
+  postInstall = lib.optionalString (!stdenv.hostPlatform.isDarwin) ''
     wrapProgram $out/bin/rbw-pinentry \
       --prefix PATH : ${lib.makeBinPath [ zenity ]}
   '';
