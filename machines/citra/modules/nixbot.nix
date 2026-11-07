@@ -78,6 +78,7 @@ in
     prApproval.enable = true;
 
     buildSystems = [ "x86_64-linux" ];
+    buildMaxSilentTime = 60 * 60;
 
     github = {
       enable = true;
