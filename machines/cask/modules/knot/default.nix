@@ -1,19 +1,49 @@
 {
   self,
   config,
+  lib,
   pkgs,
   ...
 }:
 let
   ipv4 = config.networking.cask.ipv4.address;
   ipv6 = config.networking.cask.ipv6.address;
-  publicZone = pkgs.writeText "mulatta.io.zone" (
-    builtins.replaceStrings [ "@SERVICE_IPV4@" "@SERVICE_IPV6@" ] [ ipv4 ipv6 ] (
+  # The acme records mirror terraform/cloudflare/dns.tf until mulatta.io moves here.
+  publicZone = pkgs.writeText "mulatta.io.zone" ''
+    ${builtins.replaceStrings [ "@SERVICE_IPV4@" "@SERVICE_IPV6@" ] [ ipv4 ipv6 ] (
       builtins.readFile ./mulatta.io.zone
+    )}
+    acme IN NS ns1.mulatta.io.
+    ${lib.concatMapStrings (host: ''
+      _acme-challenge.${host}.ts IN CNAME ${acmeKey host}.
+    '') acmeHosts}
+  '';
+  # Hosts importing nixosModules/acme-knot, each with its own TSIG key.
+  # cask itself is skipped: its generators depend on this list.
+  acmeHosts = lib.attrNames (
+    lib.filterAttrs (name: machine: machine.config.clan.core.vars.generators ? "acme-tsig-${name}") (
+      removeAttrs self.nixosConfigurations [ config.networking.hostName ]
     )
   );
+  acmeKey = host: "${host}.acme.mulatta.io";
+  acmeZone = pkgs.writeText "acme.mulatta.io.zone" ''
+    $ORIGIN acme.mulatta.io.
+    $TTL 60
+    @ IN SOA ns1.mulatta.io. hostmaster.mulatta.io. 1 3600 600 604800 60
+    @ IN NS ns1.mulatta.io.
+  '';
 in
 {
+  clan.core.vars.generators = lib.genAttrs' acmeHosts (
+    host:
+    lib.nameValuePair "acme-tsig-${host}" (
+      lib.mkMerge [
+        (import ../../../../nixosModules/acme-knot/tsig.nix { inherit pkgs host; })
+        { files."knot-key.conf".owner = "knot"; }
+      ]
+    )
+  );
+
   sops.secrets."knot-keys.conf" = {
     owner = "knot";
     restartUnits = [ "knot.service" ];
@@ -21,7 +51,12 @@ in
 
   services.knot = {
     enable = true;
-    keyFiles = [ config.sops.secrets."knot-keys.conf".path ];
+    keyFiles = [
+      config.sops.secrets."knot-keys.conf".path
+    ]
+    ++ map (
+      host: config.clan.core.vars.generators."acme-tsig-${host}".files."knot-key.conf".path
+    ) acmeHosts;
     settings = {
       server.listen = [
         "${ipv4}@53"
@@ -41,7 +76,17 @@ in
           key = "52cc052c-fb0c-444c-9056-17c32c18d9bb.uniq.mulatta.io";
           action = "transfer";
         }
-      ];
+      ]
+      # An ACL with no key would accept unsigned updates.
+      ++ lib.optional (acmeHosts != [ ]) {
+        # Each host's key, named after its record, may only replace that TXT record.
+        id = "acme_update";
+        key = map acmeKey acmeHosts;
+        action = "update";
+        update-owner = "key";
+        update-owner-match = "equal";
+        update-type = [ "TXT" ];
+      };
 
       template = [
         {
@@ -75,6 +120,15 @@ in
           domain = "mulatta.io";
           file = "${publicZone}";
           template = "master";
+        }
+        {
+          # Hosts point _acme-challenge here, so DNS-01 never needs a Cloudflare token.
+          domain = "acme.mulatta.io";
+          file = "${acmeZone}";
+          acl = lib.optional (acmeHosts != [ ]) "acme_update";
+          zonefile-sync = "-1";
+          zonefile-load = "difference-no-serial";
+          journal-content = "all";
         }
       ];
     };

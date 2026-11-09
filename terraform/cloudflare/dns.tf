@@ -58,6 +58,28 @@ resource "cloudflare_dns_record" "ns1_aaaa" {
   }
 }
 
+# ACME DNS-01 challenges are answered by knot on cask, where each host's TSIG
+# key may only write its own record.
+resource "cloudflare_dns_record" "acme_ns" {
+  zone_id = local.zone_id
+  name    = "acme"
+  content = "ns1.${local.base_domain}"
+  type    = "NS"
+  ttl     = 300
+  comment = "ACME challenge zone on cask knot"
+}
+
+# Hosts importing nixosModules/acme-knot.
+resource "cloudflare_dns_record" "acme_challenge" {
+  for_each = toset(["citra"])
+  zone_id  = local.zone_id
+  name     = "_acme-challenge.${each.key}.ts"
+  content  = "${each.key}.acme.${local.base_domain}"
+  type     = "CNAME"
+  ttl      = 300
+  proxied  = false
+}
+
 resource "cloudflare_dns_record" "mail_a" {
   zone_id = local.zone_id
   name    = "mail"
