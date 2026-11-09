@@ -9,7 +9,6 @@
     (import ./radicle-httpd)
     (import ./atuin)
     (import ./afew)
-    (import ./sphinx-hook)
     (import ./php)
     (import ./hindsight { inherit inputs; })
   ];
