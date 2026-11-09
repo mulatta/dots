@@ -20,4 +20,12 @@
       ];
     };
   };
+
+  # Enroll after OIDC is available; keep .x DNS and routing intact.
+  # tailscale up --login-server=https://hs.mulatta.io --advertise-tags=tag:citra --accept-dns=false
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+    useRoutingFeatures = "none";
+  };
 }
