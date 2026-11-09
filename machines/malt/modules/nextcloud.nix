@@ -10,7 +10,8 @@ let
   kanidmDomain = "idm.mulatta.io";
   kanidmIssuer = "https://${kanidmDomain}/oauth2/openid/nextcloud";
 
-  # cask fronts Nextcloud as the public reverse proxy.
+  # Only the edge proxy may supply client identity headers.
+  cask = self.nixosConfigurations.cask.config.networking.naru;
 
   filesUser = "seungwon";
   filesDir = "/srv/files/${filesUser}";
@@ -102,7 +103,10 @@ in
 
     settings = {
       overwriteprotocol = "https";
-      trusted_proxies = [ "fdec:ca5f::/32" ];
+      trusted_proxies = [
+        cask.ipv4
+        cask.ipv6
+      ];
       default_phone_region = "KR";
       maintenance_window_start = 3; # 3 AM UTC
       files_external_allow_create_new_local = true;

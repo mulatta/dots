@@ -17,7 +17,8 @@
   <LocalNetworkSubnets />
   <LocalNetworkAddresses />
   <KnownProxies>
-    <string>@naruTrustedCidr@</string>
+    <string>@proxyIPv4@</string>
+    <string>@proxyIPv6@</string>
   </KnownProxies>
   <IgnoreVirtualInterfaces>true</IgnoreVirtualInterfaces>
   <VirtualInterfaceNames>

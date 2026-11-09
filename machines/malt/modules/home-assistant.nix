@@ -1,11 +1,13 @@
 {
   config,
+  self,
   pkgs,
   ...
 }:
 let
   secretsYaml = config.clan.core.vars.generators.home-assistant.files."secrets.yaml".path;
 
+  cask = self.nixosConfigurations.cask.config.networking.naru;
   domain = "home.mulatta.io";
   port = 8123;
 in
@@ -39,7 +41,10 @@ in
         server_host = "::";
         server_port = port;
         use_x_forwarded_for = true;
-        trusted_proxies = [ "fdec:ca5f::/32" ];
+        trusted_proxies = [
+          cask.ipv4
+          cask.ipv6
+        ];
         ip_ban_enabled = true;
         login_attempts_threshold = 5;
       };

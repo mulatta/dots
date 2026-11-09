@@ -6,6 +6,7 @@
   ...
 }:
 let
+  cask = self.nixosConfigurations.cask.config.networking.naru;
   port = 8096;
   portString = toString port;
   domain = "video.mulatta.io";
@@ -22,7 +23,8 @@ let
   ssoVersion = ssoPlugin.version;
   networkConfig = pkgs.replaceVars ./network.xml {
     inherit portString;
-    naruTrustedCidr = "fdec:ca5f::/32";
+    proxyIPv4 = cask.ipv4;
+    proxyIPv6 = cask.ipv6;
   };
   brandingConfig = pkgs.replaceVars ./branding.xml {
     inherit ssoStartUrl ssoLoginLabel;
