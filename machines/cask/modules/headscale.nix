@@ -1,15 +1,53 @@
 # Keep the personal tailnet separate from the existing .x management mesh.
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   domain = "hs.mulatta.io";
+  # headscale assigns these at registration; re-registering a node changes them.
+  tailnetIPs.citra = "100.64.0.1";
+  # MagicDNS takes only A and AAAA records, so service names point at addresses.
+  extraRecords = lib.concatLists (
+    lib.mapAttrsToList (
+      host: address:
+      map (name: {
+        name = "${name}.ts.mulatta.io";
+        type = "A";
+        value = address;
+      }) self.nixosConfigurations.${host}.config.mulatta.tailnetNames
+    ) tailnetIPs
+  );
+  namedHosts = lib.attrNames (
+    lib.filterAttrs (
+      _: machine: machine.config.mulatta.tailnetNames or [ ] != [ ]
+    ) self.nixosConfigurations
+  );
   port = 8089;
   aclPolicy = {
     tagOwners."tag:citra" = [ "seungwon@" ];
     # Only explicitly selected services belong on this network.
-    acls = [ ];
+    acls = [
+      {
+        # ovis on citra, behind nginx with a knot-issued certificate.
+        action = "accept";
+        src = [ "seungwon@" ];
+        dst = [ "tag:citra:443" ];
+      }
+    ];
   };
 in
 {
+  assertions = [
+    {
+      assertion = lib.all (host: tailnetIPs ? ${host}) namedHosts;
+      message = "headscale: add the tailnet address of every host with mulatta.tailnetNames to tailnetIPs";
+    }
+  ];
+
   services.headscale = {
     enable = true;
     address = "127.0.0.1";
@@ -20,6 +58,7 @@ in
         magic_dns = true;
         # MagicDNS must not capture the control server's domain.
         base_domain = "ts.mulatta.io";
+        extra_records = extraRecords;
         override_local_dns = false;
       };
       oidc = {

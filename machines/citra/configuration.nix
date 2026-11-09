@@ -21,6 +21,7 @@
     ../../nixosModules/gnome-desktop.nix
     ./modules/searxng.nix
     ../../nixosModules/acme-knot
+    ./modules/ovis.nix
   ];
 
   networking.hostName = "citra";

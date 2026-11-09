@@ -1,13 +1,25 @@
 # A tailnet certificate whose DNS-01 challenge is answered by knot on cask.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   host = config.networking.hostName;
   generator = "acme-tsig-${host}";
 in
 {
-  clan.core.vars.generators.${generator} = import ./tsig.nix { inherit pkgs host; };
+  options.mulatta.tailnetNames = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = "Service names under ts.mulatta.io that this host serves and certifies.";
+  };
 
-  security.acme.certs."${host}.ts.mulatta.io" = {
+  config.clan.core.vars.generators.${generator} = import ./tsig.nix { inherit pkgs host; };
+
+  config.security.acme.certs."${host}.ts.mulatta.io" = {
+    extraDomainNames = map (name: "${name}.ts.mulatta.io") config.mulatta.tailnetNames;
     dnsProvider = "rfc2136";
     environmentFile = pkgs.writeText "acme-rfc2136.env" ''
       RFC2136_NAMESERVER=ns1.mulatta.io

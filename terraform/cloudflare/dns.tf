@@ -69,12 +69,13 @@ resource "cloudflare_dns_record" "acme_ns" {
   comment = "ACME challenge zone on cask knot"
 }
 
-# Hosts importing nixosModules/acme-knot.
+# Names under ts.mulatta.io, each mapped to the host that certifies it
+# (nixosModules/acme-knot and its mulatta.tailnetNames).
 resource "cloudflare_dns_record" "acme_challenge" {
-  for_each = toset(["citra"])
+  for_each = { citra = "citra", ovis = "citra" }
   zone_id  = local.zone_id
   name     = "_acme-challenge.${each.key}.ts"
-  content  = "${each.key}.acme.${local.base_domain}"
+  content  = "${each.value}.acme.${local.base_domain}"
   type     = "CNAME"
   ttl      = 300
   proxied  = false

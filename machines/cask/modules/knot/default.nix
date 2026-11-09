@@ -14,9 +14,12 @@ let
       builtins.readFile ./mulatta.io.zone
     )}
     acme IN NS ns1.mulatta.io.
-    ${lib.concatMapStrings (host: ''
-      _acme-challenge.${host}.ts IN CNAME ${acmeKey host}.
-    '') acmeHosts}
+    ${lib.concatMapStrings (
+      host:
+      lib.concatMapStrings (name: ''
+        _acme-challenge.${name}.ts IN CNAME ${acmeKey host}.
+      '') ([ host ] ++ self.nixosConfigurations.${host}.config.mulatta.tailnetNames)
+    ) acmeHosts}
   '';
   # Hosts importing nixosModules/acme-knot, each with its own TSIG key.
   # cask itself is skipped: its generators depend on this list.

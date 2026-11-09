@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   self,
@@ -8,6 +9,7 @@
 let
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  ovis = aiPkgs.ovis.override { runtime = "herdr-core"; };
 in
 {
   imports = [
@@ -20,9 +22,24 @@ in
   home.packages = [
     selfPkgs.rbw-pinentry
     pkgs.kanidm_1_11
-    # Started on demand behind `tailscale serve`.
-    (aiPkgs.ovis.override { runtime = "herdr-core"; })
+    ovis
   ];
+
+  # No [Install]: `systemctl --user start ovis` when needed; nginx serves it to the tailnet.
+  systemd.user.services.ovis = {
+    Unit.Description = "ovis web UI for herdr-core";
+    Service = {
+      ExecStart = lib.getExe ovis;
+      # hc may start the core from here, and its terminals should see the login PATH.
+      Environment = "PATH=${
+        lib.concatStringsSep ":" [
+          "/run/wrappers/bin"
+          "${config.home.profileDirectory}/bin"
+          "/run/current-system/sw/bin"
+        ]
+      }";
+    };
+  };
 
   # The RDP session draws on a virtual monitor, not the TV, and RDP credentials
   # already gate it; a lock on every reconnect only repeats the login.
