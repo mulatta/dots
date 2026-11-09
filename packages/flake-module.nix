@@ -81,9 +81,6 @@
         openlogi = pkgs.callPackage ./openlogi { };
         radicle-desktop = pkgs.callPackage ./radicle-desktop { };
         systemctl-macos = pkgs.callPackage ./systemctl { };
-      }
-      // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
-        neko-image = pkgs.callPackage ./neko-image { };
       };
     };
 }

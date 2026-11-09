@@ -24,8 +24,6 @@ python3Packages.buildPythonApplication {
     fileset = lib.fileset.unions [
       ./.
       ../radicle-desktop/update.py
-      ../neko-image/update.py
-      ../neko-image/default.nix
     ];
   };
   sourceRoot = "source/updater";

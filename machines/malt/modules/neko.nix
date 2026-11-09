@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  self,
   ...
 }:
 let
@@ -36,7 +35,8 @@ let
     };
   };
 
-  image = self.packages.${pkgs.stdenv.hostPlatform.system}.neko-image;
+  # The digest keeps a re-pushed tag from changing the browser under its saved profile.
+  image = "ghcr.io/m1k1o/neko/chromium:3.2.0@sha256:270face8b8111e639744fb7bcdbbf0deed227900bb89d58b2f8adfc12af8c41e";
 
   podmanNetworkConfig = (pkgs.formats.json { }).generate "neko-podman-network.json" {
     name = network.name;
@@ -255,9 +255,7 @@ in
   virtualisation.oci-containers = {
     backend = "podman";
     containers.neko = {
-      image = "${image.imageName}:${image.imageTag}";
-      imageFile = image;
-      pull = "never";
+      inherit image;
       hostname = "neko";
       networks = [ network.name ];
       environmentFiles = [ secretEnv ];
