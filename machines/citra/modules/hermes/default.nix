@@ -107,6 +107,8 @@ in
           client = selfPkgs.hindsight-client;
           plugins = selfPkgs.hindsight-plugins;
         };
+        # Hermes' browser tools shell out to agent-browser, which attaches to Neko.
+        packages = [ aiPkgs.agent-browser ];
         browser.cdpUrl = url loopbackServices.neko-cdp;
         search.searxngUrl = url loopbackServices.searxng;
       };
