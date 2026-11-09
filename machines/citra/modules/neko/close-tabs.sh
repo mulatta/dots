@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Close Neko pages nobody has used for IDLE_SECONDS; reads CDP_URL and UI_PORT.
 cdp=$CDP_URL
 state="$STATE_DIRECTORY/seen.json"
