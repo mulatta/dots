@@ -5,6 +5,7 @@
   ...
 }:
 let
+  cask = self.nixosConfigurations.cask.config.networking.naru;
   domain = "rss.mulatta.io";
   port = 8080;
 in
@@ -168,12 +169,10 @@ in
     IPAddressAllow = [
       "127.0.0.1/32"
       "::1/128"
-      # The fc00::/7 deny below also covers the Naru mesh, which would
-      # drop both the cask reverse-proxy ingress that serves the site and our
-      # local provisioning reaches the wildcard listener over loopback.
-      # Allow wins over Deny: re-permit the authenticated Naru mesh while the
-      # SSRF egress guard still blocks other private networks.
-      "fdec:ca5f::/32"
+      # The private-network deny also covers proxy replies. Permit only
+      # cask on both address families without reopening the entire mesh.
+      "${cask.ipv4}/32"
+      "${cask.ipv6}/128"
     ];
     IPAddressDeny = [
       "10.0.0.0/8"
@@ -186,5 +185,8 @@ in
     ];
   };
 
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${cask.ipv4} tcp dport ${toString port} accept
+    iifname "tinc.naru" ip6 saddr ${cask.ipv6} tcp dport ${toString port} accept
+  '';
 }

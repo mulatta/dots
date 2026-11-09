@@ -63,6 +63,12 @@ fronts them over Naru. Example: `nextcloud.nix`.
 }
 ```
 
+Backend-only ports accept cask's Naru IPv4 and IPv6 addresses through
+`networking.firewall.extraInputRules` in the backend's service module. Do not
+also add those ports to interface-wide `allowedTCPPorts`: that would bypass
+the source restriction. Direct-client services keep their separate policies;
+in particular, nixbot HTTP ingress is distinct from the Tribuchet worker port.
+
 ### C. SPA / proxied app with default-deny `.well-known`
 
 Keep service-specific routes in the owner module. `security-txt.nix` adds the

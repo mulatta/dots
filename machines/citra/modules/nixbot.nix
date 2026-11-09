@@ -6,6 +6,7 @@
   ...
 }:
 let
+  cask = self.nixosConfigurations.cask.config.networking.naru;
   domain = "nixbot.mulatta.io";
   gen = config.clan.core.vars.generators;
   inherit (config.networking) naru;
@@ -112,5 +113,8 @@ in
       port = 80;
     }
   ];
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ 80 ];
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${cask.ipv4} tcp dport 80 accept
+    iifname "tinc.naru" ip6 saddr ${cask.ipv6} tcp dport 80 accept
+  '';
 }

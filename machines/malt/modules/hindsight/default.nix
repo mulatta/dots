@@ -183,5 +183,8 @@ in
     };
   };
 
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ relayPort ];
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${cask.ipv4} tcp dport ${toString relayPort} accept
+    iifname "tinc.naru" ip6 saddr ${cask.ipv6} tcp dport ${toString relayPort} accept
+  '';
 }

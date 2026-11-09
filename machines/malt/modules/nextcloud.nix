@@ -265,5 +265,8 @@ in
   };
 
   # Allow access from WireGuard interface
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ 80 ];
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${cask.ipv4} tcp dport 80 accept
+    iifname "tinc.naru" ip6 saddr ${cask.ipv6} tcp dport 80 accept
+  '';
 }

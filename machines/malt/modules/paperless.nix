@@ -5,6 +5,7 @@
   ...
 }:
 let
+  cask = self.nixosConfigurations.cask.config.networking.naru;
   port = 28981;
   uiDomain = "paperless.mulatta.io";
   apiDomain = "paperless-api.mulatta.io";
@@ -124,5 +125,8 @@ in
     requires = [ "postgresql.service" ];
   };
 
-  networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ port ];
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${cask.ipv4} tcp dport ${toString port} accept
+    iifname "tinc.naru" ip6 saddr ${cask.ipv6} tcp dport ${toString port} accept
+  '';
 }
