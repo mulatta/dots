@@ -62,6 +62,12 @@ writeShellApplication {
       fi
     fi
 
+    # mbsync creates mailboxes but not a MaildirStore's Path, so a fresh
+    # machine fails before the first sync.
+    grep '^Path ' "$ISYNC_CONFIG" | while read -r _ dir; do
+      mkdir -p "''${dir/#\~/$HOME}"
+    done
+
     echo "Syncing emails from IMAP servers..."
     mbsync -c "$ISYNC_CONFIG" -a
 
