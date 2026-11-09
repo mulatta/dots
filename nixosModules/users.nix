@@ -3,6 +3,8 @@ let
   seungwonKey = [
     # Secretive Secure Enclave key on rhesus (daily SSH from laptop).
     "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAbiIX1IpgsaylNgtDb04IM4jQKlU+RVwDr8YGfXLwuHWn3xydzTYeg3o/T9UX/j2326D7tnL7kMq7XvmhuSd8Y= ssh@secretive.rhesus.local"
+    # citra workstation.
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILsNxLymPlu3+FJmn1/uBATTN8xgJ2UJQi7VddQJfif6 seungwon@citra"
   ];
 
 in
