@@ -135,13 +135,27 @@ let
       IncognitoModeAvailability = 1;
       PasswordManagerEnabled = false;
       PromptForDownloadLocation = false;
-      RestoreOnStartup = 1;
+      # Agents leave tabs behind; restoring them keeps their pages rendering.
+      RestoreOnStartup = 5;
       SyncDisabled = true;
       VideoCaptureAllowed = true;
     }
   );
 
   secretEnv = config.clan.core.vars.generators.kanidm-neko-oidc.files.env.path;
+
+  closeTabs = pkgs.writeShellApplication {
+    name = "neko-close-tabs";
+    runtimeInputs = [
+      config.virtualisation.podman.package
+      pkgs.curl
+      pkgs.iproute2
+      pkgs.jq
+      pkgs.util-linux
+      pkgs.websocat
+    ];
+    text = builtins.readFile ./close-tabs.sh;
+  };
 in
 {
   clan.core.vars.generators.kanidm-neko-oidc = {
@@ -250,6 +264,30 @@ in
       image
       pkgs.pkgsStatic.socat
     ];
+  };
+
+  # Agent-browser leaves pages open over CDP; without CDP it drops the whole
+  # browser after two idle minutes, so closing idle pages loses no more.
+  systemd.services.neko-close-tabs = {
+    requisite = [ "podman-neko.service" ];
+    after = [ "podman-neko.service" ];
+    environment = {
+      CDP_URL = "http://127.0.0.1:${toString ports.cdp.host}";
+      UI_PORT = toString ports.ui.container;
+      # Below the timer period so slack cannot skip a run: a page closes at
+      # the second run that finds it unchanged.
+      IDLE_SECONDS = "250";
+    };
+    # Root reads the container's sockets through nsenter.
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = lib.getExe closeTabs;
+      StateDirectory = "neko-close-tabs";
+    };
+  };
+  systemd.timers.neko-close-tabs = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "*:0/5";
   };
 
   virtualisation.oci-containers = {

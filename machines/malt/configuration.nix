@@ -22,7 +22,7 @@
     ./modules/linkwarden.nix
     ./modules/miniflux
     ./modules/network.nix
-    ./modules/neko.nix
+    ./modules/neko
     ./modules/nextcloud.nix
     ./modules/paperless.nix
     ./modules/private-service.nix
