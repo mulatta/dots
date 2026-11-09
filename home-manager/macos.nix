@@ -92,6 +92,7 @@ in
     selfPkgs.radicle-desktop
     pkgs.chatgpt
     aiPkgs.hermes-desktop
+    aiPkgs.herdr-app
     selfPkgs.rbw-pinentry
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt

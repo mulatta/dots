@@ -92,6 +92,7 @@ in
     ".pi/agent/extensions/herdr-agent-state.ts".source =
       "${aiPkgs.herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
     ".claude/skills/herdr".source = "${aiPkgs.herdr}/share/skills/herdr/herdr";
+    ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
@@ -100,6 +101,8 @@ in
 
   home.packages = [
     qmd
+    # herdr-app reaches other machines over SSH and looks for hc on their PATH.
+    aiPkgs.herdr-core
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md

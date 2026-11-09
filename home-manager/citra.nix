@@ -2,10 +2,12 @@
   pkgs,
   lib,
   self,
+  inputs,
   ...
 }:
 let
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+  aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
   imports = [
@@ -18,6 +20,8 @@ in
   home.packages = [
     selfPkgs.rbw-pinentry
     pkgs.kanidm_1_11
+    # Started on demand behind `tailscale serve`.
+    (aiPkgs.ovis.override { runtime = "herdr-core"; })
   ];
 
   # The RDP session draws on a virtual monitor, not the TV, and RDP credentials
