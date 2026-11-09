@@ -40,7 +40,6 @@
         let
           files = [
             ".config/openlogi/config.toml"
-            ".prime/agent/settings.json"
           ];
         in
         {

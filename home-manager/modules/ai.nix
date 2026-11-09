@@ -29,10 +29,6 @@ let
     (bioPkgs.dna-features-viewer.override { python3Packages = ps; })
   ];
 
-  primeAgent = aiPkgs.prime-agent.override {
-    extraPythonPackages = agentPython;
-  };
-
   piPython = pkgs.python3.withPackages agentPython;
 
   nixbot-cli =
@@ -122,13 +118,6 @@ in
     aiPkgs.jscpd
     aiPkgs.officecli
     aiPkgs.openspec
-    (pkgs.writeShellApplication {
-      name = "pa";
-      text = ''
-        ${pkgs.pueue}/bin/pueued -d > /dev/null 2>&1 || true
-        exec ${primeAgent}/bin/prime-agent "$@"
-      '';
-    })
     aiPkgs.tuicr
     nixbot-cli
     pkgs.pueue

@@ -27,4 +27,3 @@ _darcs
 
 # Apps atomically replace these files; pre-stow-mutable seeds writable copies.
 ^/\.config/openlogi/config\.toml$
-^/\.prime/agent/settings\.json$
