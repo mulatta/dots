@@ -29,7 +29,7 @@
         taps.machineClass = "nixos";
         cask = {
           machineClass = "nixos";
-          deploy.targetHost = "root@cask.i";
+          deploy.targetHost = "root@cask.x";
         };
         pint = {
           machineClass = "nixos";

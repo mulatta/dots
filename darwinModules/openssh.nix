@@ -1,6 +1,22 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  self,
+  ...
+}:
 let
   sshCaPubKey = ../vars/shared/openssh-ca/id_ed25519.pub/value;
+  citra = self.nixosConfigurations.citra.config;
+  allowedSources = [
+    "127.0.0.1"
+    "::1"
+    citra.networking.naru.ipv4
+    citra.networking.naru.ipv6
+  ]
+  ++ map (address: lib.head (lib.splitString "/" address)) (
+    lib.filter (lib.hasInfix ":") citra.networking.wireguard.interfaces.wireguard.ips
+  );
 in
 {
   users.users.seungwon.openssh.authorizedKeys.keys = [
@@ -35,5 +51,11 @@ in
     Host *.local
       StrictHostKeyChecking accept-new
   '';
+  # Darwin's SSH socket remains reachable, but only citra may authenticate
+  # remotely. Keep loopback usable for local maintenance.
+  services.openssh.extraConfig = ''
+    AllowUsers ${lib.concatMapStringsSep " " (address: "*@${address}") allowedSources}
+  '';
+
   environment.systemPackages = [ pkgs.openssh ];
 }

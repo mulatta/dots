@@ -1,10 +1,21 @@
 {
   config,
+  self,
   lib,
   pkgs,
   ...
 }:
 let
+  rhesus = self.darwinConfigurations.rhesus.config;
+  sources = {
+    wireguard = map (address: lib.head (lib.splitString "/" address)) (
+      lib.filter (lib.hasInfix ":") rhesus.networking.wg-quick.interfaces.wireguard.address
+    );
+    "tinc.naru" = [
+      rhesus.networking.naru.ipv4
+      rhesus.networking.naru.ipv6
+    ];
+  };
   grd = pkgs.gnome-remote-desktop;
   gen = config.clan.core.vars.generators.gnome-remote-desktop;
 in
@@ -78,8 +89,23 @@ in
   };
 
   # Naru is direct on the LAN; WireGuard is steadier from outside.
-  networking.firewall.interfaces = lib.genAttrs [ "tinc.naru" "wireguard" ] (_: {
-    allowedTCPPorts = [ 3389 ];
-    allowedUDPPorts = [ 3389 ];
-  });
+  networking.firewall.extraInputRules = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (
+      interface: addresses:
+      lib.concatMapStringsSep "\n" (
+        address:
+        let
+          family = if lib.hasInfix ":" address then "ip6" else "ip";
+        in
+        lib.concatMapStringsSep "\n"
+          (protocol: ''
+            iifname "${interface}" ${family} saddr ${address} ${protocol} dport 3389 accept
+          '')
+          [
+            "tcp"
+            "udp"
+          ]
+      ) addresses
+    ) sources
+  );
 }
