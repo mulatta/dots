@@ -1,6 +1,6 @@
 { ... }:
 {
-  # UI/signalling only. Media stays on Naru; Chromium CDP stays on malt loopback.
+  # UI/signalling only. Media stays on Naru; Chromium CDP stays off the public proxy.
   services.nginx.virtualHosts."neko.mulatta.io" = {
     useACMEHost = "mulatta.io";
     forceSSL = true;
@@ -9,7 +9,7 @@
       if ($block_dotted) { return 404; }
     '';
     locations."/" = {
-      proxyPass = "http://malt.n:8082";
+      proxyPass = "http://citra.n:8082";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_buffering off;

@@ -14,6 +14,7 @@
     ./modules/nixbot.nix
     ./modules/tribuchet.nix
     ./modules/network.nix
+    ./modules/neko
     ../../nixosModules/gnome-desktop.nix
   ];
 

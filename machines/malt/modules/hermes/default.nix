@@ -10,6 +10,7 @@ let
   cfg = config.services.hermes;
   aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+  citra = self.nixosConfigurations.citra.config.networking.naru;
   stateDir = "/var/lib/hermes";
   # Host and container must agree so the bind-mounted state keeps its owner.
   hermesId = 2001;
@@ -128,7 +129,8 @@ in
         TZ = "Asia/Seoul";
         HOME = stateDir;
         HERMES_HOME = "${stateDir}/.hermes";
-        BROWSER_CDP_URL = "http://127.0.0.1:9222";
+        # Chromium refuses DevTools requests whose Host is a name, so use the address.
+        BROWSER_CDP_URL = "http://${citra.ipv4}:9222";
         SEARXNG_URL = "http://127.0.0.1:8888";
         HERMES_INFERENCE_PROVIDER = model.provider;
         HERMES_INFERENCE_MODEL = model.default;

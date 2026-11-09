@@ -6,6 +6,7 @@
 let
   mediaDir = "/srv/media/job-01";
   vars = config.clan.core.vars.generators;
+  citra = self.nixosConfigurations.citra.config.networking.naru;
   # Gitea is served by cask's sshd, so its host key is cask's.
   giteaKnownHosts = builtins.toFile "gitea-known-hosts" ''
     git.mulatta.io ${builtins.readFile ../../../vars/per-machine/cask/openssh/ssh.id_ed25519.pub/value}
@@ -61,7 +62,8 @@ in
       autoUpdate.enable = false;
       settings = {
         inherit mediaDir;
-        browserUnits = [ "podman-neko.service" ];
+        # Neko runs on citra; Chromium only answers DevTools requests addressed by IP.
+        cdpUrl = "http://${citra.ipv4}:9222";
         triggerUrl = "https://ntfy.mulatta.io/job-01";
         reportUrl = "https://ntfy.mulatta.io/automation";
         ntfyCredentialFile = vars.ntfy-job-01.files.credential.path;

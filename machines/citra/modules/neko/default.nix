@@ -2,9 +2,11 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 let
+  malt = self.nixosConfigurations.malt.config.networking.naru;
   ports = {
     ui = {
       host = 8082;
@@ -219,13 +221,29 @@ in
     allowedUDPPorts = [ ports.media ];
   };
 
+  # Hermes and job-01 on malt read this browser; no other Naru peer may reach CDP.
+  # A host relay, unlike a published port, passes through the input firewall.
+  networking.firewall.extraInputRules = ''
+    iifname "tinc.naru" ip saddr ${malt.ipv4} tcp dport ${toString ports.cdp.host} accept
+  '';
+  systemd.sockets.neko-cdp-naru = {
+    wantedBy = [ "sockets.target" ];
+    listenStreams = [ "${config.networking.naru.ipv4}:${toString ports.cdp.host}" ];
+    socketConfig.FreeBind = true;
+  };
+  systemd.services.neko-cdp-naru.serviceConfig = {
+    ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd 127.0.0.1:${toString ports.cdp.host}";
+    DynamicUser = true;
+    PrivateTmp = true;
+  };
+
   networking.firewall.extraForwardRules = ''
     iifname "tinc.naru" oifname "${network.interface}" tcp dport { ${toString ports.ui.container}, ${toString ports.media} } accept
     iifname "tinc.naru" oifname "${network.interface}" udp dport ${toString ports.media} accept
     iifname "${network.interface}" oifname "tinc.naru" ct state established,related accept
   '';
 
-  # Keep the browser away from malt and overlay-network services if a visited
+  # Keep the browser away from citra and overlay-network services if a visited
   # page compromises Chromium. Internet egress remains available.
   networking.nftables.tables.neko-isolation = {
     family = "inet";
