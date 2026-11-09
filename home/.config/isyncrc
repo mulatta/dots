@@ -1,5 +1,4 @@
 IMAPAccount mulatta
-CertificateFile /etc/ssl/cert.pem
 Host mail.mulatta.io
 PassCmd "rbw get 'mulatta.io'"
 Port 993
@@ -10,8 +9,8 @@ IMAPStore mulatta-remote
 Account mulatta
 
 MaildirStore mulatta-local
-Inbox /Users/seungwon/.local/share/mail/mulatta/Inbox
-Path /Users/seungwon/.local/share/mail/mulatta/
+Inbox ~/.local/share/mail/mulatta/Inbox
+Path ~/.local/share/mail/mulatta/
 SubFolders Verbatim
 
 Channel mulatta

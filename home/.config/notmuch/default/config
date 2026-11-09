@@ -1,5 +1,5 @@
 [database]
-path=/Users/seungwon/.local/share/mail
+path=.local/share/mail
 
 [new]
 tags=new
