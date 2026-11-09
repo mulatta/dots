@@ -49,7 +49,6 @@ ntfy          IN A @SERVICE_IPV4@
 tasks         IN A @SERVICE_IPV4@
 zotero        IN A @SERVICE_IPV4@
 trek          IN A @SERVICE_IPV4@
-minecraft     IN A 100.64.0.1
 
 www          IN CNAME mulatta.io.
 autodiscover IN CNAME mail.mulatta.io.
