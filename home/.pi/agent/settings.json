@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "99.99.99",
   "followUpMode": "all",
-  "defaultProvider": "openai-codex",
+  "defaultProvider": "openai",
   "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "low",
   "skills": [
