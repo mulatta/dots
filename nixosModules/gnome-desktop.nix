@@ -72,6 +72,8 @@ in
     restartTriggers = [ config.environment.etc."gnome-remote-desktop/grd.conf".source ];
   };
 
+  systemd.user.services.obex.enable = false;
+
   # Only gnome-remote-desktop may configure the system daemon (its polkit rule).
   systemd.services.gnome-remote-desktop-credentials = {
     description = "Load the RDP credentials into gnome-remote-desktop";
