@@ -5,7 +5,6 @@
     "defaultMode": "auto"
   },
   "model": "opus",
-  "remoteControlAtStartup": true,
   "skillOverrides": {
     "agent-slack": "name-only",
     "calendar-cli": "name-only",
@@ -30,22 +29,13 @@
     "command": "ccstatusline",
     "padding": 0
   },
-  "extraKnownMarketplaces": {
-    "ponytail": {
-      "source": {
-        "source": "github",
-        "repo": "DietrichGebert/ponytail"
-      }
-    }
-  },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
   "autoCompactEnabled": false,
   "switchModelsOnFlag": true,
+  "remoteControlAtStartup": true,
   "skipAutoPermissionPrompt": true,
-  "enabledPlugins": {
-    "ponytail@ponytail": true
-  }
+  "agentPushNotifEnabled": true
 }
