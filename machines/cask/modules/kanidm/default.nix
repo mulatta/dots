@@ -62,6 +62,7 @@ in
       autoRemove = true;
 
       groups = {
+        headscale_users.members = [ "seungwon" ];
         mail_users = {
           members = [
             "seungwon"

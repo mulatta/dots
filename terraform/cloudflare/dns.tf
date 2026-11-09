@@ -116,7 +116,7 @@ resource "cloudflare_dns_record" "vaultwarden_a" {
 # Tailscale noise/DERP long-poll connections break behind Cloudflare's proxy.
 resource "cloudflare_dns_record" "headscale_a" {
   zone_id = local.zone_id
-  name    = "headscale"
+  name    = "hs"
   content = local.service_ip
   type    = "A"
   ttl     = 300

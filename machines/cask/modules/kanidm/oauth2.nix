@@ -52,6 +52,22 @@ let
 in
 {
   clients = {
+    headscale = {
+      displayName = "Headscale";
+      originUrl = "https://hs.${baseDomain}/oidc/callback";
+      originLanding = "https://hs.${baseDomain}";
+      public = false;
+      enableLocalhostRedirects = false;
+      preferShortUsername = true;
+      basicSecretFile = config.clan.core.vars.generators.kanidm-headscale-oidc.files.kanidm-secret.path;
+      # Scope maps are the login allow-list, independent of network ACLs.
+      scopeMaps.headscale_users = [
+        "openid"
+        "email"
+        "profile"
+      ];
+    };
+
     # Neko requires a confidential client and sends S256 PKCE.
     neko = {
       displayName = "Neko";
@@ -376,6 +392,22 @@ in
   };
 
   generators = {
+    kanidm-headscale-oidc = {
+      files.kanidm-secret = {
+        secret = true;
+        owner = "kanidm";
+      };
+      files.headscale-secret = {
+        secret = true;
+        owner = "headscale";
+      };
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 32 | tr -d '\n' > "$out/kanidm-secret"
+        cp "$out/kanidm-secret" "$out/headscale-secret"
+      '';
+    };
+
     kanidm-neko-oidc = {
       share = true;
       files.client-secret = {
