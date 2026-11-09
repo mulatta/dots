@@ -60,7 +60,7 @@ in
       publicKey = builtins.readFile config.clan.core.vars.generators.radicle.files.ssh-public-key.path;
 
       node = {
-        openFirewall = true;
+        openFirewall = lib.mkDefault true;
         listenAddress = "[::]";
         listenPort = 8776;
       };

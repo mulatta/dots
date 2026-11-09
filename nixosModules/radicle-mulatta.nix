@@ -1,7 +1,15 @@
+{ config, lib, ... }:
 {
   imports = [ ./radicle-node.nix ];
 
+  # Personal nodes accept peers over Naru, not the public or management networks.
+  networking.firewall.interfaces."tinc.naru".allowedTCPPorts =
+    lib.mkIf config.services.radicle.enable
+      [ config.services.radicle.node.listenPort ];
+
   services.radicle = {
+    node.openFirewall = false;
+
     # DIDs to follow (auto-accept repos from these identities)
     followDids = [
       "did:key:z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY" # taps
@@ -18,7 +26,7 @@
     ];
 
     # Personal nodes to connect
-    # NAT-behind nodes use WireGuard addresses since they have no public DNS.
+    # NAT-behind nodes use Naru for direct mesh connections.
     connectNodes = [
       "z6MkkV8YjYkBowG8oFyMqwe1Lnp3B9TmJtTSjNNFY6mcxGJY@rad.mulatta.io:8776"
       "z6MkqRXPuCo1ykP1korSc2sMKjTQxyHcvuSG3D2CQ17ZmFgd@malt.n:8776"
