@@ -50,7 +50,8 @@
               runtimeInputs = [ pkgs.coreutils ];
               text = ''
                 umask 077
-                for relative in ${lib.escapeShellArgs files}; do
+                files=(${lib.escapeShellArgs files})
+                for relative in "''${files[@]}"; do
                   source="$HOME/dots/home/$relative"
                   target="$HOME/$relative"
                   [[ -f "$source" ]] || continue
