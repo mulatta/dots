@@ -22,6 +22,7 @@
           config.containers.hermes.hostAddress
         ];
         tokenFile = config.clan.core.vars.generators.youtube-mcp.files.token.path;
+        writes = [ "all" ];
       };
     };
   };
