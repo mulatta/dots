@@ -11,10 +11,7 @@ let
   hubPort = 7437;
 in
 {
-  imports = [
-    tribuchet.nixosModules.default
-    self.inputs.flakelet.nixosModules.flakelet
-  ];
+  imports = [ tribuchet.nixosModules.default ];
 
   # psi's worker uses worker.{crt,key} from this CA.
   clan.core.vars.generators.tribuchet = {

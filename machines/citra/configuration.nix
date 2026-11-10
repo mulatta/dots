@@ -9,6 +9,7 @@
     self.nixosModules.default
     self.inputs.srvos.nixosModules.server
     self.inputs.disko.nixosModules.disko
+    self.inputs.flakelet.nixosModules.flakelet
     ../../nixosModules/postgresql.nix
     ./modules/disko.nix
     ./modules/hermes
@@ -22,6 +23,7 @@
     ./modules/searxng.nix
     ../../nixosModules/acme-knot
     ./modules/ovis.nix
+    ./modules/mcp-servers/youtube.nix
   ];
 
   networking.hostName = "citra";
