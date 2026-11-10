@@ -22,6 +22,7 @@ in
   home.packages = [
     selfPkgs.rbw-pinentry
     pkgs.kanidm_1_11
+    pkgs.wl-clipboard
     ovis
   ];
 

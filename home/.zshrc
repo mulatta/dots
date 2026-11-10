@@ -463,8 +463,21 @@ if [[ -f ~/.nix-profile/share/zsh-helix-mode/zsh-helix-mode.plugin.zsh ]]; then
     export ZHM_CLIPBOARD_PIPE_CONTENT_TO="pbcopy"
     export ZHM_CLIPBOARD_READ_CONTENT_FROM="pbpaste"
   else
-    export ZHM_CLIPBOARD_PIPE_CONTENT_TO="wl-copy"
-    export ZHM_CLIPBOARD_READ_CONTENT_FROM="wl-paste"
+    # Panes (herdr, SSH) may be viewed remotely while a compositor runs, so feed both clipboards.
+    zhm_clip_copy() {
+      local s
+      s=$(cat; print x)
+      s=${s%x}
+      if (( $+commands[wl-copy] )) && [[ -n $WAYLAND_DISPLAY ]]; then
+        print -rn -- "$s" | wl-copy 2>/dev/null
+      fi
+      print -rn -- "$s" | osc52
+    }
+    zhm_clip_paste() {
+      (( $+commands[wl-paste] )) && wl-paste --no-newline 2>/dev/null
+    }
+    export ZHM_CLIPBOARD_PIPE_CONTENT_TO="zhm_clip_copy"
+    export ZHM_CLIPBOARD_READ_CONTENT_FROM="zhm_clip_paste"
   fi
   source ~/.nix-profile/share/zsh-helix-mode/zsh-helix-mode.plugin.zsh
 
