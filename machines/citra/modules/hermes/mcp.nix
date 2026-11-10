@@ -1,3 +1,7 @@
+{ config, ... }:
+let
+  youtube = config.services.flakelets.services.youtube-mcp.settings;
+in
 {
   containers.hermes.config.services.hermes.profiles.noa.mcpServers = {
     # User approval and refresh tokens stay in Hermes' mutable state, not Nix.
@@ -9,6 +13,10 @@
     sparkyfitness = {
       url = "https://fitness.mulatta.io/mcp";
       bearerTokenCredential = "noa-sparkyfitness-api-key";
+    };
+    youtube = {
+      url = "http://${config.containers.hermes.hostAddress}:${toString youtube.port}/mcp";
+      bearerTokenCredential = "noa-youtube-mcp-token";
     };
   };
 

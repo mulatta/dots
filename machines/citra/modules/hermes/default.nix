@@ -19,11 +19,13 @@ let
     noa-discord-bot-token = vars.hermes-discord.files.bot-token.path;
     noa-sparkyfitness-api-key = vars.hermes-sparkyfitness.files.api-key.path;
     hindsight-api-key = vars.hindsight.files.api-key.path;
+    noa-youtube-mcp-token = vars.youtube-mcp.files.token.path;
   };
   loopbackServices = {
     hindsight-api = 8890;
     searxng = 8888;
     neko-cdp = 9222;
+    youtube-mcp = config.services.flakelets.services.youtube-mcp.settings.port;
   };
   url = port: "http://${hostAddress}:${toString port}";
 in

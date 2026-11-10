@@ -16,6 +16,11 @@
       autoUpdate.enable = true;
       settings = {
         port = 8765;
+        allowedHosts = [
+          "localhost"
+          "127.0.0.1"
+          config.containers.hermes.hostAddress
+        ];
         tokenFile = config.clan.core.vars.generators.youtube-mcp.files.token.path;
       };
     };
