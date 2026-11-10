@@ -120,6 +120,14 @@ let
                     default = null;
                     description = "Credential sent as `Authorization: Bearer`.";
                   };
+                  trust = mkOption {
+                    type = types.enum [
+                      "full"
+                      "untrusted"
+                    ];
+                    default = "full";
+                    description = "`untrusted` asks before every tool call that lacks a read-only hint.";
+                  };
                 };
               }
             );

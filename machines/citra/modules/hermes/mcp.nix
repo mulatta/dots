@@ -17,6 +17,7 @@ in
     youtube = {
       url = "http://${config.containers.hermes.hostAddress}:${toString youtube.port}/mcp";
       bearerTokenCredential = "noa-youtube-mcp-token";
+      trust = "untrusted";
     };
   };
 

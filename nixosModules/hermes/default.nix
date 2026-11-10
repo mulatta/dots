@@ -75,7 +75,7 @@ let
           mcp_servers = lib.mapAttrs (
             _: s:
             {
-              inherit (s) url;
+              inherit (s) url trust;
             }
             // optional (s.auth != null) { inherit (s) auth; }
             // optional (s.bearerTokenCredential != null) {
