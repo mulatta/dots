@@ -1,5 +1,6 @@
 {
   inputs,
+  self,
   system,
   ...
 }:
@@ -9,7 +10,7 @@ in
 {
   home.packages = [
     aiPkgs.claude-agent-acp
-    aiPkgs.codex-acp
+    self.packages.${system}.codex-acp
     aiPkgs.pi-acp
   ];
 

@@ -115,7 +115,7 @@ in
       '';
     })
     aiPkgs.ccstatusline
-    aiPkgs.codex
+    selfPkgs.codex
     aiPkgs.ctx
     aiPkgs.git-surgeon
     aiPkgs.jscpd
