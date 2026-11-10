@@ -12,6 +12,25 @@ let
   yaml = pkgs.formats.yaml { };
   hindsight = cfg.memory.hindsight;
 
+  # Hermes' package manager installs plugin dependencies only into venvs it
+  # manages, and a Nix install has none, so the client joins Hermes' own closure.
+  package =
+    if hindsight.enable then
+      cfg.package.overridePythonAttrs (old: {
+        dependencies = old.dependencies ++ [ hindsight.client ];
+        # The TUI gateway, dashboard PTY and slash workers run HERMES_PYTHON, a
+        # separate env; this later --set overrides the package's own.
+        makeWrapperArgs = old.makeWrapperArgs ++ [
+          "--set"
+          "HERMES_PYTHON"
+          "${
+            hindsight.client.pythonModule.withPackages (_: old.dependencies ++ [ hindsight.client ])
+          }/bin/python3"
+        ];
+      })
+    else
+      cfg.package;
+
   # A credential name like `sparkyfitness-api-key` becomes SPARKYFITNESS_API_KEY.
   envName = name: lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name);
   optional = cond: attrs: lib.optionalAttrs cond attrs;
@@ -130,30 +149,16 @@ let
   managedEnv =
     optional (cfg.browser.cdpUrl != null) { BROWSER_CDP_URL = cfg.browser.cdpUrl; }
     // optional (cfg.search.searxngUrl != null) { SEARXNG_URL = cfg.search.searxngUrl; }
-    // optional hindsight.enable (
-      let
-        python = hindsight.client.pythonModule;
-      in
-      {
-        HINDSIGHT_MODE = "local_external";
-        HINDSIGHT_API_URL = hindsight.apiUrl;
-        # Hermes' sealed Nix venv appends this read-only tree to sys.path behind its own
-        # packages, so the plugin's client imports without shadowing pinned deps.
-        HERMES_LAZY_INSTALL_TARGET = "${
-          python.withPackages (_: [ hindsight.client ])
-        }/${python.sitePackages}";
-      }
-    )
+    // optional hindsight.enable {
+      HINDSIGHT_MODE = "local_external";
+      HINDSIGHT_API_URL = hindsight.apiUrl;
+    }
     // cfg.environment;
 
   managedSettings = lib.foldl' lib.recursiveUpdate { } [
     { terminal.cwd = "${cfg.stateDir}/workspace"; }
     (optional (cfg.search.searxngUrl != null) { web.search_backend = "searxng"; })
-    (optional hindsight.enable {
-      memory.provider = "hindsight";
-      # A lazy-install target lifts the sealed-venv block; the store path is read-only anyway.
-      security.allow_lazy_installs = false;
-    })
+    (optional hindsight.enable { memory.provider = "hindsight"; })
     cfg.settings
   ];
 
@@ -242,7 +247,7 @@ let
       StateDirectoryMode = "0750";
       Restart = "on-failure";
       RestartSec = 30;
-      ExecStart = "${lib.getExe cfg.package} ${args}";
+      ExecStart = "${lib.getExe package} ${args}";
     };
   };
 in
@@ -284,7 +289,7 @@ in
     # resets PATH there, so tools must live in the system profile rather than
     # only in the units' PATH.
     environment.systemPackages = [
-      cfg.package
+      package
     ]
     ++ cfg.packages;
 
