@@ -1,5 +1,5 @@
 {
-  "includeCoAuthoredBy": false,
+  "attribution": false,
   "permissions": {
     "deny": ["Bash(git push*)", "Bash(jj git push*)"],
     "defaultMode": "auto"
