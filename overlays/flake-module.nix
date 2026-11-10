@@ -11,7 +11,6 @@
     (import ./weechat-matrix-rs)
     (import ./atuin)
     (import ./afew)
-    (import ./php)
     (import ./hindsight { inherit inputs; })
   ];
 
