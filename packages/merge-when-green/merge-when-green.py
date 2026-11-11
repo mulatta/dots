@@ -360,8 +360,25 @@ def check_gitea_pr_state(pr_id: str) -> bool | None:
 
 
 def count_check_states(checks: list[dict[str, Any]]) -> tuple[int, int, int]:
+    # GitHub retains superseded runs in statusCheckRollup. A cancelled older
+    # run must not override its replacement, regardless of API result order.
+    latest: dict[tuple[str, str], dict[str, Any]] = {}
+    for check in checks:
+        if check.get("__typename") != "CheckRun" or not check.get("name"):
+            continue
+        key = (check.get("workflowName", ""), check["name"])
+        previous = latest.get(key)
+        if previous is None or (check.get("startedAt") or "") >= (
+            previous.get("startedAt") or ""
+        ):
+            latest[key] = check
+
     pending = failed = passed = 0
     for check in checks:
+        if check.get("__typename") == "CheckRun" and check.get("name"):
+            key = (check.get("workflowName", ""), check["name"])
+            if latest[key] is not check:
+                continue
         if check.get("__typename") == "CheckRun":
             status = check.get("status")
             conclusion = check.get("conclusion")

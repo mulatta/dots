@@ -16,6 +16,50 @@ from typing import Any
 SCRIPT = Path(__file__).with_name("merge-when-green.py")
 
 
+class CheckStatesTest(unittest.TestCase):
+    def test_latest_run_supersedes_cancelled_run_in_any_order(self) -> None:
+        count = runpy.run_path(str(SCRIPT))["count_check_states"]
+        cancelled = {
+            "__typename": "CheckRun",
+            "name": "auto-merge-dependency-updates",
+            "workflowName": "Auto Merge Dependency Updates",
+            "status": "COMPLETED",
+            "conclusion": "CANCELLED",
+            "startedAt": "2026-11-11T12:01:11Z",
+        }
+        success = {
+            **cancelled,
+            "conclusion": "SUCCESS",
+            "startedAt": "2026-11-11T12:01:28Z",
+        }
+        for checks in ([cancelled, success], [success, cancelled]):
+            self.assertEqual(count(checks), (0, 0, 1))
+        self.assertEqual(
+            count([success, cancelled | {"workflowName": "Other"}]), (0, 1, 1)
+        )
+        self.assertEqual(count([cancelled]), (0, 1, 0))
+        self.assertEqual(
+            count(
+                [
+                    success,
+                    success
+                    | {"status": "IN_PROGRESS", "startedAt": "2026-11-11T12:02:00Z"},
+                ]
+            ),
+            (1, 0, 0),
+        )
+        self.assertEqual(
+            count(
+                [
+                    success,
+                    success
+                    | {"conclusion": "FAILURE", "startedAt": "2026-11-11T12:02:00Z"},
+                ]
+            ),
+            (0, 1, 0),
+        )
+
+
 class DetectPlatformTest(unittest.TestCase):
     def test_github_remote_needs_no_forge_client(self) -> None:
         git = shutil.which("git")
