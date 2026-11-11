@@ -97,8 +97,10 @@ wsf = ["workspace", "forget"]
 wsu = ["workspace", "update-stale"]
 
 [git]
-sign-on-push = false
 write-change-id-header = false
+
+[revsets]
+git-sign-on-push = "none()"
 
 [revset-aliases]
 "closest_bookmark(to)" = "heads(::to & bookmarks())"
