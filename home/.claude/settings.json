@@ -1,5 +1,9 @@
 {
-  "attribution": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "deny": ["Bash(git push*)", "Bash(jj git push*)"],
     "defaultMode": "auto"
@@ -33,9 +37,18 @@
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
-  "autoCompactEnabled": false,
+  "autoCompactEnabled": true,
   "switchModelsOnFlag": true,
   "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "agentPushNotifEnabled": true
+  "idleCompaction": true,
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  },
+  "includeGitInstructions": false,
+  "autoContinueAtUsageLimit": true,
+  "inputNeededNotifEnabled": true,
+  "autoDreamEnabled": true,
+  "terminalProgressBarEnabled": true
 }
