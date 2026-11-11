@@ -50,6 +50,24 @@ in
 
   systemd.tmpfiles.rules = [ "d ${mediaDir} 2750 job-01 media -" ];
 
+  # Neko's DevTools port controls a signed-in browser without authentication,
+  # and citra admits it by source address alone. Keep it to job-01 rather
+  # than every process and guest on malt. A numeric uid keeps the build-time
+  # ruleset check independent of the passwd database.
+  networking.nftables.tables.neko-cdp-egress = {
+    family = "inet";
+    content = ''
+      chain output {
+        type filter hook output priority filter; policy accept;
+        ip daddr ${citra.ipv4} tcp dport 9222 meta skuid != ${toString config.users.users.job-01.uid} reject with tcp reset
+      }
+      chain forward {
+        type filter hook forward priority filter; policy accept;
+        ip daddr ${citra.ipv4} tcp dport 9222 reject with tcp reset
+      }
+    '';
+  };
+
   services.flakelets = {
     enable = true;
     credentials = {
