@@ -78,7 +78,6 @@ in
   home.file = {
     # skills
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
-    ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
