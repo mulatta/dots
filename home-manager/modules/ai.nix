@@ -106,7 +106,6 @@ in
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md
-    selfPkgs.pim
     (pkgs.writeShellApplication {
       name = "pi";
       text = ''

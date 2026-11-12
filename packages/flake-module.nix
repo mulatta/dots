@@ -9,7 +9,6 @@
     }:
     let
       aiPkgs = inputs'.llm-agents.packages;
-      skillz = inputs'.skillz.packages;
     in
     {
       packages = {
@@ -46,16 +45,6 @@
         # Paperless's interpreter, so the entry point loads there.
         paperless-rhwp = pkgs.paperless-ngx.python.pkgs.callPackage ./paperless-rhwp {
           rhwp = inputs'.rhwp.packages.rhwp-cli;
-        };
-        pim = pkgs.callPackage ./pim {
-          inherit (self'.packages) email-sync msmtp-with-sent;
-          calendar-cli = skillz.calendar-cli.override {
-            msmtp = self'.packages.msmtp-with-sent;
-          };
-          crabfit-cli = skillz.crabfit-cli;
-          miniflux-cli = skillz.miniflux-cli;
-          biorefs-cli = skillz.biorefs-cli;
-          pi = aiPkgs.pi;
         };
         rbw-pinentry = pkgs.callPackage ./rbw-pinentry { };
         rhwp = inputs'.rhwp.packages.rhwp-cli;
