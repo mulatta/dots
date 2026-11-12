@@ -1,52 +1,23 @@
 {
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-lib.mkMerge [
-  {
-    home.packages = [ pkgs.atuin ];
-  }
+  programs.atuin = {
+    enable = true;
+    daemon.enable = true;
 
-  # Linux: systemd user timer + service
-  (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    systemd.user.timers.atuin-sync = {
-      Unit.Description = "Atuin auto sync";
-      Timer = {
-        OnCalendar = "hourly";
-        Persistent = true;
-      };
-      Install.WantedBy = [ "timers.target" ];
-    };
+    # Shell hooks live in the stowed dotfiles, including custom key bindings.
+    enableBashIntegration = false;
+    enableFishIntegration = false;
+    enableNushellIntegration = false;
+    enableZshIntegration = false;
 
-    systemd.user.services.atuin-sync = {
-      Unit.Description = "Atuin auto sync";
-      Service = {
-        Type = "oneshot";
-        Environment = "ATUIN_SESSION=systemd";
-        ExecStart = "${pkgs.atuin}/bin/atuin sync";
-        IOSchedulingClass = "idle";
+    settings = {
+      auto_sync = true;
+      sync_address = "https://atuin.mulatta.io";
+      daemon = {
+        # Home Manager owns the daemon lifecycle on both platforms.
+        autostart = false;
+        sync_frequency = 3600;
       };
+      threads.capture = true;
     };
-  })
-
-  # macOS: launchd agent
-  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    launchd.agents.atuin-sync = {
-      enable = true;
-      config = {
-        ProgramArguments = [
-          "${pkgs.atuin}/bin/atuin"
-          "sync"
-        ];
-        EnvironmentVariables.ATUIN_SESSION = "launchd";
-        StartInterval = 3600;
-        RunAtLoad = true;
-        ProcessType = "Background";
-        StandardOutPath = "${config.xdg.stateHome}/atuin-sync.log";
-        StandardErrorPath = "${config.xdg.stateHome}/atuin-sync.err";
-      };
-    };
-  })
-]
+  };
+}
