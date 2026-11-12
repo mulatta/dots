@@ -1,14 +1,18 @@
 {
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  },
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
+  "includeGitInstructions": false,
   "permissions": {
     "deny": ["Bash(git push*)", "Bash(jj git push*)"],
     "defaultMode": "auto"
   },
-  "model": "opus",
+  "model": "sonnet",
   "skillOverrides": {
     "agent-slack": "name-only",
     "calendar-cli": "name-only",
@@ -36,20 +40,16 @@
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
+  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
   "autoCompactEnabled": true,
-  "switchModelsOnFlag": true,
-  "remoteControlAtStartup": true,
-  "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true,
   "idleCompaction": true,
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  },
-  "includeGitInstructions": false,
+  "switchModelsOnFlag": true,
   "autoContinueAtUsageLimit": true,
+  "terminalProgressBarEnabled": true,
+  "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "autoDreamEnabled": true,
-  "terminalProgressBarEnabled": true
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
