@@ -1,0 +1,18 @@
+{
+  "session_id": "00000000-0000-7000-8000-00000000c0de",
+  "turn_id": "01a1b42e-9000-7000-8000-000000000001",
+  "cwd": "/home/u/src/dots",
+  "transcript_path": "ROLLOUT",
+  "model": "gpt-5.6-sol",
+  "hook_event_name": "PostModelRequest",
+  "status": "completed",
+  "error": null,
+  "token_usage": {
+    "input_tokens": 84058,
+    "cached_input_tokens": 83712,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 77,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 84135
+  }
+}

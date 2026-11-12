@@ -30,6 +30,7 @@
           inherit (aiPkgs) hindsight;
         };
         hindsight-plugins = pkgs.callPackage ./hindsight-plugins { inherit (aiPkgs) hindsight; };
+        hmeter = pkgs.callPackage ./herdr-meter { };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };

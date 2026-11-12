@@ -1,0 +1,11 @@
+#!/bin/sh
+# Stand-in for herdr-core in tests: answers `hc get <terminal> --json` from fixtures.
+fixtures=$(dirname "$0")/..
+case "$1 $2" in
+  "get t3") cat "$fixtures/hc-get-codex.json" ;;
+  "get t9") cat "$fixtures/hc-get-claude.json" ;;
+  *)
+    echo '{"error":{"kind":"not_found","message":"no such terminal","hint":"hc ls"}}' >&2
+    exit 3
+    ;;
+esac
