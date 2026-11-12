@@ -1,0 +1,81 @@
+{
+  "session_id": "00000000-0000-4000-8000-0000000c1a0d",
+  "transcript_path": "/home/u/.claude/projects/p/s.jsonl",
+  "cwd": "/home/u/src/dots",
+  "scratchpad_dir": "/tmp/s",
+  "prompt_id": "00000000-0000-4000-8000-000000000001",
+  "effort": {
+    "level": "medium"
+  },
+  "session_name": "demo",
+  "model": {
+    "id": "claude-haiku-5-5",
+    "display_name": "Haiku 5.5"
+  },
+  "workspace": {
+    "current_dir": "/home/u/src/dots",
+    "project_dir": "/home/u/src/dots",
+    "added_dirs": [],
+    "git_worktree": "cache-mods",
+    "repo": {
+      "host": "github.com",
+      "owner": "example",
+      "name": "dots"
+    }
+  },
+  "version": "2.1.319",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 0.009558,
+    "total_duration_ms": 3247,
+    "total_api_duration_ms": 3865,
+    "total_lines_added": 0,
+    "total_lines_removed": 0
+  },
+  "context_window": {
+    "total_input_tokens": 46513,
+    "total_output_tokens": 4,
+    "context_window_size": 1000000,
+    "current_usage": {
+      "input_tokens": 2,
+      "output_tokens": 4,
+      "cache_creation_input_tokens": 46511,
+      "cache_read_input_tokens": 0
+    },
+    "used_percentage": 5,
+    "remaining_percentage": 95
+  },
+  "exceeds_200k_tokens": false,
+  "prompt_cache": {
+    "warm": true,
+    "caching_observed": true,
+    "ttl": "1h",
+    "expires_at": 1794306473,
+    "requests": 1,
+    "misses": 0,
+    "expected_rebuilds": 0,
+    "hit_ratio": 0,
+    "cache_write_tokens": 46511,
+    "miss_recache_tokens": 0,
+    "last_miss_at": null,
+    "last_miss_cause": null,
+    "miss_causes": {},
+    "recache_tokens_if_cold": 46513
+  },
+  "fast_mode": false,
+  "thinking": {
+    "enabled": true
+  },
+  "rate_limits": {
+    "five_hour": {
+      "used_percentage": 17,
+      "resets_at": 1794310800
+    },
+    "seven_day": {
+      "used_percentage": 31,
+      "resets_at": 1794391200
+    }
+  }
+}
