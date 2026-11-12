@@ -1,3 +1,0 @@
-# Sync via system service instead of daemon
-auto_sync = false
-sync_address = "https://atuin.mulatta.io"
