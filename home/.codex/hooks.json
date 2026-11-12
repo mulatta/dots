@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "PostModelRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hmeter ingest codex"
+          }
+        ]
+      }
+    ]
+  }
+}
