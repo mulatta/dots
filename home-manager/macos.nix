@@ -79,15 +79,12 @@ in
     ./modules/mail
 
     ./modules/paneru.nix
-    ./modules/zed.nix
     ./modules/zen.nix
     ./modules/zotero.nix
   ];
 
   home.packages = [
     selfPkgs.instagram-cli
-    selfPkgs.openknowledge
-    selfPkgs.openknowledge-desktop
     selfPkgs.openlogi
     selfPkgs.radicle-desktop
     pkgs.chatgpt
@@ -97,7 +94,6 @@ in
     (pkgs.yt-dlp.override { ffmpeg-headless = pkgs.ffmpeg; })
     pkgs.basalt
     pkgs.czkawka-full
-    pkgs.dorion
     pkgs.tinycast
     pkgs.google-chrome
     pkgs.kanidm_1_11

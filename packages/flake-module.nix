@@ -43,19 +43,6 @@
         miniflux-sync = pkgs.callPackage ./miniflux-sync { };
         msmtp-with-sent = pkgs.callPackage ./msmtp-with-sent { };
         nextflow-language-server = pkgs.callPackage ./nextflow-language-server { };
-        openknowledge = pkgs.callPackage ./openknowledge {
-          inherit (aiPkgs)
-            pi
-            pi-acp
-            claude-code
-            claude-agent-acp
-            ;
-          inherit (self'.packages) codex codex-acp;
-          piSupport = true;
-          claudeSupport = true;
-          codexSupport = true;
-        };
-        openknowledge-desktop = self'.packages.openknowledge.desktop;
         # Paperless's interpreter, so the entry point loads there.
         paperless-rhwp = pkgs.paperless-ngx.python.pkgs.callPackage ./paperless-rhwp {
           rhwp = inputs'.rhwp.packages.rhwp-cli;
