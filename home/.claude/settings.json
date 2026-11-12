@@ -30,8 +30,9 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "ccstatusline",
-    "padding": 0
+    "command": "hq ingest claude -- ~/.claude/statusline.sh",
+    "padding": 0,
+    "refreshInterval": 2
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",

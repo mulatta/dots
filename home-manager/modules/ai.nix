@@ -76,6 +76,7 @@ in
   };
 
   home.file = {
+    # skills
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
@@ -87,7 +88,6 @@ in
 
   home.packages = [
     qmd
-    # herdr-app reaches other machines over SSH and looks for hc on their PATH.
     aiPkgs.herdr-core
     selfPkgs.archify-cli
     selfPkgs.claude-code
@@ -99,7 +99,7 @@ in
         exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
-    aiPkgs.ccstatusline
+    selfPkgs.hq
     selfPkgs.codex
     aiPkgs.ctx
     aiPkgs.git-surgeon

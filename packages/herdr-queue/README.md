@@ -15,8 +15,9 @@ hq usage [--refresh] [--json]
 
 ## Agent integration
 
-- Claude Code: `home/.claude/settings.json` wraps `ccstatusline` with
-  `hq ingest claude -- ccstatusline`.
+- Claude Code: `home/.claude/settings.json` wraps the status line script with
+  `hq ingest claude -- ~/.claude/statusline.sh`, which reads this terminal's snapshot
+  back for its cache TTL.
 - Pi: `home/.pi/agent/extensions/herdr-queue.ts` reports turns and shows cache expiry
   in the footer. Stow deploys this file independently of the package.
 - Codex: a `PostModelRequest` hook can send its JSON to `hq ingest codex`.
