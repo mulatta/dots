@@ -49,19 +49,8 @@ in
 {
   imports = [
     inputs.skillz.homeModules.default
-    ./herdr
   ];
 
-  programs.herdr = {
-    enable = true;
-    package = aiPkgs.herdr;
-    plugins = [
-      selfPkgs.herdr-sesh
-      selfPkgs.herdr-autoname
-    ];
-  };
-
-  xdg.configFile."herdr/autoname-hook.zsh".source = "${selfPkgs.herdr-autoname}/shell/hook.zsh";
   xdg.configFile."pi-agent-extensions/python/config.json".text = builtins.toJSON {
     python = "${piPython}/bin/python3";
     prompt = "Includes polars, matplotlib, requests, pexpect, pyelftools, pydna, biotite, and primer3. Python runs with user permissions, outside the shell permission gate.";
@@ -89,9 +78,6 @@ in
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/git-review".source = "${selfPkgs.maiao}/share/skills/maiao/git-review";
-    ".pi/agent/extensions/herdr-agent-state.ts".source =
-      "${aiPkgs.herdr}/share/herdr/integrations/pi/herdr-agent-state.ts";
-    ".claude/skills/herdr".source = "${aiPkgs.herdr}/share/skills/herdr/herdr";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
