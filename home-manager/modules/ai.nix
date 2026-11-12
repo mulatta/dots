@@ -79,6 +79,7 @@ in
   xdg.dataFile."gh/extensions/gh-stack/gh-stack".source = "${pkgs.gh-stack}/bin/gh-stack";
 
   home.file = {
+    # skills
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
@@ -89,7 +90,6 @@ in
 
   home.packages = [
     qmd
-    # herdr-app reaches other machines over SSH and looks for hc on their PATH.
     aiPkgs.herdr-core
     selfPkgs.archify-cli
     selfPkgs.claude-code
@@ -101,7 +101,7 @@ in
         exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
-    aiPkgs.ccstatusline
+    selfPkgs.hmeter
     selfPkgs.codex
     pkgs.ctx
     aiPkgs.git-surgeon

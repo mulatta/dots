@@ -15,8 +15,9 @@ hmeter usage [--refresh] [--json]
 
 ## Agent integration
 
-- Claude Code: `home/.claude/settings.json` wraps `ccstatusline` with
-  `hmeter ingest claude -- ccstatusline`.
+- Claude Code: `home/.claude/settings.json` wraps the status line script with
+  `hmeter ingest claude -- ~/.claude/statusline.sh`, which reads this terminal's snapshot
+  back for its cache TTL.
 - Pi: `home/.pi/agent/extensions/herdr-meter.ts` reports turns and shows cache expiry
   in the footer. Stow deploys this file independently of the package.
 - Codex: `home/.codex/hooks.json` sends `PostModelRequest` JSON to `hmeter ingest codex`.
