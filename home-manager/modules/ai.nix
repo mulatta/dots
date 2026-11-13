@@ -75,12 +75,16 @@ in
     };
   };
 
+  # gh finds extensions only under its data dir, not on PATH.
+  xdg.dataFile."gh/extensions/gh-stack/gh-stack".source = "${pkgs.gh-stack}/bin/gh-stack";
+
   home.file = {
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
+    ".claude/skills/gh-stack".source = "${pkgs.gh-stack}/share/skills/gh-stack/gh-stack";
   };
 
   home.packages = [
