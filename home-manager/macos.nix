@@ -96,7 +96,7 @@ in
     pkgs.czkawka-full
     pkgs.tinycast
     pkgs.google-chrome
-    pkgs.kanidm_1_11
+    pkgs.kanidm_1_12
     pkgs.mpv
     pkgs.obsidian
     pkgs.tailscale
