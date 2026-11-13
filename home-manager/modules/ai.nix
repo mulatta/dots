@@ -82,7 +82,7 @@ in
     ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
-    ".claude/skills/ctx".source = "${aiPkgs.ctx}/share/skills/ctx/ctx";
+    ".claude/skills/ctx".source = "${pkgs.ctx}/share/skills/ctx/ctx";
   };
 
   home.packages = [
@@ -101,7 +101,7 @@ in
     })
     aiPkgs.ccstatusline
     selfPkgs.codex
-    aiPkgs.ctx
+    pkgs.ctx
     aiPkgs.git-surgeon
     aiPkgs.jscpd
     aiPkgs.officecli

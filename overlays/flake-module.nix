@@ -12,6 +12,7 @@
     (import ./atuin)
     (import ./afew)
     (import ./hindsight { inherit inputs; })
+    (import ./ctx { inherit inputs; })
   ];
 
   perSystem =
