@@ -18,6 +18,10 @@ _darcs
 # next to the hot-reloadable dotfiles sources. Do not stow it into $HOME.
 ^/\.pi/agent/node_modules$
 
+# herdr-app writes these beside every mod it checks; herdr-app owns the copies in $HOME.
+^/\.config/herdr-app/mods/[^/]+/gpui-kit\.d\.ts$
+^/\.config/herdr-app/mods/[^/]+/jsconfig\.json$
+
 .+~          # emacs backup files
 \#.*\#       # emacs autosave files
 
