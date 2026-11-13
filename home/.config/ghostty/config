@@ -16,7 +16,7 @@ font-codepoint-map = U+e5fa-U+e6b1=JetBrainsMono Nerd Font Mono
 font-codepoint-map = U+ea60-U+ebeb=JetBrainsMono Nerd Font Mono
 font-codepoint-map = U+f000-U+f2e0,U+e200-U+e2a9=JetBrainsMono Nerd Font Mono
 font-codepoint-map = U+f0000-U+f1af0=JetBrainsMono Nerd Font Mono
-font-family = BerkeleyMono Nerd Font
+font-family = JetBrains Mono
 font-feature = calt
 font-feature = liga
 font-feature = zero

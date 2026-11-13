@@ -5,6 +5,9 @@
     "version": "0.1.14"
   },
   "type": "row",
+  "theme": "catppuccin-mocha",
+  "font": "JetBrains Mono",
+  "font_size": 15,
   "children": [
     {
       "id": "sidebar",
