@@ -5,7 +5,7 @@
 }:
 
 let
-  version = "0.4.0";
+  version = "0.4.1";
 in
 tree-sitter.buildGrammar {
   language = "nextflow";
@@ -15,7 +15,7 @@ tree-sitter.buildGrammar {
     owner = "nextflow-io";
     repo = "tree-sitter-nextflow";
     rev = "v${version}";
-    hash = "sha256-WcqkGvd/NHzsdMt88pjyS02EFPAinljnETOb4FQrgR4=";
+    hash = "sha256-jnuP+E3Zn6vPc6HXmXuy7PyxFgD5KfcEWpRTea+di2Q=";
   };
 
   meta = {
