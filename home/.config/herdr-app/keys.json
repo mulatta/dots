@@ -85,7 +85,7 @@
     "ctrl-space ?": "app.help",
     "ctrl-space w": "spaces-vim.focus",
     "ctrl-space shift-c": "space.new",
-    "ctrl-space shift-s": "mod.open:worktree",
+    "ctrl-space shift-s": "prefix.worktree",
     "ctrl-space ctrl-space": "send:\u0000",
     "ctrl-space s": "mod.open:picker",
     "ctrl-space t": "prefix.scratch",

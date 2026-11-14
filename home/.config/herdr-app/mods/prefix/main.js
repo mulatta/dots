@@ -4,6 +4,7 @@
 // go-left/down/up/right: from a zoomed tab, zoom the neighbor instead, as the herdr tui did.
 // scratch, tuicr: a terminal in the focused folder, on the space's machine, shown as a
 // popup that closes when its program exits. The same key shows it again while it runs.
+// worktree: the New worktree dialog for the active space; mod.open cannot pass it props.
 
 import { View, div } from "gpui-kit";
 import { nextCommand, focused, panes, spaces, run, hc, openOverlay, closeOverlay } from "herdr";
@@ -22,6 +23,7 @@ export default class Prefix extends View {
         const command = await nextCommand();
         try {
           if (command.startsWith("go-")) this.go(command.slice(3), cx);
+          else if (command === "worktree") this.worktree();
           else if (command in POPUPS) await this.popup(command);
         } catch (e) {
           console.log(`prefix ${command}: ${e.message ?? e}`);
@@ -43,6 +45,12 @@ export default class Prefix extends View {
       run("pane.go", { direction });
       this.until(cx, () => focused()?.pane !== from.pane, () => run("pane.zoom", { pane: focused()?.pane ?? from.pane }), 6);
     });
+  }
+
+  worktree() {
+    const space = spaces().find((s) => s.active);
+    if (!space) return;
+    openOverlay({ mod: "worktree", kind: "dialog", width: 460, height: 280, props: { space: space.id, folder: focused()?.cwd, action: "new" } });
   }
 
   // Runs `then` once `ready()` holds, checking every frame, or anyway after `frames` frames.
