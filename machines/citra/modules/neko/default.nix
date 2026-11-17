@@ -23,6 +23,7 @@ let
 
   state = "/var/lib/neko";
   profile = "/var/lib/neko/chrome-profile";
+  downloads = "/var/cache/neko/downloads";
 
   network = {
     name = "neko";
@@ -136,6 +137,7 @@ let
       FullscreenAllowed = true;
       IncognitoModeAvailability = 1;
       PasswordManagerEnabled = true;
+      DownloadDirectory = "/home/neko/Downloads";
       PromptForDownloadLocation = false;
       # Agents leave tabs behind; restoring them keeps their pages rendering.
       RestoreOnStartup = 5;
@@ -209,6 +211,8 @@ in
   systemd.tmpfiles.rules = [
     "d ${state} 0700 1000 1000 -"
     "d ${profile} 0700 1000 1000 -"
+    # Reading a downloaded file must not extend its retention.
+    "d ${downloads} 0700 1000 1000 mM:7d"
   ];
 
   environment.etc."containers/networks/${network.name}.json".source = podmanNetworkConfig;
@@ -343,6 +347,7 @@ in
       ];
       volumes = [
         "${profile}:/home/neko/chrome-profile:rw"
+        "${downloads}:/home/neko/Downloads:rw"
         "${chromiumConfig}:/etc/neko/supervisord/chromium.conf:ro"
         "${chromiumPolicy}:/etc/chromium/policies/managed/policies.json:ro"
         "${pkgs.pkgsStatic.socat}/bin/socat:/usr/local/bin/socat:ro"
