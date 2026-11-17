@@ -130,12 +130,11 @@ let
       DefaultNotificationsSetting = 2;
       DefaultPopupsSetting = 2;
       DeveloperToolsAvailability = 1;
-      DownloadRestrictions = 3;
       EditBookmarksEnabled = false;
       ExtensionInstallBlocklist = [ "*" ];
       FullscreenAllowed = true;
       IncognitoModeAvailability = 1;
-      PasswordManagerEnabled = false;
+      PasswordManagerEnabled = true;
       PromptForDownloadLocation = false;
       # Agents leave tabs behind; restoring them keeps their pages rendering.
       RestoreOnStartup = 5;
