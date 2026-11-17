@@ -7,6 +7,7 @@
 }:
 let
   malt = self.nixosConfigurations.malt.config.networking.naru;
+  rhesus = self.darwinConfigurations.rhesus.config.networking.naru;
   ports = {
     ui = {
       host = 8082;
@@ -220,10 +221,11 @@ in
     allowedUDPPorts = [ ports.media ];
   };
 
-  # job-01 on malt reads this browser; no other Naru peer may reach CDP.
+  # CDP trusts the source host; malt additionally restricts access to job-01.
   # A host relay, unlike a published port, passes through the input firewall.
   networking.firewall.extraInputRules = ''
     iifname "tinc.naru" ip saddr ${malt.ipv4} tcp dport ${toString ports.cdp.host} accept
+    iifname "tinc.naru" ip saddr ${rhesus.ipv4} tcp dport ${toString ports.cdp.host} accept
   '';
   systemd.sockets.neko-cdp-naru = {
     wantedBy = [ "sockets.target" ];
