@@ -19,6 +19,7 @@
     ./modules/tribuchet.nix
     ./modules/network.nix
     ./modules/neko
+    ./modules/rustfs.nix
     ../../nixosModules/gnome-desktop.nix
     ./modules/searxng.nix
     ../../nixosModules/acme-knot

@@ -126,6 +126,16 @@ resource "cloudflare_dns_record" "idm_a" {
   proxied = false
 }
 
+# RustFS Console and S3 API share one origin; cask terminates TLS.
+resource "cloudflare_dns_record" "s3_a" {
+  zone_id = local.zone_id
+  name    = "s3"
+  content = local.service_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "vaultwarden_a" {
   zone_id = local.zone_id
   name    = "vaultwarden"
