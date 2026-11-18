@@ -112,6 +112,8 @@ in
         neko_admins = {
           members = [ "seungwon" ];
         };
+        rustfs_users.members = [ "seungwon" ];
+        rustfs_admins.members = [ "seungwon" ];
         media_users = {
           members = [ "seungwon" ];
         };

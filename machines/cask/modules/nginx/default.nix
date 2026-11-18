@@ -18,6 +18,7 @@ in
     ./nixbot.nix
     ./nextcloud.nix
     ./paperless.nix
+    ./rustfs.nix
     ./security-txt.nix
     ./sparkyfitness.nix
     ./trek.nix
