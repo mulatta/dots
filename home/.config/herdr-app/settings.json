@@ -1,11 +1,10 @@
 {
-  "zoom": 1,
+  "zoom": 1.0,
   "sounds": {
     "enabled": true
   },
-  "minimum_contrast": 1,
+  "font_ligatures": true,
   "telemetry": false,
-  "appearance": "dark",
-  "option_as_alt": "auto",
-  "font_ligatures": true
+  "minimum_contrast": 1.0,
+  "appearance": "dark"
 }
