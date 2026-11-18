@@ -104,6 +104,7 @@ in
     selfPkgs.hmeter
     selfPkgs.codex
     pkgs.ctx
+    aiPkgs.agent-slack
     aiPkgs.git-surgeon
     aiPkgs.jscpd
     aiPkgs.officecli
