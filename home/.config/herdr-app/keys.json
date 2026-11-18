@@ -71,8 +71,8 @@
     "ctrl-space shift-c": "space.new",
     "ctrl-space shift-s": "prefix.worktree",
     "ctrl-space ctrl-space": "send:\u0000",
-    "ctrl-space t": "prefix.scratch",
-    "ctrl-space shift-r": "prefix.tuicr",
+    "alt-f": "prefix.scratch",
+    "ctrl-space r": "prefix.tuicr",
     "cmd-shift-m": "mod.open:mermaid"
   },
   "terminal": {

@@ -2,29 +2,44 @@
 // from keys.json. It lives in an empty layout block, so a key costs no mod start.
 //
 // go-left/down/up/right: from a zoomed tab, zoom the neighbor instead, as the herdr tui did.
-// scratch, tuicr: a terminal in the focused folder, on the space's machine, shown as a
-// popup that closes when its program exits. The same key shows it again while it runs.
+// scratch, tuicr: a terminal in the focused folder, on the space's machine, attached to the
+// focused session and peeked over its tab (keep promotes it to a pane). The same key
+// shows it again while it runs, and hides it from inside the peek. Over an agent, tuicr
+// exports to stdout and the popup sends that review to the agent as its next message;
+// over a plain shell, pasting markdown would run it, so tuicr keeps its clipboard export.
 // worktree: the New worktree dialog for the active space; mod.open cannot pass it props.
 
 import { View, div } from "gpui-kit";
-import { nextCommand, focused, panes, spaces, run, hc, openOverlay, closeOverlay } from "herdr";
+import { nextCommand, focused, panes, spaces, terminals, agents, run, hc, openOverlay } from "herdr";
 
-const POPUP_BLOCK = "prefix-popup";
+const LABEL = "prefix.popup";
+const ADOPT_POLL = 50;
+const ADOPT_TIMEOUT = 5000;
 const POPUPS = {
-  scratch: { argv: ["sh", "-c", 'exec "${SHELL:-sh}"'], width: 0.8, height: 0.7 },
-  tuicr: { argv: ["sh", "-c", "tuicr --no-update-check -w || tuicr --no-update-check"], width: 0.9, height: 0.85 },
+  scratch: { argv: ["sh", "-c", 'exec "${SHELL:-sh}"'] },
+  tuicr: {
+    argv: ["sh", "-c", "tuicr --no-update-check -w || tuicr --no-update-check"],
+    // $1 is the agent's terminal. `-w` fails at startup when the tree is clean, so the
+    // fallback opens the commit selector. An empty export (quit without comments) sends nothing.
+    agentArgv: (agent) => [
+      "sh",
+      "-c",
+      'out=$(tuicr --no-update-check -w --stdout || tuicr --no-update-check --stdout) && [ -n "$out" ] && exec hc send "$1" "$out"',
+      "sh",
+      agent,
+    ],
+  },
 };
 
 export default class Prefix extends View {
   init(_props, cx) {
-    this.popups = {}; // popup name -> { address, overlay }
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
         try {
           if (command.startsWith("go-")) this.go(command.slice(3), cx);
           else if (command === "worktree") this.worktree();
-          else if (command in POPUPS) await this.popup(command);
+          else if (command in POPUPS) await this.popup(command, cx);
         } catch (e) {
           console.log(`prefix ${command}: ${e.message ?? e}`);
         }
@@ -59,35 +74,35 @@ export default class Prefix extends View {
     cx.timer.after(16, (cx) => this.until(cx, ready, then, frames - 1));
   }
 
-  async popup(name) {
+  // One popup terminal per name per session: a child of the focused terminal, found again
+  // by its label and parent, so it ends with that session and survives a mod reload.
+  async popup(name, cx) {
     const spec = POPUPS[name];
-    const open = this.popups[name];
-    if (open) {
-      // Focused means shown: the key hides it. Hidden but running (a click beside the
-      // dialog closes it, not its program): show it again.
-      const f = focused();
-      if (f?.terminal === open.address || f?.pane === POPUP_BLOCK) return closeOverlay(open.overlay);
-      if (await this.alive(open.address)) return this.show(open, spec);
-      delete this.popups[name];
-    }
     const here = focused();
+    if (!here?.terminal) return;
+    const all = terminals();
+    const mine = (t) => t.state === "live" && t.labels?.[LABEL] === name;
+    // The key from inside its own peek hides it.
+    if (all.some((t) => t.address === here.terminal && mine(t))) return run("overlay.close", {});
+    const open = all.find((t) => mine(t) && t.parent === here.terminal);
+    if (open) return run("terminal.peek", { terminal: open.address });
     const on = spaces().find((s) => s.active)?.machine ?? null;
-    const args = ["run", "--bg", "--no-notify", "--rm", "--json"];
+    // The core wants the parent's id on its own machine, without the machine prefix.
+    const parent = on && here.terminal.startsWith(`${on}/`) ? here.terminal.slice(on.length + 1) : here.terminal;
+    const args = ["run", "--bg", "--no-notify", "--rm", "--json", "--parent", parent, "--label", `${LABEL}=${name}`];
     if (on) args.push("--on", on);
-    if (here?.cwd) args.push("--cwd", here.cwd);
-    const r = await hc([...args, "--", ...spec.argv]);
+    if (here.cwd) args.push("--cwd", here.cwd);
+    const agent = agents().some((a) => a.address === here.terminal);
+    const argv = agent && spec.agentArgv ? spec.agentArgv(parent) : spec.argv;
+    const r = await hc([...args, "--", ...argv]);
     if (r.code !== 0) throw new Error(r.stderr || r.stdout);
-    this.popups[name] = { address: JSON.parse(r.stdout).address, overlay: null };
-    this.show(this.popups[name], spec);
-  }
-
-  async alive(address) {
-    const r = await hc(["get", address, "--json"]);
-    return r.code === 0 && JSON.parse(r.stdout).state === "live";
-  }
-
-  show(open, spec) {
-    open.overlay = openOverlay({ layout: { id: POPUP_BLOCK, type: "block", content: { terminal: open.address } }, kind: "dialog", width: spec.width, height: spec.height });
+    const address = JSON.parse(r.stdout).address;
+    // Peek fails until the window's next terminal listing includes the child, which can
+    // take seconds when the core is busy or the space is on another machine.
+    for (let waited = 0; waited < ADOPT_TIMEOUT && !terminals().some((t) => t.address === address); waited += ADOPT_POLL) {
+      await cx.sleep(ADOPT_POLL);
+    }
+    run("terminal.peek", { terminal: address });
   }
 
   render() {
