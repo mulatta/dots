@@ -19,6 +19,7 @@ _darcs
 ^/\.pi/agent/node_modules$
 
 # herdr-app writes these beside every mod it checks; herdr-app owns the copies in $HOME.
+^/\.config/herdr-app/\.gitignore$
 ^/\.config/herdr-app/mods/[^/]+/gpui-kit\.d\.ts$
 ^/\.config/herdr-app/mods/[^/]+/jsconfig\.json$
 

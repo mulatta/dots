@@ -20,9 +20,5 @@ __pycache__
 CLAUDE.md
 CLAUDE.local.md
 
-# herdr-app writes these beside every mod it checks.
-home/.config/herdr-app/mods/*/gpui-kit.d.ts
-home/.config/herdr-app/mods/*/jsconfig.json
-
 # cargo builds here when a package is tested in place.
 packages/*/target/

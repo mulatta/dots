@@ -1,0 +1,3 @@
+# herdr-app writes these beside every mod it checks.
+mods/**/gpui-kit.d.ts
+mods/**/jsconfig.json
