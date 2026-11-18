@@ -65,7 +65,6 @@ in
       "context7-cli"
       "kmap-cli"
       "linkwarden-cli"
-      "queue"
     ]
     ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "shortcuts-cli" ];
     package = skillzPkgs // {
@@ -104,6 +103,8 @@ in
     selfPkgs.hmeter
     selfPkgs.codex
     pkgs.ctx
+    aiPkgs.agent-browser
+    aiPkgs.agent-slack
     aiPkgs.git-surgeon
     aiPkgs.jscpd
     aiPkgs.officecli
@@ -113,5 +114,6 @@ in
     pkgs.pueue
     pkgs.nushell
     piPython
+    inputs.rhwp.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-cli
   ];
 }

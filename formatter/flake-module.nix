@@ -97,6 +97,8 @@
           "home/bin/osc52"
           # pi rewrites this on every run with its own style
           "home/.pi/**"
+          # Claude Code rewrites this in its schema key order on every settings save
+          "home/.claude/settings.json"
           # vendored pnpm lockfiles are generated; yamlfmt churns them
           "**/pnpm-lock.yaml"
         ];

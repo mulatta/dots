@@ -51,6 +51,7 @@
         p.cloudflare_cloudflare
         p.vultr_vultr
         p.carlpett_sops
+        p.hashicorp_aws
         p.hashicorp_local
         p.hashicorp_null
       ]);

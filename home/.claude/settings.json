@@ -1,11 +1,18 @@
 {
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  },
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
+  "includeGitInstructions": false,
   "permissions": {
-    "deny": ["Bash(git push*)", "Bash(jj git push*)"],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(jj git push*)"
+    ],
     "defaultMode": "auto"
   },
   "model": "opus",
@@ -15,19 +22,6 @@
     "kmap-cli": "name-only",
     "linkwarden-cli": "name-only"
   },
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/bell-notify.py"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "hmeter ingest claude -- ~/.claude/statusline.sh",
@@ -36,20 +30,16 @@
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
+  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
   "autoCompactEnabled": true,
-  "switchModelsOnFlag": true,
-  "remoteControlAtStartup": true,
-  "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true,
   "idleCompaction": true,
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  },
-  "includeGitInstructions": false,
+  "switchModelsOnFlag": true,
   "autoContinueAtUsageLimit": true,
+  "terminalProgressBarEnabled": true,
+  "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "autoDreamEnabled": true,
-  "terminalProgressBarEnabled": true
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }

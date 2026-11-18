@@ -90,6 +90,28 @@ in
       };
     };
 
+    rustfs = {
+      displayName = "RustFS";
+      originUrl = "https://s3.${baseDomain}/rustfs/admin/v3/oidc/callback/kanidm";
+      originLanding = "https://s3.${baseDomain}";
+      public = false;
+      enableLocalhostRedirects = false;
+      preferShortUsername = true;
+      basicSecretFile = config.clan.core.vars.generators.kanidm-rustfs-oidc.files.client-secret.path;
+      scopeMaps.rustfs_users = [
+        "openid"
+        "email"
+        "profile"
+      ];
+      claimMaps.rustfs_policy = {
+        joinType = "array";
+        valuesByGroup = {
+          rustfs_users = [ "readwrite" ];
+          rustfs_admins = [ "consoleAdmin" ];
+        };
+      };
+    };
+
     # Stalwart Mail - public client with PKCE
     stalwart = {
       displayName = "Stalwart Mail";
@@ -392,6 +414,10 @@ in
   };
 
   generators = {
+    kanidm-rustfs-oidc = import ../../../../nixosModules/rustfs/oidc-secret.nix {
+      inherit pkgs;
+      owner = "kanidm";
+    };
     kanidm-headscale-oidc = {
       files.kanidm-secret = {
         secret = true;

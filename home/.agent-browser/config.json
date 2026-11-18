@@ -1,0 +1,22 @@
+{
+  "cdp": "http://10.208.0.10:9222",
+  "pinTab": true,
+  "maxOutput": 20000,
+  "plugins": [
+    {
+      "name": "transfer",
+      "command": "sh",
+      "args": [
+        "-c",
+        "exec python3 \"$HOME/.agent-browser/plugins/transfer.py\""
+      ],
+      "capabilities": ["command.run"]
+    },
+    {
+      "name": "rbw",
+      "command": "sh",
+      "args": ["-c", "exec python3 \"$HOME/.agent-browser/plugins/rbw.py\""],
+      "capabilities": ["credential.read"]
+    }
+  ]
+}

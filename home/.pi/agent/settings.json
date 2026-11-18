@@ -4,10 +4,6 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "low",
-  "skills": [
-    "~/.claude/skills",
-    "!**/.claude/skills/synced/**"
-  ],
   "packages": [
     {
       "source": "~/dots/pi-agent-extensions",

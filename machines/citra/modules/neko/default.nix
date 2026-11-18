@@ -23,7 +23,9 @@ let
 
   state = "/var/lib/neko";
   profile = "/var/lib/neko/chrome-profile";
-  downloads = "/var/cache/neko/downloads";
+  staging = "/var/cache/neko/staging";
+  downloads = "${staging}/downloads";
+  uploads = "${staging}/uploads";
 
   network = {
     name = "neko";
@@ -141,8 +143,8 @@ let
         "https://vaultwarden.mulatta.io";
       FullscreenAllowed = true;
       IncognitoModeAvailability = 1;
-      PasswordManagerEnabled = false;
-      DownloadDirectory = "/home/neko/Downloads";
+      PasswordManagerEnabled = true;
+      DownloadDirectory = "/home/neko/staging/downloads";
       PromptForDownloadLocation = false;
       # Agents leave tabs behind; restoring them keeps their pages rendering.
       RestoreOnStartup = 5;
@@ -164,6 +166,55 @@ let
       pkgs.websocat
     ];
     text = builtins.readFile ./close-tabs.sh;
+  };
+  rustfsTransferEnv = config.clan.core.vars.generators.neko-rustfs-transfer.files.env.path;
+  rustfsStaging = "staging:neko-transfer";
+  mkRustfsTransferService = source: destination: {
+    unitConfig.ConditionPathExists = rustfsTransferEnv;
+    after = [
+      "rustfs.service"
+      "systemd-tmpfiles-setup.service"
+    ];
+    requires = [ "rustfs.service" ];
+    environment = {
+      RCLONE_CONFIG_STAGING_TYPE = "s3";
+      RCLONE_CONFIG_STAGING_PROVIDER = "Other";
+      RCLONE_CONFIG_STAGING_ENDPOINT = "http://127.0.0.1:9000";
+      RCLONE_CONFIG_STAGING_FORCE_PATH_STYLE = "true";
+    };
+    serviceConfig = {
+      Type = "oneshot";
+      User = "transfer";
+      Group = "transfer";
+      UMask = "0007";
+      EnvironmentFile = rustfsTransferEnv;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      ReadWritePaths = lib.optional (destination == uploads) destination;
+      TimeoutStartSec = "10min";
+    };
+    script = ''
+      exec ${lib.getExe pkgs.rclone} copy \
+        --config /dev/null \
+        --s3-no-check-bucket \
+        --max-depth 1 \
+        --max-age ${if destination == uploads then "1d" else "7d"} \
+        --ignore-existing \
+        --exclude '*.crdownload' \
+        --exclude '*.partial' \
+        --exclude '.*' \
+        ${lib.escapeShellArg source} ${lib.escapeShellArg destination}
+    '';
+  };
+  rustfsTransferTimer = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitInactiveSec = "30s";
+      AccuracySec = "1s";
+    };
   };
 in
 {
@@ -216,9 +267,22 @@ in
   systemd.tmpfiles.rules = [
     "d ${state} 0700 1000 1000 -"
     "d ${profile} 0700 1000 1000 -"
-    # Reading a downloaded file must not extend its retention.
-    "d ${downloads} 0700 1000 1000 mM:7d"
+    "d ${staging} 0750 1000 transfer -"
+    # Reading a staged file must not extend its retention.
+    "d ${downloads} 2770 1000 transfer mM:1d"
+    "d ${uploads} 2770 1000 transfer mM:1d"
+    # Inherit transfer access on browser files and browser access on uploads.
+    "a+ ${downloads} - - - - d:u::rwx,d:u:1000:rwx,d:g::rwx,d:m::rwx,d:o::---"
+    "a+ ${uploads} - - - - d:u::rwx,d:u:1000:rwx,d:g::rwx,d:m::rwx,d:o::---"
   ];
+
+  users.groups.transfer = { };
+  users.users.transfer = {
+    isSystemUser = true;
+    group = "transfer";
+    home = "/";
+    createHome = false;
+  };
 
   environment.etc."containers/networks/${network.name}.json".source = podmanNetworkConfig;
 
@@ -294,8 +358,22 @@ in
     ];
   };
 
-  # Best-effort collection of detached, unchanged pages. Controllers own normal
-  # task cleanup; attachment protects a page but does not give it a durable lease.
+  # Agent-browser leaves pages open over CDP; without CDP it drops the whole
+  # browser after two idle minutes, so closing idle pages loses no more.
+  clan.core.vars.generators.neko-rustfs-transfer = {
+    prompts.secret-key.type = "hidden";
+    files.env.secret = true;
+    script = ''
+      printf 'RCLONE_CONFIG_STAGING_ACCESS_KEY_ID=citra\nRCLONE_CONFIG_STAGING_SECRET_ACCESS_KEY=%s\n' \
+        "$(cat "$prompts/secret-key")" > "$out/env"
+    '';
+  };
+
+  systemd.services.neko-rustfs-export = mkRustfsTransferService downloads "${rustfsStaging}/downloads/";
+  systemd.services.neko-rustfs-import = mkRustfsTransferService "${rustfsStaging}/uploads/" uploads;
+  systemd.timers.neko-rustfs-export = rustfsTransferTimer;
+  systemd.timers.neko-rustfs-import = rustfsTransferTimer;
+
   systemd.services.neko-close-tabs = {
     requisite = [ "podman-neko.service" ];
     after = [ "podman-neko.service" ];
@@ -316,7 +394,7 @@ in
   };
   systemd.timers.neko-close-tabs = {
     wantedBy = [ "timers.target" ];
-    timerConfig.OnCalendar = "*:0/5";
+    timerConfig.OnCalendar = "daily";
   };
 
   virtualisation.oci-containers = {
@@ -353,7 +431,8 @@ in
       ];
       volumes = [
         "${profile}:/home/neko/chrome-profile:rw"
-        "${downloads}:/home/neko/Downloads:rw"
+        "${downloads}:/home/neko/staging/downloads:rw"
+        "${uploads}:/home/neko/staging/uploads:ro"
         "${chromiumConfig}:/etc/neko/supervisord/chromium.conf:ro"
         "${chromiumPolicy}:/etc/chromium/policies/managed/policies.json:ro"
         "${pkgs.pkgsStatic.socat}/bin/socat:/usr/local/bin/socat:ro"
