@@ -14,7 +14,7 @@ import click
 path = "~/.local/share/calendars/*"
 
 # Default list for new todos (must match a calendar name)
-default_list = "dev"
+default_list = "personal"
 
 # Date format
 date_format = "%Y-%m-%d"
