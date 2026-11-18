@@ -63,6 +63,7 @@ generate "terraform" {
   contents  = <<EOF
 terraform {
   required_providers {
+    aws        = { source = "hashicorp/aws" }
     cloudflare = { source = "cloudflare/cloudflare" }
     vultr      = { source = "vultr/vultr" }
     sops       = { source = "carlpett/sops" }
