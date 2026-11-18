@@ -1,0 +1,9 @@
+{
+  "inu": {
+    "item": "inu-researcher",
+    "url": "https://lib.inu.ac.kr/login",
+    "usernameSelector": "form.ikc-loginform input[formcontrolname=\"userId\"]",
+    "passwordSelector": "form.ikc-loginform input[formcontrolname=\"password\"]",
+    "submitSelector": "form.ikc-loginform button[type=\"submit\"]"
+  }
+}
