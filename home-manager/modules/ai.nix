@@ -114,5 +114,6 @@ in
     pkgs.pueue
     pkgs.nushell
     piPython
+    inputs.rhwp.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-cli
   ];
 }
