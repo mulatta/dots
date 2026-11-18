@@ -54,5 +54,14 @@
       proxyPass = "http://127.0.0.1:8222";
       proxyWebsockets = true;
     };
+    # The admin token alone should not face the internet.
+    locations."/admin" = {
+      proxyPass = "http://127.0.0.1:8222";
+      extraConfig = ''
+        allow 10.208.0.0/12;
+        allow fdec:ca5f::/32;
+        deny all;
+      '';
+    };
   };
 }
