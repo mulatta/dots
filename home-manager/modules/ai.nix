@@ -8,6 +8,7 @@
 let
   aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   bioPkgs = inputs.bioinformatics-toolkits.packages.${pkgs.stdenv.hostPlatform.system};
+  hmodsPkgs = inputs.hmods.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
   installAgentSkills = pkgs.installAgentSkills;
@@ -85,6 +86,7 @@ in
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
     ".claude/skills/gh-stack".source = "${pkgs.gh-stack}/share/skills/gh-stack/gh-stack";
+    ".claude/skills/herdr-scene".source = "${hmodsPkgs.hscene}/share/skills/hscene/herdr-scene";
   };
 
   home.packages = [
@@ -100,7 +102,8 @@ in
         exec ${aiPkgs.pi}/bin/pi "$@"
       '';
     })
-    selfPkgs.hmeter
+    hmodsPkgs.hmeter
+    hmodsPkgs.hscene
     selfPkgs.codex
     pkgs.ctx
     aiPkgs.agent-browser

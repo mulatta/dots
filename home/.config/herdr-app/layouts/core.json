@@ -43,7 +43,7 @@
               "id": "agents",
               "type": "block",
               "content": {
-                "mod": "hmeter-cache"
+                "mod": "cache"
               },
               "size": {
                 "weight": 1
@@ -59,7 +59,7 @@
             "px": 86
           },
           "content": {
-            "mod": "hmeter-usage"
+            "mod": "usage"
           }
         },
         {

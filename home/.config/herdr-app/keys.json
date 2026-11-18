@@ -65,14 +65,15 @@
     "ctrl-space shift-d": "space.close",
     "ctrl-space [": "terminal.search",
     "ctrl-space z": "pane.zoom",
-    "ctrl-space b": "hmeter-cache.rail",
+    "ctrl-space b": "cache.rail",
     "ctrl-space ?": "app.help",
     "ctrl-space w": "spaces-vim.focus",
     "ctrl-space shift-c": "space.new",
     "ctrl-space shift-s": "prefix.worktree",
     "ctrl-space ctrl-space": "send:\u0000",
     "ctrl-space t": "prefix.scratch",
-    "ctrl-space shift-r": "prefix.tuicr"
+    "ctrl-space shift-r": "prefix.tuicr",
+    "cmd-shift-m": "mod.open:mermaid"
   },
   "terminal": {
     "cmd-f": "terminal.search",

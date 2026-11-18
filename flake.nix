@@ -91,6 +91,12 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    hmods = {
+      url = "github:mulatta/hmods";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     # Infra-level modules sources
     fast-nix-gc = {
       url = "github:Mic92/fast-nix-gc";

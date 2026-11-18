@@ -419,6 +419,29 @@
         "type": "github"
       }
     },
+    "hmods": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795090704,
+        "narHash": "sha256-qoaAqR5jR5PCCFQyDS/Isc6U0HHHhHUYr2AjcSRSas0=",
+        "owner": "mulatta",
+        "repo": "hmods",
+        "rev": "40191f7db1680da5f24e09dba41c34f16ca886cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mulatta",
+        "repo": "hmods",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -798,6 +821,7 @@
         "flake-utils": "flake-utils",
         "flakelet": "flakelet",
         "gitea-mq": "gitea-mq",
+        "hmods": "hmods",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "niks3": "niks3",
