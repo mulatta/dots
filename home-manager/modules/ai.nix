@@ -65,7 +65,6 @@ in
       "context7-cli"
       "kmap-cli"
       "linkwarden-cli"
-      "queue"
     ]
     ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "shortcuts-cli" ];
     package = skillzPkgs // {
