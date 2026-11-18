@@ -129,3 +129,15 @@ Keep the same flake revision, platform, and initialized provider selection from
 saved-plan creation through apply. Do not update Nix inputs or reinitialize with
 a different environment between them. Store plans with restricted permissions;
 they can contain secrets. Only apply a reviewed plan with explicit approval.
+
+## RustFS bucket
+
+The `terraform/rustfs` unit manages the `neko-transfer` bucket through the
+RustFS S3 endpoint and stores its state in the shared R2 backend. Supply
+RustFS credentials as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` for
+this invocation. Use a fresh environment without an AWS session token or
+profile. RustFS users, keys, and IAM policies are managed separately.
+
+```sh
+nix develop .#terraform -c terragrunt --working-dir terraform/rustfs plan
+```

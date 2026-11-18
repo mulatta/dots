@@ -59,8 +59,8 @@ instance it manages.
 ## Storage
 
 Persistent data is owned by `rustfs` under `/var/lib/rustfs`, mode `0700`.
+Terraform manages the `neko-transfer` bucket on this single-node deployment.
 
 OIDC settings were checked against the pinned server tag
 [`1.0.4`](https://github.com/rustfs/rustfs/tree/1.0.4/crates/iam/src/oidc) and
 Console tag [`v0.1.37`](https://github.com/rustfs/console/tree/v0.1.37).
-
