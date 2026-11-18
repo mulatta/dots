@@ -294,8 +294,8 @@ in
     ];
   };
 
-  # Agent-browser leaves pages open over CDP; without CDP it drops the whole
-  # browser after two idle minutes, so closing idle pages loses no more.
+  # Best-effort collection of detached, unchanged pages. Controllers own normal
+  # task cleanup; attachment protects a page but does not give it a durable lease.
   systemd.services.neko-close-tabs = {
     requisite = [ "podman-neko.service" ];
     after = [ "podman-neko.service" ];
@@ -309,6 +309,7 @@ in
     # Root reads the container's sockets through nsenter.
     serviceConfig = {
       Type = "oneshot";
+      TimeoutStartSec = 60;
       ExecStart = lib.getExe closeTabs;
       StateDirectory = "neko-close-tabs";
     };
