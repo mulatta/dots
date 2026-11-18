@@ -388,7 +388,7 @@ in
   };
   systemd.timers.neko-close-tabs = {
     wantedBy = [ "timers.target" ];
-    timerConfig.OnCalendar = "*:0/5";
+    timerConfig.OnCalendar = "daily";
   };
 
   virtualisation.oci-containers = {
