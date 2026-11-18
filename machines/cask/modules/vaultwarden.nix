@@ -38,7 +38,7 @@
       SHOW_PASSWORD_HINT = false;
       ROCKET_ADDRESS = "127.0.0.1";
       ROCKET_PORT = 8222;
-      IP_HEADER = "X-Forwarded-For";
+      IP_HEADER = "X-Real-IP";
       LOG_LEVEL = "warn";
       DATABASE_MAX_CONNS = 3;
       DATABASE_MIN_CONNS = 1;
