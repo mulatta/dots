@@ -103,6 +103,7 @@ in
     selfPkgs.hmeter
     selfPkgs.codex
     pkgs.ctx
+    aiPkgs.agent-slack
     aiPkgs.git-surgeon
     aiPkgs.jscpd
     aiPkgs.officecli
@@ -112,5 +113,6 @@ in
     pkgs.pueue
     pkgs.nushell
     piPython
+    inputs.rhwp.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-cli
   ];
 }
