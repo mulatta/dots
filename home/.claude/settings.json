@@ -22,19 +22,6 @@
     "kmap-cli": "name-only",
     "linkwarden-cli": "name-only"
   },
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/bell-notify.py"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "hmeter ingest claude -- ~/.claude/statusline.sh",
