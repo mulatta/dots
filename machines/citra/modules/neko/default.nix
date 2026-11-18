@@ -134,9 +134,14 @@ let
       DeveloperToolsAvailability = 1;
       EditBookmarksEnabled = false;
       ExtensionInstallBlocklist = [ "*" ];
+      ExtensionInstallForcelist = [
+        "nngceckbapebfimnlniiiahkandclblb;https://clients2.google.com/service/update2/crx"
+      ];
+      "3rdparty".extensions.nngceckbapebfimnlniiiahkandclblb.environment.base =
+        "https://vaultwarden.mulatta.io";
       FullscreenAllowed = true;
       IncognitoModeAvailability = 1;
-      PasswordManagerEnabled = true;
+      PasswordManagerEnabled = false;
       DownloadDirectory = "/home/neko/Downloads";
       PromptForDownloadLocation = false;
       # Agents leave tabs behind; restoring them keeps their pages rendering.
