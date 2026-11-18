@@ -64,3 +64,25 @@ Terraform manages the `neko-transfer` bucket on this single-node deployment.
 OIDC settings were checked against the pinned server tag
 [`1.0.4`](https://github.com/rustfs/rustfs/tree/1.0.4/crates/iam/src/oidc) and
 Console tag [`v0.1.37`](https://github.com/rustfs/console/tree/v0.1.37).
+
+### Neko staging transfer
+
+The citra worker reads its `citra` S3 key from the Clan var
+`neko-rustfs-transfer/env`. RustFS grants it the `transfer-worker` policy.
+The client reads its `rhesus` S3 key from the `neko-rustfs-client` rbw
+item. RustFS grants it the `transfer-client` policy.
+
+The export timer copies completed top-level staging downloads to
+`neko-transfer/downloads/`. The import timer copies objects from
+`neko-transfer/uploads/` to local staging for Chromium. Both run as the
+existing `transfer` user and use the loopback S3 endpoint. They skip hidden
+names, Chromium partial downloads, rclone partial files, and names already
+present at the destination. The export considers sources up to seven days old.
+The import only considers sources up to one day old so expired local uploads
+are not staged again. Use unique names.
+The timers copy files, so staging and RustFS each retain a copy. Local
+staging expires through systemd-tmpfiles after one day based on mtime.
+Terraform configures seven-day object expiration for the RustFS bucket.
+
+The citra credential needs bucket listing scoped to both prefixes, object
+write and read-back for `downloads/*`, and object read for `uploads/*`.
