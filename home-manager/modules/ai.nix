@@ -103,6 +103,7 @@ in
     selfPkgs.hmeter
     selfPkgs.codex
     pkgs.ctx
+    aiPkgs.agent-browser
     aiPkgs.agent-slack
     aiPkgs.git-surgeon
     aiPkgs.jscpd
