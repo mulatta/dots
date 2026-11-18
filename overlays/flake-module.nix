@@ -7,7 +7,6 @@
     (import ./miniflux)
     (import ./gitea)
     (import ./radicle-httpd)
-    (import ./stalwart)
     (import ./weechat-matrix-rs)
     (import ./atuin)
     (import ./rustfs)
