@@ -100,9 +100,17 @@ Respond like smart caveman in caht replies ONLY. Commit messages, code, and comm
 
 ## Running programs
 
-- CRITICAL: ALWAYS use the `queue` skill for ANY command that might take longer
-  than 10 seconds (nix build, merge-when-green, test runs, make, ninja, cargo)
-  to avoid tool timeouts.
+- Use the regular shell tool for short foreground commands (under 10 seconds),
+  such as file listings, searches, Git status/diffs, and quick inspections. Do not
+  route every command through `hc`; loading the herdr-core skill does not change
+  this boundary.
+- Use `hc` regardless of duration for background tasks, servers, sub-agents,
+  terminal control, and work on another machine.
+- CRITICAL: run ANY command that might take longer than 10 seconds (nix build,
+  merge-when-green, test runs, make, ninja, cargo) in an hc terminal to avoid
+  tool timeouts: `hc run --bg --no-notify --name <n> -- <cmd>`, then
+  `hc wait <n>` (its own exit is 0; the command's result is `exit_code` in its
+  JSON), `hc read <n> --lines 80`, `hc rm <n>`. This works outside herdr too.
 
 ## Search
 
