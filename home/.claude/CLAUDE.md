@@ -94,10 +94,6 @@ Write chat replies in Korean; technical terms, commands, and paths stay as writt
   - Conventional Commits (`feat:`, `fix:`, `chore(deps):`) are usually bot
     output. Check `git log --author` before copying that style from
     dependency-update commits.
-- Before committing:
-  1. Check for bugs
-  2. Try to simplify your code
-  3. Always test/lint/format
 - Use `gh` for GitHub (CI logs, issues, PRs), e.g.
   `gh run view 18256703410 --log`
 - Use `tea` for Gitea, e.g. `tea pr 5519 --comments`
