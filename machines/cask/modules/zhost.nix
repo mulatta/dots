@@ -152,6 +152,8 @@ in
       EnvironmentFile = config.clan.core.vars.generators.oauth2-proxy-zhost.files.env.path;
       ExecStart = "${lib.getExe config.services.oauth2-proxy.package} ${lib.escapeShellArgs zhostOauth2Args}";
       Restart = "always";
+      # Kanidm is not ready at boot; spaced retries stay under the start limit.
+      RestartSec = 5;
     };
   };
   services.nginx.virtualHosts.${domain} = {
