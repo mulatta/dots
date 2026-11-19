@@ -98,6 +98,10 @@ in
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
     ".claude/skills/gh-stack".source = "${pkgs.gh-stack}/share/skills/gh-stack/gh-stack";
     ".claude/skills/herdr-scene".source = "${hmodsPkgs.hscene}/share/skills/hscene/herdr-scene";
+
+    # pi extensions
+    ".pi/agent/extensions/herdr-meter.ts".source =
+      "${hmodsPkgs.hmeter}/share/pi/herdr-meter/herdr-meter.ts";
   };
 
   home.packages = [
