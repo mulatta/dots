@@ -38,7 +38,7 @@
       SHOW_PASSWORD_HINT = false;
       ROCKET_ADDRESS = "127.0.0.1";
       ROCKET_PORT = 8222;
-      IP_HEADER = "X-Forwarded-For";
+      IP_HEADER = "X-Real-IP";
       LOG_LEVEL = "warn";
       DATABASE_MAX_CONNS = 3;
       DATABASE_MIN_CONNS = 1;
@@ -53,6 +53,15 @@
     locations."/" = {
       proxyPass = "http://127.0.0.1:8222";
       proxyWebsockets = true;
+    };
+    # The admin token alone should not face the internet.
+    locations."/admin" = {
+      proxyPass = "http://127.0.0.1:8222";
+      extraConfig = ''
+        allow 10.208.0.0/12;
+        allow fdec:ca5f::/32;
+        deny all;
+      '';
     };
   };
 }

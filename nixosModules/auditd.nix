@@ -1,6 +1,12 @@
+{ config, lib, ... }:
+let
+  nginxUid = toString config.ids.uids.nginx;
+in
 {
   security.audit = {
     enable = true;
+    # The default 1024 overflowed and dropped events on busy hosts.
+    backlogLimit = 8192;
     rules = [
       # systemd sandboxing emits high-volume BPF records we do not act on.
       "-a always,exclude -F msgtype=BPF"
@@ -21,7 +27,11 @@
 
       # Kernel module load/unload (rootkit detection)
       "-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k kernel_module"
-    ];
+
+      # nginx workers never exec; any exec means a compromised worker.
+      "-a always,exit -F arch=b64 -S execve,execveat -F uid=${nginxUid} -k nginx_exec"
+    ]
+    ++ lib.optional config.nixpkgs.hostPlatform.isx86_64 "-a always,exit -F arch=b32 -S execve,execveat -F uid=${nginxUid} -k nginx_exec";
   };
 
   security.auditd.enable = true;

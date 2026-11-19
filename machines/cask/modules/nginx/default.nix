@@ -27,7 +27,6 @@ in
   options.services.nginx.virtualHosts = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        config.quic = true;
         config.listen = lib.mkDefault [
           {
             addr = "[::1]";
@@ -100,7 +99,6 @@ in
         80
         443
       ];
-      allowedUDPPorts = [ 443 ];
     };
 
     security.acme = {
