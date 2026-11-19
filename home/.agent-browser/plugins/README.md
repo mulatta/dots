@@ -10,7 +10,7 @@ Without `--url`, the first eligible URI in vault order is used.
 
 ```sh
 rbw unlock
-agent-browser auth login inu --credential-provider rbw \
+agent-browser auth login inu-lib --credential-provider rbw \
   --item '<vault item name>' --url https://lib.inu.ac.kr/login
 ```
 
