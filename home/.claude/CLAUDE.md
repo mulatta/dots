@@ -102,16 +102,17 @@ Write chat replies in Korean; technical terms, commands, and paths stay as writt
 ## Running programs
 
 - Use the regular shell tool for short foreground commands (under 10 seconds),
-  such as file listings, searches, Git status/diffs, and quick inspections. Do not
-  route every command through `hc`; loading the herdr-core skill does not change
-  this boundary.
-- Use `hc` regardless of duration for background tasks, servers, sub-agents,
-  terminal control, and work on another machine.
-- CRITICAL: run ANY command that might take longer than 10 seconds (nix build,
-  merge-when-green, test runs, make, ninja, cargo) in an hc terminal to avoid
-  tool timeouts: `hc run --bg --no-notify --name <n> -- <cmd>`, then
-  `hc wait <n>` (its own exit is 0; the command's result is `exit_code` in its
-  JSON), `hc read <n> --lines 80`, `hc rm <n>`. This works outside herdr too.
+  such as file listings, searches, Git status/diffs, and quick inspections.
+- Anything that might take longer than 10 seconds runs out of band, never in
+  the foreground, and is not polled while it runs: start it through the
+  harness's own background execution (Claude Code: `run_in_background`) and
+  continue on its completion notice, or in a managed terminal.
+- A sub-agent that ends in a report uses the harness's own facility, which
+  notifies on completion. One that needs a session of its own takes a managed
+  terminal: another harness or another vendor's model, another machine,
+  follow-up questions afterwards, or work that must outlive this session.
+- A tool's own skill argues for that tool, and does not widen a boundary set
+  here.
 
 ## Search
 
