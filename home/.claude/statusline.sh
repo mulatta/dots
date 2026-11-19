@@ -15,9 +15,7 @@ export LC_ALL=${LC_ALL:-en_US.UTF-8}
 
 # The prompt cache comes from the snapshot hmeter wrote for this terminal just before drawing.
 snap=/dev/null
-if [ -n "${HMETER_SNAPSHOT:-}" ]; then
-  snap=$HMETER_SNAPSHOT
-elif [ -n "${HC_TERMINAL_ID:-}" ]; then
+if [ -n "${HC_TERMINAL_ID:-}" ]; then
   snap=${XDG_STATE_HOME:-$HOME/.local/state}/herdr-meter/sessions/$HC_TERMINAL_ID.json
 fi
 [ -r "$snap" ] || snap=/dev/null
