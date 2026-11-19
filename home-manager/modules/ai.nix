@@ -32,6 +32,17 @@ let
 
   piPython = pkgs.python3.withPackages agentPython;
 
+  # hmeter files a Codex hook under the hook's HC_TERMINAL_ID. Under Codex's shared
+  # app-server daemon every session's hook carries the daemon's terminal instead.
+  codex = pkgs.symlinkJoin {
+    inherit (selfPkgs.codex) name meta;
+    paths = [ selfPkgs.codex ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/codex --add-flags "-c daemon_auto_start=false"
+    '';
+  };
+
   nixbot-cli =
     inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
       (old: {
@@ -104,7 +115,7 @@ in
     })
     hmodsPkgs.hmeter
     hmodsPkgs.hscene
-    selfPkgs.codex
+    codex
     pkgs.ctx
     aiPkgs.agent-browser
     aiPkgs.agent-slack
