@@ -33,32 +33,12 @@ Write chat replies in Korean; technical terms, commands, and paths stay as writt
 
 ## Nix-specific
 
-- Use `nix log /nix/store/xxxx | grep <key-word>` to inspect failed nix builds
-- Add new untracked files in Nix flakes with `git add`.
-- To get a rebuild of a nix package change the nix expression instead of
-  `--rebuild`
 - Prefer nix-provided Python deps over pip/venv when packaging or scripting.
-- Inside nix-shell/nix develop: locate headers/libs/tools via env vars (e.g.
-  `env | rg /nix/store`, `$NIX_CFLAGS_COMPILE`, `$PKG_CONFIG_PATH`,
-  `$buildInputs`) rather than guessing system paths.
 - My nix.conf has remote builders for x86_64-linux by default. Targeted NixOS
   tests and dependency-fetcher reproductions can use those builders from macOS
-  when project rules permit. Do not build Linux system toplevels from macOS as
-  routine validation; prefer target evaluation and native CI builds.
-- A cached fixed-output derivation does not prove reproducibility. For a
-  platform-dependent hash failure, independently regenerate outputs on the
-  affected platforms and compare them before replacing the recorded hash.
-- Cross-arch builds: `nix-build --eval-system x86_64-linux`. Flakes: use system
-  attr directly (e.g., `.#packages.x86_64-linux.hello`).
+  when project rules permit.
 - Use nix-locate to find packages by path, e.g. `nix-locate bin/ip`
 - Use `nix run` to execute applications that are not installed.
-- Use `nix eval` instead of `nix flake show` to look up attributes in a flake.
-- Generate/Update patch files for packages:
-  1. git clone
-  2. Optional: apply existing patch
-  3. Apply edits
-  4. Use `git format-patch` for a new patch
-- `nix flake check` runs too slow. Instead, build individual tests.
 
 ## Code Quality & Testing
 
