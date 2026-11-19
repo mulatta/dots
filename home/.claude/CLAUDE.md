@@ -74,8 +74,11 @@ Write chat replies in Korean; technical terms, commands, and paths stay as writt
 - Tests use realistic inputs/outputs that exercise actual code, not mocks.
 - Linter reports dead code: remove it.
 - Linter errors: fix root cause, do not suppress warnings.
-- Code comments: explain WHY, not WHAT. Describe current state, not what was
-  removed.
+- Code comments: none by default. Write one only for a constraint the code
+  cannot express because it comes from outside it (a dependency, a platform, a
+  protocol, an upstream issue), and keep it to one line that describes the
+  current state. A surprise in our own code is a reason to change the code, not
+  to explain it.
 
 ## Git
 
