@@ -10,46 +10,14 @@ import { join } from "node:path";
 import { currentBranch, git, prBase } from "./_git.ts";
 
 const OPEN_PR_PROMPT = `
-Write a PR description using the conversation context and open PR creation in
-the browser.
+Write a PR description and open PR creation in the browser.
 
-## Commit uncommitted changes
+Read the Open PR playbook in full and follow it:
+\`~/git/harness/skills/mulatta-mode/playbooks/opening-a-pr.md\`. It owns the scope,
+the description, the title, and how the creation screen is opened. Do not work
+from memory of it.
 
-If \`git status\` below shows changes, commit them before proceeding.
-
-## Write PR description
-
-If a repo PR template was found below, fill it in.
-
-Otherwise write a single short paragraph. Derive it from the commit messages:
-for a single commit, expand its body slightly; for multiple commits,
-synthesize the overall goal (don't enumerate them). No headings, no bullet
-lists. Only mention testing if the conversation or diff shows actual
-verification.
-
-Guidelines:
-
-- Lead with a concise summary of what the PR does
-- Explain the "why" before the "how"
-- Use the conversation context to inform the description
-- Include before/after comparisons for UI or performance changes
-- Be direct and to the point
-
-## Create the PR
-
-1. Write a short PR title (max 72 characters)
-2. Ensure the branch is pushed: \`git push -u origin HEAD\`
-3. Open PR creation in browser (do NOT create directly). On a workstation,
-   detach so the tool call returns immediately instead of blocking on the
-   browser:
-   \`\`\`bash
-   nohup gh pr create --web --title "<title>" --body "<body>" >/dev/null 2>&1 &
-   \`\`\`
-   On a headless server with no browser/display, do not discard output; print
-   the PR creation URL instead so the user can open it elsewhere:
-   \`\`\`bash
-   GH_BROWSER=echo gh pr create --web --title "<title>" --body "<body>"
-   \`\`\`
+The git state below is already loaded. Do not re-run those commands to get it.
 `.trim();
 
 // Anything larger than this is probably noise (lockfiles, generated code).
@@ -122,13 +90,13 @@ export default function (pi: ExtensionAPI) {
 
       const templateSection = template
         ? [
-          `Found \`${template.path}\` — use this instead of the default template:`,
+          `Found \`${template.path}\` — the playbook says to fill this in:`,
           "",
           "```markdown",
           template.body.trim(),
           "```",
         ].join("\n")
-        : "(no PR template found in repo, use the default above)";
+        : "(no PR template found in repo; write the description the playbook's way)";
 
       const gitContext = [
         "## Current git state",

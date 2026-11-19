@@ -9,56 +9,15 @@ import {
 } from "./_git.ts";
 
 const TIDY_PROMPT = `
-Tidy branch history into cohesive, reviewable commits while preserving final
-tree and intent. Turn tangled incremental changes such as \`A -> A+B -> B\`
-into direct logical changes such as \`A -> B\`.
+Tidy this branch's history.
 
-## Commit quality bar
+Read the \`tidy\` skill in full and follow it:
+\`~/git/harness/skills/tidy/SKILL.md\`. It owns the commit quality bar, the
+plan-before-rewrite gate, the git-surgeon operations, and the backup ref. Do
+not work from memory of it.
 
-Each final commit must:
-
-- have one clear purpose
-- be understandable on its own from its diff and message
-- avoid mixing unrelated files or hunks
-- include tests, docs, and config with code they validate or explain
-- stay small enough to review without hiding multiple concerns
-- leave tree buildable and reviewable when practical
-
-Split commits containing independent concepts. Combine commits only when one is
-a fixup, cleanup, rename support, or test/docs companion for same concept. Do
-not squash everything unless whole change is one small logical unit.
-
-Use imperative, concise commit subjects following repository convention. Prefer
-\`<context>: <description>\` when existing history uses scoped subjects. Avoid
-Conventional Commit prefixes unless repository history uses them. Explain why,
-not merely what, in commit bodies when needed.
-
-## Required workflow
-
-1. Treat preloaded data as structural inventory, not complete evidence.
-2. Use git-surgeon skill for history inspection. Investigate tangled files and
-   ambiguous hunks with its \`hunks --commit\`, \`--full\`, \`--blame\`, and
-   \`show\` operations instead of loading full branch patch.
-3. Present rewrite plan before changing history. For each proposed commit, give
-   subject, purpose, and files or hunks it contains.
-4. Before any history mutation, require clean worktree and index. If either has
-   uncommitted changes, ask user how to handle them. Do not invoke git-surgeon,
-   raw rebase, reset, stash, add, commit, or other mutating commands until tree
-   is clean or user explicitly approves handling plan. Never rely on
-   git-surgeon's automatic stash behavior.
-5. After plan is accepted, prefer git-surgeon \`split\`, \`fold\`, \`move\`,
-   \`squash\`, \`amend\`, and \`reword\` operations. Do not construct an
-   interactive rebase manually. Use lower-level Git only when git-surgeon cannot
-   express approved rewrite.
-6. Preserve final tree exactly unless user explicitly approves a difference.
-   Compare rewritten HEAD tree with backup commit.
-7. Run relevant narrow formatters, linters, or tests.
-8. Inspect final history and use \`git range-diff\` when useful.
-9. Report final commits, verification commands, remaining risks, and retained
-   backup ref. Mention \`git for-each-ref refs/backup/tidy\` for listing backups.
-
-Never force-push or update remote refs unless explicitly requested. Backup ref
-shown below protects original HEAD; do not replace or delete it.
+The inventory below is already loaded. Treat it as a structural inventory, not
+complete evidence: inspect tangled files and ambiguous hunks yourself.
 `.trim();
 
 const CONTEXT_LIMIT = 15_000;

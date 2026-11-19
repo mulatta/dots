@@ -7,19 +7,13 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const COMMIT_PROMPT = `
-Commit the changes using this style:
+Commit the changes.
 
-- when writing commit messages focus on the WHY rather than the WHAT.
-- imperative mood
-- concise, no conventional commit prefixes
-- optionally use a context prefix when it adds clarity (e.g., "docs:", "cli:")
-- paragraphs instead of bullet points
+Read the \`commit\` skill in full and follow it:
+\`~/git/harness/skills/commit/SKILL.md\`. It owns the selection, the message
+style, and what to report. Do not work from memory of it.
 
-If nothing is staged, stage all changes first (\`git add -A\`).
-If there are untracked files relevant to the change, include them.
-
-If the changes cover multiple unrelated concerns, split them into separate
-logical commits rather than one large commit.
+The git state below is already loaded. Do not re-run those commands to get it.
 `.trim();
 
 export default function (pi: ExtensionAPI) {
