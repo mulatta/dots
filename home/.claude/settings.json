@@ -9,10 +9,6 @@
   },
   "includeGitInstructions": false,
   "permissions": {
-    "deny": [
-      "Bash(git push*)",
-      "Bash(jj git push*)"
-    ],
     "defaultMode": "auto"
   },
   "model": "opus",
