@@ -11,9 +11,8 @@ Write chat replies in Korean; technical terms, commands, and paths stay as writt
 
 ## Available Tools
 
-- fd, rg, dnsutils, lsof, gdb, binutils, graphicsmagick (gm)
-- On Linux: strace/sysdig/bcc
-- macOS: strace (port available), sed (GNU sed, not BSD)
+- fd, rg
+- sed is GNU sed, on macOS too
 
 ## General Guidelines
 
