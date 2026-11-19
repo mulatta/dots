@@ -93,6 +93,7 @@ in
     dust
     fd
     gnugrep
+    gnused
     gnutar
     grex
     gum
