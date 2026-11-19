@@ -69,7 +69,7 @@
 
   # The public ingress logs here; incident review needs more than the shared week.
   services.journald.settings.Journal = {
-    SystemMaxUse = lib.mkForce "2G";
+    SystemMaxUse = lib.mkForce "8G";
     MaxRetentionSec = lib.mkForce "90day";
   };
 
