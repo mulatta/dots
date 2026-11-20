@@ -243,10 +243,9 @@ y() {
   rm -f -- "$tmp"
 }
 
-# mkdir + cd
 mk() {
   [[ $# -eq 0 ]] && { echo "Usage: mk <directory_name>"; return 1; }
-  mkdir -p "$1" && cd "$1"
+  mkdir -p -- "$1" && cd -- "$1" && jj git init --colocate
 }
 
 # git wrapper: default to the current branch stack, pass subcommands through.
