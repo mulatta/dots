@@ -8,7 +8,6 @@
     (import ./gitea)
     (import ./radicle-httpd)
     (import ./weechat-matrix-rs)
-    (import ./atuin)
     (import ./hindsight { inherit inputs; })
     (import ./ctx { inherit inputs; })
   ];
