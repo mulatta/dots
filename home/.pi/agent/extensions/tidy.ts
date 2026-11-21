@@ -12,7 +12,7 @@ const TIDY_PROMPT = `
 Tidy this branch's history.
 
 Read the \`tidy\` skill in full and follow it:
-\`~/git/harness/skills/tidy/SKILL.md\`. It owns the commit quality bar, the
+\`~/.claude/skills/tidy/SKILL.md\`. It owns the commit quality bar, the
 plan-before-rewrite gate, the git-surgeon operations, and the backup ref. Do
 not work from memory of it.
 

@@ -13,7 +13,7 @@ const OPEN_PR_PROMPT = `
 Write a PR description and open PR creation in the browser.
 
 Read the Open PR playbook in full and follow it:
-\`~/git/harness/skills/mulatta-mode/playbooks/opening-a-pr.md\`. It owns the scope,
+\`~/.claude/skills/mulatta-mode/playbooks/opening-a-pr.md\`. It owns the scope,
 the description, the title, and how the creation screen is opened. Do not work
 from memory of it.
 
