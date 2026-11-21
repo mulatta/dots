@@ -50,7 +50,6 @@
 	verbose = true
 
 [core]
-	attributesfile = ~/.gitattributes
 	autocrlf = "input"
 	compression = -1
 	editor = "hx"
