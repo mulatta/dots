@@ -9,10 +9,6 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 const COMMIT_PROMPT = `
 Commit the changes.
 
-Read the \`commit\` skill in full and follow it:
-\`~/git/harness/skills/commit/SKILL.md\`. It owns the selection, the message
-style, and what to report. Do not work from memory of it.
-
 The git state below is already loaded. Do not re-run those commands to get it.
 `.trim();
 
