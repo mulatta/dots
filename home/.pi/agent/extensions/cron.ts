@@ -21,6 +21,7 @@ import type {
   ExtensionAPI,
   ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
+import { Type } from "@sinclair/typebox";
 
 interface CronTask {
   id: string;
@@ -206,6 +207,34 @@ export default function (pi: ExtensionAPI) {
     }
   };
 
+  function schedule(p: Parsed): CronTask {
+    const id = generateId();
+    const now = Date.now();
+    const jitter = computeJitterMs(id, p.intervalMs);
+    const t: CronTask = {
+      id,
+      prompt: p.prompt,
+      intervalMs: p.intervalMs,
+      humanLabel: p.humanLabel,
+      createdAt: now,
+      expiresAt: now + EXPIRY_DAYS * 86_400_000,
+      fireCount: 0,
+      nextFireAt: now + p.intervalMs + jitter,
+      jitterMs: jitter,
+    };
+    tasks.set(id, t);
+    start();
+    updateStatus();
+    return t;
+  }
+
+  function remove(id: string): boolean {
+    const removed = tasks.delete(id);
+    if (removed) updateStatus();
+    if (tasks.size === 0) stop();
+    return removed;
+  }
+
   pi.on("agent_start", async () => {
     busy = true;
   });
@@ -292,10 +321,8 @@ export default function (pi: ExtensionAPI) {
 
       const del = s.match(/^(?:delete|rm|stop)\s+(\S+)/);
       if (del) {
-        if (tasks.delete(del[1])) {
-          updateStatus();
+        if (remove(del[1])) {
           ctx.ui.notify(`Task ${del[1]} deleted`, "info");
-          if (tasks.size === 0) stop();
         } else {
           ctx.ui.notify(`Task ${del[1]} not found`, "error");
         }
@@ -322,23 +349,9 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      const id = generateId();
+      const t = schedule(p);
+      const { id } = t;
       const now = Date.now();
-      const jitter = computeJitterMs(id, p.intervalMs);
-      const t: CronTask = {
-        id,
-        prompt: p.prompt,
-        intervalMs: p.intervalMs,
-        humanLabel: p.humanLabel,
-        createdAt: now,
-        expiresAt: now + EXPIRY_DAYS * 86_400_000,
-        fireCount: 0,
-        nextFireAt: now + p.intervalMs + jitter,
-        jitterMs: jitter,
-      };
-      tasks.set(id, t);
-      start();
-      updateStatus();
 
       let msg = `Scheduled ${id} (${p.humanLabel})\n` +
         `Next: in ${formatRelative(t.nextFireAt - now)}\n` +
@@ -355,6 +368,78 @@ export default function (pi: ExtensionAPI) {
           display: true,
         },
         { triggerTurn: true },
+      );
+    },
+  });
+
+  pi.registerTool({
+    name: "loop",
+    label: "Loop",
+    description:
+      "Run a prompt on a recurring interval, as `/loop <interval> <prompt>` " +
+      "does in Claude Code. Use when a playbook or the user says to arm " +
+      "`/loop`, to poll for status, or to repeat a task on a schedule. " +
+      "A prompt fires as a new turn once the agent is idle, never mid-turn. " +
+      "Intervals below 1m are raised to 1m. Not for a one-off task.",
+    parameters: Type.Object({
+      action: Type.Union(
+        [Type.Literal("start"), Type.Literal("list"), Type.Literal("stop")],
+        { description: "start a loop, list loops, or stop one" },
+      ),
+      interval: Type.Optional(
+        Type.String({ description: "for start: 90s, 5m, 1h, or 1d" }),
+      ),
+      prompt: Type.Optional(
+        Type.String({ description: "for start: the prompt each tick sends" }),
+      ),
+      id: Type.Optional(
+        Type.String({ description: "for stop: a loop id, or all" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      ctxRef = ctx;
+      const text = (body: string) => ({
+        content: [{ type: "text" as const, text: body }],
+      });
+      if (params.action === "list") {
+        if (tasks.size === 0) return text("No loops.");
+        const now = Date.now();
+        return text(
+          Array.from(tasks.values())
+            .map(
+              (t) =>
+                `${t.id} ${t.humanLabel}, next in ${
+                  formatRelative(t.nextFireAt - now)
+                }: ${t.prompt}`,
+            )
+            .join("\n"),
+        );
+      }
+      if (params.action === "stop") {
+        if (params.id === "all") {
+          const ids = Array.from(tasks.keys());
+          for (const id of ids) remove(id);
+          return text(`Stopped ${ids.length} loop(s).`);
+        }
+        if (!params.id) throw new Error("stop needs an id, or all");
+        if (!remove(params.id)) throw new Error(`No loop ${params.id}`);
+        return text(`Stopped ${params.id}.`);
+      }
+      if (tasks.size >= MAX_TASKS) {
+        throw new Error(`At most ${MAX_TASKS} loops run at once`);
+      }
+      const interval = params.interval?.trim() ?? "";
+      if (!/^\d+\s*[smhd]$/i.test(interval) || !params.prompt?.trim()) {
+        throw new Error("start needs an interval such as 5m and a prompt");
+      }
+      const p = parseInput(`${interval} ${params.prompt}`);
+      if (!p) throw new Error("start needs an interval and a prompt");
+      const t = schedule(p);
+      const note = p.clamped ? ` ${p.clamped}` : "";
+      return text(
+        `Started ${t.id}, ${t.humanLabel}, first in ${
+          formatRelative(t.nextFireAt - Date.now())
+        }.${note} Stop it with action stop and id ${t.id}.`,
       );
     },
   });
