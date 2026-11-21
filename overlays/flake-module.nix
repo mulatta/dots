@@ -10,7 +10,6 @@
     (import ./weechat-matrix-rs)
     (import ./atuin)
     (import ./rustfs)
-    (import ./afew)
     (import ./hindsight { inherit inputs; })
     (import ./ctx { inherit inputs; })
   ];
