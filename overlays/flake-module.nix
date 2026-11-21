@@ -7,7 +7,6 @@
     (import ./miniflux)
     (import ./gitea)
     (import ./radicle-httpd)
-    (import ./weechat-matrix-rs)
     (import ./hindsight { inherit inputs; })
     (import ./ctx { inherit inputs; })
   ];
