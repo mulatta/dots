@@ -19,9 +19,6 @@
 
   # Miniflux is the only RSSHub consumer; public/SSO exposure would leak feed
   # URLs or add unnecessary auth complexity for a localhost backend.
-  # The remaining routes (inu/kosaf notices, github trending) are plain HTTP, so
-  # no headless Chromium or rendering fonts are needed - the journal routes that
-  # required them moved to publisher RSS + the on-demand paperfetch-cli path.
   services.rsshub = {
     enable = true;
     package = self.packages.${pkgs.stdenv.hostPlatform.system}.rsshub;
