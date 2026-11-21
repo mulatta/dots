@@ -2,7 +2,7 @@
   writeShellApplication,
   claude-code,
   pueue,
-  nodejs_24,
+  bun,
   bashInteractive,
 }:
 writeShellApplication {
@@ -10,7 +10,7 @@ writeShellApplication {
   runtimeInputs = [
     claude-code
     pueue
-    nodejs_24
+    bun
   ];
   text = ''
     export SHELL=${bashInteractive}/bin/bash
