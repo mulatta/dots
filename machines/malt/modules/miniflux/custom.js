@@ -620,23 +620,6 @@
     }
   };
 
-  const setupRssActionLabels = () => {
-    document.querySelectorAll("[data-toggle-starred]").forEach((button) => {
-      const archived = button.dataset.value === "star";
-      button.title = archived
-        ? "Archived to Linkwarden; click to unstar in Miniflux only"
-        : "Archive to Linkwarden";
-      button.dataset.labelStar = "Archive";
-      button.dataset.labelUnstar = "Archived";
-      button.dataset.toastStar = "Archived to Linkwarden";
-      button.dataset.toastUnstar = "Unstarred in Miniflux";
-      const label = button.querySelector(".icon-label");
-      if (label) {
-        label.textContent = archived ? "Archived" : "Archive";
-      }
-    });
-  };
-
   const setupGithubTrendingDescription = () => {
     document.querySelectorAll(".entry-item .item-title a").forEach((anchor) => {
       const parsed = githubTrendingTitle(text(anchor));
@@ -695,7 +678,6 @@
     setupCodeCopy();
     setupMarkdownCopy();
     setupExternalLinkButton();
-    setupRssActionLabels();
     setupGithubTrendingDescription();
   });
 })();
