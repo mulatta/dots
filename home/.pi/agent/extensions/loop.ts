@@ -1,17 +1,17 @@
 /**
- * /cron — schedule recurring prompts that fire on an interval.
+ * /loop — schedule recurring prompts that fire on an interval.
  *
  * Tasks only fire when the agent is idle (between turns). Each task gets
  * deterministic jitter derived from its ID so multiple tasks don't
  * thunder-herd, and so restarts don't reshuffle fire times.
  *
  * Usage:
- *   /cron 5m check if the deployment finished
- *   /cron 2h run the integration tests
- *   /cron check deploy every 30m
- *   /cron list          — show all tasks
- *   /cron delete <id>   — cancel a task
- *   /cron clear         — delete all tasks
+ *   /loop 5m check if the deployment finished
+ *   /loop 2h run the integration tests
+ *   /loop check deploy every 30m
+ *   /loop list          — show all tasks
+ *   /loop delete <id>   — cancel a task
+ *   /loop clear         — delete all tasks
  *
  * Based on aldoborrero/agent-kit (extensions/loop). Rewritten to drop the
  * croner dependency — upstream only accepts simple intervals (5m/2h) as
@@ -23,7 +23,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 
-interface CronTask {
+interface LoopTask {
   id: string;
   prompt: string;
   intervalMs: number;
@@ -88,7 +88,7 @@ function labelFor(ms: number): string {
 }
 
 /**
- * Parse "/cron <input>" into interval + prompt.
+ * Parse "/loop <input>" into interval + prompt.
  *  1. Leading token: "5m check something"
  *  2. Trailing clause: "check something every 5m"
  *  3. Default: 10m, entire input is the prompt
@@ -146,7 +146,7 @@ function formatRelative(ms: number): string {
 }
 
 export default function (pi: ExtensionAPI) {
-  const tasks = new Map<string, CronTask>();
+  const tasks = new Map<string, LoopTask>();
   let timer: ReturnType<typeof setInterval> | null = null;
   let busy = false;
   let ctxRef: ExtensionContext | null = null;
@@ -154,10 +154,10 @@ export default function (pi: ExtensionAPI) {
   function updateStatus() {
     if (!ctxRef?.hasUI) return;
     ctxRef.ui.setStatus(
-      "cron",
+      "loop",
       tasks.size === 0
         ? undefined
-        : ctxRef.ui.theme.fg("success", `cron:${tasks.size}`),
+        : ctxRef.ui.theme.fg("success", `loop:${tasks.size}`),
     );
   }
 
@@ -171,7 +171,7 @@ export default function (pi: ExtensionAPI) {
         drop.push(id);
         if (ctxRef.hasUI) {
           ctxRef.ui.notify(
-            `cron task ${id} expired (${EXPIRY_DAYS}d limit)`,
+            `loop task ${id} expired (${EXPIRY_DAYS}d limit)`,
             "info",
           );
         }
@@ -183,8 +183,8 @@ export default function (pi: ExtensionAPI) {
 
         pi.sendMessage(
           {
-            customType: "cron",
-            content: `[cron ${t.id} — ${t.humanLabel}]\n\n${t.prompt}`,
+            customType: "loop",
+            content: `[loop ${t.id} — ${t.humanLabel}]\n\n${t.prompt}`,
             display: true,
           },
           { triggerTurn: true },
@@ -207,11 +207,11 @@ export default function (pi: ExtensionAPI) {
     }
   };
 
-  function schedule(p: Parsed): CronTask {
+  function schedule(p: Parsed): LoopTask {
     const id = generateId();
     const now = Date.now();
     const jitter = computeJitterMs(id, p.intervalMs);
-    const t: CronTask = {
+    const t: LoopTask = {
       id,
       prompt: p.prompt,
       intervalMs: p.intervalMs,
@@ -255,9 +255,9 @@ export default function (pi: ExtensionAPI) {
     tasks.clear();
   });
 
-  pi.registerCommand("cron", {
+  pi.registerCommand("loop", {
     description:
-      "Schedule recurring prompts (/cron 5m <prompt> | list | delete <id> | clear)",
+      "Schedule recurring prompts (/loop 5m <prompt> | list | delete <id> | clear)",
     getArgumentCompletions: (prefix) => {
       const del = prefix.match(/^(delete|rm|stop)\s+(\S*)$/);
       if (del) {
@@ -305,9 +305,9 @@ export default function (pi: ExtensionAPI) {
         if (tasks.size === 0) {
           ctx.ui.notify(
             "No scheduled tasks.\n\n" +
-              "  /cron 5m check deploy   — schedule\n" +
-              "  /cron list              — show all\n" +
-              "  /cron delete <id>       — cancel",
+              "  /loop 5m check deploy   — schedule\n" +
+              "  /loop list              — show all\n" +
+              "  /loop delete <id>       — cancel",
             "info",
           );
         } else showList(ctx);
@@ -339,13 +339,13 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (tasks.size >= MAX_TASKS) {
-        ctx.ui.notify(`Max ${MAX_TASKS} tasks. /cron clear first.`, "error");
+        ctx.ui.notify(`Max ${MAX_TASKS} tasks. /loop clear first.`, "error");
         return;
       }
 
       const p = parseInput(s);
       if (!p?.prompt) {
-        ctx.ui.notify("Usage: /cron [interval] <prompt>", "error");
+        ctx.ui.notify("Usage: /loop [interval] <prompt>", "error");
         return;
       }
 
@@ -355,16 +355,16 @@ export default function (pi: ExtensionAPI) {
 
       let msg = `Scheduled ${id} (${p.humanLabel})\n` +
         `Next: in ${formatRelative(t.nextFireAt - now)}\n` +
-        `Expires in ${EXPIRY_DAYS}d. /cron delete ${id} to cancel.`;
+        `Expires in ${EXPIRY_DAYS}d. /loop delete ${id} to cancel.`;
       if (p.clamped) msg = `${p.clamped}\n\n${msg}`;
       ctx.ui.notify(msg, "info");
 
       // Fire once immediately so you see it working.
       pi.sendMessage(
         {
-          customType: "cron",
+          customType: "loop",
           content:
-            `[cron ${id} — ${p.humanLabel} — initial run]\n\n${p.prompt}`,
+            `[loop ${id} — ${p.humanLabel} — initial run]\n\n${p.prompt}`,
           display: true,
         },
         { triggerTurn: true },
