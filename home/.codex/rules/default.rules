@@ -1,0 +1,46 @@
+# Codex runs without a sandbox or approvals (config.toml), so these rules
+# are the only commands it refuses. Under approval_policy = "never" a
+# refused command fails at once; the agent reports it and the user runs it.
+# A prefix rule matches leading words only: a command wrapped in sh -c, or
+# with the matched flag after its arguments, passes.
+# Codex skips a rules file that is a symlink, so ~/.codex/rules links as a directory.
+
+# Deploys and activations are the user's.
+prefix_rule(
+    pattern = ["nix", "run", [".#hm", "path:.#hm", "~/dots#hm", "/Users/seungwon/dots#hm"], "--", "switch"],
+    decision = "forbidden",
+    justification = "Home Manager switch is the user's. Run build instead and report the switch command.",
+)
+prefix_rule(
+    pattern = [["hm", "home-manager"], "switch"],
+    decision = "forbidden",
+    justification = "Home Manager switch is the user's. Run build instead and report the switch command.",
+)
+prefix_rule(
+    pattern = [["nixos-rebuild", "darwin-rebuild"], ["switch", "boot", "test", "activate"]],
+    decision = "forbidden",
+    justification = "Activating a system is the user's. Run build instead and report the command.",
+)
+prefix_rule(
+    pattern = ["sudo", ["nixos-rebuild", "darwin-rebuild"], ["switch", "boot", "test", "activate"]],
+    decision = "forbidden",
+    justification = "Activating a system is the user's. Run build instead and report the command.",
+)
+prefix_rule(
+    pattern = ["nh", ["os", "home", "darwin"], ["switch", "boot", "test"]],
+    decision = "forbidden",
+    justification = "Activating a system is the user's. Run build instead and report the command.",
+)
+prefix_rule(
+    pattern = ["clan", "machines", ["update", "install"]],
+    decision = "forbidden",
+    justification = "Deploying a machine is the user's. Report the command instead.",
+)
+
+# Rewriting a shared branch is the user's. --force-with-lease on the
+# agent's own branch stays allowed.
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f"]],
+    decision = "forbidden",
+    justification = "A plain force push can overwrite others' work. Use --force-with-lease on your own branch, or report the command.",
+)

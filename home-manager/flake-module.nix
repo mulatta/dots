@@ -47,12 +47,26 @@
                 exit 0
               fi
 
-              exec stow \
+              # stow local fold
+              shopt -s patsub_replacement
+              meta='[][\\.^$*+?(){}|]'
+              ignores=()
+              if [[ -f "$HOME/dots/home/.stow-local-fold" ]]; then
+                while IFS= read -r path; do
+                  [[ -z "$path" || "$path" == "#"* ]] && continue
+                  ignores+=(--ignore "^''${path//$meta/\\&}")
+                done <"$HOME/dots/home/.stow-local-fold"
+              fi
+
+              # stow all of home, file by file
+              stow \
                 -d "$HOME/dots" \
                 -t "$HOME" \
                 --restow \
                 --no-folding \
+                "''${ignores[@]}" \
                 home
+              exec stow -d "$HOME/dots" -t "$HOME" --stow home
             '';
           }
         }/bin/stow-dotfiles";
