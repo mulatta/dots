@@ -79,6 +79,7 @@ in
     enable = true;
     settings = {
       base-url = "https://ntfy.mulatta.io";
+      upstream-base-url = "https://ntfy.sh";
       listen-http = "127.0.0.1:2586";
       behind-proxy = true;
       auth-file = "/var/lib/ntfy-sh/user.db";
