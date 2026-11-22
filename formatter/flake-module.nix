@@ -99,6 +99,8 @@
           "home/.pi/**"
           # Claude Code rewrites this in its schema key order on every settings save
           "home/.claude/settings.json"
+          # /hstack-setup writes this in its own line format, where `#` lines are comments, not headings
+          "home/.claude/rules/models.md"
           # vendored pnpm lockfiles are generated; yamlfmt churns them
           "**/pnpm-lock.yaml"
         ];
