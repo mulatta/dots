@@ -9,7 +9,7 @@ Prose follows the `unslop` skill, chat replies included. Read `~/.claude/skills/
 ## Available Tools
 
 - fd, rg
-- sed is GNU sed, on macOS too
+- On macOS, treat these tools as GNU compatible: coreutils such as `date` and `stat`, sed, grep, awk, find, xargs, diff, tar, and make.
 
 ## General Guidelines
 
