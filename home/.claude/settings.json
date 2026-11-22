@@ -24,6 +24,7 @@
     "padding": 0,
     "refreshInterval": 2
   },
+  "language": "korean",
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "autoDreamEnabled": true,

@@ -1,5 +1,8 @@
 ## Output format
 
+Chat replies are in Korean, and so are the one-line notes between tool calls.
+Drift starts in those notes: after long English tool output or commit messages,
+one note slips into English and the final report follows it.
 Commit messages, code, and comments are in English.
 Prose follows the `unslop` skill, chat replies included. Read `~/.claude/skills/unslop/SKILL.md` before the first reply of a session.
 
