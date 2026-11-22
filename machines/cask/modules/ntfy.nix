@@ -37,6 +37,18 @@ in
       username = "job-01";
       role = "user";
     };
+    ntfy-web-push = {
+      files.env.secret = true;
+      runtimeInputs = with pkgs; [
+        ntfy-sh
+        gnused
+      ];
+      script = ''
+        keys=$(ntfy webpush keys)
+        sed -nE 's/^web-push-(public|private)-key: (.+)$/NTFY_WEB_PUSH_\U\1\E_KEY=\2/p' <<< "$keys" > "$out/env"
+        [ "$(wc -l < "$out/env")" -eq 2 ]
+      '';
+    };
   };
 
   systemd.services.ntfy-sh = {
@@ -48,6 +60,7 @@ in
         "ntfy"
         "ntfy-automation"
         "ntfy-job-01"
+        "ntfy-web-push"
       ];
     };
     preStart = ''
@@ -58,6 +71,7 @@ in
       automation_users="$NTFY_AUTH_USERS"
       source "$CREDENTIALS_DIRECTORY/ntfy-job-01"
       printf "NTFY_AUTH_USERS='%s,%s,%s'\n" "$admin_users" "$automation_users" "$NTFY_AUTH_USERS" > /run/ntfy-sh/auth.env
+      cat "$CREDENTIALS_DIRECTORY/ntfy-web-push" >> /run/ntfy-sh/auth.env
     '';
   };
 
@@ -77,6 +91,8 @@ in
       ];
       enable-signup = false;
       enable-login = true;
+      web-push-file = "/var/lib/ntfy-sh/webpush.db";
+      web-push-email-address = "postmaster@mulatta.io";
     };
   };
   services.nginx.virtualHosts."ntfy.mulatta.io" = {
