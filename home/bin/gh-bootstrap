@@ -208,15 +208,23 @@ check_auto_merge_workflow() {
 }
 
 get_ruleset_details() {
+  local ids
   local id
+  local detail
+  local details=()
 
-  while IFS= read -r id; do
-    gh api "repos/$REPO/rulesets/$id"
-  done < <(gh api "repos/$REPO/rulesets" --jq '.[].id') | jq -s .
+  ids=$(gh api "repos/$REPO/rulesets" --jq '.[].id') ||
+    die "could not list rulesets for $REPO"
+  for id in $ids; do
+    detail=$(gh api "repos/$REPO/rulesets/$id") ||
+      die "could not read ruleset $id for $REPO"
+    details+=("$detail")
+  done
+  printf '%s\n' "${details[@]}" | jq -s .
 }
 
 gitea_mq_app_id() {
-  get_ruleset_details | jq -r '
+  jq -r '
     [
       .[]
       | select(.name == "gitea-mq")
@@ -233,7 +241,7 @@ gitea_mq_app_id() {
 check_gitea_mq() {
   local details
 
-  details=$(get_ruleset_details)
+  details=$(get_ruleset_details) || return 1
 
   if jq -e 'any(.[]?.rules[]?; .type == "merge_queue")' <<<"$details" >/dev/null; then
     die "GitHub built-in merge queue conflicts with gitea-mq"
@@ -330,7 +338,8 @@ echo "    repository: enabled"
 echo "==> [5/7] Branch rulesets..."
 REMOTE_BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].name' 2>/dev/null || true)
 
-GITEA_MQ_APP_ID=$(gitea_mq_app_id)
+RULESETS=$(get_ruleset_details)
+GITEA_MQ_APP_ID=$(gitea_mq_app_id <<<"$RULESETS")
 if [[ -n $GITEA_MQ_APP_ID ]]; then
   echo "    bypass: repository admins and the gitea-mq App"
   BYPASS_ACTORS=$(jq -n --argjson app "$GITEA_MQ_APP_ID" '[
@@ -338,7 +347,11 @@ if [[ -n $GITEA_MQ_APP_ID ]]; then
     { actor_id: $app, actor_type: "Integration", bypass_mode: "always" }
   ]')
 else
-  echo "    warning: no gitea-mq App ruleset; only admins bypass the rulesets" >&2
+  if jq -e 'any(.[]; .name == "gitea-mq")' <<<"$RULESETS" >/dev/null; then
+    echo "    warning: the gitea-mq ruleset names no App check; only admins bypass the rulesets" >&2
+  else
+    echo "    warning: no gitea-mq ruleset; only admins bypass the rulesets" >&2
+  fi
   BYPASS_ACTORS='[{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]'
 fi
 
