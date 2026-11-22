@@ -95,5 +95,4 @@ Prose follows the `unslop` skill, chat replies included. Read `~/.claude/skills/
 - Recommended: Use GitHub code search to find examples for libraries and APIs:
   `gh search code "foo lang:nix"`.
 - Prefer cloning source code over web searches for more accurate results.
-  Various projects are available in `~/git`, including: `nixpkgs`, `linux`,
-  `nix`
+  Various projects are available in `~/git`.
