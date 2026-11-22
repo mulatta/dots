@@ -338,7 +338,7 @@ if [[ -n $GITEA_MQ_APP_ID ]]; then
     { actor_id: $app, actor_type: "Integration", bypass_mode: "always" }
   ]')
 else
-  echo "    warning: gitea-mq App is not installed; only admins bypass the rulesets" >&2
+  echo "    warning: no gitea-mq App ruleset; only admins bypass the rulesets" >&2
   BYPASS_ACTORS='[{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]'
 fi
 
