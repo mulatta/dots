@@ -1,5 +1,4 @@
-# GNU Stow's built-in ignore list, with .gitignore removed so home/.gitignore
-# can be linked into ~/.gitignore.
+# Stow drops its built-in ignore list when this file exists, so it is repeated here.
 RCS
 .+,v
 
@@ -12,6 +11,7 @@ _darcs
 \.hg
 
 \.git
+\.gitignore
 \.gitmodules
 
 # Read by stow-dotfiles to choose the directories it links whole.
@@ -22,7 +22,6 @@ _darcs
 ^/\.pi/agent/node_modules$
 
 # herdr-app writes these beside every mod it checks; herdr-app owns the copies in $HOME.
-^/\.config/herdr-app/\.gitignore$
 ^/\.config/herdr-app/mods/[^/]+/gpui-kit\.d\.ts$
 ^/\.config/herdr-app/mods/[^/]+/jsconfig\.json$
 

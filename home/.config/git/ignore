@@ -8,7 +8,6 @@
 result
 result-*
 .direnv/
-.pi/agent/node_modules
 
 # ck semantic search
 .ck/
@@ -19,16 +18,11 @@ result-*
 
 # CLAUDE.md
 CLAUDE.md
-!.claude/CLAUDE.md
 CLAUDE.local.md
 AGENTS.md
 
 
 **/.claude/settings.local.json
 
-.codex/*
-!.codex/hooks.json
-!.codex/rules/
-!.codex/skills/
 
 skills-lock.json

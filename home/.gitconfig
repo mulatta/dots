@@ -50,11 +50,9 @@
 	verbose = true
 
 [core]
-	attributesfile = ~/.gitattributes
 	autocrlf = "input"
 	compression = -1
 	editor = "hx"
-	excludesfile = ~/.gitignore
 	pager = "delta"
 	precomposeunicode = true
 	whitespace = "trailing-space,space-before-tab"
@@ -98,7 +96,6 @@
 
 [init]
 	defaultBranch = "main"
-	templateDir = ~/.config/maiao/template
 
 [interactive]
 	diffFilter = "delta --color-only"
@@ -154,6 +151,3 @@
 
 [include]
 	path = ~/.gitconfig.local
-
-[maiao]
-	autoInstallHook = true
