@@ -1,5 +1,5 @@
 /**
- * /open-pr command — write a PR description and open it in the browser.
+ * /open-pr command — write a PR description and open the PR.
  *
  * Preloads git diff, log, and status so the agent can write the description
  * without spending tool-call turns gathering context.
@@ -10,12 +10,12 @@ import { join } from "node:path";
 import { currentBranch, git, prBase } from "./_git.ts";
 
 const OPEN_PR_PROMPT = `
-Write a PR description and open PR creation in the browser.
+Write a PR description and open the PR.
 
 Read the Open PR playbook in full and follow it:
 \`~/.claude/skills/mulatta-mode/playbooks/opening-a-pr.md\`. It owns the scope,
-the description, the title, and how the creation screen is opened. Do not work
-from memory of it.
+the description, the title, and how the PR opens. Do not work from memory of
+it.
 
 The git state below is already loaded. Do not re-run those commands to get it.
 `.trim();
@@ -62,7 +62,7 @@ function findPrTemplate(
 
 export default function (pi: ExtensionAPI) {
   pi.registerCommand("open-pr", {
-    description: "Write a PR description and open PR creation in browser",
+    description: "Write a PR description and open the PR",
     handler: async (_args, _ctx) => {
       const [cur, repoRoot] = await Promise.all([
         currentBranch(pi.exec),
