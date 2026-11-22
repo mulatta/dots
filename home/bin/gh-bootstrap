@@ -286,7 +286,6 @@ if [[ -z $OWNER || -z $NAME || $OWNER == "$NAME" ]]; then
 fi
 
 echo "repo:      $REPO"
-echo "bypass:    repository admins and the gitea-mq App"
 echo
 
 echo "==> [1/7] Repository..."
@@ -333,6 +332,7 @@ REMOTE_BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[
 
 GITEA_MQ_APP_ID=$(gitea_mq_app_id)
 if [[ -n $GITEA_MQ_APP_ID ]]; then
+  echo "    bypass: repository admins and the gitea-mq App"
   BYPASS_ACTORS=$(jq -n --argjson app "$GITEA_MQ_APP_ID" '[
     { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
     { actor_id: $app, actor_type: "Integration", bypass_mode: "always" }
