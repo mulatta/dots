@@ -29,5 +29,6 @@ AGENTS.md
 .codex/*
 !.codex/hooks.json
 !.codex/rules/
+!.codex/skills/
 
 skills-lock.json
