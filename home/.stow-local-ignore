@@ -31,3 +31,6 @@ _darcs
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
+
+# Python writes bytecode caches beside the sources it runs from here.
+__pycache__
