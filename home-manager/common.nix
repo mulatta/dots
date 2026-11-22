@@ -90,9 +90,13 @@ in
     # CLI utilities
     ast-grep
     delta
+    diffutils
     dust
     fd
+    findutils
+    gawk
     gnugrep
+    gnumake
     gnused
     gnutar
     grex
