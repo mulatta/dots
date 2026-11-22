@@ -215,6 +215,21 @@ get_ruleset_details() {
   done < <(gh api "repos/$REPO/rulesets" --jq '.[].id') | jq -s .
 }
 
+gitea_mq_app_id() {
+  get_ruleset_details | jq -r '
+    [
+      .[]
+      | select(.name == "gitea-mq")
+      | .rules[]?
+      | select(.type == "required_status_checks")
+      | .parameters.required_status_checks[]?
+      | select(.context == "gitea-mq")
+      | .integration_id // empty
+    ]
+    | first // empty
+  '
+}
+
 check_gitea_mq() {
   local details
 
@@ -271,7 +286,6 @@ if [[ -z $OWNER || -z $NAME || $OWNER == "$NAME" ]]; then
 fi
 
 echo "repo:      $REPO"
-echo "bypass:    repository admins"
 echo
 
 echo "==> [1/7] Repository..."
@@ -301,10 +315,10 @@ install_updater_secrets
 
 echo "==> [4/7] Nixbot..."
 EXISTING_TOPICS=$(gh api "repos/$REPO/topics" --jq '.names | join(",")')
-if grep -qw "build-with-buildbot" <<<"$EXISTING_TOPICS"; then
+if grep -qw "build-with-nixbot" <<<"$EXISTING_TOPICS"; then
   echo "    topic: already present"
 else
-  ALL_TOPICS="$EXISTING_TOPICS,build-with-buildbot"
+  ALL_TOPICS="$EXISTING_TOPICS,build-with-nixbot"
   TOPIC_JSON=$(tr ',' '\n' <<<"$ALL_TOPICS" | grep -v '^$' | jq -R . | jq -s '{"names": .}')
   gh api "repos/$REPO/topics" --method PUT --silent --input - <<<"$TOPIC_JSON"
   echo "    topic: added"
@@ -315,6 +329,18 @@ echo "    repository: enabled"
 
 echo "==> [5/7] Branch rulesets..."
 REMOTE_BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].name' 2>/dev/null || true)
+
+GITEA_MQ_APP_ID=$(gitea_mq_app_id)
+if [[ -n $GITEA_MQ_APP_ID ]]; then
+  echo "    bypass: repository admins and the gitea-mq App"
+  BYPASS_ACTORS=$(jq -n --argjson app "$GITEA_MQ_APP_ID" '[
+    { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
+    { actor_id: $app, actor_type: "Integration", bypass_mode: "always" }
+  ]')
+else
+  echo "    warning: gitea-mq App is not installed; only admins bypass the rulesets" >&2
+  BYPASS_ACTORS='[{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]'
+fi
 
 for BRANCH in "${BRANCHES[@]}"; do
   RULESET_NAME="${BRANCH}-protection"
@@ -339,21 +365,15 @@ for BRANCH in "${BRANCHES[@]}"; do
       "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "buildbot/nix-eval" },
-          { "context": "buildbot/nix-build" }
+          { "context": "nixbot/nix-eval" },
+          { "context": "nixbot/nix-build" }
         ]
       }
     },
     { "type": "deletion" },
     { "type": "non_fast_forward" }
   ],
-  "bypass_actors": [
-    {
-      "actor_id": 5,
-      "actor_type": "RepositoryRole",
-      "bypass_mode": "always"
-    }
-  ]
+  "bypass_actors": $BYPASS_ACTORS
 }
 EOF
   )
