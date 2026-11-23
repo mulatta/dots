@@ -7,7 +7,6 @@
 }:
 let
   aiPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-  bioPkgs = inputs.bioinformatics-toolkits.packages.${pkgs.stdenv.hostPlatform.system};
   hmodsPkgs = inputs.hmods.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
@@ -23,10 +22,6 @@ let
     ps.requests
     ps.pexpect
     ps.pyelftools
-    (bioPkgs.pydna.override { python3Packages = ps; })
-    (bioPkgs.biotite.override { python3Packages = ps; })
-    ps.primer3-py
-    (bioPkgs.dna-features-viewer.override { python3Packages = ps; })
   ];
 
   piPython = pkgs.python3.withPackages agentPython;
@@ -52,7 +47,7 @@ in
 
   xdg.configFile."pi-agent-extensions/python/config.json".text = builtins.toJSON {
     python = "${piPython}/bin/python3";
-    prompt = "Includes polars, matplotlib, requests, pexpect, pyelftools, pydna, biotite, and primer3. Python runs with user permissions, outside the shell permission gate.";
+    prompt = "Includes polars, matplotlib, requests, pexpect, and pyelftools. Python runs with user permissions, outside the shell permission gate.";
   };
 
   programs.skillz = {
