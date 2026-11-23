@@ -85,12 +85,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
-    bioinformatics-toolkits = {
-      url = "github:mulatta/bioinformatics-toolkits";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
-
     hmods = {
       url = "github:mulatta/hmods";
       inputs.nixpkgs.follows = "nixpkgs";

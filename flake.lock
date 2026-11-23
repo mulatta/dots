@@ -16,29 +16,6 @@
         "type": "github"
       }
     },
-    "bioinformatics-toolkits": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792745550,
-        "narHash": "sha256-A97lLoDimGDIIzwqsYMpmQh+5YWzscXzd7msHKoBPiA=",
-        "owner": "mulatta",
-        "repo": "bioinformatics-toolkits",
-        "rev": "5d3b1c3e88d83816d49b89c67108ae97e99846b3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mulatta",
-        "repo": "bioinformatics-toolkits",
-        "type": "github"
-      }
-    },
     "bun2nix": {
       "inputs": {
         "flake-parts": [
@@ -808,7 +785,6 @@
     },
     "root": {
       "inputs": {
-        "bioinformatics-toolkits": "bioinformatics-toolkits",
         "cherri": "cherri",
         "clan-core": "clan-core",
         "crane": "crane",
