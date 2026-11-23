@@ -58,10 +58,12 @@
 	whitespace = "trailing-space,space-before-tab"
 
 [credential "https://gist.github.com"]
-	helper = "!gh auth git-credential"
+	helper = 
+	helper = !gh auth git-credential
 
 [credential "https://github.com"]
-	helper = "!gh auth git-credential"
+	helper = 
+	helper = !gh auth git-credential
 
 [credential "https://api.github.com"]
 	helper = "!f() { if [ \"$1\" = get ]; then printf '%s\\n' username=x-access-token \"password=$(gh auth token)\"; fi; }; f"

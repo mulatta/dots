@@ -153,6 +153,7 @@ in
   home.sessionVariables = {
     LC_COLLATE = "C.UTF-8";
     NIKS3_SERVER_URL = "https://niks3.mulatta.io";
+    GH_PATH = "gh";
   };
 
   # rbw: headless default (TTY pinentry, 24h agent cache).
