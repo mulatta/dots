@@ -130,7 +130,20 @@ in
     # Analysis
     csvlens
     duckdb
+
+    # Debugging
+    dnsutils
+    graphicsmagick
   ])
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (
+    with pkgs;
+    [
+      binutils
+      gdb
+      lsof
+      strace
+    ]
+  )
   ++ [
     # Custom packages
     selfPkgs.loc
