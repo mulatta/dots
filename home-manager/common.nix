@@ -111,6 +111,7 @@ in
     sendme
     stow
     uutils-coreutils-noprefix
+    ty
     uv
     xcp
     xz
