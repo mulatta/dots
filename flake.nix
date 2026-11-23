@@ -1,4 +1,11 @@
 {
+  nixConfig = {
+    extra-substituters = [ "https://cache.mulatta.io" ];
+    extra-trusted-public-keys = [
+      "cache.mulatta.io-1:DrV+Oy2azNyVKM7ihhD1QoOetRUnW+1G6RWToUpSO4U="
+    ];
+  };
+
   inputs = {
     # Shared roots. Other flakes follow these to avoid duplicate lock nodes.
     nixpkgs.url = "git+https://github.com/mulatta/nixpkgs?shallow=1&ref=main";
