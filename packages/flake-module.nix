@@ -4,7 +4,6 @@
       pkgs,
       lib,
       inputs',
-      self',
       ...
     }:
     let
@@ -17,13 +16,6 @@
           claude-code = aiPkgs.claude-code;
         };
         claude-md = pkgs.callPackage ./claude-md { };
-        # nixpkgs' aws-lc now prefixes its symbols and no longer ships the
-        # openssl.pc that codex's openssl-sys found, so link OpenSSL itself.
-        # Drop once llm-agents.nix builds against a nixpkgs with that aws-lc.
-        codex = aiPkgs.codex.overrideAttrs (old: {
-          buildInputs = old.buildInputs ++ [ pkgs.openssl ];
-        });
-        codex-acp = aiPkgs.codex-acp.override { inherit (self'.packages) codex; };
         email-sync = pkgs.callPackage ./email-sync { };
 
         hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client {
