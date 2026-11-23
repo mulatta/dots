@@ -120,7 +120,7 @@ in
     hmodsPkgs.hmeter
     hmodsPkgs.hscene
     codex
-    pkgs.ctx
+    aiPkgs.ctx
     aiPkgs.agent-browser
     aiPkgs.agent-slack
     aiPkgs.git-surgeon

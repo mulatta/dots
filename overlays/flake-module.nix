@@ -8,7 +8,6 @@
     (import ./gitea)
     (import ./radicle-httpd)
     (import ./hindsight { inherit inputs; })
-    (import ./ctx { inherit inputs; })
   ];
 
   perSystem =
