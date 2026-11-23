@@ -11,7 +11,6 @@ let
   hmodsPkgs = inputs.hmods.packages.${pkgs.stdenv.hostPlatform.system};
   selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   skillzPkgs = inputs.skillz.packages.${pkgs.stdenv.hostPlatform.system};
-  installAgentSkills = pkgs.installAgentSkills;
 
   # Flake packages do not inherit the consuming host's nixpkgs configuration.
   qmd = aiPkgs.qmd.override {
@@ -43,19 +42,7 @@ let
     '';
   };
 
-  nixbot-cli =
-    inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli.overrideAttrs
-      (old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ installAgentSkills ];
-        dontInstallAgentSkills = true;
-        postInstall = (old.postInstall or "") + ''
-          chmod -R u+w "$out/share/skills/nixbot-cli"
-          rm -rf "$out/share/skills/nixbot-cli"
-          skillDir=$(mktemp -d)
-          cp -r ${old.src}/skill "$skillDir/nixbot-cli"
-          installSkill "$skillDir/nixbot-cli" nixbot-cli
-        '';
-      });
+  nixbot-cli = inputs.nixbot.packages.${pkgs.stdenv.hostPlatform.system}.nixbot-cli;
 
 in
 {
@@ -93,7 +80,7 @@ in
     # skills
     ".claude/skills/archify".source = "${selfPkgs.archify-cli}/share/skills/archify-cli/archify";
     ".claude/skills/herdr-core".source = "${aiPkgs.herdr-core}/share/skills/herdr-core/herdr-core";
-    ".claude/skills/nixbot-cli".source = "${nixbot-cli}/share/skills/nixbot-cli/nixbot-cli";
+    ".claude/skills/nixbot-cli".source = "${nixbot-cli.src}/skill";
     ".claude/skills/git-surgeon".source = "${aiPkgs.git-surgeon}/share/skills/git-surgeon/git-surgeon";
     ".claude/skills/officecli".source = "${aiPkgs.officecli}/share/skills/officecli/officecli";
     ".claude/skills/gh-stack".source = "${pkgs.gh-stack}/share/skills/gh-stack/gh-stack";
