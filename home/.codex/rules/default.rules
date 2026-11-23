@@ -44,3 +44,25 @@ prefix_rule(
     decision = "forbidden",
     justification = "A plain force push can overwrite others' work. Use --force-with-lease on your own branch, or report the command.",
 )
+
+# Secret values stay out of the transcript; secret-shape shows keys and lengths.
+prefix_rule(
+    pattern = ["sops", ["-d", "--decrypt", "decrypt", "exec-env", "exec-file"]],
+    decision = "forbidden",
+    justification = "Decrypting prints secret values. Run secret-shape on the file instead.",
+)
+prefix_rule(
+    pattern = ["age", ["-d", "--decrypt"]],
+    decision = "forbidden",
+    justification = "Decrypting prints secret values. Run secret-shape on the file instead.",
+)
+prefix_rule(
+    pattern = ["clan", "vars", ["get", "export"]],
+    decision = "forbidden",
+    justification = "This prints or writes secret values. Run secret-shape MACHINE GENERATOR/FILE instead.",
+)
+prefix_rule(
+    pattern = ["clan", "secrets", "get"],
+    decision = "forbidden",
+    justification = "This prints secret values. Run secret-shape on the file instead.",
+)
