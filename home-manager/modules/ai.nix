@@ -110,13 +110,7 @@ in
     selfPkgs.archify-cli
     selfPkgs.claude-code
     selfPkgs.claude-md
-    (pkgs.writeShellApplication {
-      name = "pi";
-      text = ''
-        ${pkgs.pueue}/bin/pueued -d >/dev/null 2>&1 || true
-        exec ${aiPkgs.pi}/bin/pi "$@"
-      '';
-    })
+    aiPkgs.pi
     hmodsPkgs.hmeter
     hmodsPkgs.hscene
     codex
@@ -129,7 +123,6 @@ in
     aiPkgs.openspec
     aiPkgs.tuicr
     nixbot-cli
-    pkgs.pueue
     pkgs.nushell
     piPython
     inputs.rhwp.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-cli

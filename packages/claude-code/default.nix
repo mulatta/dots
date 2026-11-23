@@ -1,7 +1,6 @@
 {
   writeShellApplication,
   claude-code,
-  pueue,
   bun,
   bashInteractive,
 }:
@@ -9,7 +8,6 @@ writeShellApplication {
   name = "claude";
   runtimeInputs = [
     claude-code
-    pueue
     bun
   ];
   text = ''
@@ -17,10 +15,6 @@ writeShellApplication {
 
     # Add ~/bin to PATH for user scripts (stowed from dots/home/bin)
     export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-
-    if ! pueue status &>/dev/null; then
-      pueued -d >/dev/null 2>&1 || true
-    fi
 
     exec claude  "$@"
   '';
