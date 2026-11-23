@@ -12,9 +12,6 @@
     {
       packages = {
         archify-cli = pkgs.callPackage ./archify-cli { };
-        claude-code = pkgs.callPackage ./claude-code {
-          claude-code = aiPkgs.claude-code;
-        };
         claude-md = pkgs.callPackage ./claude-md { };
         email-sync = pkgs.callPackage ./email-sync { };
 
