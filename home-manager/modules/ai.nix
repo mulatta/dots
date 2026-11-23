@@ -17,15 +17,13 @@ let
     cudaSupport = pkgs.config.cudaSupport or false;
   };
 
-  agentPython = ps: [
+  agentPython = pkgs.python3.withPackages (ps: [
     ps.polars
     ps.matplotlib
     ps.requests
     ps.pexpect
     ps.pyelftools
-  ];
-
-  piPython = pkgs.python3.withPackages agentPython;
+  ]);
 
   # hmeter files a Codex hook under the hook's HC_TERMINAL_ID. Under Codex's shared
   # app-server daemon every session's hook carries the daemon's terminal instead.
@@ -34,7 +32,21 @@ let
     paths = [ aiPkgs.codex ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/codex --add-flags "-c daemon_auto_start=false"
+      wrapProgram $out/bin/codex --prefix PATH : ${agentPython}/bin --add-flags "-c daemon_auto_start=false"
+    '';
+  };
+
+  claude = pkgs.writeShellApplication {
+    name = "claude";
+    runtimeInputs = [
+      aiPkgs.claude-code
+      pkgs.bun
+    ];
+    text = ''
+      export SHELL=${pkgs.bashInteractive}/bin/bash
+      export PATH="$HOME/.local/bin:$HOME/bin:${agentPython}/bin:$PATH"
+
+      exec claude "$@"
     '';
   };
 
@@ -59,7 +71,7 @@ in
   ];
 
   xdg.configFile."pi-agent-extensions/python/config.json".text = builtins.toJSON {
-    python = "${piPython}/bin/python3";
+    python = "${agentPython}/bin/python3";
     prompt = "Includes polars, matplotlib, requests, pexpect, and pyelftools. Python runs with user permissions, outside the shell permission gate.";
   };
 
@@ -103,7 +115,7 @@ in
     qmd
     aiPkgs.herdr-core
     selfPkgs.archify-cli
-    selfPkgs.claude-code
+    claude
     selfPkgs.claude-md
     aiPkgs.pi
     hmodsPkgs.hmeter
@@ -119,7 +131,7 @@ in
     aiPkgs.tuicr
     nixbot-cli
     pkgs.nushell
-    piPython
+    agentPython
     inputs.rhwp.packages.${pkgs.stdenv.hostPlatform.system}.rhwp-cli
   ];
 }
