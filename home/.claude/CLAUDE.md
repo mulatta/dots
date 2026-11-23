@@ -74,6 +74,9 @@ Prose follows the `unslop` skill, chat replies included. Read `~/.claude/skills/
 - Use `gh` for GitHub (CI logs, issues, PRs), e.g.
   `gh run view 18256703410 --log`
 - Use `tea` for Gitea, e.g. `tea pr 5519 --comments`
+- A GitHub repository that requires the `gitea-mq` status check lands PRs
+  through gitea-mq. Enqueue a PR with `gh pr merge <pr> --auto --rebase`, or
+  label the top PR of a stack `merge-queue`.
 
 ## Running programs
 
