@@ -383,11 +383,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793955357,
-        "narHash": "sha256-IZ3VGFw36KfmYXAxeOxUlFzZOy7rZEZGjNeF5gTF8rY=",
+        "lastModified": 1795060002,
+        "narHash": "sha256-SkKo9T80FgbrzC3iCsMOslYKagjPgM9j9uZtPWnmclM=",
         "owner": "Mic92",
         "repo": "gitea-mq",
-        "rev": "2de20c7702eaa37178a5490407e09d1c5681a1c9",
+        "rev": "c9a36bd7130e71e290a7d8fe3eb3cb3116357922",
         "type": "github"
       },
       "original": {
