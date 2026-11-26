@@ -12,7 +12,6 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.srvos.nixosModules.mixins-nginx
     ../../nixosModules/auditd.nix
-    ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/i18n.nix
     ../../nixosModules/journald.nix
     ../../nixosModules/kernel-hardening.nix
@@ -64,8 +63,6 @@
       monthly = 0;
     };
   };
-
-  system.autoUpgrade.enable = true;
 
   # The public ingress logs here; incident review needs more than the shared week.
   services.journald.settings.Journal = {

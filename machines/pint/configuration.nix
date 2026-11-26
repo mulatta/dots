@@ -10,7 +10,6 @@
     self.inputs.nixos-hardware.nixosModules.raspberry-pi-5
     self.inputs.disko.nixosModules.disko
     ../../nixosModules/raspberry-pi
-    ../../nixosModules/auto-upgrade.nix
     # Radicle node transport leaks private repos until the next major release.
     # ../../nixosModules/radicle-mulatta.nix
     ./modules/disko-sd.nix

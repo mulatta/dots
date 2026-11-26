@@ -11,7 +11,6 @@
     self.inputs.srvos.nixosModules.server
     self.inputs.srvos.nixosModules.mixins-nginx
     ../../nixosModules/auditd.nix
-    ../../nixosModules/auto-upgrade.nix
     ../../nixosModules/kernel-hardening.nix
     ../../nixosModules/users.nix
     ../../nixosModules/vultr.nix

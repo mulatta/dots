@@ -21,6 +21,7 @@
     ./journald.nix
     ./nix-daemon.nix
     ./thermald.nix
+    ./update-prefetch.nix
     ./users.nix
     ./zfs.nix
 
