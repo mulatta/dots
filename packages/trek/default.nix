@@ -17,16 +17,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "trek";
-  version = "4.3.4";
+  version = "5.2.1";
 
   src = fetchFromGitHub {
     owner = "liketrek";
     repo = "TREK";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-rtZOGzRDG611/zxS+vZcc9q+U4JVseI0D+ecbKcC+hE=";
+    hash = "sha256-4gz4MMJjHS1I6kZyvWsQ2pjNEWTrblWHNs3MYcQBRZg=";
   };
 
-  npmDepsHash = "sha256-UiHpAn/1Eh1DKy+VLANXYMCln3sEJnPKJA/Np0snj3k=";
+  npmDepsHash = "sha256-T+h2Z1Xssmwt5Qn0N0NtXnBTsWCMhaK4kMsrljjKg9M=";
 
   inherit nodejs;
 
