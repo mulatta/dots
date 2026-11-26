@@ -50,7 +50,15 @@
       "Bash(age --decrypt *)",
       "Bash(clan vars get *)",
       "Bash(clan vars export *)",
-      "Bash(clan secrets get *)"
+      "Bash(clan secrets get *)",
+      "Bash(terragrunt apply*)",
+      "Bash(terragrunt destroy*)",
+      "Bash(terragrunt import*)",
+      "Bash(terragrunt state *)",
+      "Bash(tofu apply*)",
+      "Bash(tofu destroy*)",
+      "Bash(tofu import*)",
+      "Bash(tofu state *)"
     ],
     "defaultMode": "auto"
   },
