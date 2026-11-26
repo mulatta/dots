@@ -1,12 +1,13 @@
 version: 2
 updates:
-  # The force-pushed nixpkgs fork and the package locks under packages/* are
-  # bumped by hand and by .#updater, not here.
   - package-ecosystem: "nix"
     directory: "/"
+    open-pull-requests-limit: 50
+    labels:
+      - "dependencies"
+      - "auto-merge"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
