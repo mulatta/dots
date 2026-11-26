@@ -58,6 +58,8 @@ in
     # The flakelet's RuntimeDirectory.
     nixConfigPath = "/run/tribuchet-hub/nix.conf";
     dynamic = true;
+    # tribuchet's Nix patches do not compile against Nix 2.36; drop once tribuchet carries them for it.
+    nixPackage = pkgs.nixVersions.nix_2_35;
   };
 
   networking.firewall.interfaces."tinc.naru".allowedTCPPorts = [ hubPort ];
