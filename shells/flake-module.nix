@@ -14,6 +14,7 @@
           inputs'.clan-core.packages.default
           (clan.pythonRuntime.withPackages (ps: [
             ps.invoke
+            ps.pyyaml
             (ps.toPythonModule clan)
           ]))
           pkgs.sops
