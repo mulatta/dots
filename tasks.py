@@ -1,6 +1,10 @@
 import base64
 import json
 import re
+import tempfile
+import time
+from collections.abc import Callable, Generator
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -8,7 +12,8 @@ from typing import Any, NoReturn, final
 
 import yaml
 from clan_cli.secrets.sops import decrypt_file_raw, load_age_plugins
-from clan_lib.errors import ClanCmdError, ClanError
+from clan_lib.cmd import Log, RunOpts
+from clan_lib.errors import ClanCmdError, ClanError, CmdOut
 from clan_lib.flake import Flake
 from clan_lib.machines.machines import Machine
 from clan_lib.ssh.remote import Remote
@@ -285,7 +290,11 @@ def reveal(ref: SecretRef) -> Plaintext:
 
 
 def send_stdin(secret: Plaintext, remote: Remote, cmd: list[str]) -> None:
-    raise NotImplementedError
+    remote.run(
+        cmd,
+        RunOpts(input=secret._value, sensitive_input=True, log=Log.NONE),
+        control_master=False,
+    )
 
 
 @dataclass(frozen=True)
@@ -294,6 +303,7 @@ class InitrdUnlock:
     address: str
     port: int = 2222
     jump: str = "root@malt.x"
+    host_key: str = "initrd-ssh/id_ed25519.pub"
 
 
 UNLOCK: dict[str, InitrdUnlock] = {
@@ -311,13 +321,138 @@ def inspect_secret(
         print(field.row())
 
 
+AGENT = "systemd-tty-ask-password-agent"
+PROBE = {"BatchMode": "yes", "ConnectTimeout": "5"}
+PROBE_SECONDS = 15
+POLL_SECONDS = 2
+
+
+@contextmanager
+def _initrd(machine: str, entry: InitrdUnlock) -> Generator[Remote]:
+    try:
+        var = get_machine_var(Machine(machine, _flake()), entry.host_key)
+        public = b"" if var.secret else var.value
+    except (ClanError, ValueError) as error:
+        _fail(f"cannot pin the initrd host key of {machine}: {error}")
+    fields = public.decode(errors="replace").split()
+    if len(fields) < 2 or not fields[0].startswith("ssh-"):
+        _fail(f"{entry.host_key} of {machine} is not a public ssh host key")
+    with tempfile.TemporaryDirectory(prefix="initrd-") as tmp:
+        known_hosts = Path(tmp) / "known_hosts"
+        known_hosts.write_text(
+            f"[{entry.address}]:{entry.port} {' '.join(fields[:2])}\n"
+        )
+        yield Remote(
+            address=entry.address,
+            port=entry.port,
+            host_key_check="strict",
+            ssh_options={
+                **PROBE,
+                "UserKnownHostsFile": str(known_hosts),
+                "GlobalKnownHostsFile": "/dev/null",
+                "ProxyJump": entry.jump,
+                "ControlPath": "none",
+            },
+        )
+
+
+def _ssh(remote: Remote, cmd: list[str]) -> CmdOut | None:
+    try:
+        out = remote.run(
+            cmd,
+            RunOpts(check=False, log=Log.NONE, timeout=PROBE_SECONDS),
+            quiet=True,
+            control_master=False,
+        )
+    except ClanCmdError:
+        return None
+    if "Host key verification failed." in out.stderr:
+        _fail(f"{remote.target}: host key verification failed")
+    return out
+
+
+def _answer(remote: Remote, cmd: list[str]) -> str | None:
+    out = _ssh(remote, cmd)
+    return out.stdout if out is not None and out.returncode == 0 else None
+
+
+def _asks(initrd: Remote) -> str | None:
+    return "" if _answer(initrd, [AGENT, "--list"]) else None
+
+
+def _booted(target: Remote) -> str | None:
+    out = _answer(target, ["readlink", "/run/booted-system"])
+    return None if out is None else out.strip()
+
+
+def _send_key(machine: str, entry: InitrdUnlock, initrd: Remote) -> str:
+    try:
+        send_stdin(reveal(entry.key), initrd, [AGENT])
+    except ClanCmdError as error:
+        reason = error.cmd.stderr.strip().splitlines()[-1:]
+        _fail(f"{AGENT} on {machine} failed: {' '.join(reason)}")
+    return ""
+
+
+@dataclass(frozen=True)
+class Step:
+    name: str
+    done: Callable[[], str | None]
+
+
+def _run_steps(machine: str, steps: list[Step], timeout: int) -> None:
+    deadline = time.monotonic() + timeout
+    for step in steps:
+        while (detail := step.done()) is None:
+            if time.monotonic() >= deadline:
+                _fail(f"{machine}: timed out after {timeout}s waiting for {step.name}")
+            time.sleep(POLL_SECONDS)
+        print(f"{machine}: {step.name} {detail}".rstrip(), flush=True)
+
+
+def _request_reboot(target: Remote) -> str:
+    out = _ssh(target, ["systemctl", "reboot"])
+    if out is not None and out.returncode not in (0, 255):
+        _fail(f"systemctl reboot failed: {out.stderr.strip()}")
+    return ""
+
+
 @task
 def unlock(_: Context, machine: str) -> None:
     """Hand a machine's disk passphrase to its initrd over ssh."""
-    raise NotImplementedError
+    entry = UNLOCK.get(machine)
+    if entry is None:
+        _fail(f"{machine} has no initrd unlock; known: {', '.join(UNLOCK)}")
+    with _initrd(machine, entry) as initrd:
+        if _asks(initrd) is None:
+            _fail(
+                f"{machine}: no initrd at {entry.address}:{entry.port} asks for a key"
+            )
+        _send_key(machine, entry, initrd)
+    print(f"{machine}: unlock")
 
 
 @task
 def reboot(_: Context, machine: str, timeout: int = 600) -> None:
     """Reboot a machine, unlock its initrd if it has one, and wait until it is back."""
-    raise NotImplementedError
+    try:
+        target = Machine(machine, _flake()).target_host()
+    except ClanError as error:
+        _fail(str(error))
+    target = target.override(ssh_options={**target.ssh_options, **PROBE})
+    if _booted(target) is None:
+        _fail(f"{machine} does not answer at {target.target}; nothing was rebooted")
+    entry = UNLOCK.get(machine)
+    with ExitStack() as stack:
+        steps = [
+            Step("reboot", lambda: _request_reboot(target)),
+            Step("down", lambda: "" if _answer(target, ["true"]) is None else None),
+        ]
+        if entry is not None:
+            initrd = stack.enter_context(_initrd(machine, entry))
+            steps += [
+                Step("initrd", lambda: _asks(initrd)),
+                Step("unlock", lambda: _send_key(machine, entry, initrd)),
+            ]
+        steps.append(Step("up", lambda: _booted(target)))
+        _run_steps(machine, steps, timeout)
