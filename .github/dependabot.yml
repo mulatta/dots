@@ -1,9 +1,7 @@
 version: 2
 updates:
-  # Flake inputs only. The nixpkgs fork is rebased on upstream and bumped by
-  # home/bin/update-nixpkgs-fork, so Dependabot leaves it alone (no linear
-  # commit delta on a force-pushed branch). Vendored package locks under
-  # packages/* are owned by the .#updater scripts, not Dependabot.
+  # The force-pushed nixpkgs fork and the package locks under packages/* are
+  # bumped by hand and by .#updater, not here.
   - package-ecosystem: "nix"
     directory: "/"
     schedule:
