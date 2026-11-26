@@ -24,6 +24,7 @@
   boot.initrd.systemd.network.networks."10-enp10s0" = {
     matchConfig.Name = "enp10s0";
     networkConfig.DHCP = "ipv4";
+    dhcpV4Config.ClientIdentifier = "mac";
   };
 
   # RTL8126A

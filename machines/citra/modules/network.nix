@@ -21,6 +21,9 @@
     };
   };
 
+  # The initrd has no machine-id, so only a MAC client ID gets it the booted system's lease.
+  systemd.network.networks."40-enp10s0".dhcpV4Config.ClientIdentifier = "mac";
+
   # Enroll after OIDC is available; keep .x DNS and routing intact.
   # tailscale up --login-server=https://hs.mulatta.io --advertise-tags=tag:citra --accept-dns=false
   services.tailscale = {
