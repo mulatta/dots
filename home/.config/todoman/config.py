@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
+from collections.abc import Iterator
 from datetime import date, datetime
 from typing import Any
 
@@ -69,7 +69,7 @@ def _mocha_style(text: str, **kwargs: Any) -> str:
     return _original_style(text, **kwargs)
 
 
-click.style = _mocha_style
+click.style = _mocha_style  # ty: ignore[invalid-assignment]
 
 
 # Todoman's default sort puts undated tasks before dated tasks and orders due
@@ -114,8 +114,8 @@ if os.environ.get("TODOMAN_DISABLE_CUSTOM_LIST") != "1":
             getattr(todo, "id", 0) or 0,
         )
 
-    def _todos_by_urgency(self: Database, *args: Any, **kwargs: Any) -> Iterable[Todo]:
-        todos = list(_original_todos(self, *args, **kwargs))
+    def _todos_by_urgency(self: Database, **kwargs: Any) -> Iterator[Todo]:
+        todos = list(_original_todos(self, **kwargs))
         if not kwargs.get("sort"):
             todos.sort(key=_urgency_key)
         return iter(todos)
