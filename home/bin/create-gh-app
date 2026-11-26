@@ -120,9 +120,8 @@ def parse_args() -> CreateGhAppArgs:
     )
 
     args = parser.parse_args()
-    if not args.username:
-        if args.org:
-            args.username = args.org
+    if not args.username and args.org:
+        args.username = args.org
     if not args.url and args.repository and args.username:
         args.url = f"https://github.com/{args.username}/{args.repository}"
 

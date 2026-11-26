@@ -18,11 +18,6 @@ Design notes:
     so no extra cursor-positioning command is needed.
 """
 
-# ruff: noqa: S606
-# ^ execvp-without-shell is intentional: we are a trampoline that *becomes*
-#   tmux/ghostty. No shell = no injection surface. The lint targets code that
-#   expects shell expansion; we explicitly don't want any.
-
 from __future__ import annotations
 
 import os

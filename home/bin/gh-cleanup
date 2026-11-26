@@ -73,18 +73,14 @@ def analyze_dismissal_safety(
 
     # Already closed/merged items (give a few days buffer for follow-up)
     if state in ["closed", "merged"] and item_data.get("closed_at"):
-        closed_at = datetime.fromisoformat(
-            item_data["closed_at"].replace("Z", "+00:00")
-        )
+        closed_at = datetime.fromisoformat(item_data["closed_at"])
         days_since_closed = (now - closed_at).days
         if days_since_closed > 3:
             return True, f"Closed/merged {days_since_closed} days ago"
 
     # Draft PRs with no recent activity
     if item_data.get("draft") and item_data.get("updated_at"):
-        updated_at = datetime.fromisoformat(
-            item_data["updated_at"].replace("Z", "+00:00")
-        )
+        updated_at = datetime.fromisoformat(item_data["updated_at"])
         days_since_update = (now - updated_at).days
         if days_since_update > 30:
             return True, f"Draft PR inactive for {days_since_update} days"
@@ -93,9 +89,7 @@ def analyze_dismissal_safety(
     if reason in ["ci_activity", "subscribed", "state_change"] and item_data.get(
         "updated_at"
     ):
-        updated_at = datetime.fromisoformat(
-            item_data["updated_at"].replace("Z", "+00:00")
-        )
+        updated_at = datetime.fromisoformat(item_data["updated_at"])
         days_since_update = (now - updated_at).days
         if days_since_update > 14:
             return (
@@ -105,18 +99,14 @@ def analyze_dismissal_safety(
 
     # Old mentions/team_mentions with no recent activity
     if reason in ["mention", "team_mention"] and item_data.get("updated_at"):
-        updated_at = datetime.fromisoformat(
-            item_data["updated_at"].replace("Z", "+00:00")
-        )
+        updated_at = datetime.fromisoformat(item_data["updated_at"])
         days_since_update = (now - updated_at).days
         if days_since_update > 21:
             return True, f"Old {reason}, inactive for {days_since_update} days"
 
     # Old comment notifications
     if reason == "comment" and item_data.get("updated_at"):
-        updated_at = datetime.fromisoformat(
-            item_data["updated_at"].replace("Z", "+00:00")
-        )
+        updated_at = datetime.fromisoformat(item_data["updated_at"])
         days_since_update = (now - updated_at).days
         if days_since_update > 21:
             return True, f"Old comment, inactive for {days_since_update} days"
@@ -182,9 +172,7 @@ def main() -> int:
 
     # Sort by age (oldest first) for systematic processing
     now = datetime.now(UTC)
-    all_notifications.sort(
-        key=lambda x: datetime.fromisoformat(x["updated_at"].replace("Z", "+00:00"))
-    )
+    all_notifications.sort(key=lambda x: datetime.fromisoformat(x["updated_at"]))
 
     # Process in batches
     batch_to_analyze = all_notifications[: args.batch_size]
@@ -200,9 +188,7 @@ def main() -> int:
     print("=" * 100)
 
     for i, notification in enumerate(batch_to_analyze, 1):
-        updated_at = datetime.fromisoformat(
-            notification["updated_at"].replace("Z", "+00:00")
-        )
+        updated_at = datetime.fromisoformat(notification["updated_at"])
         age_days = (now - updated_at).days
 
         repo = notification.get("repository", {}).get("full_name", "unknown")
