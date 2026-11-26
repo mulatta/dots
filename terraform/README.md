@@ -2,47 +2,54 @@
 
 Infrastructure-as-Code for mulatta.io services.
 
-## Modules
+## Units
 
-| Module     | Purpose                   | Secrets Used                                                         |
-| ---------- | ------------------------- | -------------------------------------------------------------------- |
-| vultr      | VPS provisioning          | `VULTR_API`                                                          |
-| cloudflare | DNS A records, R2 buckets | Cloudflare token from clan vars                                      |
-| aws        | SES SMTP relay            | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFLARE_API_TOKEN` |
+Each directory is a Terragrunt unit that includes `root.hcl`.
 
-## Secrets Management
+| Unit       | Manages                                                                                             | Credentials                                                        |
+| ---------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| vultr      | The cask instance, its Reserved IP and PTR record, the provisioning SSH key, and the firewall group | `VULTR_API`                                                        |
+| cloudflare | `mulatta.io` DNS records and the R2 buckets `cache`, `backup`, `zotero`, and `research`             | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, the R2 access key |
+| rustfs     | The `neko-transfer` bucket on citra's RustFS                                                        | RustFS credentials from the environment                            |
 
-### Terraform-only secrets (`secrets.yaml`)
+The taps resources in `vultr` are commented out until taps is reprovisioned
+(issue #424).
 
-Secrets used exclusively by Terraform are stored in `terraform/secrets.yaml` (SOPS encrypted):
+## Secrets
 
-- `VULTR_API` - Vultr API key for VPS management
-- `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` - Cloudflare R2 for Terraform state backend
-- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - AWS (SES, IAM)
-- `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` - Cloudflare (shared, also in Terraform)
+`terraform/secrets.yaml` (SOPS) holds every secret Terraform reads:
 
-## Dependency Order
+- `VULTR_API`: the Vultr API key
+- `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`: Cloudflare DNS and R2
+- `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`: the R2 state backend, and the
+  vultr state the cloudflare unit reads
 
-```
-1. vultr      → Creates VPS, outputs IP
-2. cloudflare → Creates A records (reads vultr state for IP)
-3. aws        → Creates SES domain, DKIM records in Cloudflare
-4. NixOS      → Deploys services (reads cloudflare-api token from clan vars, SES credentials)
-```
+Its only recipient is the user age key on rhesus (`.sops.yaml`), so plans and
+applies run there. The vultr unit also reads the provisioning public key from
+`~/.ssh/id_ed25519.pub`.
+
+## Dependency order
+
+1. `vultr` creates the instance and outputs its address.
+2. `cloudflare` reads the vultr state for that address and creates the records.
+
+`rustfs` depends on neither.
 
 ## Usage
 
-```bash
-# Apply infrastructure
-cd terraform/vultr && terragrunt apply
-cd terraform/cloudflare && terragrunt apply
-cd terraform/aws && terragrunt apply
+Run every Terragrunt command through the declared shell. Plan, review, then
+apply the saved plan:
 
-# Copy SES SMTP credentials to NixOS secrets (see aws/README.md)
-
-# Deploy NixOS
-clan machines update cask
+```sh
+nix develop .#terraform -c terragrunt --working-dir terraform/vultr plan -out <absolute-path>/vultr.tfplan
+nix develop .#terraform -c terragrunt --working-dir terraform/vultr apply <absolute-path>/vultr.tfplan
 ```
+
+[Provider reproducibility](#provider-reproducibility) explains the shell and
+the saved plan.
+
+`nix build .#terraform-validate` initializes the pinned providers without a
+backend and validates the `terraform/` root. It does not validate the units.
 
 ## Reserved IP
 
@@ -50,12 +57,14 @@ The production Reserved IP is attached to cask and supplies the stable address
 consumed by Cloudflare remote state. Preserve `prevent_destroy` and import an
 existing address before adding this module to fresh Terraform state.
 
-## Remote State
+## Remote state
 
-Terraform state is stored in S3 (`mulatta-dots-tfstate` bucket) with DynamoDB locking.
+State lives in the Cloudflare R2 bucket `dots-tfstate`, one object per unit at
+`<unit>/terraform.tfstate`, through the S3 backend that `root.hcl` generates.
+No state locking is configured, so run one operation on a unit at a time.
 
-The `cloudflare` module reads `vultr` state to get the VPS IP for DNS A records.
-This is a one-way dependency (not circular).
+The `cloudflare` unit reads `vultr` state to get the address for DNS A records.
+This is a one-way dependency.
 
 ## Cloudflare scope (design note)
 
