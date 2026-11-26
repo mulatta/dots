@@ -281,7 +281,7 @@ def reconcile_mailbox_acls(
     admin_account = (session.get("primaryAccounts") or {}).get(PRINCIPALS)
     if not isinstance(admin_account, str):
         msg = "JMAP session exposes no principals account"
-        raise RuntimeError(msg)
+        raise RuntimeError(msg)  # noqa: TRY004
 
     for desired in desired_acls:
         account = desired["account"]
@@ -319,7 +319,7 @@ def main() -> int:
         desired = json.loads(args.resources.read_text())
         if not isinstance(desired, dict):
             msg = "resources JSON must be an object"
-            raise ValueError(msg)
+            raise ValueError(msg)  # noqa: TRY004
         client = StalwartClient(
             args.base_url, args.username, read_password(args.admin_password_file)
         )

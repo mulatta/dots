@@ -96,14 +96,14 @@ class StalwartClient:
         session = self.request("GET", f"{self.base_url}/.well-known/jmap")
         if not isinstance(session, dict):
             msg = "JMAP session endpoint returned an unexpected response"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg)  # noqa: TRY004
         return session
 
     def jmap(self, request: dict[str, Any]) -> dict[str, Any]:
         response = self.request("POST", f"{self.base_url}/jmap/", request)
         if not isinstance(response, dict):
             msg = "JMAP endpoint returned an unexpected response"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg)  # noqa: TRY004
         return response
 
 
