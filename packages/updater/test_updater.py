@@ -230,11 +230,13 @@ class TestCreatePrBranchExists:
 
         empty_result = subprocess.CompletedProcess([], 0, stdout="", stderr="")
 
-        with patch("updater.__main__.run_cmd", return_value=empty_result):
-            with patch(
+        with (
+            patch("updater.__main__.run_cmd", return_value=empty_result),
+            patch(
                 "updater.__main__._create_pr_in_worktree", return_value=True
-            ) as mock_create:
-                result = create_pr_for_package(pkg, tmp_path)
+            ) as mock_create,
+        ):
+            result = create_pr_for_package(pkg, tmp_path)
 
         assert result is True
         mock_create.assert_called_once()

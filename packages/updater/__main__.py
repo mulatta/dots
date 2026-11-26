@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Update third-party packages in ./packages directory.
 
@@ -193,7 +192,7 @@ def run_custom_update(pkg: Package, dry_run: bool = False) -> bool:
             return True
         print(f"  Error: update.py exited with code {e.code}")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"  Error: update.py raised {type(e).__name__}: {e}")
         return False
     finally:
