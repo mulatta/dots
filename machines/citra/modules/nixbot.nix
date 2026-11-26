@@ -80,6 +80,7 @@ in
 
     buildSystems = [ "x86_64-linux" ];
     buildMaxSilentTime = 60 * 60;
+    outputsPath = "/var/www/nixbot/nix-outputs/";
 
     github = {
       enable = true;
