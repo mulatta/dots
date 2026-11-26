@@ -2,11 +2,10 @@
 # gh-bootstrap — One-shot GitHub repo setup for Nix flake projects.
 #
 # Configures GitHub-side state that cannot live in the repository: merge and
-# Actions policy, Nixbot repository enablement and its marker topic, updater App
-# credentials, and Nixbot branch rulesets. The auto-merge workflow stays in the
-# flake template; this script verifies that it uses github-actions[bot] and that
-# gitea-mq owns
-# the merge queue check.
+# Actions policy, Nixbot repository enablement and its marker topic, and Nixbot
+# branch rulesets. The auto-merge workflow stays in the flake template; this
+# script verifies that it uses github-actions[bot] and that gitea-mq owns the
+# merge queue check.
 #
 # Usage:
 #   gh-bootstrap                        # current repo, protect its default branch
@@ -15,13 +14,11 @@
 #
 # Environment:
 #   GH_BOOTSTRAP_VISIBILITY             # public (default), private, or internal
-#   GH_BOOTSTRAP_UPDATER_ENTRY          # rbw entry (default: github/dots-flake-updater)
-#   GH_BOOTSTRAP_SKIP_UPDATER_SECRETS   # set to 1 to leave Actions secrets unchanged
 
 set -euo pipefail
 
 usage() {
-  sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 die() {
@@ -162,25 +159,6 @@ ensure_repo() {
   fi
 }
 
-install_updater_secrets() {
-  local app_id
-  local entry=${GH_BOOTSTRAP_UPDATER_ENTRY:-github/dots-flake-updater}
-
-  if [[ ${GH_BOOTSTRAP_SKIP_UPDATER_SECRETS:-0} == 1 ]]; then
-    echo "    skipped"
-    return 0
-  fi
-
-  app_id=$(rbw get "$entry" --field username)
-  [[ $app_id =~ ^[0-9]+$ ]] || die "$entry username must contain the numeric App ID"
-
-  printf '%s' "$app_id" | gh secret set APP_ID --app actions --repo "$REPO"
-  unset app_id
-  rbw get "$entry" --field notes |
-    gh secret set APP_PRIVATE_KEY --app actions --repo "$REPO"
-  echo "    installed from rbw entry $entry"
-}
-
 check_auto_merge_workflow() {
   local response
   local workflow
@@ -296,7 +274,7 @@ fi
 echo "repo:      $REPO"
 echo
 
-echo "==> [1/7] Repository..."
+echo "==> [1/6] Repository..."
 ensure_repo
 
 if [[ ${#BRANCHES[@]} -eq 0 ]]; then
@@ -304,7 +282,7 @@ if [[ ${#BRANCHES[@]} -eq 0 ]]; then
 fi
 echo "    protected branches: ${BRANCHES[*]}"
 
-echo "==> [2/7] Repository and Actions policy..."
+echo "==> [2/6] Repository and Actions policy..."
 gh api "repos/$REPO" --method PATCH --silent \
   --field allow_squash_merge=true \
   --field allow_merge_commit=true \
@@ -318,10 +296,7 @@ gh api "repos/$REPO/actions/permissions/workflow" --method PUT --silent \
   --field can_approve_pull_request_reviews=false
 echo "    merge enabled; Actions read-only by default and cannot approve PRs"
 
-echo "==> [3/7] Updater App credentials..."
-install_updater_secrets
-
-echo "==> [4/7] Nixbot..."
+echo "==> [3/6] Nixbot..."
 EXISTING_TOPICS=$(gh api "repos/$REPO/topics" --jq '.names | join(",")')
 if grep -qw "build-with-nixbot" <<<"$EXISTING_TOPICS"; then
   echo "    topic: already present"
@@ -335,7 +310,7 @@ fi
 nbo repo enable "github/$REPO" >/dev/null
 echo "    repository: enabled"
 
-echo "==> [5/7] Branch rulesets..."
+echo "==> [4/6] Branch rulesets..."
 REMOTE_BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].name' 2>/dev/null || true)
 
 RULESETS=$(get_ruleset_details)
@@ -414,14 +389,13 @@ EOF
   fi
 done
 
-echo "==> [6/7] Auto-merge workflow..."
+echo "==> [5/6] Auto-merge workflow..."
 check_auto_merge_workflow || true
 
-echo "==> [7/7] gitea-mq..."
+echo "==> [6/6] gitea-mq..."
 check_gitea_mq || true
 
 echo
 echo "done. Verify at:"
 echo "  Rules:   https://github.com/$REPO/rules"
 echo "  Actions: https://github.com/$REPO/settings/actions"
-echo "  Secrets: https://github.com/$REPO/settings/secrets/actions"
