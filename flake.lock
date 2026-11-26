@@ -60,11 +60,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794549244,
-        "narHash": "sha256-to/5ZIZQwzUfOcKIaerb8Z8/hQWuDtI8EVhtqvlCkK4=",
+        "lastModified": 1795400674,
+        "narHash": "sha256-PN6Imz3UZZRXJblNqCc6mBcEnnDN69GLABFmPIM+oJI=",
         "owner": "electrikmilk",
         "repo": "cherri",
-        "rev": "24e231f81fa91d945ffbb868e862027adeda8e05",
+        "rev": "98d5191ae121a6bcf663ed0e55495f4ee4c7a6e2",
         "type": "github"
       },
       "original": {
