@@ -23,6 +23,19 @@
         "#!/usr/bin/env bash"
         "#!/bin/sh"
       ];
+      # ty resolves imports against one interpreter, so it carries every script's dependencies.
+      tyPython = pkgs.python3.withPackages (ps: [
+        ps.click
+        ps.django
+        ps.icalendar
+        ps.miniflux
+        ps.psycopg
+        ps.pytest
+        ps.python-dateutil
+        ps.pytz
+        ps.types-pytz
+        (ps.toPythonModule pkgs.todoman)
+      ]);
     in
     {
       treefmt = {
@@ -35,6 +48,7 @@
         programs.deadnix.enable = true;
         programs.nixfmt.enable = true;
         programs.ruff-format.enable = true;
+        programs.ruff-check.enable = true;
         programs.shfmt.enable = true;
         programs.taplo = {
           enable = true;
@@ -63,6 +77,7 @@
 
         settings.formatter = {
           ruff-format.includes = pythonScripts;
+          ruff-check.includes = pythonScripts;
           shfmt.includes = shellScripts;
           shellcheck.includes = shellScripts;
           shellcheck.options = [
@@ -86,6 +101,24 @@
             ]
             ++ pythonScripts;
             priority = 1; # run before ruff format
+          };
+
+          ty = {
+            command = lib.getExe pkgs.ty;
+            options = [
+              "check"
+              "--python"
+              "${tyPython}/bin/python3"
+              "--extra-search-path"
+              "packages/rbw-pinentry/src"
+              "--extra-search-path"
+              "${pkgs.paperless-ngx}/lib/paperless-ngx/src"
+            ];
+            includes = [
+              "*.py"
+              "*.pyi"
+            ]
+            ++ pythonScripts;
           };
         };
 
