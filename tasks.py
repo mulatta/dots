@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import re
 import tempfile
 import time
@@ -13,6 +14,7 @@ from typing import Any, NoReturn, final
 import yaml
 from clan_cli.secrets.sops import decrypt_file_raw, load_age_plugins
 from clan_lib.cmd import Log, RunOpts
+from clan_lib.custom_logger import setup_logging
 from clan_lib.errors import ClanCmdError, ClanError, CmdOut
 from clan_lib.flake import Flake
 from clan_lib.machines.machines import Machine
@@ -432,16 +434,21 @@ def unlock(_: Context, machine: str) -> None:
     print(f"{machine}: unlock")
 
 
-@task
-def reboot(_: Context, machine: str, timeout: int = 600) -> None:
-    """Reboot a machine, unlock its initrd if it has one, and wait until it is back."""
+def _reachable(machine: str, action: str) -> Remote:
     try:
         target = Machine(machine, _flake()).target_host()
     except ClanError as error:
         _fail(str(error))
     target = target.override(ssh_options={**target.ssh_options, **PROBE})
     if _booted(target) is None:
-        _fail(f"{machine} does not answer at {target.target}; nothing was rebooted")
+        _fail(f"{machine} does not answer at {target.target}; nothing was {action}")
+    return target
+
+
+@task
+def reboot(_: Context, machine: str, timeout: int = 600) -> None:
+    """Reboot a machine, unlock its initrd if it has one, and wait until it is back."""
+    target = _reachable(machine, "rebooted")
     entry = UNLOCK.get(machine)
     with ExitStack() as stack:
         steps = [
@@ -456,3 +463,148 @@ def reboot(_: Context, machine: str, timeout: int = 600) -> None:
             ]
         steps.append(Step("up", lambda: _booted(target)))
         _run_steps(machine, steps, timeout)
+
+
+PROFILE = "/nix/var/nix/profiles/system"
+GENERATION = re.compile(
+    r"\s*(?P<number>\d+)\s+(?P<date>\S+)\s+(?P<time>\S+)\s*(?P<current>\(current\))?\s*"
+)
+KERNEL = re.compile(r"linux-(?P<version>[\w.-]+?)/")
+
+
+@dataclass(frozen=True)
+class Generation:
+    number: int
+    created: str
+    kernel: str
+    current: bool
+
+
+def _nixos(machine: str, action: str) -> Remote:
+    target = _reachable(machine, action)
+    if (
+        _answer(target, ["test", "-x", f"{PROFILE}/bin/switch-to-configuration"])
+        is None
+    ):
+        _fail(f"{machine} is not NixOS; nix-darwin rolls back with darwin-rebuild")
+    return target
+
+
+def _generations(machine: str, target: Remote) -> list[Generation]:
+    listed = _answer(target, ["nix-env", "-p", PROFILE, "--list-generations"])
+    kernels = _answer(
+        target,
+        [
+            "sh",
+            "-c",
+            f'for l in {PROFILE}-*-link; do echo "$l $(readlink "$l/kernel")"; done',
+        ],
+    )
+    if listed is None or kernels is None:
+        _fail(f"{machine}: cannot list its system generations")
+    kernel = {
+        line.split()[0]: match["version"]
+        for line in kernels.splitlines()
+        if (match := KERNEL.search(line))
+    }
+    generations = [
+        Generation(
+            number=int(match["number"]),
+            created=f"{match['date']} {match['time'][:5]}",
+            kernel=kernel.get(f"{PROFILE}-{match['number']}-link", "?"),
+            current=bool(match["current"]),
+        )
+        for match in map(GENERATION.fullmatch, listed.splitlines())
+        if match is not None
+    ]
+    if not any(g.current for g in generations):
+        _fail(f"{machine}: no system generation is marked current")
+    return generations
+
+
+def _diff(machine: str, target: Remote, current: int, goal: int) -> None:
+    target.run(
+        [
+            "nix",
+            "store",
+            "diff-closures",
+            f"{PROFILE}-{current}-link",
+            f"{PROFILE}-{goal}-link",
+        ],
+        RunOpts(check=False, log=Log.BOTH, prefix=machine),
+        control_master=False,
+    )
+
+
+@task
+def generations(_: Context, machine: str, diff: int = 0) -> None:
+    """List a NixOS machine's system generations, or diff the current one with --diff."""
+    # clan_lib streams the remote output through logging, which invoke leaves unset.
+    setup_logging(logging.INFO)
+    target = _nixos(machine, "listed")
+    listed = _generations(machine, target)
+    current = next(g for g in listed if g.current)
+    if not diff:
+        for g in listed:
+            mark = "current" if g.current else ""
+            print(f"{g.number}\t{g.created}\t{g.kernel}\t{mark}".rstrip())
+        return
+    if diff not in {g.number for g in listed}:
+        _fail(f"{machine}: no generation {diff}")
+    _diff(machine, target, current.number, diff)
+
+
+@task
+def rollback(_: Context, machine: str, to: int = 0) -> None:
+    """Switch a NixOS machine to its previous system generation, or to --to."""
+    setup_logging(logging.INFO)
+    target = _nixos(machine, "rolled back")
+    listed = _generations(machine, target)
+    current = next(g for g in listed if g.current)
+    numbers = [g.number for g in listed]
+    goal = to or max((n for n in numbers if n < current.number), default=0)
+    if goal == current.number or goal not in numbers:
+        known = ", ".join(map(str, numbers))
+        _fail(
+            f"{machine}: cannot switch from {current.number} to {goal or '-'}; has {known}"
+        )
+    print(f"{machine}: generation {current.number} -> {goal}", flush=True)
+    _diff(machine, target, current.number, goal)
+    target.run(
+        ["nix-env", "-p", PROFILE, "--switch-generation", str(goal)],
+        RunOpts(log=Log.BOTH, prefix=machine),
+        control_master=False,
+    )
+    # systemd-run keeps the switch going if ssh drops, as clan machines update does.
+    switch = [
+        "systemd-run",
+        "--pipe",
+        "--wait",
+        "--quiet",
+        "--collect",
+        "--no-ask-password",
+        "--service-type=exec",
+        f"--unit=inv-rollback-{goal}-{int(time.time())}",
+        "-E",
+        "LOCALE_ARCHIVE",
+        "--",
+        f"{PROFILE}/bin/switch-to-configuration",
+        "switch",
+    ]
+    try:
+        target.run(switch, RunOpts(log=Log.BOTH, prefix=machine), control_master=False)
+    except ClanCmdError:
+        _fail(
+            f"{machine}: the profile is at {goal} but switching to it failed; "
+            f"`inv rollback {machine} --to {current.number}` returns"
+        )
+    failed = (
+        _answer(target, ["systemctl", "--failed", "--no-legend", "--plain"]) or ""
+    ).split("\n")
+    units = [line.split()[0] for line in failed if line.strip()]
+    print(f"{machine}: running {goal}, failed units: {', '.join(units) or 'none'}")
+    goal_kernel = next(g.kernel for g in listed if g.number == goal)
+    if goal_kernel != current.kernel:
+        print(
+            f"{machine}: kernel {current.kernel} -> {goal_kernel} takes effect after a reboot"
+        )
