@@ -16,7 +16,7 @@ def fetch_latest_release() -> dict[str, Any]:
         GITHUB_API,
         headers={"User-Agent": "dots-openlogi-updater"},
     )
-    with urllib.request.urlopen(request) as response:  # noqa: S310
+    with urllib.request.urlopen(request) as response:
         result: dict[str, Any] = json.load(response)
         return result
 
