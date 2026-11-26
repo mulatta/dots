@@ -14,7 +14,7 @@ import tempfile
 import time
 import uuid
 import xml.etree.ElementTree as ET
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 from urllib.parse import quote, urlencode
@@ -62,7 +62,7 @@ def regular(mode: int) -> None:
 
 
 @contextmanager
-def directory(path: str) -> Iterator[int]:
+def directory(path: str) -> Generator[int]:
     # Walk every component: O_NOFOLLOW on only the final path is insufficient.
     parts = absolute(path).split("/")
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_NONBLOCK
@@ -78,7 +78,7 @@ def directory(path: str) -> Iterator[int]:
 
 
 @contextmanager
-def source_file(path: str) -> Iterator[int]:
+def source_file(path: str) -> Generator[int]:
     parent, name = os.path.split(absolute(path))
     name_value(name)
     with directory(parent) as parent_fd:
@@ -96,7 +96,7 @@ def source_file(path: str) -> Iterator[int]:
 
 
 @contextmanager
-def destination_file(path: str, mode: int) -> Iterator[int]:
+def destination_file(path: str, mode: int) -> Generator[int]:
     parent, name = os.path.split(absolute(path))
     name_value(name)
     with directory(parent) as parent_fd:

@@ -13,7 +13,7 @@ import termios
 import threading
 import time
 import unittest
-from collections.abc import Iterator
+from collections.abc import Generator
 from pathlib import Path
 from unittest import mock
 
@@ -66,7 +66,7 @@ class UnusableKeyring(FakeKeyring):
 
 
 @contextlib.contextmanager
-def isolated_home(**env: str) -> Iterator[Path]:
+def isolated_home(**env: str) -> Generator[Path]:
     """A temporary HOME that also covers Path.home(), which macOS resolves via pwd."""
     with tempfile.TemporaryDirectory() as tmp:
         home = Path(tmp)
