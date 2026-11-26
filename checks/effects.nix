@@ -119,4 +119,20 @@ in
           fi
         '';
   };
+
+  onSchedule.update-packages = {
+    when = {
+      hour = 19;
+      minute = 0;
+    };
+    outputs.effects.update-packages =
+      mkRepoEffect "update-packages"
+        {
+          checkout = true;
+          extraInputs = [ inputs.self.packages.x86_64-linux.updater ];
+        }
+        ''
+          updater --pr
+        '';
+  };
 }
