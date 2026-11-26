@@ -32,7 +32,7 @@ def write_srcs(pkg_dir: Path, data: dict[str, str]) -> None:
 
 def get_latest_version() -> dict[str, str]:
     """Fetch latest Radicle Desktop release metadata."""
-    with urllib.request.urlopen(LATEST_JSON_URL) as response:  # noqa: S310
+    with urllib.request.urlopen(LATEST_JSON_URL) as response:
         result: dict[str, str] = json.loads(response.read().decode())
         return result
 
@@ -66,7 +66,7 @@ def mirror_to_github(version: str, sha: str) -> str:
     with tempfile.TemporaryDirectory() as tmpdir:
         local_path = Path(tmpdir) / filename
         print(f"Downloading {LATEST_DMG_URL}...")
-        urllib.request.urlretrieve(LATEST_DMG_URL, local_path)  # noqa: S310
+        urllib.request.urlretrieve(LATEST_DMG_URL, local_path)
 
         body = json.dumps({"version": version, "sha": sha})
         release_exists = run_gh(["release", "view", RELEASE_TAG], check=False)
