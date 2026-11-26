@@ -10,8 +10,14 @@
   "includeGitInstructions": false,
   "permissions": {
     "deny": [
-      "Bash(nix run .#hm -- switch*)",
-      "Bash(nix run path:.#hm -- switch*)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)"
+    ],
+    "ask": [
       "Bash(nix run ~/dots#hm -- switch*)",
       "Bash(nix run /Users/seungwon/dots#hm -- switch*)",
       "Bash(hm switch*)",
@@ -33,15 +39,8 @@
       "Bash(nh home switch*)",
       "Bash(clan machines update*)",
       "Bash(clan machines install*)",
-      "Bash(git push --force *)",
-      "Bash(git push -f *)",
-      "Bash(git push * --force)",
-      "Bash(git push * --force *)",
-      "Bash(git push * -f)",
-      "Bash(git push * -f *)"
-    ],
-    "defaultMode": "auto",
-    "ask": [
+      "Bash(nix develop -c clan machines update*)",
+      "Bash(nix develop -c clan machines install*)",
       "Bash(sops -d *)",
       "Bash(sops --decrypt *)",
       "Bash(sops decrypt *)",
@@ -52,7 +51,8 @@
       "Bash(clan vars get *)",
       "Bash(clan vars export *)",
       "Bash(clan secrets get *)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "model": "opus",
   "skillOverrides": {
@@ -91,6 +91,16 @@
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Secret Decryption [named+specifics — **must name:** the secret being decrypted]: printing a decrypted sops, age, clan vars or rbw secret value to the transcript or writing it to a file. Covers `sops -d`/`--decrypt`/`decrypt`/`exec-env`/`exec-file`, `sops edit` (decrypts to a temp file), `age -d`, `clan vars get`/`export`, `clan secrets get`, `rbw get`/`code`; `tofu output -json`/`-raw`, `tofu show -json`, `state show`, `state pull` and `tofu console` (plain `tofu output` masks sensitive values and is fine); reading decrypted files such as `/run/secrets/`, `/run/secrets-for-users/` or `/run/credentials/`, locally or over SSH (e.g. `ssh root@cask.x cat /run/secrets/...`), and untracked env files such as .envrc.private; and reading an age identity (`~/.config/sops/age/keys.txt`, `SOPS_AGE_KEY`, `SOPS_AGE_KEY_FILE`, or an SSH host key used as one). The unwrapped decrypting commands go through a permission prompt, so run them unwrapped; wrapped forms fall under Secret Prompt Bypass. Piping a value straight into the command that consumes it, without echoing it, is fine. Also fine: `inv inspect-secret`, `rbw unlock`/`sync`/`list`, and reading ciphertext with `cat` or `grep`",
+      "Machine Disruption [named+specifics — **must name:** the machine]: on cask, citra, malt, or the local machine (rhesus, a nix-darwin MacBook, and Home Manager profiles) — deploying (`clan machines update`, which targets every machine when no machine is named; `nixos-rebuild --target-host`, `inv deploy`), installing or repartitioning (`clan machines install`, `nixos-anywhere`), rebooting or powering off (`reboot`, `systemctl reboot`, `poweroff`, `shutdown`, `halt`, `kexec`, `inv reboot`), stopping or restarting services locally or over SSH, activating a configuration (`nixos-rebuild`/`darwin-rebuild` `switch`/`boot`/`test`, `home-manager switch`, `hm switch`), and rotating credentials (`clan vars generate --regenerate`). Plain `clan vars generate` without `--regenerate`, which only fills missing values, is fine. Builds, `dry-build`, `dry-activate`, and one-shot read-only diagnostics over SSH (`journalctl`, `systemctl status`/`show`, `ss`, `readlink /run/current-system`) are fine",
+      "IaC State Changes [named+specifics — **must name:** the terraform unit]: any `tofu`, `terraform` or `terragrunt` invocation that targets terraform/ by any means (cwd, `-chdir`, `--terragrunt-working-dir`, a wrapper) and runs apply, destroy, import, `state` writes (mv, rm, push, replace-provider), `workspace new`/`delete`, taint, untaint, force-unlock, refresh, `apply -refresh-only`, or `run-all apply`/`destroy`. plan, validate, fmt, `state list`, and plain `init` are fine; `init -migrate-state`/`-reconfigure`/`-force-copy`/`-upgrade` are not"
+    ],
+    "hard_deny": [
+      "$defaults",
+      "Secret Prompt Bypass: running `sops -d`/`--decrypt`/`decrypt`/`exec-env`/`exec-file`, `age -d`, `clan vars get`/`export` or `clan secrets get` inside any wrapper (`nix develop -c`, `nix shell -c`, `bash -c`, `sh -c`, `env`, `ssh`, a script), or reimplementing it in Python or clan_lib, whatever happens to the output. The unwrapped command gets a permission prompt, and a wrapper skips it. The dots tasks `inv inspect-secret`, `inv unlock` and `inv reboot` decrypt through their own secret layer and are not a bypass"
+    ],
     "environment": [
       "**Organization**: None — a personal setup run by one person",
       "**Primary use of Claude Code**: software development",
@@ -113,16 +123,7 @@
       "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar\n\nIn this setup that means decrypted values from the secret stores under Secrets management, and untracked local env files such as .envrc.private. Nix files that declare a secret's generator or read it at runtime hold no secret value.",
       "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)\n\nAlso the machines cask, citra and malt, reached as <machine>.x or <machine>.n, especially as root over SSH.",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment\n\nAlso terraform/ (Vultr, Cloudflare DNS and R2, RustFS), changed only after the user approves."
-    ],
-    "soft_deny": [
-      "$defaults",
-      "Secret Decryption [named+specifics — **must name:** the secret being decrypted]: printing a decrypted sops, age, clan vars or rbw secret value to the transcript or writing it to a file. Covers `sops -d`/`--decrypt`/`decrypt`/`exec-env`/`exec-file`, `sops edit` (decrypts to a temp file), `age -d`, `clan vars get`/`export`, `clan secrets get`, `rbw get`/`code`; `tofu output -json`/`-raw`, `tofu show -json`, `state show`, `state pull` and `tofu console` (plain `tofu output` masks sensitive values and is fine); reading decrypted files such as `/run/secrets/`, `/run/secrets-for-users/` or `/run/credentials/`, locally or over SSH (e.g. `ssh root@cask.x cat /run/secrets/...`), and untracked env files such as .envrc.private; and reading an age identity (`~/.config/sops/age/keys.txt`, `SOPS_AGE_KEY`, `SOPS_AGE_KEY_FILE`, or an SSH host key used as one). The unwrapped decrypting commands go through a permission prompt, so run them unwrapped; wrapped forms fall under Secret Prompt Bypass. Piping a value straight into the command that consumes it, without echoing it, is fine. Also fine: `inv inspect-secret`, `rbw unlock`/`sync`/`list`, and reading ciphertext with `cat` or `grep`",
-      "Machine Disruption [named+specifics — **must name:** the machine]: on cask, citra, malt, or the local machine (rhesus, a nix-darwin MacBook, and Home Manager profiles) — deploying (`clan machines update`, which targets every machine when no machine is named; `nixos-rebuild --target-host`, `inv deploy`), installing or repartitioning (`clan machines install`, `nixos-anywhere`), rebooting or powering off (`reboot`, `systemctl reboot`, `poweroff`, `shutdown`, `halt`, `kexec`, `inv reboot`), stopping or restarting services locally or over SSH, activating a configuration (`nixos-rebuild`/`darwin-rebuild` `switch`/`boot`/`test`, `home-manager switch`, `hm switch`), and rotating credentials (`clan vars generate --regenerate`). Plain `clan vars generate` without `--regenerate`, which only fills missing values, is fine. Builds, `dry-build`, `dry-activate`, and one-shot read-only diagnostics over SSH (`journalctl`, `systemctl status`/`show`, `ss`, `readlink /run/current-system`) are fine",
-      "IaC State Changes [named+specifics — **must name:** the terraform unit]: any `tofu`, `terraform` or `terragrunt` invocation that targets terraform/ by any means (cwd, `-chdir`, `--terragrunt-working-dir`, a wrapper) and runs apply, destroy, import, `state` writes (mv, rm, push, replace-provider), `workspace new`/`delete`, taint, untaint, force-unlock, refresh, `apply -refresh-only`, or `run-all apply`/`destroy`. plan, validate, fmt, `state list`, and plain `init` are fine; `init -migrate-state`/`-reconfigure`/`-force-copy`/`-upgrade` are not"
-    ],
-    "hard_deny": [
-      "$defaults",
-      "Secret Prompt Bypass: running `sops -d`/`--decrypt`/`decrypt`/`exec-env`/`exec-file`, `age -d`, `clan vars get`/`export` or `clan secrets get` inside any wrapper (`nix develop -c`, `nix shell -c`, `bash -c`, `sh -c`, `env`, `ssh`, a script), or reimplementing it in Python or clan_lib, whatever happens to the output. The unwrapped command gets a permission prompt, and a wrapper skips it. The dots tasks `inv inspect-secret`, `inv unlock` and `inv reboot` decrypt through their own secret layer and are not a bypass"
     ]
-  }
+  },
+  "skipWorkflowUsageWarning": true
 }
