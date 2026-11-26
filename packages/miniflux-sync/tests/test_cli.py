@@ -5,20 +5,22 @@ from typing import Any
 
 import miniflux
 import pytest
+import requests
 
 from miniflux_sync.bootstrap import BootstrapError, _ensure_webhook_integration
 from miniflux_sync.cli import default_config_path, load_manifest, sync_feeds
 
 
-class FakeResponse:
-    """Minimal requests.Response stand-in for building miniflux errors."""
+class FakeResponse(requests.Response):
+    """requests.Response carrying a Miniflux JSON error body."""
 
     def __init__(self, status_code: int, error_message: str) -> None:
+        super().__init__()
         self.status_code = status_code
-        self.headers = {"Content-Type": "application/json"}
+        self.headers["Content-Type"] = "application/json"
         self._error_message = error_message
 
-    def json(self) -> dict[str, str]:
+    def json(self, **kwargs: Any) -> dict[str, str]:
         return {"error_message": self._error_message}
 
 

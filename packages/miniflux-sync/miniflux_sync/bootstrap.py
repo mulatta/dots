@@ -4,9 +4,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import LiteralString, Protocol
 
 import psycopg
-from psycopg.rows import dict_row
+from psycopg.rows import DictRow, dict_row
+
+
+class SqlExecutor(Protocol):
+    def execute(
+        self, query: LiteralString, params: tuple[object, ...], /
+    ) -> object: ...
 
 
 class BootstrapError(RuntimeError):
@@ -42,7 +49,9 @@ def ensure_user_and_api_key(request: BootstrapRequest) -> int:
         raise BootstrapError("api key description must not be empty")
 
     with (
-        psycopg.connect(request.database_url, row_factory=dict_row) as conn,
+        psycopg.Connection[DictRow].connect(
+            request.database_url, row_factory=dict_row
+        ) as conn,
         conn.transaction(),
         conn.cursor() as cur,
     ):
@@ -65,7 +74,7 @@ def ensure_user_and_api_key(request: BootstrapRequest) -> int:
 
 
 def _ensure_user(
-    cur: psycopg.Cursor, username: str, openid_connect_id: str | None
+    cur: psycopg.Cursor[DictRow], username: str, openid_connect_id: str | None
 ) -> int:
     cur.execute(
         """
@@ -113,7 +122,7 @@ def _ensure_user(
     )
 
 
-def _ensure_default_rows(cur: psycopg.Cursor, user_id: int) -> None:
+def _ensure_default_rows(cur: psycopg.Cursor[DictRow], user_id: int) -> None:
     cur.execute(
         """
         INSERT INTO categories (user_id, title)
@@ -133,7 +142,7 @@ def _ensure_default_rows(cur: psycopg.Cursor, user_id: int) -> None:
 
 
 def _ensure_api_key(
-    cur: psycopg.Cursor,
+    cur: psycopg.Cursor[DictRow],
     user_id: int,
     api_token: str,
     api_key_description: str,
@@ -150,7 +159,7 @@ def _ensure_api_key(
 
 
 def _ensure_webhook_integration(
-    cur: psycopg.Cursor,
+    cur: SqlExecutor,
     user_id: int,
     *,
     enabled: bool | None,
@@ -162,7 +171,7 @@ def _ensure_webhook_integration(
     if enabled is True and not url:
         raise BootstrapError("webhook_url is required when webhook is enabled")
 
-    updates: list[str] = []
+    updates: list[LiteralString] = []
     values: list[object] = []
     if enabled is not None:
         updates.append("webhook_enabled = %s")

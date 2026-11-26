@@ -39,7 +39,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import miniflux
 
@@ -87,6 +87,20 @@ SECRET_FILE_KEYS = {
     "username_file": "username",
     "password_file": "password",
 }
+
+
+class FeedClient(Protocol):
+    def get_feeds(self) -> list[dict[str, Any]]: ...
+
+    def get_categories(self) -> list[dict[str, Any]]: ...
+
+    def create_category(self, title: str, /) -> dict[str, Any]: ...
+
+    def create_feed(
+        self, feed_url: str, /, *, category_id: int, **kwargs: Any
+    ) -> int: ...
+
+    def update_feed(self, feed_id: int, /, **kwargs: Any) -> dict[str, Any]: ...
 
 
 def default_config_path() -> Path:
@@ -148,7 +162,7 @@ def sync_assets(
 
 
 def ensure_categories(
-    client: miniflux.Client,
+    client: FeedClient,
     names: set[str],
     *,
     dry_run: bool,
@@ -177,7 +191,7 @@ def feed_settings(spec: dict[str, Any], *, base: Path) -> dict[str, Any]:
 
 
 def sync_feeds(
-    client: miniflux.Client,
+    client: FeedClient,
     feeds: list[dict[str, Any]],
     *,
     base: Path,
