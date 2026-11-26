@@ -15,8 +15,7 @@ Prose follows the `unslop` skill, chat replies included. Read `~/.claude/skills/
 
 - Follow XDG Base Directory spec for config/cache/data paths when writing code.
 - Use `$HOME/.claude/outputs` as a scratch directory.
-- Inspect a sops or clan vars secret with `secret-shape`, which prints keys
-  and lengths rather than values. Do not decrypt a secret directly.
+- Do not decrypt a sops or clan vars secret directly.
 
 ## Upstream fixes
 
