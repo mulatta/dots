@@ -52,7 +52,7 @@ def exec_ksecretd(ksecretd: str, password_hash: bytes) -> None:
     # Hash and env connection are queued in the kernel before exec, so no
     # helper process is needed.
     hash_r, hash_w = os.pipe()
-    os.set_inheritable(hash_r, True)  # noqa: FBT003
+    os.set_inheritable(hash_r, True)
     os.write(hash_w, password_hash)
     os.close(hash_w)
 
@@ -75,9 +75,9 @@ def exec_ksecretd(ksecretd: str, password_hash: bytes) -> None:
         addr.unlink()
 
     sock_fd = listener.detach()
-    os.set_inheritable(sock_fd, True)  # noqa: FBT003
+    os.set_inheritable(sock_fd, True)
     os.environ["PAM_KWALLET5_LOGIN"] = "1"
-    os.execv(  # noqa: S606
+    os.execv(
         ksecretd,
         [ksecretd, "--pam-login", str(hash_r), str(sock_fd)],
     )
