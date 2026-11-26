@@ -110,8 +110,8 @@ let
       builtins.toJSON (nonNullAttrs {
         base_url = provision.apiEndpoint;
         assets = nonNullAttrs {
-          css = if userCfg.stylesheet == null then null else toString userCfg.stylesheet;
-          js = if userCfg.javascript == null then null else toString userCfg.javascript;
+          css = if userCfg.stylesheet == null then null else "${userCfg.stylesheet}";
+          js = if userCfg.javascript == null then null else "${userCfg.javascript}";
         };
         feeds = mapAttrsToList (feedToManifest userName) userCfg.feeds;
       })
