@@ -3,7 +3,12 @@
   imports = [ inputs.treefmt-nix.flakeModule ];
 
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      inputs',
+      ...
+    }:
     let
       # Stow commands have no extension; select by interpreter, not filename.
       scripts = builtins.readDir ../home/bin;
@@ -23,16 +28,19 @@
         "#!/usr/bin/env bash"
         "#!/bin/sh"
       ];
+      clan = inputs'.clan-core.packages.clan-cli;
       # ty resolves imports against one interpreter, so it carries every script's dependencies.
       tyPython = pkgs.python3.withPackages (ps: [
         ps.click
         ps.django
         ps.icalendar
+        ps.invoke
         ps.miniflux
         ps.psycopg
         ps.pytest
         ps.python-dateutil
         ps.pytz
+        ps.pyyaml
         ps.types-pytz
         (ps.toPythonModule pkgs.todoman)
       ]);
@@ -113,6 +121,8 @@
               "packages/rbw-pinentry/src"
               "--extra-search-path"
               "${pkgs.paperless-ngx}/lib/paperless-ngx/src"
+              "--extra-search-path"
+              "${clan}/${clan.pythonRuntime.sitePackages}"
             ];
             includes = [
               "*.py"
