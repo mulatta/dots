@@ -57,7 +57,10 @@
         programs.nixfmt.enable = true;
         programs.ruff-format.enable = true;
         programs.ruff-check.enable = true;
-        programs.shfmt.enable = true;
+        programs.shfmt = {
+          enable = true;
+          indent_size = 2;
+        };
         programs.taplo = {
           enable = true;
           excludes = [
