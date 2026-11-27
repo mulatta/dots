@@ -172,13 +172,14 @@ gitroot() { # ROOT = nearest folder above $1 holding .git, or empty
 DIFF_TTL=5
 diffcache=${XDG_CACHE_HOME:-$HOME/.cache}/claude-statusline/diff
 diffrefresh() { # $1 repo root, $2 cache file
-  local base out a=0 d=0
+  local base alg out a=0 d=0
   base=$(git -C "$1" merge-base HEAD refs/remotes/origin/HEAD 2>/dev/null) || base=HEAD
-  if out=$(git -C "$1" --no-optional-locks diff --shortstat "$base" 2>/dev/null); then
-    [[ $out =~ ([0-9]+)\ insertion ]] && a=${BASH_REMATCH[1]}
-    [[ $out =~ ([0-9]+)\ deletion ]] && d=${BASH_REMATCH[1]}
-    printf '%s %s %s\n' "$now" "$a" "$d" >"$2.tmp" && mv -f "$2.tmp" "$2"
-  fi
+  alg=$(git -C "$1" config diff.algorithm) || alg=myers
+  # Porcelain diff rewrites the index for stat-dirty entries even with --no-optional-locks.
+  out=$(git -C "$1" diff-index --shortstat --diff-algorithm="$alg" "$base" 2>/dev/null)
+  [[ $out =~ ([0-9]+)\ insertion ]] && a=${BASH_REMATCH[1]}
+  [[ $out =~ ([0-9]+)\ deletion ]] && d=${BASH_REMATCH[1]}
+  printf '%s %s %s\n' "$now" "$a" "$d" >"$2.tmp" && mv -f "$2.tmp" "$2"
   rm -f "$2.lock"
 }
 diffstat() { # ladd, lrem = cached diff of repo $1; a refresh holds $file.lock for 30s at most
@@ -188,7 +189,7 @@ diffstat() { # ladd, lrem = cached diff of repo $1; a refresh holds $file.lock f
   read -r held 2>/dev/null <"$file.lock"
   [[ $held =~ ^[0-9]+$ ]] && ((now - held < 30)) && return
   [ -d "$diffcache" ] || mkdir -p "$diffcache"
-  [ -n "$held" ] && rm -f "$file.lock"
+  [ -e "$file.lock" ] && rm -f "$file.lock"
   set -C
   { echo "$now" >"$file.lock"; } 2>/dev/null && took=1
   set +C
