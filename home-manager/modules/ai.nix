@@ -103,7 +103,6 @@ in
     aiPkgs.herdr-core
     selfPkgs.archify-cli
     claude
-    selfPkgs.claude-md
     aiPkgs.pi
     hmodsPkgs.hmeter
     hmodsPkgs.hscene

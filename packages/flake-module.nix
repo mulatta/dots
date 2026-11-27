@@ -12,7 +12,6 @@
     {
       packages = {
         archify-cli = pkgs.callPackage ./archify-cli { };
-        claude-md = pkgs.callPackage ./claude-md { };
         email-sync = pkgs.callPackage ./email-sync { };
 
         hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client {
