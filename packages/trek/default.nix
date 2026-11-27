@@ -9,24 +9,22 @@
   node-gyp,
   python3,
   kdePackages,
-  # The server resolves its SQLite database and uploads relative to its own
-  # install tree (server/data, server/uploads), so mutable state has to be
-  # reached through symlinks baked into the read-only store path.
+  # TREK anchors data/ and uploads/ on its install tree (server/src/app-config/data-paths.ts).
   stateDir ? "/var/lib/trek",
 }:
 
 buildNpmPackage (finalAttrs: {
   pname = "trek";
-  version = "4.3.4";
+  version = "5.2.1";
 
   src = fetchFromGitHub {
     owner = "liketrek";
     repo = "TREK";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-rtZOGzRDG611/zxS+vZcc9q+U4JVseI0D+ecbKcC+hE=";
+    hash = "sha256-4gz4MMJjHS1I6kZyvWsQ2pjNEWTrblWHNs3MYcQBRZg=";
   };
 
-  npmDepsHash = "sha256-UiHpAn/1Eh1DKy+VLANXYMCln3sEJnPKJA/Np0snj3k=";
+  npmDepsHash = "sha256-T+h2Z1Xssmwt5Qn0N0NtXnBTsWCMhaK4kMsrljjKg9M=";
 
   inherit nodejs;
 
@@ -42,19 +40,22 @@ buildNpmPackage (finalAttrs: {
 
   env.SCARF_ANALYTICS = "false";
 
+  # plyr's preinstall runs `npx only-allow pnpm`, which needs the network.
+  npmRebuildFlags = [ "--ignore-scripts" ];
+
+  # npmConfigHook patches shebangs only in the root node_modules.
+  postConfigure = ''
+    patchShebangs {client,server,shared}/node_modules
+  '';
+
   installPhase = ''
     runHook preInstall
 
-    # Pruning from the root keeps the client workspace's runtime deps (map
-    # libraries, icon sets), which only matter for the already built bundle.
-    # Reinstall the server workspace alone, as the upstream image does.
     rm -rf node_modules server/node_modules shared/node_modules
     npm ci --workspace=server --omit=dev --ignore-scripts
 
-    # better-sqlite3 carries prebuilt addons in its tarball and its binding.gyp
-    # skips compilation whenever one matches the host. Removing them forces
-    # node-gyp to compile the bundled SQLite amalgamation against this nodejs.
-    pushd server/node_modules/better-sqlite3
+    # better-sqlite3's binding.gyp skips compiling when a bundled prebuild matches the host.
+    pushd node_modules/better-sqlite3
     rm -r prebuilds
     node-gyp rebuild --release
     find build -mindepth 1 -maxdepth 1 ! -name Release -exec rm -r {} +
@@ -62,8 +63,7 @@ buildNpmPackage (finalAttrs: {
     rm -r deps src binding.gyp
     popd
 
-    # Packages like bare-fs ship addons for every platform; foreign ones
-    # would only trip autoPatchelf.
+    # bare-fs and others ship prebuilds for every platform, which trip autoPatchelf.
     find node_modules -type d -name prebuilds -prune | while read -r dir; do
       find "$dir" -mindepth 1 -maxdepth 1 \
         ! -name '${stdenv.hostPlatform.node.platform}-${stdenv.hostPlatform.node.arch}' -exec rm -r {} +
@@ -74,14 +74,13 @@ buildNpmPackage (finalAttrs: {
     mkdir -p $app/shared $app/server/scripts
 
     cp -r node_modules $app/node_modules
-    # better-sqlite3 is not hoisted, so server keeps its own node_modules.
     cp -r server/node_modules $app/server/node_modules
 
     cp shared/package.json $app/shared/
     cp -r shared/dist $app/shared/dist
 
     cp server/package.json server/tsconfig.json server/reset-admin.js $app/server/
-    cp server/scripts/migrate-encryption.ts $app/server/scripts/
+    cp server/scripts/migrate-encryption.ts server/scripts/migrate-encryption-stores.ts $app/server/scripts/
     cp -r server/dist server/assets $app/server/
     cp -r client/dist $app/server/public
     cp -r client/public/fonts $app/server/public/fonts
@@ -103,7 +102,6 @@ buildNpmPackage (finalAttrs: {
     runHook postInstall
   '';
 
-  # The state symlinks point outside the store until the service creates them.
   dontCheckForBrokenSymlinks = true;
 
   meta = {

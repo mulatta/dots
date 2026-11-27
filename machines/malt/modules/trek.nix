@@ -10,10 +10,8 @@ let
   port = 3010;
   domain = "trek.mulatta.io";
   kanidmDomain = "idm.mulatta.io";
-  # Must match the package's stateDir: the server only reaches data/ and
-  # uploads/ through symlinks baked into its store path.
   stateDir = "/var/lib/trek";
-  trek = self.packages.${pkgs.stdenv.hostPlatform.system}.trek;
+  trek = self.packages.${pkgs.stdenv.hostPlatform.system}.trek.override { inherit stateDir; };
 in
 {
   clan.core.vars.generators.kanidm-trek-oidc = {
@@ -46,12 +44,11 @@ in
       PORT = toString port;
       APP_URL = "https://${domain}";
       ALLOWED_ORIGINS = "https://${domain}";
-      # cask terminates TLS and forwards over Naru.
       TRUST_PROXY = "1";
       XDG_CACHE_HOME = "%C/trek";
+      TREK_SERVICES = "off";
+      TREK_PLACES_ENABLED = "false";
 
-      # Kanidm scope maps are the login allow-list, so password login is
-      # disabled and admin rights follow the Kanidm admins group.
       OIDC_ISSUER = "https://${kanidmDomain}/oauth2/openid/trek";
       OIDC_CLIENT_ID = "trek";
       OIDC_DISPLAY_NAME = "Kanidm";
