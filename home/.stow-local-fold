@@ -1,3 +1,0 @@
-# Paths under home/ that stow-dotfiles links as whole directories, one per line.
-.codex/rules
-.codex/skills/loop
