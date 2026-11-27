@@ -172,20 +172,30 @@ gitroot() { # ROOT = nearest folder above $1 holding .git, or empty
 DIFF_TTL=5
 diffcache=${XDG_CACHE_HOME:-$HOME/.cache}/claude-statusline/diff
 diffrefresh() { # $1 repo root, $2 cache file
-  local base alg out a=0 d=0
+  local base key val alg=myers find=-M out a=0 d=0
   base=$(git -C "$1" merge-base HEAD refs/remotes/origin/HEAD 2>/dev/null) || base=HEAD
-  alg=$(git -C "$1" config diff.algorithm) || alg=myers
-  # Porcelain diff rewrites the index for stat-dirty entries even with --no-optional-locks.
-  out=$(git -C "$1" diff-index --shortstat --diff-algorithm="$alg" "$base" 2>/dev/null)
+  # Porcelain diff rewrites the index for stat-dirty entries even with --no-optional-locks,
+  # and plumbing ignores the diff config, so pass it to diff-index by hand.
+  while read -r key val; do
+    case $key=${val,,} in
+    diff.algorithm=*) alg=$val ;;
+    diff.renames=false | diff.renames=no | diff.renames=off | diff.renames=0) find="" ;;
+    diff.renames=copies | diff.renames=copy) find=-C ;;
+    esac
+  done < <(git -C "$1" config --get-regexp '^diff\.(algorithm|renames)$')
+  out=$(git -C "$1" diff-index --shortstat --diff-algorithm="$alg" $find "$base" 2>/dev/null)
   [[ $out =~ ([0-9]+)\ insertion ]] && a=${BASH_REMATCH[1]}
   [[ $out =~ ([0-9]+)\ deletion ]] && d=${BASH_REMATCH[1]}
   printf '%s %s %s\n' "$now" "$a" "$d" >"$2.tmp" && mv -f "$2.tmp" "$2"
   rm -f "$2.lock"
 }
 diffstat() { # ladd, lrem = cached diff of repo $1; a refresh holds $file.lock for 30s at most
-  local file=$diffcache/${1//\//%} at="" held="" took=""
-  read -r at ladd lrem 2>/dev/null <"$file"
-  [[ $at =~ ^[0-9]+$ ]] && ((now - at < DIFF_TTL)) && return
+  local file=$diffcache/${1//\//%} at="" a="" d="" held="" took=""
+  read -r at a d 2>/dev/null <"$file"
+  if [[ "$at $a $d" =~ ^[0-9]+\ [0-9]+\ [0-9]+$ ]]; then
+    ladd=$a lrem=$d
+    ((now - at < DIFF_TTL)) && return
+  fi
   read -r held 2>/dev/null <"$file.lock"
   [[ $held =~ ^[0-9]+$ ]] && ((now - held < 30)) && return
   [ -d "$diffcache" ] || mkdir -p "$diffcache"
