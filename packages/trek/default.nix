@@ -9,9 +9,7 @@
   node-gyp,
   python3,
   kdePackages,
-  # The server resolves its SQLite database and uploads relative to its own
-  # install tree (server/data, server/uploads), so mutable state has to be
-  # reached through symlinks baked into the read-only store path.
+  # TREK anchors data/ and uploads/ on its install tree (server/src/app-config/data-paths.ts).
   stateDir ? "/var/lib/trek",
 }:
 
@@ -53,15 +51,10 @@ buildNpmPackage (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    # Pruning from the root keeps the client workspace's runtime deps (map
-    # libraries, icon sets), which only matter for the already built bundle.
-    # Reinstall the server workspace alone, as the upstream image does.
     rm -rf node_modules server/node_modules shared/node_modules
     npm ci --workspace=server --omit=dev --ignore-scripts
 
-    # better-sqlite3 carries prebuilt addons in its tarball and its binding.gyp
-    # skips compilation whenever one matches the host. Removing them forces
-    # node-gyp to compile the bundled SQLite amalgamation against this nodejs.
+    # better-sqlite3's binding.gyp skips compiling when a bundled prebuild matches the host.
     pushd node_modules/better-sqlite3
     rm -r prebuilds
     node-gyp rebuild --release
@@ -70,8 +63,7 @@ buildNpmPackage (finalAttrs: {
     rm -r deps src binding.gyp
     popd
 
-    # Packages like bare-fs ship addons for every platform; foreign ones
-    # would only trip autoPatchelf.
+    # bare-fs and others ship prebuilds for every platform, which trip autoPatchelf.
     find node_modules -type d -name prebuilds -prune | while read -r dir; do
       find "$dir" -mindepth 1 -maxdepth 1 \
         ! -name '${stdenv.hostPlatform.node.platform}-${stdenv.hostPlatform.node.arch}' -exec rm -r {} +
@@ -110,7 +102,6 @@ buildNpmPackage (finalAttrs: {
     runHook postInstall
   '';
 
-  # The state symlinks point outside the store until the service creates them.
   dontCheckForBrokenSymlinks = true;
 
   meta = {
