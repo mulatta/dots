@@ -46,6 +46,8 @@ in
       ALLOWED_ORIGINS = "https://${domain}";
       TRUST_PROXY = "1";
       XDG_CACHE_HOME = "%C/trek";
+      TREK_SERVICES = "off";
+      TREK_PLACES_ENABLED = "false";
 
       OIDC_ISSUER = "https://${kanidmDomain}/oauth2/openid/trek";
       OIDC_CLIENT_ID = "trek";
