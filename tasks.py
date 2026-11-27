@@ -536,6 +536,41 @@ def _diff(machine: str, target: Remote, current: int, goal: int) -> None:
     )
 
 
+def _resolve(target: Remote, path: str) -> str | None:
+    out = _answer(target, ["readlink", "-f", path])
+    return None if out is None else out.strip()
+
+
+def _kernel_version(path: str) -> str:
+    match = KERNEL.search(path)
+    return path if match is None else match["version"]
+
+
+def _activate(machine: str, target: Remote, system: str, action: str) -> int:
+    # systemd-run keeps the switch going if ssh drops, as clan machines update does.
+    command = [
+        "systemd-run",
+        "--pipe",
+        "--wait",
+        "--quiet",
+        "--collect",
+        "--no-ask-password",
+        "--service-type=exec",
+        f"--unit=inv-rollback-{action}-{time.time_ns()}",
+        "-E",
+        "LOCALE_ARCHIVE",
+        "--",
+        f"{system}/bin/switch-to-configuration",
+        action,
+    ]
+    out = target.run(
+        command,
+        RunOpts(check=False, log=Log.BOTH, prefix=machine),
+        control_master=False,
+    )
+    return out.returncode
+
+
 @task
 def generations(_: Context, machine: str, diff: int = 0) -> None:
     """List a NixOS machine's system generations, or diff the current one with --diff."""
@@ -570,41 +605,39 @@ def rollback(_: Context, machine: str, to: int = 0) -> None:
         )
     print(f"{machine}: generation {current.number} -> {goal}", flush=True)
     _diff(machine, target, current.number, goal)
+    system = _resolve(target, f"{PROFILE}-{goal}-link")
+    if system is None:
+        _fail(f"{machine}: cannot resolve generation {goal}")
     target.run(
         ["nix-env", "-p", PROFILE, "--switch-generation", str(goal)],
         RunOpts(log=Log.BOTH, prefix=machine),
         control_master=False,
     )
-    # systemd-run keeps the switch going if ssh drops, as clan machines update does.
-    switch = [
-        "systemd-run",
-        "--pipe",
-        "--wait",
-        "--quiet",
-        "--collect",
-        "--no-ask-password",
-        "--service-type=exec",
-        f"--unit=inv-rollback-{goal}-{int(time.time())}",
-        "-E",
-        "LOCALE_ARCHIVE",
-        "--",
-        f"{PROFILE}/bin/switch-to-configuration",
-        "switch",
-    ]
-    try:
-        target.run(switch, RunOpts(log=Log.BOTH, prefix=machine), control_master=False)
-    except ClanCmdError:
+    back = f"`inv rollback {machine} --to {current.number}` returns"
+    if _activate(machine, target, system, "boot") != 0:
+        _fail(f"{machine}: the profile is at {goal} but its boot entry failed; {back}")
+    code = _activate(machine, target, system, "switch")
+    if _resolve(target, "/run/current-system") != system:
+        dropped = (
+            "; the connection dropped, so the switch may still finish"
+            if code == 255
+            else ""
+        )
         _fail(
-            f"{machine}: the profile is at {goal} but switching to it failed; "
-            f"`inv rollback {machine} --to {current.number}` returns"
+            f"{machine}: {goal} boots next, but switching to it failed "
+            f"(exit {code}){dropped}; {back}"
         )
     failed = (
         _answer(target, ["systemctl", "--failed", "--no-legend", "--plain"]) or ""
     ).split("\n")
     units = [line.split()[0] for line in failed if line.strip()]
     print(f"{machine}: running {goal}, failed units: {', '.join(units) or 'none'}")
-    goal_kernel = next(g.kernel for g in listed if g.number == goal)
-    if goal_kernel != current.kernel:
+    goal_kernel = _resolve(target, f"{system}/kernel")
+    booted_kernel = _resolve(target, "/run/booted-system/kernel")
+    if goal_kernel is None or booted_kernel is None:
+        print(f"{machine}: cannot tell whether {goal} needs a reboot for its kernel")
+    elif goal_kernel != booted_kernel:
         print(
-            f"{machine}: kernel {current.kernel} -> {goal_kernel} takes effect after a reboot"
+            f"{machine}: kernel {_kernel_version(booted_kernel)} -> "
+            f"{_kernel_version(goal_kernel)} takes effect after a reboot"
         )
