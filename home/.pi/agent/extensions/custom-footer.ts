@@ -1,7 +1,7 @@
 /**
  * Custom Footer Extension - one line shaped like the statusline extension's widget (model,
  * plan usage, context, folder, branch, VCS state, extension statuses), followed by bar cells
- * like the Claude Code status line (home/.claude/statusline.sh): context, prompt cache TTL,
+ * like the Claude Code status line (~/.claude/statusline.sh): context, prompt cache TTL,
  * plan limits and cost. hmeter's per-terminal snapshot supplies the cache.
  */
 

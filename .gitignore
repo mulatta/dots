@@ -23,9 +23,4 @@ CLAUDE.local.md
 # cargo builds here when a package is tested in place.
 packages/*/target/
 # home/ is stowed into $HOME; these paths are tracked or ignored only here
-!home/.claude/CLAUDE.md
 home/.pi/agent/node_modules
-home/.codex/*
-!home/.codex/hooks.json
-!home/.codex/rules/
-!home/.codex/skills/
