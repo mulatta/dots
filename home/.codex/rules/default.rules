@@ -1,44 +1,55 @@
-# Codex runs without a sandbox or approvals (config.toml), so these rules
-# are the only commands it refuses. Under approval_policy = "never" a
-# refused command fails at once; the agent reports it and the user runs it.
+# The commands Claude asks about in home/.claude/settings.json; Codex asks about
+# the same ones, and refuses a force push as Claude denies it. A prompt rule
+# asks only under approval_policy granular with rules = true; under "never"
+# Codex refuses it instead.
 # A prefix rule matches leading words only: a command wrapped in sh -c, or
 # with the matched flag after its arguments, passes.
 # Codex skips a rules file that is a symlink, so ~/.codex/rules links as a directory.
 
-# Deploys and activations are the user's.
+# Deploys and activations.
 prefix_rule(
-    pattern = ["nix", "run", [".#hm", "path:.#hm", "~/dots#hm", "/Users/seungwon/dots#hm"], "--", "switch"],
-    decision = "forbidden",
-    justification = "Home Manager switch is the user's. Run build instead and report the switch command.",
+    pattern = ["nix", "run", ["~/dots#hm", "/Users/seungwon/dots#hm"], "--", "switch"],
+    decision = "prompt",
+    justification = "Home Manager switch activates a profile.",
 )
 prefix_rule(
     pattern = [["hm", "home-manager"], "switch"],
-    decision = "forbidden",
-    justification = "Home Manager switch is the user's. Run build instead and report the switch command.",
+    decision = "prompt",
+    justification = "Home Manager switch activates a profile.",
 )
 prefix_rule(
     pattern = [["nixos-rebuild", "darwin-rebuild"], ["switch", "boot", "test", "activate"]],
-    decision = "forbidden",
-    justification = "Activating a system is the user's. Run build instead and report the command.",
+    decision = "prompt",
+    justification = "This activates a system.",
 )
 prefix_rule(
-    pattern = ["sudo", ["nixos-rebuild", "darwin-rebuild"], ["switch", "boot", "test", "activate"]],
-    decision = "forbidden",
-    justification = "Activating a system is the user's. Run build instead and report the command.",
+    pattern = ["sudo", ["nixos-rebuild", "darwin-rebuild"]],
+    decision = "prompt",
+    justification = "This rebuilds a system as root.",
 )
 prefix_rule(
-    pattern = ["nh", ["os", "home", "darwin"], ["switch", "boot", "test"]],
-    decision = "forbidden",
-    justification = "Activating a system is the user's. Run build instead and report the command.",
+    pattern = ["nh", "os", ["switch", "boot", "test"]],
+    decision = "prompt",
+    justification = "This activates a system.",
+)
+prefix_rule(
+    pattern = ["nh", ["darwin", "home"], "switch"],
+    decision = "prompt",
+    justification = "This activates a system or a profile.",
 )
 prefix_rule(
     pattern = ["clan", "machines", ["update", "install"]],
-    decision = "forbidden",
-    justification = "Deploying a machine is the user's. Report the command instead.",
+    decision = "prompt",
+    justification = "This deploys a machine.",
+)
+prefix_rule(
+    pattern = ["nix", "develop", "-c", "clan", "machines", ["update", "install"]],
+    decision = "prompt",
+    justification = "This deploys a machine.",
 )
 
-# Rewriting a shared branch is the user's. --force-with-lease on the
-# agent's own branch stays allowed.
+# Rewriting a shared branch. --force-with-lease on the agent's own branch
+# stays allowed.
 prefix_rule(
     pattern = ["git", "push", ["--force", "-f"]],
     decision = "forbidden",
@@ -48,21 +59,28 @@ prefix_rule(
 # Secret values stay out of the transcript; in dots, `inv inspect-secret` shows keys and lengths.
 prefix_rule(
     pattern = ["sops", ["-d", "--decrypt", "decrypt", "exec-env", "exec-file"]],
-    decision = "forbidden",
-    justification = "Decrypting prints secret values. In dots, run `inv inspect-secret` on the file instead.",
+    decision = "prompt",
+    justification = "Decrypting prints secret values. In dots, `inv inspect-secret` on the file shows keys and lengths.",
 )
 prefix_rule(
     pattern = ["age", ["-d", "--decrypt"]],
-    decision = "forbidden",
-    justification = "Decrypting prints secret values. In dots, run `inv inspect-secret` on the file instead.",
+    decision = "prompt",
+    justification = "Decrypting prints secret values. In dots, `inv inspect-secret` on the file shows keys and lengths.",
 )
 prefix_rule(
     pattern = ["clan", "vars", ["get", "export"]],
-    decision = "forbidden",
-    justification = "This prints or writes secret values. In dots, run `inv inspect-secret MACHINE --var GENERATOR/FILE` instead.",
+    decision = "prompt",
+    justification = "This prints or writes secret values. In dots, `inv inspect-secret MACHINE --var GENERATOR/FILE` shows keys and lengths.",
 )
 prefix_rule(
     pattern = ["clan", "secrets", "get"],
-    decision = "forbidden",
-    justification = "This prints secret values. In dots, run `inv inspect-secret` on the file instead.",
+    decision = "prompt",
+    justification = "This prints secret values. In dots, `inv inspect-secret` on the file shows keys and lengths.",
+)
+
+# Terraform state and remote resources.
+prefix_rule(
+    pattern = [["terragrunt", "tofu"], ["apply", "destroy", "import", "state"]],
+    decision = "prompt",
+    justification = "This changes remote resources or Terraform state.",
 )
