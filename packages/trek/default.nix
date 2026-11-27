@@ -42,6 +42,14 @@ buildNpmPackage (finalAttrs: {
 
   env.SCARF_ANALYTICS = "false";
 
+  # plyr's preinstall runs `npx only-allow pnpm`, which needs the network.
+  npmRebuildFlags = [ "--ignore-scripts" ];
+
+  # npmConfigHook patches shebangs only in the root node_modules.
+  postConfigure = ''
+    patchShebangs {client,server,shared}/node_modules
+  '';
+
   installPhase = ''
     runHook preInstall
 
@@ -54,7 +62,7 @@ buildNpmPackage (finalAttrs: {
     # better-sqlite3 carries prebuilt addons in its tarball and its binding.gyp
     # skips compilation whenever one matches the host. Removing them forces
     # node-gyp to compile the bundled SQLite amalgamation against this nodejs.
-    pushd server/node_modules/better-sqlite3
+    pushd node_modules/better-sqlite3
     rm -r prebuilds
     node-gyp rebuild --release
     find build -mindepth 1 -maxdepth 1 ! -name Release -exec rm -r {} +
@@ -74,14 +82,13 @@ buildNpmPackage (finalAttrs: {
     mkdir -p $app/shared $app/server/scripts
 
     cp -r node_modules $app/node_modules
-    # better-sqlite3 is not hoisted, so server keeps its own node_modules.
     cp -r server/node_modules $app/server/node_modules
 
     cp shared/package.json $app/shared/
     cp -r shared/dist $app/shared/dist
 
     cp server/package.json server/tsconfig.json server/reset-admin.js $app/server/
-    cp server/scripts/migrate-encryption.ts $app/server/scripts/
+    cp server/scripts/migrate-encryption.ts server/scripts/migrate-encryption-stores.ts $app/server/scripts/
     cp -r server/dist server/assets $app/server/
     cp -r client/dist $app/server/public
     cp -r client/public/fonts $app/server/public/fonts
