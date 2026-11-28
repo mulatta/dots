@@ -6,15 +6,10 @@
       inputs',
       ...
     }:
-    let
-      aiPkgs = inputs'.llm-agents.packages;
-    in
     {
       packages = {
         archify-cli = pkgs.callPackage ./archify-cli { };
         email-sync = pkgs.callPackage ./email-sync { };
-
-        hindsight-plugins = pkgs.callPackage ./hindsight-plugins { inherit (aiPkgs) hindsight; };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };
         loc = pkgs.callPackage ./loc { };

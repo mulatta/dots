@@ -11,7 +11,6 @@ let
   vars = config.clan.core.vars.generators;
   hermes = config.containers.hermes.config.services.hermes;
   aiPkgs = self.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
   hostAddress = "10.90.0.1";
   localAddress = "10.90.0.2";
   iface = "ve-hermes";
@@ -112,7 +111,6 @@ in
           enable = true;
           apiUrl = url loopbackServices.hindsight-api;
           client = aiPkgs.hindsight-client;
-          plugins = selfPkgs.hindsight-plugins;
         };
         # Hermes' browser tools shell out to agent-browser, which attaches to Neko.
         packages = [ aiPkgs.agent-browser ];

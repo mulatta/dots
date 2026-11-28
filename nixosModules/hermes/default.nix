@@ -194,7 +194,8 @@ let
       "L+ ${home}/config.yaml - - - - ${configFiles.${name}}"
       "L+ ${home}/.env - - - - /run/hermes/${name}.env"
     ]
-    ++ lib.optional hindsight.enable "L+ ${home}/plugins/hindsight - - - - ${hindsight.plugins}/hermes";
+    # hindsight-client builds from the whole Hindsight repository, which carries the Hermes plugin.
+    ++ lib.optional hindsight.enable "L+ ${home}/plugins/hindsight - - - - ${hindsight.client.src}/hindsight-integrations/hermes";
 
   hardening = {
     User = "hermes";

@@ -241,10 +241,6 @@ in
         type = types.package;
         description = "hindsight-client, built with Hermes' Python interpreter.";
       };
-      plugins = mkOption {
-        type = types.package;
-        description = "Hindsight's integrations; the module links its `hermes` plugin.";
-      };
       apiKeyCredential = credential "hindsight-api-key" "Hindsight API key, written to every profile's .env.";
     };
 
