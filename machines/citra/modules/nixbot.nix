@@ -55,6 +55,17 @@ in
     '';
   };
 
+  clan.core.vars.generators.nixbot-gitea = {
+    prompts.token = {
+      description = "git.mulatta.io access token of the nixbot user";
+      type = "hidden";
+      persist = true;
+    };
+    script = ''
+      cp "$prompts/token" "$out/token"
+    '';
+  };
+
   # Copy of cask's dure-ca-renew-effect-secrets/secrets; the CA lives on cask.
   clan.core.vars.generators.nixbot-dots-effects = {
     prompts.secrets = {
@@ -90,6 +101,15 @@ in
       webhookSecretFile = gen.nixbot-github.files.webhook-secret.path;
       oauthSecretFile = gen.nixbot-github.files.oauth-secret.path;
       topic = "build-with-nixbot";
+      userAllowlist = [ "mulatta" ];
+    };
+
+    gitea = {
+      enable = true;
+      instanceUrl = "https://git.mulatta.io";
+      tokenFile = gen.nixbot-gitea.files.token.path;
+      # Topic import only runs on an empty repo table.
+      topic = null;
       userAllowlist = [ "mulatta" ];
     };
 
