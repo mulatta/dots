@@ -106,7 +106,7 @@ in
         memory.hindsight = {
           enable = true;
           apiUrl = url loopbackServices.hindsight-api;
-          client = selfPkgs.hindsight-client;
+          client = aiPkgs.hindsight-client;
           plugins = selfPkgs.hindsight-plugins;
         };
         # Hermes' browser tools shell out to agent-browser, which attaches to Neko.

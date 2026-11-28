@@ -14,9 +14,6 @@
         archify-cli = pkgs.callPackage ./archify-cli { };
         email-sync = pkgs.callPackage ./email-sync { };
 
-        hindsight-client = pkgs.python3Packages.callPackage ./hindsight-client {
-          inherit (aiPkgs) hindsight;
-        };
         hindsight-plugins = pkgs.callPackage ./hindsight-plugins { inherit (aiPkgs) hindsight; };
         instagram-cli = pkgs.callPackage ./instagram-cli { };
         jellyfin-plugin-sso-auth = pkgs.callPackage ./jellyfin-plugin-sso-auth { };

@@ -13,23 +13,9 @@ let
   hindsight = cfg.memory.hindsight;
 
   # Hermes' package manager installs plugin dependencies only into venvs it
-  # manages, and a Nix install has none, so the client joins Hermes' own closure.
+  # manages, and a Nix install has none.
   package =
-    if hindsight.enable then
-      cfg.package.overridePythonAttrs (old: {
-        dependencies = old.dependencies ++ [ hindsight.client ];
-        # The TUI gateway, dashboard PTY and slash workers run HERMES_PYTHON, a
-        # separate env; this later --set overrides the package's own.
-        makeWrapperArgs = old.makeWrapperArgs ++ [
-          "--set"
-          "HERMES_PYTHON"
-          "${
-            hindsight.client.pythonModule.withPackages (_: old.dependencies ++ [ hindsight.client ])
-          }/bin/python3"
-        ];
-      })
-    else
-      cfg.package;
+    if hindsight.enable then cfg.package.withPythonPackages (_: [ hindsight.client ]) else cfg.package;
 
   # A credential name like `sparkyfitness-api-key` becomes SPARKYFITNESS_API_KEY.
   envName = name: lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name);
@@ -265,8 +251,7 @@ in
         message = "Hermes credentials used by more than one profile: ${toString duplicateCredentials}. A bot token can serve only one profile.";
       }
       {
-        assertion =
-          !hindsight.enable || lib.elem hindsight.client.pythonModule cfg.package.nativeBuildInputs;
+        assertion = !hindsight.enable || hindsight.client.pythonModule == cfg.package.unwrapped.python;
         message = "hindsight-client must be built with Hermes' Python interpreter.";
       }
     ];
