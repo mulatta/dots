@@ -30,6 +30,7 @@ in
       fi
     '';
     serviceConfig = {
+      Type = "oneshot";
       CPUSchedulingPolicy = "idle";
       IOSchedulingClass = "idle";
     };
