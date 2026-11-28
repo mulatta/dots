@@ -77,7 +77,12 @@ in
         # `sudo nixos-container root-login hermes` via
         # `runuser -u hermes -- env HOME=/var/lib/hermes hermes auth add openai-codex`;
         # runuser keeps root's HOME, and -l fails on the nologin shell.
-        package = aiPkgs.hermes-agent;
+        package = aiPkgs.hermes-agent.override {
+          extras = [
+            "mcp"
+            "messaging"
+          ];
+        };
         defaultProfile = "noa";
 
         settings = {
