@@ -26,7 +26,10 @@
           machineClass = "nixos";
           deploy.targetHost = "root@citra.x";
         };
-        taps.machineClass = "nixos";
+        taps = {
+          machineClass = "nixos";
+          tags = [ "retired" ];
+        };
         cask = {
           machineClass = "nixos";
           deploy.targetHost = "root@cask.x";
@@ -34,6 +37,7 @@
         pint = {
           machineClass = "nixos";
           deploy.targetHost = "root@pint.x";
+          tags = [ "retired" ];
         };
       };
 
