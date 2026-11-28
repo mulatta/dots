@@ -8,13 +8,13 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "instagram-cli";
-  version = "2.1.0";
+  version = "2.2.0";
 
   src = fetchFromGitHub {
     owner = "supreme-gg-gg";
     repo = "instagram-cli";
     tag = "ts-v${finalAttrs.version}";
-    hash = "sha256-W09hGxoHO35kHckUnLH1Pp2ULHosVl8BQwkvQHTVWYs=";
+    hash = "sha256-1k2HxqnwaBdIjDC4vfK9Nb4FsvLYL/Ii+BdHDwatvWc=";
   };
 
   npmDepsHash = "sha256-uLoLQysBIxIFeUbxahDk6ZI1qNiJ0JGlG/nqjge77r0=";
